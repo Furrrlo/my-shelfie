@@ -10,9 +10,4 @@ class MainTest {
     public void test() {
         assertTrue(true, "Preciso tutto ok");
     }
-
-    @Test
-    public void testFailure() {
-        fail("This should fail");
-    }
 }
