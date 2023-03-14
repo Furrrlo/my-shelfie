@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>it.polimi.shelfie</groupId>
-    <artifactId>shelfie-parent</artifactId>
+    <groupId>it.polimi.ingsw</groupId>
+    <artifactId>PSP031</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -22,16 +22,16 @@
     </properties>
 
     <modules>
-        <module>shelfie-client</module>
-        <module>shelfie-server</module>
-        <module>shelfie-common</module>
+        <module>PSP031-client</module>
+        <module>PSP031-server</module>
+        <module>PSP031-common</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>it.polimi.shelfie</groupId>
-                <artifactId>shelfie-common</artifactId>
+                <groupId>it.polimi.ingsw</groupId>
+                <artifactId>PSP031-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -67,7 +67,7 @@
                 <configuration>
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
-                        <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=it.polimi.shelfie</arg>
+                        <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=it.polimi.ingsw</arg>
                     </compilerArgs>
                     <annotationProcessorPaths>
                         <path>
