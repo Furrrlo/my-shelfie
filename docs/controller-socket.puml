@@ -1,0 +1,64 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package common {
+    RmiConnectionController -- GameCreationState : provides
+    interface GameCreationState {
+    }
+
+    RmiConnectionController --> GameCreationStateUpdater : requires
+    interface GameCreationStateUpdater {
+        void updateJoinedPlayers(int joinedPlayers)
+        GameUpdater updateCreatedGame(GameAndController gameAndController);
+    }
+
+    GameCreationStateUpdater --> GameUpdater : provides
+    interface GameUpdater {
+        ... methods to deliver client model updates
+    }
+
+    GameCreationState -- GameController : provides asyncronously
+    interface GameController {
+        ... game controlling methods
+        + makeMoveExample(Move move);
+    }
+}
+
+package server {
+    class GameServerController {
+        This is the actual controller
+        __
+        - Game game
+        __
+        game controlling methods
+        overloaded with player instance
+        + makeMoveExample(Player player, Move move);
+    }
+
+    package server.socket {
+        class SocketServer {
+            - ExecutorService threadPool
+            __
+            accepts incoming connections
+        }
+
+        SocketServer -- SocketGameServerController : creates on new connection
+        class SocketGameServerController {
+            - ObjectInputStream in
+            - Player player
+            __
+            ~ readLoop() throws InterruptedException;
+            - C2SPacket readPacket();
+        }
+
+        SocketGameServerController -- GameServerController : delegates to
+    }
+}
+
+package client {
+
+    interface ClientNetManager {
+        GameCreationState establishConnection(String nick);
+    }
+}
+@enduml

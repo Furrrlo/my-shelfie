@@ -1,0 +1,54 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package common {
+    interface GameLobbyView {
+        Provider<@Nullable GameAndController> game()
+    }
+
+    GameLobbyView --> GameAndController : provides asyncronously
+    class GameAndController {
+        - GameView model;
+        - GameController controller;
+
+        + GameView getModel();
+        + GameController getController();
+    }
+
+    GameController "1" --* GameAndController
+    interface GameController {
+        ... game controlling methods
+        makeMoveExample(Move move);
+    }
+}
+
+package server {
+    class ServerController {
+        + LobbyView joinGame( \n\
+            String nick, \n\
+            LobbyUpdaterFactory updaterFactory, \n\
+            Supplier<GameController> gameControllerFactory)
+    }
+
+    class GameServerController {
+        This is the actual game controller
+        __
+        - Game game
+        __ game controlling overloaded with player instance __
+        + makeMoveExample(Player player, Move move);
+    }
+}
+
+package client {
+    interface ClientNetManager {
+        LobbyView establishConnection(String nick);
+    }
+
+    ClientNetManager --> LobbyView : provides
+}
+
+ClientNetManager ..> ServerController : calls via a rmi/socket adapter
+ServerController ..> ClientNetManager : responds via a rmi/socket adapter
+GameController ..> GameServerController : calls via a rmi/socket adapter
+
+@enduml
