@@ -112,7 +112,7 @@ package client {
 
         RmiClientNetManager --> RmiLobbyClientUpdater : creates on establishConnection
         class RmiLobbyClientUpdater implements RmiLobbyUpdater {
-            - Lobby gameLobby
+            - Lobby lobby
             __
             ... implements methods to deliver client model updates
             + RmiGameClientUpdater updateCreatedGame(GameAndController gameAndController);

@@ -2,11 +2,11 @@
 skinparam classAttributeIconSize 0
 
 package common {
-    interface GameLobbyView {
+    interface LobbyView {
         Provider<@Nullable GameAndController> game()
     }
 
-    GameLobbyView --> GameAndController : provides asyncronously
+    LobbyView --> GameAndController : provides asyncronously
     class GameAndController {
         - GameView model;
         - GameController controller;
