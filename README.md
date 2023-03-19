@@ -3,4 +3,8 @@
 See specs [here](docs/Requisiti.pdf)
 
 ## UML Class Diagram:
-![uml](docs/uml.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/model-uml-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/model-uml.svg">
+  <img alt="uml" src="docs/model-uml-dark.svg">
+</picture>

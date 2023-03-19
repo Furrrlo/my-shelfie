@@ -1,16 +1,5 @@
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1152.1806640625"
      height="1021">
-    <style>
-        rect {
-        fill: none;
-        }
-
-        @media (prefers-color-scheme: dark) {
-        svg {
-        filter: invert(100%);
-        }
-        }
-    </style>
     <defs/>
     <g>
 
