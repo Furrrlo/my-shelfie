@@ -2,29 +2,69 @@
 skinparam classAttributeIconSize 0
 
 package common {
-    RmiConnectionController -- GameCreationState : provides
-    interface GameCreationState {
-    }
+    package socket {
 
-    RmiConnectionController --> GameCreationStateUpdater : requires
-    interface GameCreationStateUpdater {
-        void updateJoinedPlayers(int joinedPlayers)
-        GameUpdater updateCreatedGame(GameAndController gameAndController);
-    }
+        interface LobbyView {
+        }
 
-    GameCreationStateUpdater --> GameUpdater : provides
-    interface GameUpdater {
-        ... methods to deliver client model updates
-    }
+        interface SocketLobbyUpdaterFactory <<LobbyUpdaterFactory>> {
+            SocketLobbyUpdater create(Lobby lobby)
+        }
 
-    GameCreationState -- GameController : provides asyncronously
-    interface GameController {
-        ... game controlling methods
-        + makeMoveExample(Move move);
+        interface SocketLobbyUpdater <<LobbyUpdater>> {
+            void updateJoinedPlayers(int joinedPlayers)
+            GameUpdater updateCreatedGame(GameAndController gameAndController);
+        }
+
+        SocketLobbyUpdater --> SocketGameUpdater : provides
+        interface SocketGameUpdater <<GameUpdater>> {
+            ... methods to deliver client model updates
+        }
+
+        LobbyView -- SocketGameController : provides asyncronously
+        interface SocketGameController <<GameController>> {
+            ... game controlling methods
+            + makeMoveExample(Move move);
+        }
+
+        package packets {
+            interface Packet <<Serializable>> {}
+            interface C2SPacket <<Serializable>> extends Packet {}
+            interface S2CPacket <<Serializable>> extends Packet {}
+            class EstablishConnectionPacket <<Serializable>> implements C2SPacket {
+                - String nick
+                + String getNick()
+            }
+            class LobbyPacket <<Serializable>> implements S2CPacket {
+                -List<String> nicks
+                + List<String> getNicks()
+            }
+            class UpdateJoinedPlayerPacket <<Serializable>> implements S2CPacket {
+                - List<String> nicks
+                + List<String> getNicks()
+            }
+            class UpdatePlayerPacket <<Serializable>> implements S2CPacket {
+                - Player player
+                + Player getPlayer()
+            }
+            class CreateGamePacket <<Serializable>> implements S2CPacket {
+                ...
+            }
+            class MakeMovePacket <<Serializable>> implements C2SPacket {
+                ...
+            }
+        }
     }
 }
 
 package server {
+    class ServerController {
+        + LobbyView joinGame( \n\
+            String nick, \n\
+            LobbyUpdaterFactory updaterFactory, \n\
+            Supplier<GameController> gameControllerFactory)
+    }
+
     class GameServerController {
         This is the actual controller
         __
@@ -36,29 +76,98 @@ package server {
     }
 
     package server.socket {
-        class SocketServer {
+        SocketConnectionServerController --> ServerController: delegates to
+        class SocketConnectionServerController {
             - ExecutorService threadPool
+            - SocketServer socketServer
             __
             accepts incoming connections
         }
 
-        SocketServer -- SocketGameServerController : creates on new connection
-        class SocketGameServerController {
+        class SocketLobbyUpdaterServerFactory implements common.socket.SocketLobbyUpdaterFactory {
+            -ObjectInputStream in
+            -ObjectOutputStream out
+            __
+            receive EstablishConnectionPacket
+            create Lobby and send LobbyPacket
+        }
+        SocketConnectionServerController -- SocketLobbyUpdaterServerFactory : creates on new connection
+
+        class SocketLobbyServerUpdater <<Runnable (?)>> implements common.socket.SocketLobbyUpdater{
+            - ObjectOutputStream out
+            - Lobby lobby
+            __
+            Send UpdateJoinedPlayerPacket to update client lobby
+        }
+        SocketConnectionServerController --> SocketLobbyServerUpdater : execute when lobby is created
+
+
+        class SocketGameServerController <<Runnable>> implements common.socket.SocketGameController{
             - ObjectInputStream in
             - Player player
             __
+            receive C2SPacket from client
             ~ readLoop() throws InterruptedException;
             - C2SPacket readPacket();
         }
+        SocketGameServerController <-- SocketConnectionServerController : provides implementation
 
-        SocketGameServerController -- GameServerController : delegates to
+        SocketGameServerController --> GameServerController : delegates to
+
+        SocketGameServerController --> SocketServerGameUpdater : execute where game is created
+        class SocketServerGameUpdater implements common.socket.SocketGameUpdater {
+            - ObjectOutputStream out
+            - Game game
+            __
+            send model updated to client
+        }
+
     }
 }
 
 package client {
 
     interface ClientNetManager {
-        GameCreationState establishConnection(String nick);
+        LobbyView establishConnection(String nick);
+    }
+
+    package socket {
+        class SocketClientNetManager implements client.ClientNetManager {
+            - Socket socket
+            __
+            + LobbyView establishConnection(String nick);
+            ... create a new EstablishConnectionPacket and send it to server
+            ... wait for LobbyPacket
+        }
+
+        SocketClientNetManager --> SocketLobbyClientUpdater : creates on establishConnection
+        class SocketLobbyClientUpdater implements common.socket.SocketLobbyUpdater {
+            - ObjectInputStream in
+            - Lobby lobby
+            __
+            + readLoop()
+            ... Receive a UpdateJoinedPlayerPacket or a CreateGamePacket
+            - S2CPacket readPacket()
+            - SocketGameClientUpdater updateCreatedGame(GameAndController gameAndController);
+        }
+
+        class SocketGameClientController implements common.socket.SocketGameController {
+            ObjectOutputStream out
+            __
+            ... methods
+            send MakeMovePacket to server
+        }
+        SocketLobbyClientUpdater --> SocketGameClientController : execute on game start
+
+        class SocketGameClientUpdater implements common.socket.SocketGameUpdater {
+            - Game game
+            - ObjectInputStream in
+            __
+            receive UpdatePlayerPacket and update client model
+        }
+        SocketLobbyClientUpdater --> SocketGameClientUpdater : create on game start
+
+
     }
 }
 @enduml
