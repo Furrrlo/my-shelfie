@@ -27,6 +27,7 @@
         <module>PSP031-client</module>
         <module>PSP031-server</module>
         <module>PSP031-common</module>
+        <module>PSP031-integration-tests</module>
     </modules>
 
     <dependencyManagement>
@@ -34,6 +35,16 @@
             <dependency>
                 <groupId>it.polimi.ingsw</groupId>
                 <artifactId>PSP031-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>it.polimi.ingsw</groupId>
+                <artifactId>PSP031-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>it.polimi.ingsw</groupId>
+                <artifactId>PSP031-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
