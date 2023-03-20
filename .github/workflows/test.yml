@@ -29,6 +29,8 @@ jobs:
         uses: PavanMudigonda/jacoco-reporter@v4.8
         with:
           coverage_results_path: PSP031-jacoco-report/target/site/jacoco-aggregate/jacoco.xml
+          coverage_report_name: Coverage
+          coverage_report_title: JaCoCo
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Add Coverage Job Summary
         run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
