@@ -25,3 +25,10 @@ jobs:
         if: always()
         with:
           files: '**/target/surefire-reports/TEST-*.xml'
+      - name: Publish JaCoCo Code Coverage Report
+        uses: PavanMudigonda/jacoco-reporter@v4.8
+        with:
+          coverage_results_path: PSP031-jacoco-report/target/site/jacoco-aggregate/jacoco.xml
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add Coverage Job Summary
+        run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
