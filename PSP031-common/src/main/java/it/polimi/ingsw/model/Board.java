@@ -20,6 +20,16 @@ public class Board implements BoardView {
     }
 
     @Override
+    public int getRows() {
+        return board.length;
+    }
+
+    @Override
+    public int getCols() {
+        return board.length == 0 ? 0 : board[0].length;
+    }
+
+    @Override
     public Property<Tile> tile(int r, int c) {
         if (board[r][c] == invalidTile)
             throw new IndexOutOfBoundsException("Invalid Position selected");
