@@ -1,5 +1,8 @@
 package it.polimi.ingsw.model;
 
+import it.polimi.ingsw.GameAndController;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 public interface LobbyView {

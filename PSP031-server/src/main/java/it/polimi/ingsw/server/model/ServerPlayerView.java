@@ -3,6 +3,7 @@ package it.polimi.ingsw.server.model;
 import it.polimi.ingsw.model.*;
 
 public interface ServerPlayerView {
+
     /**
      * @return player's nick
      */
@@ -17,5 +18,4 @@ public interface ServerPlayerView {
      * @return personal goal
      */
     PersonalGoal getPersonalGoal();
-
 }

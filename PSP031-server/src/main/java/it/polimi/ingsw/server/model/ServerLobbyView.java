@@ -4,6 +4,7 @@ import java.util.List;
 import it.polimi.ingsw.model.*;
 
 public interface ServerLobbyView {
+
     /**
      * @return number of required players
      */

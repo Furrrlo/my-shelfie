@@ -3,53 +3,36 @@ package it.polimi.ingsw.model;
 import java.util.*;
 import java.util.function.Consumer;
 
-/**
- * 
- */
 public class PropertyImpl<T> implements Property<T> {
+
     private T val;
 
-    private List<Consumer<T>> observers;
-
-
+    private List<Consumer<? super T>> observers;
 
     /**
      * Default constructor
      */
     public PropertyImpl(T val) {
         this.val = val;
-        observers = new ArrayList<Consumer<T>>();
     }
 
-    /**
-     * 
-     */
+    @Override
     public T get() {
         return val;
     }
 
-    /**
-     * @param val 
-     * @return
-     */
+    @Override
     public void set(T val) {
         this.val = val;
     }
 
-    /**
-     * @param o 
-     * @return
-     */
-    public void registerObserver(Consumer<T> o) {
+    @Override
+    public void registerObserver(Consumer<? super T> o) {
         observers.add(o);
     }
 
-    /**
-     * @param o 
-     * @return
-     */
-    public void unregisterObserver(Consumer<T> o) {
+    @Override
+    public void unregisterObserver(Consumer<? super T> o) {
         observers.remove(o);
     }
-
 }

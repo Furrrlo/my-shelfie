@@ -4,51 +4,31 @@ import org.jetbrains.annotations.Nullable;
 import it.polimi.ingsw.model.*;
 
 
-
 import java.util.*;
 
-/**
- * 
- */
 public class ServerGame implements ServerGameView {
 
-    private final List<ServerPlayer> players;
-    private final Board board;
-    private final List<CommonGoal> commonGoal;
     private final int gameID;
-    private final Property<@Nullable ServerPlayer> firstFinisher;
-    private final Property<ServerPlayer> currentTurn;
+    private final Board board;
     private final List<Tile> bag;
+    private final List<ServerPlayer> players;
+    private final Property<ServerPlayer> currentTurn;
+    private final List<CommonGoal> commonGoal;
+    private final Property<@Nullable ServerPlayer> firstFinisher;
 
-    @SuppressWarnings("NullAway")
-    public ServerGame(List<ServerPlayer> players,
-                Board board,
-                List<CommonGoal> commonGoal,
-                int gameID,
-                ServerPlayer currentTurn,
-                List<Tile> bag) {
-        this.players = players;
-        this.board = board;
-        this.commonGoal = commonGoal;
+    public ServerGame(int gameID,
+                      Board board,
+                      List<Tile> bag,
+                      List<ServerPlayer> players,
+                      ServerPlayer currentTurn,
+                      List<CommonGoal> commonGoal) {
         this.gameID = gameID;
-        this.firstFinisher = new PropertyImpl<>(null);
-        this.currentTurn = new PropertyImpl<ServerPlayer>(currentTurn);
-        this.bag=bag;
-    }
-
-    @Override
-    public List<ServerPlayer> getPlayers() {
-        return players;
-    }
-
-    @Override
-    public Board getBoard() {
-        return board;
-    }
-
-    @Override
-    public List<CommonGoal> getCommonGoal() {
-        return commonGoal;
+        this.board = board;
+        this.bag = bag;
+        this.players = players;
+        this.currentTurn = new PropertyImpl<>(currentTurn);
+        this.commonGoal = commonGoal;
+        this.firstFinisher = PropertyImpl.nullableProperty(null);
     }
 
     @Override
@@ -57,8 +37,18 @@ public class ServerGame implements ServerGameView {
     }
 
     @Override
-    public Property<ServerPlayer> firstFinisher() {
-        return firstFinisher;
+    public Board getBoard() {
+        return board;
+    }
+
+    @Override
+    public List<Tile> getBag() {
+        return bag;
+    }
+
+    @Override
+    public List<ServerPlayer> getPlayers() {
+        return players;
     }
 
     @Override
@@ -67,9 +57,12 @@ public class ServerGame implements ServerGameView {
     }
 
     @Override
-    public List<Tile> getBag() {
-        return bag;
+    public List<CommonGoal> getCommonGoals() {
+        return commonGoal;
     }
 
-
+    @Override
+    public Property<ServerPlayer> firstFinisher() {
+        return firstFinisher;
+    }
 }

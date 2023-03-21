@@ -4,48 +4,29 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * 
- */
 public class Game implements GameView {
 
-    private final List<Player> players;
-    private final Board board;
-    private final List<CommonGoal> commonGoal;
     private final int gameID;
-    private final Property<@Nullable Player> firstFinisher;
+    private final Board board;
+    private final List<Player> players;
     private final Property<Player> currentTurn;
     private final PersonalGoal personalGoal;
+    private final List<CommonGoal> commonGoal;
+    private final Property<@Nullable Player> firstFinisher;
 
-    @SuppressWarnings("NullAway")
-    public Game(List<Player> players,
+    public Game(int gameID,
                 Board board,
-                List<CommonGoal> commonGoal,
-                int gameID,
+                List<Player> players,
                 Player currentTurn,
+                List<CommonGoal> commonGoal,
                 PersonalGoal personalGoal) {
-        this.players = players;
-        this.board = board;
-        this.commonGoal = commonGoal;
         this.gameID = gameID;
-        this.firstFinisher = new PropertyImpl<>(null);
-        this.currentTurn = new PropertyImpl<Player>(currentTurn);
+        this.board = board;
+        this.players = players;
+        this.currentTurn = new PropertyImpl<>(currentTurn);
         this.personalGoal = personalGoal;
-    }
-
-    @Override
-    public List<Player> getPlayers() {
-        return players;
-    }
-
-    @Override
-    public Board getBoard() {
-        return board;
-    }
-
-    @Override
-    public List<CommonGoal> getCommonGoal() {
-        return commonGoal;
+        this.commonGoal = commonGoal;
+        this.firstFinisher = PropertyImpl.nullableProperty(null);
     }
 
     @Override
@@ -54,8 +35,13 @@ public class Game implements GameView {
     }
 
     @Override
-    public Property<Player> firstFinisher() {
-        return firstFinisher;
+    public Board getBoard() {
+        return board;
+    }
+
+    @Override
+    public List<Player> getPlayers() {
+        return players;
     }
 
     @Override
@@ -68,4 +54,13 @@ public class Game implements GameView {
         return personalGoal;
     }
 
+    @Override
+    public List<CommonGoal> getCommonGoals() {
+        return commonGoal;
+    }
+
+    @Override
+    public Property<@Nullable Player> firstFinisher() {
+        return firstFinisher;
+    }
 }

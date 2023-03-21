@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 public interface PlayerView {
+
     /**
      * @return player's nick
      */
@@ -10,5 +11,4 @@ public interface PlayerView {
      * @return shelfie as matrix of tiles
      */
     ShelfieView getShelfie();
-
 }

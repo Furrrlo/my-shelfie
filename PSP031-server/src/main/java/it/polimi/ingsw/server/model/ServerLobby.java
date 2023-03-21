@@ -1,11 +1,9 @@
 package it.polimi.ingsw.server.model;
 
 import java.util.*;
+
 import it.polimi.ingsw.model.*;
 
-/**
- * 
- */
 public class ServerLobby implements ServerLobbyView {
 
     private final int requiredPlayers;
@@ -14,11 +12,10 @@ public class ServerLobby implements ServerLobbyView {
     /**
      * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
      */
-    public ServerLobby( int requiredPlayers ){
+    public ServerLobby(int requiredPlayers) {
         this.requiredPlayers = requiredPlayers;
-        joinedPlayers = new PropertyImpl<List<String>>(new ArrayList<String>());
+        this.joinedPlayers = new PropertyImpl<>(new ArrayList<>());
     }
-
 
     @Override
     public int getRequiredPlayers() {
@@ -29,5 +26,4 @@ public class ServerLobby implements ServerLobbyView {
     public Property<List<String>> joinedPlayers() {
         return joinedPlayers;
     }
-
 }

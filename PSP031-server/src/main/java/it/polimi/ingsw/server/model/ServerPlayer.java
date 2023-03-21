@@ -2,22 +2,16 @@ package it.polimi.ingsw.server.model;
 
 import it.polimi.ingsw.model.*;
 
-/**
- * 
- */
 public class ServerPlayer implements ServerPlayerView {
 
-    private String nick;
-    private Shelfie shelfie;
-    private PersonalGoal personalGoal;
+    private final String nick;
+    private final Shelfie shelfie;
+    private final PersonalGoal personalGoal;
 
-    /**
-     * Default constructor for player
-     */
     public ServerPlayer(String nick, PersonalGoal personalGoal) {
         this.nick = nick;
-        this.personalGoal=personalGoal;
-        shelfie = new Shelfie();
+        this.personalGoal = personalGoal;
+        this.shelfie = new Shelfie();
     }
 
     @Override
@@ -34,5 +28,4 @@ public class ServerPlayer implements ServerPlayerView {
     public PersonalGoal getPersonalGoal() {
         return personalGoal;
     }
-
 }

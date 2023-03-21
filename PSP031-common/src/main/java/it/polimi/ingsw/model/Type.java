@@ -1,8 +1,5 @@
 package it.polimi.ingsw.model;
 
-/**
- * 
- */
 public enum Type {
     SIX_COUPLES,
     ALL_CORNERS,

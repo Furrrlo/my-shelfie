@@ -1,19 +1,16 @@
 package it.polimi.ingsw.model;
 
-/**
- * 
- */
 public class Player implements PlayerView {
 
-    private String nick;
-    private Shelfie shelfie;
+    private final String nick;
+    private final Shelfie shelfie;
 
     /**
      * Default constructor for player
      */
-    public Player(String nick, PersonalGoal personalGoal) {
+    public Player(String nick) {
         this.nick = nick;
-        shelfie = new Shelfie();
+        this.shelfie = new Shelfie();
     }
 
     @Override
@@ -25,5 +22,4 @@ public class Player implements PlayerView {
     public Shelfie getShelfie() {
         return shelfie;
     }
-
 }

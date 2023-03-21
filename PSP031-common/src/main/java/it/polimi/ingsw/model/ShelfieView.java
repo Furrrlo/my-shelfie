@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 public interface ShelfieView {
+
     /**
      * @param r defines row of shelfie
      * @param c defines column of shelfie

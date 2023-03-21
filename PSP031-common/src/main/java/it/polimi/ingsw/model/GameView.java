@@ -1,22 +1,10 @@
 package it.polimi.ingsw.model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 public interface GameView {
-    /**
-     * @return list of players
-     */
-    List<? extends PlayerView> getPlayers();
-
-    /**
-     * @return playing board
-     */
-    BoardView getBoard();
-
-    /**
-     * @return list of common goals of the game
-     */
-    List<? extends CommonGoalView> getCommonGoal();
 
     /**
      * @return game ID
@@ -24,9 +12,14 @@ public interface GameView {
     int getGameID();
 
     /**
-     * @return first player compleating his shelfie
+     * @return playing board
      */
-    Provider<? extends PlayerView> firstFinisher();
+    BoardView getBoard();
+
+    /**
+     * @return list of players
+     */
+    List<? extends PlayerView> getPlayers();
 
     /**
      * @return player whose now playing
@@ -37,4 +30,14 @@ public interface GameView {
      * @return personal goal of the player
      */
     PersonalGoalView getPersonalGoal();
+
+    /**
+     * @return list of common goals of the game
+     */
+    List<? extends CommonGoalView> getCommonGoals();
+
+    /**
+     * @return first player completing his shelfie
+     */
+    Provider<? extends @Nullable PlayerView> firstFinisher();
 }
