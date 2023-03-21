@@ -2,6 +2,7 @@ package it.polimi.ingsw.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CommonGoal implements CommonGoalView {
 
@@ -22,5 +23,25 @@ public class CommonGoal implements CommonGoalView {
     @Override
     public Property<List<Player>> achieved() {
         return achieved;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CommonGoal that)) return false;
+        return type == that.type && achieved.equals(that.achieved);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, achieved);
+    }
+
+    @Override
+    public String toString() {
+        return "CommonGoal{" +
+                "type=" + type +
+                ", achieved=" + achieved +
+                '}';
     }
 }

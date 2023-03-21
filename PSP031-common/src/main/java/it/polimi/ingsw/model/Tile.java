@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import java.util.Objects;
+
 public class Tile {
 
     private final Color color;
@@ -16,5 +18,24 @@ public class Tile {
      */
     public Color getColor() {
         return this.color;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tile tile)) return false;
+        return color == tile.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color);
+    }
+
+    @Override
+    public String toString() {
+        return "Tile{" +
+                "color=" + color +
+                '}';
     }
 }

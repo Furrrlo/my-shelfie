@@ -65,4 +65,35 @@ public class ServerGame implements ServerGameView {
     public Property<ServerPlayer> firstFinisher() {
         return firstFinisher;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ServerGame that)) return false;
+        return gameID == that.gameID &&
+                board.equals(that.board) &&
+                bag.equals(that.bag) &&
+                players.equals(that.players) &&
+                currentTurn.equals(that.currentTurn) &&
+                commonGoal.equals(that.commonGoal) &&
+                firstFinisher.equals(that.firstFinisher);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameID, board, bag, players, currentTurn, commonGoal, firstFinisher);
+    }
+
+    @Override
+    public String toString() {
+        return "ServerGame{" +
+                "gameID=" + gameID +
+                ", board=" + board +
+                ", bag=" + bag +
+                ", players=" + players +
+                ", currentTurn=" + currentTurn +
+                ", commonGoal=" + commonGoal +
+                ", firstFinisher=" + firstFinisher +
+                '}';
+    }
 }

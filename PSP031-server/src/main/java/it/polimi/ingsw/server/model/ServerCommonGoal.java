@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ServerCommonGoal implements ServerCommonGoalView {
 
@@ -24,5 +25,25 @@ public class ServerCommonGoal implements ServerCommonGoalView {
     @Override
     public Property<List<ServerPlayer>> achieved() {
         return achieved;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ServerCommonGoal that)) return false;
+        return type == that.type && achieved.equals(that.achieved);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, achieved);
+    }
+
+    @Override
+    public String toString() {
+        return "ServerCommonGoal{" +
+                "type=" + type +
+                ", achieved=" + achieved +
+                '}';
     }
 }

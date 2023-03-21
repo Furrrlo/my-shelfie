@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Board implements BoardView {
 
@@ -34,5 +35,25 @@ public class Board implements BoardView {
         if (board[r][c] == invalidTile)
             throw new IndexOutOfBoundsException("Invalid Position selected");
         else return board[r][c];
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Board board1)) return false;
+        return Arrays.deepEquals(board, board1.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public String toString() {
+        return "Board{" +
+                "board=" + Arrays.toString(board) +
+                ", invalidTile=" + invalidTile +
+                '}';
     }
 }
