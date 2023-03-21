@@ -34,7 +34,7 @@ public interface ServerGameView {
     /**
      * @return list of common goals of the game
      */
-    List<? extends CommonGoalView> getCommonGoals();
+    List<? extends ServerCommonGoalView> getCommonGoals();
 
     /**
      * @return first player compleating his shelfie

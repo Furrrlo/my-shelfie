@@ -13,7 +13,7 @@ public class ServerGame implements ServerGameView {
     private final List<Tile> bag;
     private final List<ServerPlayer> players;
     private final Property<ServerPlayer> currentTurn;
-    private final List<CommonGoal> commonGoal;
+    private final List<ServerCommonGoal> commonGoal;
     private final Property<@Nullable ServerPlayer> firstFinisher;
 
     public ServerGame(int gameID,
@@ -21,7 +21,7 @@ public class ServerGame implements ServerGameView {
                       List<Tile> bag,
                       List<ServerPlayer> players,
                       ServerPlayer currentTurn,
-                      List<CommonGoal> commonGoal) {
+                      List<ServerCommonGoal> commonGoal) {
         this.gameID = gameID;
         this.board = board;
         this.bag = bag;
@@ -57,7 +57,7 @@ public class ServerGame implements ServerGameView {
     }
 
     @Override
-    public List<CommonGoal> getCommonGoals() {
+    public List<ServerCommonGoal> getCommonGoals() {
         return commonGoal;
     }
 
