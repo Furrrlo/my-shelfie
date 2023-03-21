@@ -1,10 +1,11 @@
 package it.polimi.ingsw.server.model;
 
+import it.polimi.ingsw.model.*;
 
 /**
  * 
  */
-public class Player implements PlayerView {
+public class ServerPlayer implements ServerPlayerView {
 
     private String nick;
     private Shelfie shelfie;
@@ -13,10 +14,10 @@ public class Player implements PlayerView {
     /**
      * Default constructor for player
      */
-    public Player(String nick, PersonalGoal personalGoal) {
+    public ServerPlayer(String nick, PersonalGoal personalGoal) {
         this.nick = nick;
+        this.personalGoal=personalGoal;
         shelfie = new Shelfie();
-        this.personalGoal = personalGoal;
     }
 
     @Override

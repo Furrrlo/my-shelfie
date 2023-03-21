@@ -1,13 +1,14 @@
 package it.polimi.ingsw.server.model;
 
-
 import java.util.List;
 
-public interface GameView {
+import it.polimi.ingsw.model.*;
+
+public interface ServerGameView {
     /**
      * @return list of players
      */
-    List<? extends PlayerView> getPlayers();
+    List<? extends ServerPlayerView> getPlayers();
 
     /**
      * @return playing board
@@ -27,15 +28,15 @@ public interface GameView {
     /**
      * @return first player compleating his shelfie
      */
-    Provider<? extends PlayerView> firstFinisher();
+    Provider<? extends ServerPlayerView> firstFinisher();
 
     /**
      * @return player whose now playing
      */
-    Provider<? extends PlayerView> currentTurn();
-    
+    Provider<? extends ServerPlayerView> currentTurn();
+
     /**
-     * @return tiles in the bag
+     * @return list tiles in the bag
      */
     List<Tile> getBag();
 }

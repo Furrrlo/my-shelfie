@@ -1,9 +1,9 @@
 package it.polimi.ingsw.server.model;
 
-
 import java.util.List;
+import it.polimi.ingsw.model.*;
 
-public interface LobbyView {
+public interface ServerLobbyView {
     /**
      * @return number of required players
      */

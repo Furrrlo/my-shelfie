@@ -1,41 +1,43 @@
 package it.polimi.ingsw.server.model;
 
 import org.jetbrains.annotations.Nullable;
+import it.polimi.ingsw.model.*;
+
+
 
 import java.util.*;
 
 /**
  * 
  */
-public class Game implements GameView {
+public class ServerGame implements ServerGameView {
 
-    private final List<Player> players;
+    private final List<ServerPlayer> players;
     private final Board board;
     private final List<CommonGoal> commonGoal;
     private final int gameID;
-    private final Property<@Nullable Player> firstFinisher;
-    private final Property<Player> currentTurn;
+    private final Property<@Nullable ServerPlayer> firstFinisher;
+    private final Property<ServerPlayer> currentTurn;
     private final List<Tile> bag;
 
-
     @SuppressWarnings("NullAway")
-    public Game(List<Player> players,
+    public ServerGame(List<ServerPlayer> players,
                 Board board,
                 List<CommonGoal> commonGoal,
                 int gameID,
-                Player currentTurn,
+                ServerPlayer currentTurn,
                 List<Tile> bag) {
         this.players = players;
         this.board = board;
         this.commonGoal = commonGoal;
         this.gameID = gameID;
         this.firstFinisher = new PropertyImpl<>(null);
-        this.currentTurn = new PropertyImpl<Player>(currentTurn);
+        this.currentTurn = new PropertyImpl<ServerPlayer>(currentTurn);
         this.bag=bag;
     }
 
     @Override
-    public List<Player> getPlayers() {
+    public List<ServerPlayer> getPlayers() {
         return players;
     }
 
@@ -55,12 +57,12 @@ public class Game implements GameView {
     }
 
     @Override
-    public Property<Player> firstFinisher() {
+    public Property<ServerPlayer> firstFinisher() {
         return firstFinisher;
     }
 
     @Override
-    public Property<Player> currentTurn() {
+    public Property<ServerPlayer> currentTurn() {
         return currentTurn;
     }
 

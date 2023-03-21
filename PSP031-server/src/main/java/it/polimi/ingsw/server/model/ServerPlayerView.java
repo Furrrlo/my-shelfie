@@ -1,7 +1,8 @@
 package it.polimi.ingsw.server.model;
 
+import it.polimi.ingsw.model.*;
 
-public interface PlayerView {
+public interface ServerPlayerView {
     /**
      * @return player's nick
      */
@@ -13,7 +14,8 @@ public interface PlayerView {
     ShelfieView getShelfie();
 
     /**
-     * @return personal Goal as matrix of tiles
+     * @return personal goal
      */
-    PersonalGoalView getPersonalGoal();
+    PersonalGoal getPersonalGoal();
+
 }

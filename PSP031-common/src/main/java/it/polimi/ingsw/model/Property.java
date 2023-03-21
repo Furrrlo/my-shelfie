@@ -3,7 +3,7 @@ package it.polimi.ingsw.model;
 /**
  * 
  */
-interface Property<T> extends Provider<T> {
+public interface Property<T> extends Provider<T> {
 
 
     /**

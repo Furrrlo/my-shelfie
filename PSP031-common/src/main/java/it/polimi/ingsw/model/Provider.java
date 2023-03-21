@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 /**
  * 
  */
-interface Provider<T> {
+public interface Provider<T> {
 
     T get();
 
