@@ -11,8 +11,4 @@ public interface PlayerView {
      */
     ShelfieView getShelfie();
 
-    /**
-     * @return personal Goal as matrix of tiles
-     */
-    PersonalGoalView getPersonalGoal();
 }

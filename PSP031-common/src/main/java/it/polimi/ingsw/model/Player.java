@@ -7,7 +7,6 @@ public class Player implements PlayerView {
 
     private String nick;
     private Shelfie shelfie;
-    private PersonalGoal personalGoal;
 
     /**
      * Default constructor for player
@@ -15,7 +14,6 @@ public class Player implements PlayerView {
     public Player(String nick, PersonalGoal personalGoal) {
         this.nick = nick;
         shelfie = new Shelfie();
-        this.personalGoal = personalGoal;
     }
 
     @Override
@@ -26,11 +24,6 @@ public class Player implements PlayerView {
     @Override
     public Shelfie getShelfie() {
         return shelfie;
-    }
-
-    @Override
-    public PersonalGoal getPersonalGoal() {
-        return personalGoal;
     }
 
 }
