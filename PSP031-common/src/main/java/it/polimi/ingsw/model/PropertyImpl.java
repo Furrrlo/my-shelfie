@@ -9,6 +9,11 @@ public class PropertyImpl<T> implements Property<T> {
 
     private List<Consumer<? super T>> observers;
 
+    @SuppressWarnings("NullAway") // NullAway sadly doesn't implement generics properly yet
+    public static <T> Property<@Nullable T> nullableProperty(@Nullable T prop) {
+        return new PropertyImpl<>(prop);
+    }
+
     /**
      * Default constructor
      */
