@@ -17,9 +17,18 @@ package common {
 
     GameController "1" --* GameAndController
     interface GameController {
-        ... game controlling methods
-        makeMoveExample(Move move);
+        // selected has to be in the right shelf insertion order
+        void makeMove(List<BoardCoord> selected, int shelfCol)
     }
+
+    class BoardCoord {
+        - int row;
+        - int column;
+
+        int getRow();
+        int getCol();
+    } 
+
 }
 
 package server {
@@ -35,7 +44,7 @@ package server {
         __
         - Game game
         __ game controlling overloaded with player instance __
-        + makeMoveExample(Player player, Move move);
+        + void makeMove(Player player, List<BoardCoord> selected, int shelfCol)
     }
 }
 
