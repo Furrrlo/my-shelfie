@@ -23,8 +23,10 @@ public class Tile implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Tile tile)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Tile tile))
+            return false;
         return color == tile.color;
     }
 

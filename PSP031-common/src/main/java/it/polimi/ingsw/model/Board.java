@@ -45,21 +45,22 @@ public class Board implements BoardView {
     public Property<@Nullable Tile> tile(int r, int c) {
         if (board[r][c] == invalidTile)
             throw new IndexOutOfBoundsException("Invalid Position selected");
-        else return board[r][c];
+        return board[r][c];
     }
 
     @Override
     public Stream<TileAndCoords<Property<@Nullable Tile>>> tiles() {
-        return IntStream.range(0, getRows()).boxed().flatMap(row ->
-                IntStream.range(0, getCols()).boxed()
-                        .filter(col -> board[row][col] != invalidTile)
-                        .map(col -> new TileAndCoords<>(board[row][col], row, col)));
+        return IntStream.range(0, getRows()).boxed().flatMap(row -> IntStream.range(0, getCols()).boxed()
+                .filter(col -> board[row][col] != invalidTile)
+                .map(col -> new TileAndCoords<>(board[row][col], row, col)));
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Board board1)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Board board1))
+            return false;
         return Arrays.deepEquals(board, board1.board);
     }
 

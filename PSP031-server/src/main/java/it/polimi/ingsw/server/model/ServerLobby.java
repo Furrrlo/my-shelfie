@@ -1,9 +1,12 @@
 package it.polimi.ingsw.server.model;
 
-import java.util.*;
-
-import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.SerializableProperty;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class ServerLobby implements ServerLobbyView {
 
@@ -37,8 +40,10 @@ public class ServerLobby implements ServerLobbyView {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ServerLobby that)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof ServerLobby that))
+            return false;
         return requiredPlayers == that.requiredPlayers &&
                 joinedPlayers.equals(that.joinedPlayers) &&
                 game.equals(that.game);

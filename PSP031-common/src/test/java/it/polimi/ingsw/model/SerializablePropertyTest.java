@@ -43,9 +43,9 @@ class SerializablePropertyTest {
         property.registerObserver(v -> System.out.println("random observer"));
 
         final SerializableProperty<?> deserialized;
-        try(var pipe = new PipedInputStream();
-            var oos = new ObjectOutputStream(new PipedOutputStream(pipe));
-            var ois = new ObjectInputStream(pipe)) {
+        try (var pipe = new PipedInputStream();
+             var oos = new ObjectOutputStream(new PipedOutputStream(pipe));
+             var ois = new ObjectInputStream(pipe)) {
 
             oos.writeObject(property);
             deserialized = (SerializableProperty<?>) ois.readObject();

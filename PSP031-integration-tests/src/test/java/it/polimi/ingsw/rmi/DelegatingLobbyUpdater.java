@@ -2,9 +2,9 @@ package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.updater.LobbyUpdater;
-import it.polimi.ingsw.model.Game;
 
 import java.util.List;
 

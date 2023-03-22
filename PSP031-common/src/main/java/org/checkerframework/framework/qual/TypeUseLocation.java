@@ -3,7 +3,8 @@ package org.checkerframework.framework.qual;
 /**
  * Specifies the locations to which a {@link DefaultQualifier} annotation applies.
  *
- * <p>The order of enums is important. Defaults are applied in this order. In particular, this means
+ * <p>
+ * The order of enums is important. Defaults are applied in this order. In particular, this means
  * that OTHERWISE and ALL should be last.
  *
  * @see DefaultQualifier
@@ -18,7 +19,8 @@ public enum TypeUseLocation {
      * Apply default annotations to all unannotated raw types of local variables, casts, and
      * instanceof.
      *
-     * <p>TODO: should cast/instanceof be separated?
+     * <p>
+     * TODO: should cast/instanceof be separated?
      */
     LOCAL_VARIABLE,
 
@@ -65,7 +67,8 @@ public enum TypeUseLocation {
      * clauses, and implicit upper bounds when no explicit {@code extends} or {@code super} clause is
      * present.
      *
-     * <p>Especially useful for parametrized classes that provide a lot of static methods with the
+     * <p>
+     * Especially useful for parametrized classes that provide a lot of static methods with the
      * same generic parameters as the class.
      */
     UPPER_BOUND,

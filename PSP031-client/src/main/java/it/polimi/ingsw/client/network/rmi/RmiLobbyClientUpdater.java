@@ -3,8 +3,8 @@ package it.polimi.ingsw.client.network.rmi;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Lobby;
-import it.polimi.ingsw.rmi.RmiLobbyUpdater;
 import it.polimi.ingsw.rmi.RmiGameUpdater;
+import it.polimi.ingsw.rmi.RmiLobbyUpdater;
 import it.polimi.ingsw.rmi.UnicastRemoteObjects;
 
 import java.rmi.RemoteException;

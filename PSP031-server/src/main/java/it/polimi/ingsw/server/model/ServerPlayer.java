@@ -33,8 +33,10 @@ public class ServerPlayer implements ServerPlayerView {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ServerPlayer that)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof ServerPlayer that))
+            return false;
         return nick.equals(that.nick) && shelfie.equals(that.shelfie) && personalGoal.equals(that.personalGoal);
     }
 

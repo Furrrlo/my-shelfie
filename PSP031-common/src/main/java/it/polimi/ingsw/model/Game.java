@@ -2,7 +2,8 @@ package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 public class Game implements GameView {
 
@@ -27,9 +28,8 @@ public class Game implements GameView {
         this.currentTurn = new SerializableProperty<>(players.get(currentTurnPlayerIdx));
         this.personalGoal = personalGoal;
         this.commonGoal = commonGoal;
-        this.firstFinisher = SerializableProperty.nullableProperty(firstFinisherId == null ?
-                null :
-                players.get(firstFinisherId));
+        this.firstFinisher = SerializableProperty
+                .nullableProperty(firstFinisherId == null ? null : players.get(firstFinisherId));
     }
 
     @Override
@@ -69,8 +69,10 @@ public class Game implements GameView {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Game game)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Game game))
+            return false;
         return gameID == game.gameID &&
                 board.equals(game.board) &&
                 players.equals(game.players) &&

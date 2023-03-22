@@ -30,15 +30,16 @@ public class Shelfie implements ShelfieView {
 
     @Override
     public Stream<TileAndCoords<Property<@Nullable Tile>>> tiles() {
-        return IntStream.range(0, ROWS).boxed().flatMap(row ->
-                IntStream.range(0, COLUMNS).boxed()
-                        .map(col -> new TileAndCoords<>(shelfie[row][col], row, col)));
+        return IntStream.range(0, ROWS).boxed().flatMap(row -> IntStream.range(0, COLUMNS).boxed()
+                .map(col -> new TileAndCoords<>(shelfie[row][col], row, col)));
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Shelfie shelfie1)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Shelfie shelfie1))
+            return false;
         return Arrays.deepEquals(shelfie, shelfie1.shelfie);
     }
 

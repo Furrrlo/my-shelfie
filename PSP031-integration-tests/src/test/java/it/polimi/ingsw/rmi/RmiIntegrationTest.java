@@ -2,8 +2,6 @@ package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
-import it.polimi.ingsw.updater.GameUpdater;
-import it.polimi.ingsw.updater.LobbyUpdaterFactory;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.*;
@@ -13,6 +11,8 @@ import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerLobby;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
+import it.polimi.ingsw.updater.GameUpdater;
+import it.polimi.ingsw.updater.LobbyUpdaterFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -55,7 +55,8 @@ public class RmiIntegrationTest {
             public LobbyView joinGame(String nick,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Supplier<GameController> gameControllerFactory) {
-                final LobbyUpdaterFactory wrappedFactory = lobby -> new DelegatingLobbyUpdater(lobbyUpdaterFactory.create(lobby)) {
+                final LobbyUpdaterFactory wrappedFactory = lobby -> new DelegatingLobbyUpdater(
+                        lobbyUpdaterFactory.create(lobby)) {
                     @Override
                     public GameUpdater updateGame(GameAndController<Game> gameAndController) throws DisconnectedException {
                         final var gameUpdater = super.updateGame(gameAndController);
@@ -98,8 +99,7 @@ public class RmiIntegrationTest {
                         .map(n -> new ServerPlayer(n, new PersonalGoal(new Tile[6][5])))
                         .collect(Collectors.toList()),
                 rnd.nextInt(players.size()),
-                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS))
-        ));
+                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS))));
 
         final var clientGame = gamePromise.get().game();
         assertEquals(
@@ -133,7 +133,6 @@ public class RmiIntegrationTest {
             }
         }
 
-
         for (int row = 0; row < Shelfie.ROWS; row++) {
             for (int col = 0; col < Shelfie.COLUMNS; col++)
                 ensurePropertyUpdated(
@@ -159,7 +158,8 @@ public class RmiIntegrationTest {
     private static <T> void ensurePropertyUpdated(String name,
                                                   T value,
                                                   Property<T> serverProperty,
-                                                  Provider<T> clientProvider) throws ExecutionException, InterruptedException {
+                                                  Provider<T> clientProvider)
+            throws ExecutionException, InterruptedException {
         assertEquals(
                 serverProperty.get(),
                 clientProvider.get(),
@@ -177,7 +177,8 @@ public class RmiIntegrationTest {
                                                      S serverValue,
                                                      C clientValue,
                                                      Property<S> serverProperty,
-                                                     Provider<? extends C> clientProvider) throws ExecutionException, InterruptedException {
+                                                     Provider<? extends C> clientProvider)
+            throws ExecutionException, InterruptedException {
 
         final CompletableFuture<C> received = new CompletableFuture<>();
         final Consumer<C> observer;

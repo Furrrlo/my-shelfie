@@ -20,7 +20,8 @@ public class RmiConnectionServerController implements RmiConnectionController {
 
     @VisibleForTesting
     public static void bind(String remoteName,
-                            ServerController controller) throws RemoteException {
+                            ServerController controller)
+            throws RemoteException {
         LocateRegistry.createRegistry(1099).rebind(
                 remoteName,
                 UnicastRemoteObjects.export(new RmiConnectionServerController(controller), 0));

@@ -53,7 +53,7 @@ public class RmiClientNetManager implements ClientNetManager {
 
         @Override
         public RmiLobbyUpdater create(Lobby lobby) throws RemoteException {
-            if(updater != null)
+            if (updater != null)
                 throw new UnsupportedOperationException("Expected ConnectionServerController to invoke " +
                         "GameCreationStateUpdaterFactory exactly once, was 2+");
 

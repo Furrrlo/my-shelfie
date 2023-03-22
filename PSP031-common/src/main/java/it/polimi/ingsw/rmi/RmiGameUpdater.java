@@ -1,9 +1,9 @@
 package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.DisconnectedException;
-import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.model.Type;
+import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
@@ -30,7 +30,6 @@ public interface RmiGameUpdater extends Remote {
         public Adapter(RmiGameUpdater updater) {
             this.updater = updater;
         }
-
 
         @Override
         public void updateBoardTile(int row, int col, @Nullable Tile tile) throws DisconnectedException {

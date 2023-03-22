@@ -50,8 +50,10 @@ public class Lobby implements LobbyView {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Lobby lobby)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Lobby lobby))
+            return false;
         return requiredPlayers == lobby.requiredPlayers &&
                 joinedPlayers.equals(lobby.joinedPlayers) &&
                 game.equals(lobby.game);

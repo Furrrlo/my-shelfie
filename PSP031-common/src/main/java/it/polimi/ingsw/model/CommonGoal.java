@@ -31,8 +31,10 @@ public class CommonGoal implements CommonGoalView {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CommonGoal that)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof CommonGoal that))
+            return false;
         return type == that.type && achieved.equals(that.achieved);
     }
 

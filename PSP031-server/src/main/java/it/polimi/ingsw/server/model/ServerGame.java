@@ -1,8 +1,7 @@
 package it.polimi.ingsw.server.model;
 
-import org.jetbrains.annotations.Nullable;
 import it.polimi.ingsw.model.*;
-
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -68,8 +67,10 @@ public class ServerGame implements ServerGameView {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ServerGame that)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof ServerGame that))
+            return false;
         return gameID == that.gameID &&
                 board.equals(that.board) &&
                 bag.equals(that.bag) &&

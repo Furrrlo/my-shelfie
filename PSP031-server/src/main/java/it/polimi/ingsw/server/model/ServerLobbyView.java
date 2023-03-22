@@ -1,8 +1,9 @@
 package it.polimi.ingsw.server.model;
 
-import java.util.List;
 import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface ServerLobbyView {
 

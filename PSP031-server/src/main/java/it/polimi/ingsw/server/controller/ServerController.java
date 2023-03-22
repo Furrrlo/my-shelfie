@@ -1,14 +1,14 @@
 package it.polimi.ingsw.server.controller;
 
-import it.polimi.ingsw.*;
 import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerLobby;
-import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.updater.GameUpdater;
-import it.polimi.ingsw.updater.LobbyUpdater;
 import it.polimi.ingsw.updater.LobbyUpdaterFactory;
+import it.polimi.ingsw.*;
+import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.model.ServerPlayer;
+import it.polimi.ingsw.updater.LobbyUpdater;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -69,10 +69,10 @@ public class ServerController {
                 // so that it can discard options fast, then here we re-check while actually holding the lock
                 // to guarantee concurrency
                 final List<String> currentPlayers = serverLobby.joinedPlayers().get();
-                if(!currentPlayers.contains(nick) && currentPlayers.size() >= serverLobby.getRequiredPlayers())
+                if (!currentPlayers.contains(nick) && currentPlayers.size() >= serverLobby.getRequiredPlayers())
                     continue;
 
-                if(!currentPlayers.contains(nick)) {
+                if (!currentPlayers.contains(nick)) {
                     serverLobby.joinedPlayers().update(l -> {
                         final var newList = new ArrayList<>(l);
                         newList.add(nick);
@@ -98,13 +98,14 @@ public class ServerController {
             } finally {
                 lock.unlock();
             }
-        } while(true);
+        } while (true);
     }
 
     private void updateGameForPlayer(String nick,
                                      ServerGame game,
                                      LobbyUpdater lobbyUpdater,
-                                     Supplier<GameController> gameControllerFactory) throws DisconnectedException {
+                                     Supplier<GameController> gameControllerFactory)
+            throws DisconnectedException {
         // TODO: concurrency: the game can't be edited while doing this
 
         final Map<String, Player> clientPlayers = game.getPlayers().stream()
@@ -135,30 +136,28 @@ public class ServerController {
                                                 .collect(Collectors.toList())))
                                 .collect(Collectors.toList()),
                         thePlayer.getPersonalGoal(),
-                        game.firstFinisher().get() == null ?
-                                null :
-                                game.getPlayers().indexOf(game.firstFinisher().get())
-                ),
+                        game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get())),
                 gameControllerFactory.get()));
         // Register all listeners to the game model
-        game.getBoard().tiles().forEach(tileAndCoords ->
-                tileAndCoords.tile().registerObserver(handleDisconnection(thePlayer, tile ->
-                        gameUpdater.updateBoardTile(tileAndCoords.row(), tileAndCoords.col(), tile))));
-        game.getPlayers().forEach(p ->
-                p.getShelfie().tiles().forEach(tileAndCoords ->
-                        tileAndCoords.tile().registerObserver(handleDisconnection(thePlayer, tile ->
-                                gameUpdater.updatePlayerShelfieTile(
+        game.getBoard().tiles().forEach(tileAndCoords -> tileAndCoords.tile().registerObserver(handleDisconnection(thePlayer,
+                tile -> gameUpdater.updateBoardTile(tileAndCoords.row(), tileAndCoords.col(), tile))));
+        game.getPlayers()
+                .forEach(p -> p.getShelfie().tiles()
+                        .forEach(tileAndCoords -> tileAndCoords.tile()
+                                .registerObserver(handleDisconnection(thePlayer, tile -> gameUpdater.updatePlayerShelfieTile(
                                         p.getNick(),
                                         tileAndCoords.row(),
                                         tileAndCoords.col(),
                                         tile)))));
         game.currentTurn().registerObserver(handleDisconnection(thePlayer, p -> gameUpdater.updateCurrentTurn(p.getNick())));
-        game.firstFinisher().registerObserver(handleDisconnection(thePlayer, p -> gameUpdater.updateFirstFinisher(p.getNick())));
-        game.getCommonGoals().forEach(goal ->
-                goal.achieved().registerObserver(handleDisconnection(thePlayer, players ->
-                        gameUpdater.updateAchievedCommonGoal(goal.getType(), players.stream()
-                                .map(ServerPlayer::getNick)
-                                .collect(Collectors.toList())))));
+        game.firstFinisher()
+                .registerObserver(handleDisconnection(thePlayer, p -> gameUpdater.updateFirstFinisher(p.getNick())));
+        game.getCommonGoals()
+                .forEach(goal -> goal.achieved()
+                        .registerObserver(handleDisconnection(thePlayer,
+                                players -> gameUpdater.updateAchievedCommonGoal(goal.getType(), players.stream()
+                                        .map(ServerPlayer::getNick)
+                                        .collect(Collectors.toList())))));
     }
 
     private interface ThrowingConsumer<T> {

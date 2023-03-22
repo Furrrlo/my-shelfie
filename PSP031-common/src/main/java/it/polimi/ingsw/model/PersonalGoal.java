@@ -12,9 +12,9 @@ public class PersonalGoal implements PersonalGoalView {
 
     @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
     public PersonalGoal(@Nullable Tile[][] personalGoal) {
-        if(personalGoal.length != ROWS)
+        if (personalGoal.length != ROWS)
             throw new IllegalArgumentException("Provided shelf combination has the wrong row size");
-        for(int row = 0; row < personalGoal.length; row++) {
+        for (int row = 0; row < personalGoal.length; row++) {
             if (personalGoal[row].length != COLUMNS)
                 throw new IllegalArgumentException("Provided shelf combination has the wrong column size at row " + row);
         }
@@ -31,15 +31,16 @@ public class PersonalGoal implements PersonalGoalView {
     @Override
     @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
     public Stream<TileAndCoords<@Nullable Tile>> tiles() {
-        return IntStream.range(0, ROWS).boxed().flatMap(row ->
-                IntStream.range(0, COLUMNS).boxed()
-                        .map(col -> new TileAndCoords<>(personalGoal[row][col], row, col)));
+        return IntStream.range(0, ROWS).boxed().flatMap(row -> IntStream.range(0, COLUMNS).boxed()
+                .map(col -> new TileAndCoords<>(personalGoal[row][col], row, col)));
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PersonalGoal that)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof PersonalGoal that))
+            return false;
         return Arrays.deepEquals(personalGoal, that.personalGoal);
     }
 
