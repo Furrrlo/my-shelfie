@@ -13,6 +13,7 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.updater.LobbyUpdaterFactory;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -123,24 +124,20 @@ public class RmiIntegrationTest {
             final var serverPlayer = serverGame.getPlayers().get(i);
             final var clientPlayer = clientGame.getPlayers().get(i);
 
-            for (int row = 0; row < Shelfie.ROWS; row++) {
-                for (int col = 0; col < Shelfie.COLUMNS; col++)
-                    ensurePropertyUpdated(
-                            serverPlayer.getNick() + "ShelfTile" + row + "x" + col,
-                            new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
-                            serverPlayer.getShelfie().tile(row, col),
-                            clientPlayer.getShelfie().tile(row, col));
-            }
+            for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
+                ensurePropertyUpdated(
+                        serverPlayer.getNick() + "ShelfTile" + tile.row() + "x" + tile.col(),
+                        new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                        serverPlayer.getShelfie().tile(tile.row(), tile.col()),
+                        clientPlayer.getShelfie().tile(tile.row(), tile.col()));
         }
 
-        for (int row = 0; row < Shelfie.ROWS; row++) {
-            for (int col = 0; col < Shelfie.COLUMNS; col++)
-                ensurePropertyUpdated(
-                        "board" + row + "x" + col,
-                        new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
-                        serverGame.getBoard().tile(row, col),
-                        clientGame.getBoard().tile(row, col));
-        }
+        for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverGame.getBoard().tiles()::iterator)
+            ensurePropertyUpdated(
+                    "board" + tile.row() + "x" + tile.col(),
+                    new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                    serverGame.getBoard().tile(tile.row(), tile.col()),
+                    clientGame.getBoard().tile(tile.row(), tile.col()));
 
         for (int i = 0; i < serverGame.getCommonGoals().size(); i++) {
             final var serverCommonGoal = serverGame.getCommonGoals().get(i);
