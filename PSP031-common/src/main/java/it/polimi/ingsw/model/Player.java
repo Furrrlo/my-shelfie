@@ -10,9 +10,9 @@ public class Player implements PlayerView {
     /**
      * Default constructor for player
      */
-    public Player(String nick) {
+    public Player(String nick, Shelfie shelfie) {
         this.nick = nick;
-        this.shelfie = new Shelfie();
+        this.shelfie = shelfie;
     }
 
     @Override

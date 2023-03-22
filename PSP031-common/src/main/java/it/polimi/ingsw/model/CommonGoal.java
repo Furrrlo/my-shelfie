@@ -11,8 +11,12 @@ public class CommonGoal implements CommonGoalView {
     private final Property<List<Player>> achieved;
 
     public CommonGoal(Type type) {
+        this(type, new ArrayList<>());
+    }
+
+    public CommonGoal(Type type, List<Player> achieved) {
         this.type = type;
-        this.achieved = new PropertyImpl<>(new ArrayList<>());
+        this.achieved = new PropertyImpl<>(achieved);
     }
 
     @Override
