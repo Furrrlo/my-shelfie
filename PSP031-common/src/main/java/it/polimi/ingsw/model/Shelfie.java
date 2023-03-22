@@ -1,12 +1,14 @@
 package it.polimi.ingsw.model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Shelfie implements ShelfieView {
 
-    private final Property<Tile>[][] shelfie;
+    private final Property<@Nullable Tile>[][] shelfie;
 
     /**
      * Default constructor
@@ -22,12 +24,12 @@ public class Shelfie implements ShelfieView {
     }
 
     @Override
-    public Property<Tile> tile(int r, int c) {
+    public Property<@Nullable Tile> tile(int r, int c) {
         return shelfie[r][c];
     }
 
     @Override
-    public Stream<TileAndCoords<Property<Tile>>> tiles() {
+    public Stream<TileAndCoords<Property<@Nullable Tile>>> tiles() {
         return IntStream.range(0, ROWS).boxed().flatMap(row ->
                 IntStream.range(0, COLUMNS).boxed()
                         .map(col -> new TileAndCoords<>(shelfie[row][col], row, col)));

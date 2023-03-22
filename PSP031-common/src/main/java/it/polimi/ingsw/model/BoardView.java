@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 import java.util.stream.Stream;
 
@@ -9,7 +11,7 @@ public interface BoardView extends Serializable {
 
     int getCols();
 
-    Provider<Tile> tile(int r, int c);
+    Provider<@Nullable Tile> tile(int r, int c);
 
-    Stream<? extends TileAndCoords<? extends Provider<Tile>>> tiles();
+    Stream<? extends TileAndCoords<? extends Provider<@Nullable Tile>>> tiles();
 }

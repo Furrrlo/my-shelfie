@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 import java.util.stream.Stream;
 
@@ -13,7 +15,7 @@ public interface PersonalGoalView extends Serializable {
      * @param c defines column of personalGoal
      * @return tile of personal Goal
      */
-    Tile get(int r, int c);
+    @Nullable Tile get(int r, int c);
 
-    Stream<TileAndCoords<Tile>> tiles();
+    Stream<TileAndCoords<@Nullable Tile>> tiles();
 }

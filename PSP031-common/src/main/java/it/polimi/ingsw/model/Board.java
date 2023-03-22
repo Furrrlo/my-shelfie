@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -15,18 +17,18 @@ import java.util.stream.Stream;
  */
 public class Board implements BoardView {
 
-    private final Property<Tile>[][] board;
+    private final Property<@Nullable Tile>[][] board;
     private final Property<Tile> invalidTile;
 
     @SuppressWarnings("unchecked")
     public Board(int numOfPlayers) {
         this.board = Arrays.stream(generateBasedOnPlayers(numOfPlayers))
-                .map(row -> Arrays.stream(row).map(PropertyImpl::new).toArray(Property[]::new))
+                .map(row -> Arrays.stream(row).map(PropertyImpl::nullableProperty).toArray(Property[]::new))
                 .toArray(Property[][]::new);
         invalidTile = new PropertyImpl<>(new Tile(Color.GREEN));
     }
 
-    private static Tile[][] generateBasedOnPlayers(int numOfPlayers) {
+    private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers) {
         return new Tile[20][20]; // TODO: generate based on number of players
     }
 
@@ -41,14 +43,14 @@ public class Board implements BoardView {
     }
 
     @Override
-    public Property<Tile> tile(int r, int c) {
+    public Property<@Nullable Tile> tile(int r, int c) {
         if (board[r][c] == invalidTile)
             throw new IndexOutOfBoundsException("Invalid Position selected");
         else return board[r][c];
     }
 
     @Override
-    public Stream<TileAndCoords<Property<Tile>>> tiles() {
+    public Stream<TileAndCoords<Property<@Nullable Tile>>> tiles() {
         return IntStream.range(0, getRows()).boxed().flatMap(row ->
                 IntStream.range(0, getCols()).boxed()
                         .filter(col -> board[row][col] != invalidTile)

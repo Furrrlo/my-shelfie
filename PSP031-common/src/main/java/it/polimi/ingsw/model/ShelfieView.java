@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 import java.util.stream.Stream;
 
@@ -13,7 +15,7 @@ public interface ShelfieView extends Serializable {
      * @param c defines column of shelfie
      * @return tile in position r & c
      */
-    Provider<Tile> tile(int r, int c);
+    Provider<@Nullable Tile> tile(int r, int c);
 
-    Stream<? extends TileAndCoords<? extends Provider<Tile>>> tiles();
+    Stream<? extends TileAndCoords<? extends Provider<@Nullable Tile>>> tiles();
 }
