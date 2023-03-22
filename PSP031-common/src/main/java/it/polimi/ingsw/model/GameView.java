@@ -2,9 +2,10 @@ package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface GameView {
+public interface GameView extends Serializable {
 
     /**
      * @return game ID

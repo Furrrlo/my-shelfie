@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
-public interface BoardView {
+import java.io.Serializable;
+
+public interface BoardView extends Serializable {
 
     int getRows();
 

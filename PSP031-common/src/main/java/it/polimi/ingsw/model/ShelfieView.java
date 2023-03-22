@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
-public interface ShelfieView {
+import java.io.Serializable;
+
+public interface ShelfieView extends Serializable {
 
     int ROWS = 6;
     int COLUMNS = 5;

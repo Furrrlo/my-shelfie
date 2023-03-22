@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
-public interface PlayerView {
+import java.io.Serializable;
+
+public interface PlayerView extends Serializable {
 
     /**
      * @return player's nick

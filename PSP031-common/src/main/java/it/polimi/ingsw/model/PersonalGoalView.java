@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
-public interface PersonalGoalView {
+import java.io.Serializable;
+
+public interface PersonalGoalView extends Serializable {
 
     int ROWS = Shelfie.ROWS;
     int COLUMNS = Shelfie.COLUMNS;

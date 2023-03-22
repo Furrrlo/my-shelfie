@@ -1,8 +1,9 @@
 package it.polimi.ingsw.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface CommonGoalView {
+public interface CommonGoalView extends Serializable {
 
     Type getType();
 

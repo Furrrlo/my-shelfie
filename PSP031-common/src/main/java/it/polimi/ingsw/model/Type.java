@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
-public enum Type {
+import java.io.Serializable;
+
+public enum Type implements Serializable {
     SIX_COUPLES,
     ALL_CORNERS,
     FOUR_QUADRIPLETS,
