@@ -1,13 +1,18 @@
 package it.polimi.ingsw.model;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.io.ObjectStreamException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class PropertyImpl<T> implements Property<T> {
+public class PropertyImpl<T> implements Property<T>, Serializable {
 
     private T val;
 
-    private List<Consumer<? super T>> observers;
+    private final transient Set<Consumer<? super T>> observers = new LinkedHashSet<>();
 
     @SuppressWarnings("NullAway") // NullAway sadly doesn't implement generics properly yet
     public static <T> Property<@Nullable T> nullableProperty(@Nullable T prop) {
@@ -19,6 +24,17 @@ public class PropertyImpl<T> implements Property<T> {
      */
     public PropertyImpl(T val) {
         this.val = val;
+    }
+
+    /**
+     * Custom serialization hook defined by Java spec.
+     * <p>
+     * We use it to create a PropertyImpl with a non-null observers list,
+     * as by default serialization leaves final fields as nulls.
+     */
+    @Serial
+    private Object readResolve() throws ObjectStreamException {
+        return new PropertyImpl<>(val);
     }
 
     @Override
