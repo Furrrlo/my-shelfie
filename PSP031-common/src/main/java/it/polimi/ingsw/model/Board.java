@@ -2,6 +2,8 @@ package it.polimi.ingsw.model;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * @implNote Java Serialization automatically takes care of keeping multiple references to a single object
@@ -43,6 +45,14 @@ public class Board implements BoardView {
         if (board[r][c] == invalidTile)
             throw new IndexOutOfBoundsException("Invalid Position selected");
         else return board[r][c];
+    }
+
+    @Override
+    public Stream<TileAndCoords<Property<Tile>>> tiles() {
+        return IntStream.range(0, getRows()).boxed().flatMap(row ->
+                IntStream.range(0, getCols()).boxed()
+                        .filter(col -> board[row][col] != invalidTile)
+                        .map(col -> new TileAndCoords<>(board[row][col], row, col)));
     }
 
     @Override

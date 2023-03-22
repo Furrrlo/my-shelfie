@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Shelfie implements ShelfieView {
 
@@ -22,6 +24,13 @@ public class Shelfie implements ShelfieView {
     @Override
     public Property<Tile> tile(int r, int c) {
         return shelfie[r][c];
+    }
+
+    @Override
+    public Stream<TileAndCoords<Property<Tile>>> tiles() {
+        return IntStream.range(0, ROWS).boxed().flatMap(row ->
+                IntStream.range(0, COLUMNS).boxed()
+                        .map(col -> new TileAndCoords<>(shelfie[row][col], row, col)));
     }
 
     @Override

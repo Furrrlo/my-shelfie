@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class PersonalGoal implements PersonalGoalView {
 
@@ -20,6 +22,13 @@ public class PersonalGoal implements PersonalGoalView {
     @Override
     public Tile get(int r, int c) {
         return personalGoal[r][c];
+    }
+
+    @Override
+    public Stream<TileAndCoords<Tile>> tiles() {
+        return IntStream.range(0, ROWS).boxed().flatMap(row ->
+                IntStream.range(0, COLUMNS).boxed()
+                        .map(col -> new TileAndCoords<>(personalGoal[row][col], row, col)));
     }
 
     @Override
