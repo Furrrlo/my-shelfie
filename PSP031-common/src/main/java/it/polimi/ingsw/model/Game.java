@@ -17,16 +17,19 @@ public class Game implements GameView {
     public Game(int gameID,
                 Board board,
                 List<Player> players,
-                Player currentTurn,
+                int currentTurnPlayerIdx,
                 List<CommonGoal> commonGoal,
-                PersonalGoal personalGoal) {
+                PersonalGoal personalGoal,
+                @Nullable Integer firstFinisherId) {
         this.gameID = gameID;
         this.board = board;
         this.players = players;
-        this.currentTurn = new PropertyImpl<>(currentTurn);
+        this.currentTurn = new PropertyImpl<>(players.get(currentTurnPlayerIdx));
         this.personalGoal = personalGoal;
         this.commonGoal = commonGoal;
-        this.firstFinisher = PropertyImpl.nullableProperty(null);
+        this.firstFinisher = PropertyImpl.nullableProperty(firstFinisherId == null ?
+                null :
+                players.get(firstFinisherId));
     }
 
     @Override

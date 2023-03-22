@@ -20,13 +20,13 @@ public class ServerGame implements ServerGameView {
                       Board board,
                       List<Tile> bag,
                       List<ServerPlayer> players,
-                      ServerPlayer currentTurn,
+                      int currentTurnPlayerIdx,
                       List<ServerCommonGoal> commonGoal) {
         this.gameID = gameID;
         this.board = board;
         this.bag = bag;
         this.players = players;
-        this.currentTurn = new PropertyImpl<>(currentTurn);
+        this.currentTurn = new PropertyImpl<>(players.get(currentTurnPlayerIdx));
         this.commonGoal = commonGoal;
         this.firstFinisher = PropertyImpl.nullableProperty(null);
     }
