@@ -12,4 +12,8 @@
     </parent>
 
     <artifactId>PSP031-common</artifactId>
+
+    <properties>
+        <project.rootdir>${basedir}/..</project.rootdir>
+    </properties>
 </project>

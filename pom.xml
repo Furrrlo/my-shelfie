@@ -12,12 +12,16 @@
     <name>My Shelfie</name>
 
     <properties>
+        <project.rootdir>${basedir}</project.rootdir>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <errorprone.version>2.18.0</errorprone.version>
         <nullaway.version>0.10.9</nullaway.version>
+
+        <spotless.version>2.35.0</spotless.version>
+        <eclipse-jdt.version>4.26</eclipse-jdt.version>
 
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
@@ -99,7 +103,9 @@
                 <configuration>
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
-                        <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=it.polimi.ingsw</arg>
+                        <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR
+                            -XepOpt:NullAway:AnnotatedPackages=it.polimi.ingsw
+                        </arg>
                     </compilerArgs>
                     <annotationProcessorPaths>
                         <path>
@@ -159,6 +165,54 @@
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>3.4.2</version>
             </plugin>
+            <!-- Code formatting -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <eclipse>
+                            <version>${eclipse-jdt.version}</version>
+                            <file>${project.rootdir}/eclipse-formatter.xml</file> <!-- optional -->
+                        </eclipse>
+                        <importOrder>
+                            <wildcardsLast>true</wildcardsLast>
+                            <file>${project.rootdir}/eclipse.importorder</file>
+                        </importOrder>
+                        <removeUnusedImports/>
+                        <formatAnnotations/>
+                    </java>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>format</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!no-format</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>apply</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
