@@ -24,10 +24,10 @@ public class Game implements GameView {
         this.gameID = gameID;
         this.board = board;
         this.players = players;
-        this.currentTurn = new PropertyImpl<>(players.get(currentTurnPlayerIdx));
+        this.currentTurn = new SerializableProperty<>(players.get(currentTurnPlayerIdx));
         this.personalGoal = personalGoal;
         this.commonGoal = commonGoal;
-        this.firstFinisher = PropertyImpl.nullableProperty(firstFinisherId == null ?
+        this.firstFinisher = SerializableProperty.nullableProperty(firstFinisherId == null ?
                 null :
                 players.get(firstFinisherId));
     }

@@ -15,7 +15,7 @@ public class ServerLobby implements ServerLobbyView {
      */
     public ServerLobby(int requiredPlayers) {
         this.requiredPlayers = requiredPlayers;
-        this.joinedPlayers = new PropertyImpl<>(new ArrayList<>());
+        this.joinedPlayers = new SerializableProperty<>(new ArrayList<>());
     }
 
     @Override

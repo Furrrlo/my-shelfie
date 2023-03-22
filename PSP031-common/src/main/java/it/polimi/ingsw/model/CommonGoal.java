@@ -16,7 +16,7 @@ public class CommonGoal implements CommonGoalView {
 
     public CommonGoal(Type type, List<Player> achieved) {
         this.type = type;
-        this.achieved = new PropertyImpl<>(achieved);
+        this.achieved = new SerializableProperty<>(achieved);
     }
 
     @Override

@@ -21,7 +21,7 @@ public class Lobby implements LobbyView {
 
     public Lobby(int requiredPlayers, List<String> joinedPlayers) {
         this.requiredPlayers = requiredPlayers;
-        this.joinedPlayers = new PropertyImpl<>(joinedPlayers);
+        this.joinedPlayers = new SerializableProperty<>(joinedPlayers);
     }
 
     @Override

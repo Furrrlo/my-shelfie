@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class PropertyImpl<T> implements Property<T>, Serializable {
+public class SerializableProperty<T> implements Property<T>, Serializable {
 
     private T val;
 
@@ -16,13 +16,13 @@ public class PropertyImpl<T> implements Property<T>, Serializable {
 
     @SuppressWarnings("NullAway") // NullAway sadly doesn't implement generics properly yet
     public static <T> Property<@Nullable T> nullableProperty(@Nullable T prop) {
-        return new PropertyImpl<>(prop);
+        return new SerializableProperty<>(prop);
     }
 
     /**
      * Default constructor
      */
-    public PropertyImpl(T val) {
+    public SerializableProperty(T val) {
         this.val = val;
     }
 
@@ -34,7 +34,7 @@ public class PropertyImpl<T> implements Property<T>, Serializable {
      */
     @Serial
     private Object readResolve() throws ObjectStreamException {
-        return new PropertyImpl<>(val);
+        return new SerializableProperty<>(val);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class PropertyImpl<T> implements Property<T>, Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PropertyImpl<?> that)) return false;
+        if (!(o instanceof SerializableProperty<?> that)) return false;
         return Objects.equals(val, that.val);
     }
 

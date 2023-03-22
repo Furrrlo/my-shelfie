@@ -26,9 +26,9 @@ public class ServerGame implements ServerGameView {
         this.board = board;
         this.bag = bag;
         this.players = players;
-        this.currentTurn = new PropertyImpl<>(players.get(currentTurnPlayerIdx));
+        this.currentTurn = new SerializableProperty<>(players.get(currentTurnPlayerIdx));
         this.commonGoal = commonGoal;
-        this.firstFinisher = PropertyImpl.nullableProperty(null);
+        this.firstFinisher = SerializableProperty.nullableProperty(null);
     }
 
     @Override

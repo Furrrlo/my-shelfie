@@ -15,10 +15,10 @@ public class Shelfie implements ShelfieView {
      */
     @SuppressWarnings("unchecked") // Java doesn't support generic arrays creation
     public Shelfie() {
-        shelfie = new PropertyImpl[ROWS][COLUMNS];
+        shelfie = new SerializableProperty[ROWS][COLUMNS];
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLUMNS; c++) {
-                shelfie[r][c] = PropertyImpl.nullableProperty(null);
+                shelfie[r][c] = SerializableProperty.nullableProperty(null);
             }
         }
     }

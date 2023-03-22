@@ -14,7 +14,7 @@ public class ServerCommonGoal implements ServerCommonGoalView {
 
     public ServerCommonGoal(Type type) {
         this.type = type;
-        this.achieved = new PropertyImpl<>(new ArrayList<>());
+        this.achieved = new SerializableProperty<>(new ArrayList<>());
     }
 
     @Override

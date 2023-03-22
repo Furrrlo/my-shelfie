@@ -3,7 +3,6 @@ package it.polimi.ingsw.model;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -23,9 +22,9 @@ public class Board implements BoardView {
     @SuppressWarnings("unchecked")
     public Board(int numOfPlayers) {
         this.board = Arrays.stream(generateBasedOnPlayers(numOfPlayers))
-                .map(row -> Arrays.stream(row).map(PropertyImpl::nullableProperty).toArray(Property[]::new))
+                .map(row -> Arrays.stream(row).map(SerializableProperty::nullableProperty).toArray(Property[]::new))
                 .toArray(Property[][]::new);
-        invalidTile = new PropertyImpl<>(new Tile(Color.GREEN));
+        invalidTile = new SerializableProperty<>(new Tile(Color.GREEN));
     }
 
     private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers) {
