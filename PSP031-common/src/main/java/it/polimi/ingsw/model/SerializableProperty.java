@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.ObjectStreamException;
 import java.io.Serial;
@@ -15,7 +16,7 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
     private final transient Set<Consumer<? super T>> observers = new LinkedHashSet<>();
 
     @SuppressWarnings("NullAway") // NullAway sadly doesn't implement generics properly yet
-    public static <T> Property<@Nullable T> nullableProperty(@Nullable T prop) {
+    public static <T> SerializableProperty<@Nullable T> nullableProperty(@Nullable T prop) {
         return new SerializableProperty<>(prop);
     }
 
@@ -46,6 +47,11 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
     public void set(T val) {
         this.val = val;
         observers.forEach(o -> o.accept(val));
+    }
+
+    @VisibleForTesting
+    Set<Consumer<? super T>> getObservers() {
+        return observers;
     }
 
     @Override
