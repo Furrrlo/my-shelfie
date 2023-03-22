@@ -3,6 +3,14 @@ package it.polimi.ingsw.model;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * @implNote Java Serialization automatically takes care of keeping multiple references to a single object
+ *           correct on deserialization:
+ *           "Multiple references to a single object are encoded using a reference sharing mechanism so that
+ *           graphs of objects can be restored to the same shape as when the original was written."
+ *           Using invalidTile's reference as a marker should be deserialized correctly.
+ * @see java.io.ObjectOutputStream
+ */
 public class Board implements BoardView {
 
     private final Property<Tile>[][] board;
