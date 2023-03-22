@@ -45,6 +45,7 @@ public class PropertyImpl<T> implements Property<T>, Serializable {
     @Override
     public void set(T val) {
         this.val = val;
+        observers.forEach(o -> o.accept(val));
     }
 
     @Override
