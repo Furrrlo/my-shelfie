@@ -11,6 +11,7 @@ public class Lobby implements LobbyView {
 
     private final int requiredPlayers;
     private final Property<List<String>> joinedPlayers;
+    private final Property<@Nullable GameAndController<Game>> game;
 
     /**
      * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
@@ -20,8 +21,16 @@ public class Lobby implements LobbyView {
     }
 
     public Lobby(int requiredPlayers, List<String> joinedPlayers) {
+        this(requiredPlayers, joinedPlayers, null);
+    }
+
+    public Lobby(int requiredPlayers,
+                 List<String> joinedPlayers,
+                 @Nullable GameAndController<Game> game) {
+
         this.requiredPlayers = requiredPlayers;
         this.joinedPlayers = new SerializableProperty<>(joinedPlayers);
+        this.game = SerializableProperty.nullableProperty(game);
     }
 
     @Override
@@ -35,16 +44,22 @@ public class Lobby implements LobbyView {
     }
 
     @Override
+    public Property<@Nullable GameAndController<Game>> game() {
+        return game;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Lobby lobby)) return false;
         return requiredPlayers == lobby.requiredPlayers &&
-                joinedPlayers.equals(lobby.joinedPlayers);
+                joinedPlayers.equals(lobby.joinedPlayers) &&
+                game.equals(lobby.game);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requiredPlayers, joinedPlayers);
+        return Objects.hash(requiredPlayers, joinedPlayers, game);
     }
 
     @Override
