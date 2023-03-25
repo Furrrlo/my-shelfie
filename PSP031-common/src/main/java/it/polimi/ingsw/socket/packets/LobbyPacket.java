@@ -4,6 +4,10 @@ import it.polimi.ingsw.model.Lobby;
 
 import java.util.Objects;
 
+/**
+ * Ack packet with a {@link Lobby}
+ * This will also be wrapped in a {@link SeqPacket}
+ */
 public final class LobbyPacket implements S2CAckPacket {
     private final Lobby lobby;
     private long seqAck;

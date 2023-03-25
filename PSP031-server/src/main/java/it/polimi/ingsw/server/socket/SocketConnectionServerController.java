@@ -20,6 +20,7 @@ public class SocketConnectionServerController implements Runnable {
         this.socketServer = new ServerSocket(port);
     }
 
+    @Override
     public void run() {
         do {
             try {

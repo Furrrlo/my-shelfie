@@ -2,6 +2,12 @@ package it.polimi.ingsw.socket.packets;
 
 import java.util.Objects;
 
+/**
+ * Empty ack packet with only the sequence number of the packet to acknowledge
+ * This will also be wrapped in a {@link SeqPacket}, but it's seqN is not used.
+ *
+ * @see it.polimi.ingsw.socket.SocketManager.PacketReplyContext#ack()
+ */
 public final class SimpleAckPacket implements S2CAckPacket, C2SAckPacket {
     private long seqAck;
 
