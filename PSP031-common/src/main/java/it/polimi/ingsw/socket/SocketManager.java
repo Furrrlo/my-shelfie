@@ -7,6 +7,9 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
+ * Handle socket communication from multiple threads, using a queue.
+ * Allows sending acks and replies.
+ *
  * @param <IN> type of Packet that can be received
  * @param <ACK_IN> type of AckPacket that can be received
  * @param <ACK_OUT> type of AckPacket that can be sent
@@ -15,6 +18,14 @@ import java.io.IOException;
 public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet> {
 
     /**
+     * Send a packet and wait for an ack.
+     * The given packet is wrapped in a {@link it.polimi.ingsw.socket.packets.SeqPacket} and the
+     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()} is set.
+     * The packet is added to a queue to be sent.
+     * Wait for an AckPacket of the given type and with {@link AckPacket#seqAck()} ==
+     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()}
+     *
+     *
      * @param p packet to be sent
      * @param replyType type of the AckPacket to wait for
      * @return {@link PacketReplyContext} the context of the received ack
@@ -23,6 +34,8 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
     <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> send(OUT p, Class<R> replyType) throws IOException;
 
     /**
+     * Wait for a packet of the given type
+     *
      * @param type type of the Packet to wait for
      * @return {@link PacketReplyContext} the context of the received packet
      * @throws IOException
@@ -33,6 +46,7 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     /**
      * Context of a Packet
+     * Wraps a {@link it.polimi.ingsw.socket.packets.SeqPacket} and allows to ack and reply
      *
      * @param <ACK_IN> type of AckPacket that can be received
      * @param <ACK_OUT> type of AckPacket that can be sent
@@ -41,6 +55,11 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
     interface PacketReplyContext<ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, T extends Packet>
             extends Closeable {
 
+        /**
+         * Extract the {@link Packet} from the {@link it.polimi.ingsw.socket.packets.SeqPacket} wrapped in this context
+         *
+         * @return the packet contained in the {@link it.polimi.ingsw.socket.packets.SeqPacket}
+         */
         T getPacket();
 
         /**

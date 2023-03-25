@@ -80,8 +80,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         try {
             CompletableFuture<SeqPacket> toReceive = new CompletableFuture<>();
             long seqN = seq.getAndIncrement();
-            QueuedInput queuedInput = null;
-            queuedInput = new QueuedInput(
+            QueuedInput queuedInput = new QueuedInput(
                     packet -> replyType.isInstance(packet.packet()) && ((AckPacket) packet.packet()).seqAck() == seqN,
                     toReceive);
             inQueue.add(queuedInput);
