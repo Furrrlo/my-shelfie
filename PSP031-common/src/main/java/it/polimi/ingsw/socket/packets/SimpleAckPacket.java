@@ -1,23 +1,17 @@
 package it.polimi.ingsw.socket.packets;
 
-import it.polimi.ingsw.model.Lobby;
-
 import java.util.Objects;
 
-public final class LobbyPacket implements S2CAckPacket {
-    private final Lobby lobby;
+public final class SimpleAckPacket implements S2CAckPacket, C2SAckPacket {
     private long seqAck;
 
-    public LobbyPacket(Lobby lobby) {
-        this.lobby = lobby;
-    }
-
-    public void setSeqAck(long seqAck) {
+    public SimpleAckPacket(long seqAck) {
         this.seqAck = seqAck;
     }
 
-    public Lobby lobby() {
-        return lobby;
+    @Override
+    public void setSeqAck(long seqAck) {
+        this.seqAck = seqAck;
     }
 
     @Override
@@ -31,20 +25,18 @@ public final class LobbyPacket implements S2CAckPacket {
             return true;
         if (obj == null || obj.getClass() != this.getClass())
             return false;
-        var that = (LobbyPacket) obj;
-        return Objects.equals(this.lobby, that.lobby) &&
-                this.seqAck == that.seqAck;
+        var that = (SimpleAckPacket) obj;
+        return this.seqAck == that.seqAck;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lobby, seqAck);
+        return Objects.hash(seqAck);
     }
 
     @Override
     public String toString() {
-        return "LobbyPacket[" +
-                "lobby=" + lobby + ", " +
+        return "SimpleAckPacket[" +
                 "seqAck=" + seqAck + ']';
     }
 

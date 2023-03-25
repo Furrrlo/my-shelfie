@@ -9,26 +9,27 @@ import it.polimi.ingsw.socket.packets.S2CPacket;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.List;
 
 public class SocketGameClientUpdater implements SocketGameUpdater, Runnable {
 
     private final Game game;
-    private final ObjectInputStream ois;
+    private final ClientSocketManager socketManager;
 
-    public SocketGameClientUpdater(Game game, ObjectInputStream ois) {
+    public SocketGameClientUpdater(Game game, ClientSocketManager socketManager) {
         this.game = game;
-        this.ois = ois;
+        this.socketManager = socketManager;
     }
 
     @Override
     public void run() {
         do {
-            try {
-                final S2CPacket p = (S2CPacket) ois.readObject();
+            System.out.println("[CLient] Game Updater started");
+            try (var ctx = socketManager.receive(S2CPacket.class)) {
+
+                final S2CPacket p = ctx.getPacket();
                 //TODO: call the correct method
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e); //TODO:
             }
         } while (!Thread.interrupted());

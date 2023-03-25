@@ -11,31 +11,30 @@ import it.polimi.ingsw.socket.packets.UpdateJoinedPlayerPacket;
 import it.polimi.ingsw.updater.GameUpdater;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.List;
 
 public class SocketLobbyClientUpdater implements SocketLobbyUpdater, Runnable {
 
     private final Lobby lobby;
-    private final ObjectInputStream ois;
+    private final ClientSocketManager socketManager;
 
-    public SocketLobbyClientUpdater(Lobby lobby, ObjectInputStream ois) {
+    public SocketLobbyClientUpdater(Lobby lobby, ClientSocketManager socketManager) {
         this.lobby = lobby;
-        this.ois = ois;
+        this.socketManager = socketManager;
     }
 
     @Override
     public void run() {
         do {
-            try {
-                final S2CPacket p = (S2CPacket) ois.readObject();
+            try (var ctx = socketManager.receive(S2CPacket.class)) {
+                final S2CPacket p = ctx.getPacket();
                 if (p instanceof UpdateJoinedPlayerPacket)
                     updateJoinedPlayers(((UpdateJoinedPlayerPacket) p).players());
                 else if (p instanceof CreateGamePacket) {
                     updateGame(((CreateGamePacket) p).game());
                     break;
                 }
-            } catch (IOException | ClassNotFoundException | DisconnectedException e) {
+            } catch (IOException | DisconnectedException e) {
                 throw new RuntimeException(e); //TODO:
             }
         } while (!Thread.interrupted());
@@ -50,7 +49,7 @@ public class SocketLobbyClientUpdater implements SocketLobbyUpdater, Runnable {
     @SuppressWarnings("NullAway") //TODO: remove this line
     public GameUpdater updateGame(GameAndController<Game> gameAndController) throws DisconnectedException {
         lobby.game().set(gameAndController);
-        new Thread(new SocketGameClientUpdater(gameAndController.game(), ois)).start();
+        new Thread(new SocketGameClientUpdater(gameAndController.game(), socketManager)).start();
         return null; //TODO: ?
     }
 

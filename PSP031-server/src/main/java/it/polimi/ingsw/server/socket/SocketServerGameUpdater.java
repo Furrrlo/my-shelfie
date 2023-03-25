@@ -6,14 +6,13 @@ import it.polimi.ingsw.model.Type;
 import it.polimi.ingsw.socket.SocketGameUpdater;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ObjectOutputStream;
 import java.util.List;
 
 public class SocketServerGameUpdater implements SocketGameUpdater {
-    private final ObjectOutputStream oos;
+    private final ServerSocketManager socketManager;
 
-    public SocketServerGameUpdater(ObjectOutputStream oos) {
-        this.oos = oos;
+    public SocketServerGameUpdater(ServerSocketManager socketManager) {
+        this.socketManager = socketManager;
     }
 
     @Override
