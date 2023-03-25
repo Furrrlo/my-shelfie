@@ -1,5 +1,6 @@
-package it.polimi.ingsw.rmi;
+package it.polimi.ingsw.socket;
 
+import it.polimi.ingsw.DelegatingLobbyUpdater;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
@@ -13,6 +14,7 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
 import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.updater.LobbyUpdaterFactory;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
@@ -107,6 +109,49 @@ public class SocketIntegrationTest {
                 serverGameToSerialize.get(500, TimeUnit.MILLISECONDS),
                 clientGame);
 
+        ensurePropertyUpdated(
+                "currentTurn",
+                serverGame.getPlayers().get(0),
+                clientGame.getPlayers().get(0),
+                serverGame.currentTurn(),
+                clientGame.currentTurn());
+        ensurePropertyUpdated(
+                "firstFinisher",
+                serverGame.getPlayers().get(0),
+                clientGame.getPlayers().get(0),
+                serverGame.firstFinisher(),
+                clientGame.firstFinisher());
+
+        for (int i = 0; i < serverGame.getPlayers().size(); i++) {
+            final var serverPlayer = serverGame.getPlayers().get(i);
+            final var clientPlayer = clientGame.getPlayers().get(i);
+
+            for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
+                ensurePropertyUpdated(
+                        serverPlayer.getNick() + "ShelfTile" + tile.row() + "x" + tile.col(),
+                        new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                        serverPlayer.getShelfie().tile(tile.row(), tile.col()),
+                        clientPlayer.getShelfie().tile(tile.row(), tile.col()));
+        }
+
+        for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverGame.getBoard().tiles()::iterator)
+            ensurePropertyUpdated(
+                    "board" + tile.row() + "x" + tile.col(),
+                    new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                    serverGame.getBoard().tile(tile.row(), tile.col()),
+                    clientGame.getBoard().tile(tile.row(), tile.col()));
+
+        for (int i = 0; i < serverGame.getCommonGoals().size(); i++) {
+            final var serverCommonGoal = serverGame.getCommonGoals().get(i);
+            final var clientCommonGoal = clientGame.getCommonGoals().get(i);
+
+            ensurePropertyUpdated(
+                    "commonGoal",
+                    List.of(serverGame.getPlayers().get(0)),
+                    List.of(clientGame.getPlayers().get(0)),
+                    serverCommonGoal.achieved(),
+                    clientCommonGoal.achieved());
+        }
     }
 
     private static <T> void ensurePropertyUpdated(String name,

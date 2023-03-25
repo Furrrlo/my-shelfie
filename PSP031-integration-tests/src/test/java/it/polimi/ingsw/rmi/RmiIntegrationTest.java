@@ -1,5 +1,6 @@
 package it.polimi.ingsw.rmi;
 
+import it.polimi.ingsw.DelegatingLobbyUpdater;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
