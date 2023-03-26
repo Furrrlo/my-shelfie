@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class SocketClientNetManager implements ClientNetManager {
     private final ClientSocketManager socketManager;
@@ -28,8 +29,14 @@ public class SocketClientNetManager implements ClientNetManager {
         try (var lobbyCtx = socketManager.send(new JoinGamePacket(nick), LobbyPacket.class)) {
             lobby = lobbyCtx.getPacket().lobby();
             CompletableFuture<SocketGameClientUpdater> gamePromise = CompletableFuture
-                    .supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager));
-            gamePromise.thenAcceptAsync(SocketGameClientUpdater::run);
+                    .supplyAsync(
+                            new SocketLobbyClientUpdater(lobby, socketManager),
+                            Executors.newSingleThreadExecutor(r -> {
+                                var th = new Thread(r);
+                                th.setName("ClientUpdater-thread");
+                                return th;
+                            }));
+            gamePromise.thenAccept(SocketGameClientUpdater::run);
         }
         return lobby;
     }

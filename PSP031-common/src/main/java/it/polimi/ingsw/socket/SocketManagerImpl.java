@@ -10,8 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.*;
 import java.util.function.Predicate;
 
 public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet>
@@ -23,7 +23,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final BlockingDeque<SeqPacket> outPacketQueue;
     private final List<QueuedInput> inQueue = new CopyOnWriteArrayList<>();
 
-    private final ExecutorService threadPool;
+    private final Thread recvThread;
+    private final Thread sendThread;
 
     private final AtomicLong seq;
     private final String name;
@@ -44,8 +45,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        threadPool = Executors.newFixedThreadPool(2);
-        threadPool.submit(() -> {
+
+        recvThread = new Thread(() -> {
             do {
                 try {
                     SeqPacket p = outPacketQueue.take();
@@ -56,7 +57,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
             } while (!Thread.currentThread().isInterrupted());
         });
-        threadPool.submit(() -> {
+        recvThread.setName(name + "SocketManagerImpl-recv-thread");
+        recvThread.start();
+
+        sendThread = new Thread(() -> {
             do {
                 try {
                     SeqPacket p = (SeqPacket) ois.readObject();
@@ -73,6 +77,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
             } while (!Thread.currentThread().isInterrupted());
         });
+        sendThread.setName(name + "SocketManagerImpl-send-thread");
+        sendThread.start();
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SocketConnectionServerController implements Runnable {
     private final ExecutorService threadPool;
@@ -22,7 +24,16 @@ public class SocketConnectionServerController implements Runnable {
     @VisibleForTesting
     public SocketConnectionServerController(ServerController controller, ServerSocket serverSocket) throws IOException {
         this.controller = controller;
-        this.threadPool = Executors.newFixedThreadPool(10);
+        this.threadPool = Executors.newFixedThreadPool(10, new ThreadFactory() {
+            private final AtomicInteger threadNum = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                var t = new Thread(r);
+                t.setName("SocketConnectionServerController-socket-thread-" + threadNum.getAndIncrement());
+                return t;
+            }
+        });
         this.socketServer = serverSocket;
     }
 

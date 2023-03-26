@@ -32,7 +32,11 @@ public class ServerController {
     private final PlayerObservableTracker observableTracker = new PlayerObservableTracker();
 
     public ServerController() {
-        this(Clock.systemUTC(), Executors.newSingleThreadScheduledExecutor());
+        this(Clock.systemUTC(), Executors.newSingleThreadScheduledExecutor(r -> {
+            var t = new Thread(r);
+            t.setName("ServerController-heartbeat-thread");
+            return t;
+        }));
     }
 
     public ServerController(Clock clock, ScheduledExecutorService scheduledExecutorService) {

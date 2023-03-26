@@ -20,7 +20,9 @@ public class SocketIntegrationTest {
                     try {
                         final ServerSocket serverSocket = new ServerSocket(0);
                         choosenPort.set(serverSocket.getLocalPort());
-                        new Thread(new SocketConnectionServerController(serverController, serverSocket)).start();
+                        var th = new Thread(new SocketConnectionServerController(serverController, serverSocket));
+                        th.setName("SocketConnectionServerController-accept-thread");
+                        th.start();
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                     }
