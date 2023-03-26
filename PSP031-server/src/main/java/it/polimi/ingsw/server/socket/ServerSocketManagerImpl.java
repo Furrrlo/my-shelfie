@@ -6,13 +6,14 @@ import it.polimi.ingsw.socket.packets.C2SPacket;
 import it.polimi.ingsw.socket.packets.S2CAckPacket;
 import it.polimi.ingsw.socket.packets.S2CPacket;
 
+import java.io.IOException;
 import java.net.Socket;
 
 public class ServerSocketManagerImpl
         extends SocketManagerImpl<C2SPacket, C2SAckPacket, S2CAckPacket, S2CPacket>
         implements ServerSocketManager {
 
-    public ServerSocketManagerImpl(Socket socket) {
+    public ServerSocketManagerImpl(Socket socket) throws IOException {
         super(socket, "Server");
     }
 }

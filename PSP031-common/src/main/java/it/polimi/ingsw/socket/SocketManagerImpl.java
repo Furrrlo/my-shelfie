@@ -34,18 +34,14 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     record QueuedOutput(SeqPacket packet, CompletableFuture<Void> future) {
     }
 
-    public SocketManagerImpl(Socket socket, String name) {
+    public SocketManagerImpl(Socket socket, String name) throws IOException {
         this.socket = socket;
         this.name = name;
         nick = "";
         outPacketQueue = new LinkedBlockingDeque<>();
         seq = new AtomicLong();
-        try {
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        oos = new ObjectOutputStream(socket.getOutputStream());
+        ois = new ObjectInputStream(socket.getInputStream());
 
         recvThread = new Thread(this::readLoop);
         recvThread.setName(name + "SocketManagerImpl-recv-thread");
