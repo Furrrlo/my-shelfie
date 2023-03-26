@@ -2,7 +2,12 @@
 
 See specs [here](docs/Requisiti.pdf)
 
+## Code Style
+
+See [here](CODE_STYLE.md)
+
 ## UML Class Diagram:
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/model-uml-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/model-uml.svg">
