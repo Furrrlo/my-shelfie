@@ -1,12 +1,13 @@
 package it.polimi.ingsw.socket;
 
-import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.socket.packets.AckPacket;
+import it.polimi.ingsw.socket.packets.Packet;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.*;
 import java.util.function.Predicate;
 
 public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet>
@@ -191,7 +192,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         @Override
         public void ack() throws IOException {
             try {
-                doSend(new SimpleSeqPacket(new SimpleAckPacket(), -1)).get();
+                doSend(new SeqAckPacket(new SimpleAckPacket(), -1, packet.seqN())).get();
             } catch (InterruptedException | ExecutionException e) {
                 if (e.getCause() instanceof IOException)
                     throw new IOException("Failed to ack packet " + packet, e);

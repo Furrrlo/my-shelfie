@@ -1,4 +1,6 @@
-package it.polimi.ingsw.socket.packets;
+package it.polimi.ingsw.socket;
+
+import it.polimi.ingsw.socket.packets.Packet;
 
 /**
  * Record that wraps a packet, adding a sequence number
@@ -9,5 +11,5 @@ package it.polimi.ingsw.socket.packets;
  *
  * @see it.polimi.ingsw.socket.SocketManager#send(Packet, Class)
  */
-public record SeqAckPacket(Packet packet, long seqN, long seqAck) implements SeqPacket {
+record SimpleSeqPacket(Packet packet, long seqN) implements SeqPacket {
 }

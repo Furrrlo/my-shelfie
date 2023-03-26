@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 /**
  * Packet that can be sent over socket.
- * It will be wrapped in a {@link SimpleSeqPacket}
  *
  * @see it.polimi.ingsw.socket.SocketManager#send(Packet, Class)
  */

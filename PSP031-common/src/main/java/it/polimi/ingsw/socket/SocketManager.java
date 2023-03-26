@@ -1,6 +1,7 @@
 package it.polimi.ingsw.socket;
 
-import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.socket.packets.AckPacket;
+import it.polimi.ingsw.socket.packets.Packet;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
      * The given packet is wrapped in a {@link SimpleSeqPacket} and the
      * {@link SimpleSeqPacket#seqN()} is set.
      * The packet is added to a queue to be sent.
-     * Wait for a {@link it.polimi.ingsw.socket.packets.SimpleAckPacket} with {@link SeqAckPacket#seqAck()} ==
+     * Wait for a {@link SimpleAckPacket} with {@link SeqAckPacket#seqAck()} ==
      * {@link SimpleSeqPacket#seqN()}
      *
      *

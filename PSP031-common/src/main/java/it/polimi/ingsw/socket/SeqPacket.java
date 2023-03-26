@@ -1,4 +1,6 @@
-package it.polimi.ingsw.socket.packets;
+package it.polimi.ingsw.socket;
+
+import it.polimi.ingsw.socket.packets.Packet;
 
 import java.io.Serializable;
 
@@ -8,7 +10,7 @@ import java.io.Serializable;
  *
  * @see it.polimi.ingsw.socket.SocketManager#send(Packet, Class)
  */
-public sealed interface SeqPacket extends Serializable permits SimpleSeqPacket,SeqAckPacket {
+public sealed interface SeqPacket extends Serializable permits SimpleSeqPacket, SeqAckPacket {
 
     /** Returns the wrapped packet */
     Packet packet();
