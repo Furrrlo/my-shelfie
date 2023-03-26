@@ -8,8 +8,8 @@ import it.polimi.ingsw.socket.packets.SimpleAckPacket;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet>
@@ -69,15 +69,22 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
 
                 log("Waiting for: " + inQueue.stream().filter(c -> !c.future.isDone()).count());
-                log("Accepted: " + inQueue.get(0).filter.test(p));
+                if (!inQueue.isEmpty())
+                    log("Accepted: " + inQueue.get(0).filter.test(p));
                 log("Received packet: " + p);
-                inQueue.stream()
+
+                final var maybeReceiver = inQueue.stream()
                         .filter(c -> c.filter.test(p))
-                        .findFirst()
-                        .ifPresent(c -> {
-                            c.future.complete(p);
-                            inQueue.remove(c);
-                        });
+                        .findFirst();
+                if (maybeReceiver.isPresent()) {
+                    QueuedInput receiver = maybeReceiver.get();
+                    receiver.future().complete(p);
+                    inQueue.remove(receiver);
+                } else {
+                    // TODO: what can we do here?
+                    log("WARN: No receiver found, discarding packet " + p);
+                }
+
                 log("Now waiting for: " + inQueue.stream().filter(c -> !c.future.isDone()).count());
             } while (!Thread.currentThread().isInterrupted());
         } catch (IOException e) {
