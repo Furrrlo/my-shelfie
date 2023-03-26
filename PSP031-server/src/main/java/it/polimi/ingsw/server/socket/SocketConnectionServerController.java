@@ -2,6 +2,7 @@ package it.polimi.ingsw.server.socket;
 
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.socket.packets.JoinGamePacket;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,9 +16,14 @@ public class SocketConnectionServerController implements Runnable {
     private final ServerController controller;
 
     public SocketConnectionServerController(ServerController controller, int port) throws IOException {
+        this(controller, new ServerSocket(port));
+    }
+
+    @VisibleForTesting
+    public SocketConnectionServerController(ServerController controller, ServerSocket serverSocket) throws IOException {
         this.controller = controller;
         this.threadPool = Executors.newFixedThreadPool(10);
-        this.socketServer = new ServerSocket(port);
+        this.socketServer = serverSocket;
     }
 
     @Override
