@@ -5,9 +5,7 @@ import it.polimi.ingsw.socket.packets.Packet;
 import it.polimi.ingsw.socket.packets.SeqPacket;
 import it.polimi.ingsw.socket.packets.SimpleAckPacket;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -20,7 +18,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final Socket socket;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
-    private final BlockingDeque<SeqPacket> outPacketQueue;
+    private final BlockingDeque<QueuedOutput> outPacketQueue;
     private final List<QueuedInput> inQueue = new CopyOnWriteArrayList<>();
 
     private final Thread recvThread;
@@ -31,6 +29,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private String nick;
 
     record QueuedInput(Predicate<SeqPacket> filter, CompletableFuture<SeqPacket> future) {
+    }
+
+    record QueuedOutput(SeqPacket packet, CompletableFuture<Void> future) {
     }
 
     public SocketManagerImpl(Socket socket, String name) {
@@ -46,39 +47,78 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             throw new RuntimeException(e);
         }
 
-        recvThread = new Thread(() -> {
-            do {
-                try {
-                    SeqPacket p = outPacketQueue.take();
-                    oos.writeObject(p);
-                    log("Sended " + p);
-                } catch (InterruptedException | IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } while (!Thread.currentThread().isInterrupted());
-        });
+        recvThread = new Thread(this::readLoop);
         recvThread.setName(name + "SocketManagerImpl-recv-thread");
         recvThread.start();
 
-        sendThread = new Thread(() -> {
-            do {
-                try {
-                    SeqPacket p = (SeqPacket) ois.readObject();
-                    log("Waiting for: " + inQueue.stream().filter(c -> !c.future.isDone()).count());
-                    log("Accepted: " + inQueue.get(0).filter.test(p));
-                    log("Received packet: " + p);
-                    inQueue.stream()
-                            .filter(c -> c.filter.test(p))
-                            .findFirst()
-                            .ifPresent(c -> c.future.complete(p));
-                    log("Now waiting for: " + inQueue.stream().filter(c -> !c.future.isDone()).count());
-                } catch (IOException | ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            } while (!Thread.currentThread().isInterrupted());
-        });
+        sendThread = new Thread(this::writeLoop);
         sendThread.setName(name + "SocketManagerImpl-send-thread");
         sendThread.start();
+    }
+
+    private void readLoop() {
+        try {
+            do {
+                SeqPacket p;
+                try {
+                    p = (SeqPacket) ois.readObject();
+                } catch (ClassNotFoundException | ClassCastException ex) {
+                    log("Received unexpected input packet");
+                    ex.printStackTrace();
+                    continue;
+                }
+
+                log("Waiting for: " + inQueue.stream().filter(c -> !c.future.isDone()).count());
+                log("Accepted: " + inQueue.get(0).filter.test(p));
+                log("Received packet: " + p);
+                inQueue.stream()
+                        .filter(c -> c.filter.test(p))
+                        .findFirst()
+                        .ifPresent(c -> {
+                            c.future.complete(p);
+                            inQueue.remove(c);
+                        });
+                log("Now waiting for: " + inQueue.stream().filter(c -> !c.future.isDone()).count());
+            } while (!Thread.currentThread().isInterrupted());
+        } catch (IOException e) {
+            // TODO: close socket
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void writeLoop() {
+        try {
+            do {
+                QueuedOutput p = outPacketQueue.take();
+
+                try {
+                    oos.writeObject(p.packet());
+                    log("Sent " + p);
+                    p.future().complete(null);
+                } catch (InvalidClassException | NotSerializableException ex) {
+                    p.future().completeExceptionally(ex);
+                }
+            } while (!Thread.currentThread().isInterrupted());
+        } catch (IOException e) {
+            // TODO: close socket
+            throw new UncheckedIOException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private CompletableFuture<Void> doSend(SeqPacket toSend) {
+        final CompletableFuture<Void> hasSent = new CompletableFuture<>();
+        log("Sending " + toSend + "...");
+        outPacketQueue.add(new QueuedOutput(toSend, hasSent));
+        System.out.println(outPacketQueue.size());
+        return hasSent;
+    }
+
+    private CompletableFuture<SeqPacket> doReceive(Predicate<SeqPacket> filter) {
+        CompletableFuture<SeqPacket> toReceive = new CompletableFuture<>();
+        inQueue.add(new QueuedInput(filter, toReceive));
+        return toReceive;
     }
 
     @Override
@@ -90,40 +130,32 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     @Override
     public <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> send(OUT p, Class<R> replyType) throws IOException {
         try {
-            CompletableFuture<SeqPacket> toReceive = new CompletableFuture<>();
             long seqN = seq.getAndIncrement();
-            QueuedInput queuedInput = new QueuedInput(
-                    packet -> replyType.isInstance(packet.packet()) && ((AckPacket) packet.packet()).seqAck() == seqN,
-                    toReceive);
-            inQueue.add(queuedInput);
-            final SeqPacket toSend = new SeqPacket(p, seqN);
-            log("Sending " + toSend + "...");
-            outPacketQueue.put(toSend);
-            System.out.println(outPacketQueue.size());
+            CompletableFuture<SeqPacket> toReceive = doReceive(
+                    packet -> replyType.isInstance(packet.packet()) && ((AckPacket) packet.packet()).seqAck() == seqN);
+            doSend(new SeqPacket(p, seqN)).get();
             log("Waiting for  " + replyType + "...");
-            SeqPacket res = toReceive.get();
-            inQueue.remove(queuedInput);
-            return new PacketReplyContextImpl<>(res);
+            return new PacketReplyContextImpl<>(toReceive.get());
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+            if (e.getCause() instanceof IOException)
+                throw new IOException("Failed to send packet " + p, e);
 
+            throw new RuntimeException("Failed to send packet " + p, e);
+        }
     }
 
     @Override
     public <R extends IN> PacketReplyContext<ACK_IN, ACK_OUT, R> receive(Class<R> type) throws IOException {
-        CompletableFuture<SeqPacket> toReceive = new CompletableFuture<>();
-        QueuedInput queuedInput = new QueuedInput(packet -> type.isInstance(packet.packet()), toReceive);
-        inQueue.add(queuedInput);
-        log("Waiting for  " + type + "...");
-        SeqPacket receivedPacket;
+        CompletableFuture<SeqPacket> toReceive = doReceive(packet -> type.isInstance(packet.packet()));
         try {
-            receivedPacket = toReceive.get();
-            inQueue.remove(queuedInput);
+            log("Waiting for  " + type + "...");
+            return new PacketReplyContextImpl<>(toReceive.get());
         } catch (ExecutionException | InterruptedException e) {
-            throw new IOException(e);
+            if (e.getCause() instanceof IOException)
+                throw new IOException("Failed to receive packet " + type, e);
+
+            throw new RuntimeException("Failed to receive packet " + type, e);
         }
-        return new PacketReplyContextImpl<>(receivedPacket);
     }
 
     public void setNick(String nick) {
@@ -150,12 +182,13 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
         @Override
         public void ack() throws IOException {
-            final SeqPacket toSend = new SeqPacket(new SimpleAckPacket(packet.seqN()), -1);
-            log("Sending " + toSend + "...");
             try {
-                outPacketQueue.put(toSend);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                doSend(new SeqPacket(new SimpleAckPacket(packet.seqN()), -1)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                if (e.getCause() instanceof IOException)
+                    throw new IOException("Failed to ack packet " + packet, e);
+
+                throw new RuntimeException("Failed to ack packet " + packet, e);
             }
         }
 
