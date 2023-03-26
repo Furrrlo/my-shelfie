@@ -1,9 +1,6 @@
 package it.polimi.ingsw.socket;
 
-import it.polimi.ingsw.socket.packets.AckPacket;
-import it.polimi.ingsw.socket.packets.Packet;
-import it.polimi.ingsw.socket.packets.SeqPacket;
-import it.polimi.ingsw.socket.packets.SimpleAckPacket;
+import it.polimi.ingsw.socket.packets.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -124,19 +121,15 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         return toReceive;
     }
 
-    @Override
-    @SuppressWarnings({ "unchecked", "resource" }) // We don't care about acknowledging a SimpleAckPacket
-    public void send(OUT p) throws IOException {
-        send(p, (Class<ACK_IN>) SimpleAckPacket.class);
-    }
-
-    @Override
-    public <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> send(OUT p, Class<R> replyType) throws IOException {
+    private <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> doSendAndWaitResponse(SeqPacket p, Class<R> replyType)
+            throws IOException {
         try {
-            long seqN = seq.getAndIncrement();
+            final long seqN = p.seqN();
             CompletableFuture<SeqPacket> toReceive = doReceive(
-                    packet -> replyType.isInstance(packet.packet()) && ((AckPacket) packet.packet()).seqAck() == seqN);
-            doSend(new SeqPacket(p, seqN)).get();
+                    packet -> replyType.isInstance(packet.packet()) &&
+                            packet instanceof SeqAckPacket ack &&
+                            ack.seqAck() == seqN);
+            doSend(p).get();
             log("Waiting for  " + replyType + "...");
             return new PacketReplyContextImpl<>(toReceive.get());
         } catch (InterruptedException | ExecutionException e) {
@@ -145,6 +138,18 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
             throw new RuntimeException("Failed to send packet " + p, e);
         }
+    }
+
+    @Override
+    @SuppressWarnings({ "unchecked", "resource" }) // We don't care about acknowledging a SimpleAckPacket
+    public void send(OUT p) throws IOException {
+        send(p, (Class<ACK_IN>) SimpleAckPacket.class);
+    }
+
+    @Override
+    public <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> send(OUT p, Class<R> replyType) throws IOException {
+        long seqN = seq.getAndIncrement();
+        return doSendAndWaitResponse(new SimpleSeqPacket(p, seqN), replyType);
     }
 
     @Override
@@ -186,7 +191,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         @Override
         public void ack() throws IOException {
             try {
-                doSend(new SeqPacket(new SimpleAckPacket(packet.seqN()), -1)).get();
+                doSend(new SimpleSeqPacket(new SimpleAckPacket(), -1)).get();
             } catch (InterruptedException | ExecutionException e) {
                 if (e.getCause() instanceof IOException)
                     throw new IOException("Failed to ack packet " + packet, e);
@@ -196,17 +201,16 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
 
         @Override
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "resource" }) // We don't care about acknowledging a SimpleAckPacket
         public void reply(ACK_OUT p) throws IOException {
-            send((OUT) p);
+            reply(p, (Class<ACK_IN>) SimpleAckPacket.class);
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public <R1 extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R1> reply(ACK_OUT p, Class<R1> replyType)
                 throws IOException {
-            p.setSeqAck(packet.seqN());
-            return send((OUT) p, replyType);
+            long seqN = seq.getAndIncrement();
+            return doSendAndWaitResponse(new SeqAckPacket(p, seqN, packet.seqN()), replyType);
         }
     }
 }

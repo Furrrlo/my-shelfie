@@ -1,7 +1,6 @@
 package it.polimi.ingsw.socket;
 
-import it.polimi.ingsw.socket.packets.AckPacket;
-import it.polimi.ingsw.socket.packets.Packet;
+import it.polimi.ingsw.socket.packets.*;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,11 +18,11 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     /**
      * Send a packet and wait for an ack.
-     * The given packet is wrapped in a {@link it.polimi.ingsw.socket.packets.SeqPacket} and the
-     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()} is set.
+     * The given packet is wrapped in a {@link SimpleSeqPacket} and the
+     * {@link SimpleSeqPacket#seqN()} is set.
      * The packet is added to a queue to be sent.
-     * Wait for a {@link it.polimi.ingsw.socket.packets.SimpleAckPacket} with {@link AckPacket#seqAck()} ==
-     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()}
+     * Wait for a {@link it.polimi.ingsw.socket.packets.SimpleAckPacket} with {@link SeqAckPacket#seqAck()} ==
+     * {@link SimpleSeqPacket#seqN()}
      *
      *
      * @param p packet to be sent
@@ -33,11 +32,11 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     /**
      * Send a packet and wait for an ack.
-     * The given packet is wrapped in a {@link it.polimi.ingsw.socket.packets.SeqPacket} and the
-     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()} is set.
+     * The given packet is wrapped in a {@link SimpleSeqPacket} and the
+     * {@link SimpleSeqPacket#seqN()} is set.
      * The packet is added to a queue to be sent.
-     * Wait for an AckPacket of the given type and with {@link AckPacket#seqAck()} ==
-     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()}
+     * Wait for an AckPacket of the given type and with {@link SeqAckPacket#seqAck()} ==
+     * {@link SimpleSeqPacket#seqN()}
      *
      *
      * @param p packet to be sent
@@ -60,7 +59,7 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     /**
      * Context of a Packet
-     * Wraps a {@link it.polimi.ingsw.socket.packets.SeqPacket} and allows to ack and reply
+     * Wraps a {@link SimpleSeqPacket} and allows to ack and reply
      *
      * @param <ACK_IN> type of AckPacket that can be received
      * @param <ACK_OUT> type of AckPacket that can be sent
@@ -70,15 +69,14 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
             extends Closeable {
 
         /**
-         * Extract the {@link Packet} from the {@link it.polimi.ingsw.socket.packets.SeqPacket} wrapped in this context
+         * Extract the {@link Packet} from the {@link SimpleSeqPacket} wrapped in this context
          *
-         * @return the packet contained in the {@link it.polimi.ingsw.socket.packets.SeqPacket}
+         * @return the packet contained in the {@link SimpleSeqPacket}
          */
         T getPacket();
 
         /**
-         * Send a {@link it.polimi.ingsw.socket.packets.SimpleAckPacket} with the
-         * {@link it.polimi.ingsw.socket.packets.SimpleAckPacket#seqAck()} of this packet
+         * Send a {@link SimpleAckPacket} with the {@link SeqAckPacket#seqAck()} of this packet
          *
          * @throws IOException
          */
