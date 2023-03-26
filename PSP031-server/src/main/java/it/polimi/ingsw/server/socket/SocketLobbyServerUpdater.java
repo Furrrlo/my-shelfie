@@ -33,7 +33,7 @@ public class SocketLobbyServerUpdater implements LobbyUpdater {
     @Override
     public GameUpdater updateGame(GameAndController<Game> gameAndController) throws DisconnectedException {
         try {
-            socketManager.send(new CreateGamePacket(gameAndController));
+            socketManager.send(new CreateGamePacket(gameAndController.game()));
         } catch (IOException e) {
             throw new RuntimeException(e); //TODO: ???
         }
