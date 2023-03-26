@@ -1,15 +1,15 @@
 package it.polimi.ingsw.client.network.socket;
 
 import it.polimi.ingsw.model.*;
-import it.polimi.ingsw.socket.SocketGameUpdater;
 import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SocketGameClientUpdater implements SocketGameUpdater, Runnable {
+public class SocketGameClientUpdater implements GameUpdater, Runnable {
 
     private final Game game;
     private final ClientSocketManager socketManager;

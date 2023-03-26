@@ -3,14 +3,14 @@ package it.polimi.ingsw.server.socket;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.model.Type;
-import it.polimi.ingsw.socket.SocketGameUpdater;
 import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
 
-public class SocketServerGameUpdater implements SocketGameUpdater {
+public class SocketServerGameUpdater implements GameUpdater {
     private final ServerSocketManager socketManager;
 
     public SocketServerGameUpdater(ServerSocketManager socketManager) {

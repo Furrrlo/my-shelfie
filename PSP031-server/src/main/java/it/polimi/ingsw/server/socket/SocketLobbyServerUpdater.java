@@ -3,16 +3,16 @@ package it.polimi.ingsw.server.socket;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.socket.SocketLobbyUpdater;
 import it.polimi.ingsw.socket.packets.C2SAckPacket;
 import it.polimi.ingsw.socket.packets.CreateGamePacket;
 import it.polimi.ingsw.socket.packets.UpdateJoinedPlayerPacket;
 import it.polimi.ingsw.updater.GameUpdater;
+import it.polimi.ingsw.updater.LobbyUpdater;
 
 import java.io.IOException;
 import java.util.List;
 
-public class SocketLobbyServerUpdater implements SocketLobbyUpdater {
+public class SocketLobbyServerUpdater implements LobbyUpdater {
     //TODO: serve?
     //private final Lobby lobby;
     private final ServerSocketManager socketManager;
