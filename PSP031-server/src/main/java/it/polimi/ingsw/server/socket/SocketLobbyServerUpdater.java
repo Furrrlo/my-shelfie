@@ -3,7 +3,6 @@ package it.polimi.ingsw.server.socket;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.socket.packets.C2SAckPacket;
 import it.polimi.ingsw.socket.packets.CreateGamePacket;
 import it.polimi.ingsw.socket.packets.UpdateJoinedPlayerPacket;
 import it.polimi.ingsw.updater.GameUpdater;
@@ -25,7 +24,7 @@ public class SocketLobbyServerUpdater implements LobbyUpdater {
     @Override
     public void updateJoinedPlayers(List<String> joinedPlayers) throws DisconnectedException {
         try {
-            socketManager.send(new UpdateJoinedPlayerPacket(joinedPlayers), C2SAckPacket.class);
+            socketManager.send(new UpdateJoinedPlayerPacket(joinedPlayers));
         } catch (IOException e) {
             throw new RuntimeException(e); //TODO: ???
         }
@@ -34,7 +33,7 @@ public class SocketLobbyServerUpdater implements LobbyUpdater {
     @Override
     public GameUpdater updateGame(GameAndController<Game> gameAndController) throws DisconnectedException {
         try {
-            socketManager.send(new CreateGamePacket(gameAndController), C2SAckPacket.class);
+            socketManager.send(new CreateGamePacket(gameAndController));
         } catch (IOException e) {
             throw new RuntimeException(e); //TODO: ???
         }

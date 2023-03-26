@@ -22,6 +22,20 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
      * The given packet is wrapped in a {@link it.polimi.ingsw.socket.packets.SeqPacket} and the
      * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()} is set.
      * The packet is added to a queue to be sent.
+     * Wait for a {@link it.polimi.ingsw.socket.packets.SimpleAckPacket} with {@link AckPacket#seqAck()} ==
+     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()}
+     *
+     *
+     * @param p packet to be sent
+     * @throws IOException
+     */
+    void send(OUT p) throws IOException;
+
+    /**
+     * Send a packet and wait for an ack.
+     * The given packet is wrapped in a {@link it.polimi.ingsw.socket.packets.SeqPacket} and the
+     * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()} is set.
+     * The packet is added to a queue to be sent.
      * Wait for an AckPacket of the given type and with {@link AckPacket#seqAck()} ==
      * {@link it.polimi.ingsw.socket.packets.SeqPacket#seqN()}
      *
@@ -82,7 +96,16 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
 
         /**
          * Reply with the given packet
-         * This will also acknoledge the current packet
+         * This will also acknowledge the current packet
+         *
+         * @param p packet to send
+         * @throws IOException
+         */
+        void reply(ACK_OUT p) throws IOException;
+
+        /**
+         * Reply with the given packet
+         * This will also acknowledge the current packet
          *
          * @param p packet to send
          * @param replyType type of the AckPacket to wait for

@@ -26,7 +26,7 @@ public class SocketLobbyServerUpdaterFactory implements LobbyUpdaterFactory {
     @Override
     public LobbyUpdater create(Lobby lobby) throws DisconnectedException {
         try {
-            ctx.reply(new LobbyPacket(lobby), C2SAckPacket.class);
+            ctx.reply(new LobbyPacket(lobby));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -10,8 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet>
@@ -76,6 +76,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     }
 
     @Override
+    @SuppressWarnings({ "unchecked", "resource" }) // We don't care about acknowledging a SimpleAckPacket
+    public void send(OUT p) throws IOException {
+        send(p, (Class<ACK_IN>) SimpleAckPacket.class);
+    }
+
+    @Override
     public <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> send(OUT p, Class<R> replyType) throws IOException {
         try {
             CompletableFuture<SeqPacket> toReceive = new CompletableFuture<>();
@@ -131,6 +137,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public T getPacket() {
             return (T) packet.packet();
         }
@@ -147,6 +154,13 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
 
         @Override
+        @SuppressWarnings("unchecked")
+        public void reply(ACK_OUT p) throws IOException {
+            send((OUT) p);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
         public <R1 extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R1> reply(ACK_OUT p, Class<R1> replyType)
                 throws IOException {
             p.setSeqAck(packet.seqN());

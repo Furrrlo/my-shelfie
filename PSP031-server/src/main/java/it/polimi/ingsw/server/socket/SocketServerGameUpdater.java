@@ -20,7 +20,7 @@ public class SocketServerGameUpdater implements GameUpdater {
     @Override
     public void updateBoardTile(int row, int col, @Nullable Tile tile) throws DisconnectedException {
         try {
-            socketManager.send(new UpdateBoardTilePacket(row, col, tile), SimpleAckPacket.class);
+            socketManager.send(new UpdateBoardTilePacket(row, col, tile));
         } catch (IOException e) {
             throw new DisconnectedException(e);
         }
@@ -29,7 +29,7 @@ public class SocketServerGameUpdater implements GameUpdater {
     @Override
     public void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) throws DisconnectedException {
         try {
-            socketManager.send(new UpdatePlayerShelfieTilePacket(nick, row, col, tile), SimpleAckPacket.class);
+            socketManager.send(new UpdatePlayerShelfieTilePacket(nick, row, col, tile));
         } catch (IOException e) {
             throw new DisconnectedException(e);
         }
@@ -38,7 +38,7 @@ public class SocketServerGameUpdater implements GameUpdater {
     @Override
     public void updateCurrentTurn(String nick) throws DisconnectedException {
         try {
-            socketManager.send(new UpdateCurrentTurnPacket(nick), SimpleAckPacket.class);
+            socketManager.send(new UpdateCurrentTurnPacket(nick));
         } catch (IOException e) {
             throw new DisconnectedException(e);
         }
@@ -47,7 +47,7 @@ public class SocketServerGameUpdater implements GameUpdater {
     @Override
     public void updateFirstFinisher(String nick) throws DisconnectedException {
         try {
-            socketManager.send(new UpdateFirstFinisherPacket(nick), SimpleAckPacket.class);
+            socketManager.send(new UpdateFirstFinisherPacket(nick));
         } catch (IOException e) {
             throw new DisconnectedException(e);
         }
@@ -56,7 +56,7 @@ public class SocketServerGameUpdater implements GameUpdater {
     @Override
     public void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws DisconnectedException {
         try {
-            socketManager.send(new UpdateAchievedCommonGoalPacket(commonGoalType, playersAchieved), SimpleAckPacket.class);
+            socketManager.send(new UpdateAchievedCommonGoalPacket(commonGoalType, playersAchieved));
         } catch (IOException e) {
             throw new DisconnectedException(e);
         }
