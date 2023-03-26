@@ -211,7 +211,7 @@
                             <file>${project.rootdir}/eclipse-formatter.xml</file> <!-- optional -->
                         </eclipse>
                         <importOrder>
-                            <wildcardsLast>true</wildcardsLast>
+                            <wildcardsLast>false</wildcardsLast>
                             <file>${project.rootdir}/eclipse.importorder</file>
                         </importOrder>
                         <removeUnusedImports/>

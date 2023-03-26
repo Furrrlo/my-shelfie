@@ -6,8 +6,8 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.function.Consumer;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class SerializableProperty<T> implements Property<T>, Serializable {
 
