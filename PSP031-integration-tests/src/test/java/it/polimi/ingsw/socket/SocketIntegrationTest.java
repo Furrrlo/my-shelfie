@@ -3,9 +3,11 @@ package it.polimi.ingsw.socket;
 import it.polimi.ingsw.DelegatingLobbyUpdater;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.controller.LockProtected;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.server.model.ServerCommonGoal;
 import it.polimi.ingsw.server.model.ServerGame;
@@ -47,14 +49,15 @@ public class SocketIntegrationTest {
         new Thread(new SocketConnectionServerController(new ServerController() {
 
             @Override
-            protected ServerLobby getOrCreateLobby(String nick) {
-                final var lobby = super.getOrCreateLobby(nick);
-                serverLobbyPromise.complete(lobby);
-                return lobby;
+            protected LockProtected<ServerLobby> getOrCreateLobby(String nick) {
+                final var lockedLobby = super.getOrCreateLobby(nick);
+                serverLobbyPromise.complete(lockedLobby.getUnsafe());
+                return lockedLobby;
             }
 
             @Override
             public LobbyView joinGame(String nick,
+                                      HeartbeatHandler heartbeatHandler,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Supplier<GameController> gameControllerFactory) {
                 final LobbyUpdaterFactory wrappedFactory = lobby -> new DelegatingLobbyUpdater(
@@ -66,7 +69,7 @@ public class SocketIntegrationTest {
                         return gameUpdater;
                     }
                 };
-                var lobby = super.joinGame(nick, wrappedFactory, gameControllerFactory);
+                var lobby = super.joinGame(nick, heartbeatHandler, wrappedFactory, gameControllerFactory);
                 serverJoinedNick.complete(nick);
                 serverLobbyToSerialize.complete(lobby);
                 return lobby;
@@ -94,7 +97,7 @@ public class SocketIntegrationTest {
 
         final ServerGame serverGame;
         final List<ServerPlayer> players;
-        serverLobby.game().set(serverGame = new ServerGame(
+        serverLobby.game().set(new LockProtected<>(serverGame = new ServerGame(
                 0,
                 new Board(serverLobby.joinedPlayers().get().size()),
                 List.of(),
@@ -102,7 +105,7 @@ public class SocketIntegrationTest {
                         .map(n -> new ServerPlayer(n, new PersonalGoal(new Tile[6][5])))
                         .collect(Collectors.toList()),
                 rnd.nextInt(players.size()),
-                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS))));
+                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))));
 
         final var clientGame = gamePromise.get().game();
         assertEquals(

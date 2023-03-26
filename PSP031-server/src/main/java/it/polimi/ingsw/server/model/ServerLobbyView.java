@@ -1,6 +1,7 @@
 package it.polimi.ingsw.server.model;
 
-import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.Provider;
+import it.polimi.ingsw.server.controller.LockProtected;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -17,5 +18,5 @@ public interface ServerLobbyView {
      */
     Provider<List<String>> joinedPlayers();
 
-    Provider<? extends @Nullable ServerGameView> game();
+    Provider<? extends @Nullable LockProtected<? extends ServerGameView>> game();
 }

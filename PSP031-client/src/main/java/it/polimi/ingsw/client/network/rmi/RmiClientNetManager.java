@@ -37,6 +37,7 @@ public class RmiClientNetManager implements ClientNetManager {
         final InterceptingFactory updaterFactory = new InterceptingFactory();
         server.joinGame(
                 nick,
+                UnicastRemoteObjects.export(new RmiHeartbeatClientHandler(), 0),
                 UnicastRemoteObjects.export(updaterFactory, 0));
         return updaterFactory.getUpdater().getGameCreationState();
     }

@@ -7,5 +7,8 @@ public interface RmiConnectionController extends Remote {
 
     String REMOTE_NAME = "my_shelfie_rmi";
 
-    void joinGame(String nick, RmiLobbyUpdaterFactory updaterFactory) throws RemoteException;
+    void joinGame(String nick,
+                  RmiHeartbeatHandler heartbeatHandler,
+                  RmiLobbyUpdaterFactory updaterFactory)
+            throws RemoteException;
 }

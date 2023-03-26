@@ -33,7 +33,10 @@ public class SocketConnectionServerController implements Runnable {
                         JoinGamePacket p = rec.getPacket();
                         System.out.println("[Server] " + p.nick() + " is joining...");
                         socketManager.setNick(p.nick());
-                        controller.joinGame(p.nick(), new SocketLobbyServerUpdaterFactory(socketManager, rec),
+                        controller.joinGame(
+                                p.nick(),
+                                new SocketHeartbeatHandler(socketManager),
+                                new SocketLobbyServerUpdaterFactory(socketManager, rec),
                                 SocketServerGameController::new);
 
                     } catch (IOException e) {

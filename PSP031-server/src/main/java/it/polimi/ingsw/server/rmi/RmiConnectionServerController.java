@@ -1,9 +1,6 @@
 package it.polimi.ingsw.server.rmi;
 
-import it.polimi.ingsw.rmi.RmiConnectionController;
-import it.polimi.ingsw.rmi.RmiGameController;
-import it.polimi.ingsw.rmi.RmiLobbyUpdaterFactory;
-import it.polimi.ingsw.rmi.UnicastRemoteObjects;
+import it.polimi.ingsw.rmi.*;
 import it.polimi.ingsw.server.controller.ServerController;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -32,8 +29,13 @@ public class RmiConnectionServerController implements RmiConnectionController {
     }
 
     @Override
-    public void joinGame(String nick, RmiLobbyUpdaterFactory updaterFactory) throws RemoteException {
-        controller.joinGame(nick,
+    public void joinGame(String nick,
+                         RmiHeartbeatHandler handler,
+                         RmiLobbyUpdaterFactory updaterFactory)
+            throws RemoteException {
+        controller.joinGame(
+                nick,
+                new RmiHeartbeatHandler.Adapter(handler),
                 new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
                 () -> {
                     try {

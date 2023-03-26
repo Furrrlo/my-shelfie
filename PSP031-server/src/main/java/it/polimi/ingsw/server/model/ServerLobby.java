@@ -2,6 +2,7 @@ package it.polimi.ingsw.server.model;
 
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.SerializableProperty;
+import it.polimi.ingsw.server.controller.LockProtected;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class ServerLobby implements ServerLobbyView {
 
     private final int requiredPlayers;
     private final Property<List<String>> joinedPlayers;
-    private final Property<@Nullable ServerGame> game;
+    private final Property<@Nullable LockProtected<ServerGame>> game;
 
     /**
      * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
@@ -34,7 +35,7 @@ public class ServerLobby implements ServerLobbyView {
     }
 
     @Override
-    public Property<@Nullable ServerGame> game() {
+    public Property<@Nullable LockProtected<ServerGame>> game() {
         return game;
     }
 
