@@ -197,9 +197,5 @@ public class UpdatersIntegrationTest {
         } finally {
             clientProvider.unregisterObserver(observer);
         }
-
-        // TODO: rn SocketManagerImpl discards packets that nobody read, which might happen bc of concurrency
-        //       in this test, once we fix that we can remove this
-        Thread.sleep(50);
     }
 }
