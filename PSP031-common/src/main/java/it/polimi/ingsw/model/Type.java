@@ -97,9 +97,27 @@ public enum Type implements Serializable {
         }
     },
     THREE_COLUMNS{
+        /**
+         * @param shelfie : shelfie passed as parameter
+         * @param c : index of column passed as parameter
+         * @return how many different colors are present in a given column of a given shelfie
+         */
+        public int numColorsForColumn( Shelfie shelfie, int c){
+            List<Color> colors = new ArrayList<Color>();
+            for( int r = 0; r<ROWS ; r++ ){
+                if(shelfie.tile(r,c).get()!=null && !colors.contains(shelfie.tile(r,c).get().getColor()))
+                    colors.add(shelfie.tile(r,c).get().getColor());
+            }
+            return colors.size();
+        }
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-            return false;
+            int count = 0;
+            for( int c=0; c<COLUMNS ; c++){
+                if( numColorsForColumn(shelfie,c)<=3)
+                    count++;
+            }
+            return count>=3;
         }
     },
     EIGHT_EQUAL_TILES{
