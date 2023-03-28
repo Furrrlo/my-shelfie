@@ -8,11 +8,14 @@ import it.polimi.ingsw.socket.packets.CreateGamePacket;
 import it.polimi.ingsw.socket.packets.S2CPacket;
 import it.polimi.ingsw.socket.packets.UpdateJoinedPlayerPacket;
 import it.polimi.ingsw.updater.GameUpdater;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
 import java.util.function.Supplier;
 
-public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supplier<SocketGameClientUpdater> {
+public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supplier<@Nullable SocketGameClientUpdater> {
 
     private final ClientSocketManager socketManager;
 
@@ -22,22 +25,27 @@ public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supp
     }
 
     @Override
-    public SocketGameClientUpdater get() {
-        do {
-            try (var ctx = socketManager.receive(S2CPacket.class)) {
-                final S2CPacket p = ctx.getPacket();
-                if (p instanceof UpdateJoinedPlayerPacket packet) {
-                    updateJoinedPlayers(packet.players());
-                } else if (p instanceof CreateGamePacket packet) {
-                    return (SocketGameClientUpdater) updateGame(new GameAndController<>(
-                            packet.game(),
-                            new SocketGameClientController()));
+    public @Nullable SocketGameClientUpdater get() {
+        try {
+            do {
+                try (var ctx = socketManager.receive(S2CPacket.class)) {
+                    final S2CPacket p = ctx.getPacket();
+                    if (p instanceof UpdateJoinedPlayerPacket packet) {
+                        updateJoinedPlayers(packet.players());
+                    } else if (p instanceof CreateGamePacket packet) {
+                        return (SocketGameClientUpdater) updateGame(new GameAndController<>(
+                                packet.game(),
+                                new SocketGameClientController()));
+                    }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e); //TODO:
-            }
-        } while (!Thread.interrupted());
-        throw new RuntimeException();
+            } while (!Thread.interrupted());
+        } catch (InterruptedIOException ignored) {
+            // We got interrupted, normal flow
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        return null;
     }
 
     @Override
