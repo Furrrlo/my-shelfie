@@ -37,10 +37,10 @@ public class RmiConnectionServerController implements RmiConnectionController {
                 nick,
                 new RmiHeartbeatHandler.Adapter(handler),
                 new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
-                () -> {
+                (player, game) -> {
                     try {
                         return new RmiGameController.Adapter(
-                                UnicastRemoteObjects.export(new RmiGameServerController(), 0));
+                                UnicastRemoteObjects.export(new RmiGameServerController(player, game), 0));
                     } catch (RemoteException e) {
                         throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                     }

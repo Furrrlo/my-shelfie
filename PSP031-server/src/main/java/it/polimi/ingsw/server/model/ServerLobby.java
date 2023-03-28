@@ -13,7 +13,7 @@ public class ServerLobby implements ServerLobbyView {
 
     private final int requiredPlayers;
     private final Property<List<String>> joinedPlayers;
-    private final Property<@Nullable LockProtected<ServerGame>> game;
+    private final Property<@Nullable ServerGameAndController<ServerGame>> game;
 
     /**
      * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
@@ -35,7 +35,7 @@ public class ServerLobby implements ServerLobbyView {
     }
 
     @Override
-    public Property<@Nullable LockProtected<ServerGame>> game() {
+    public Property<@Nullable ServerGameAndController<ServerGame>> game() {
         return game;
     }
 

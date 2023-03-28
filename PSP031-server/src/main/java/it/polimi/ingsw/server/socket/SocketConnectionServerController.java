@@ -54,7 +54,7 @@ public class SocketConnectionServerController implements Runnable {
                                 p.nick(),
                                 new SocketHeartbeatHandler(socketManager),
                                 new SocketLobbyServerUpdaterFactory(socketManager, rec),
-                                SocketServerGameController::new);
+                                (serverPlayer, game) -> new SocketServerGameController(socketManager, serverPlayer, game));
 
                     } catch (IOException e) {
                         throw new RuntimeException(e);

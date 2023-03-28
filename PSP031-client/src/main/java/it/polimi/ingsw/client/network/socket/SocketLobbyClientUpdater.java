@@ -35,7 +35,7 @@ public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supp
                     } else if (p instanceof CreateGamePacket packet) {
                         return (SocketGameClientUpdater) updateGame(new GameAndController<>(
                                 packet.game(),
-                                new SocketGameClientController()));
+                                new SocketGameClientController(socketManager)));
                     }
                 }
             } while (!Thread.interrupted());

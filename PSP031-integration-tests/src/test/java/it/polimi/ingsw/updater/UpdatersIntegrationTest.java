@@ -7,12 +7,10 @@ import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.controller.LockProtected;
 import it.polimi.ingsw.server.controller.ServerController;
-import it.polimi.ingsw.server.model.ServerCommonGoal;
-import it.polimi.ingsw.server.model.ServerGame;
-import it.polimi.ingsw.server.model.ServerLobby;
-import it.polimi.ingsw.server.model.ServerPlayer;
+import it.polimi.ingsw.server.model.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -21,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -55,7 +54,7 @@ public class UpdatersIntegrationTest {
             public LobbyView joinGame(String nick,
                                       HeartbeatHandler heartbeatHandler,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Supplier<GameController> gameControllerFactory) {
+                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
                 final LobbyUpdaterFactory wrappedFactory = lobby -> new DelegatingLobbyUpdater(
                         lobbyUpdaterFactory.create(lobby)) {
                     @Override
@@ -92,7 +91,7 @@ public class UpdatersIntegrationTest {
 
         final ServerGame serverGame;
         final List<ServerPlayer> players;
-        serverLobby.game().set(new LockProtected<>(serverGame = new ServerGame(
+        serverLobby.game().set(new ServerGameAndController<>(new LockProtected<>(serverGame = new ServerGame(
                 0,
                 new Board(serverLobby.joinedPlayers().get().size()),
                 List.of(),
@@ -100,7 +99,7 @@ public class UpdatersIntegrationTest {
                         .map(n -> new ServerPlayer(n, new PersonalGoal(new Tile[6][5])))
                         .collect(Collectors.toList()),
                 rnd.nextInt(players.size()),
-                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))));
+                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),new GameServerController(serverGame)));
 
         final var clientGame = gamePromise.get().game();
         assertEquals(

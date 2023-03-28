@@ -18,5 +18,5 @@ public interface ServerLobbyView {
      */
     Provider<List<String>> joinedPlayers();
 
-    Provider<? extends @Nullable LockProtected<? extends ServerGameView>> game();
+    Provider<? extends @Nullable ServerGameAndController<? extends ServerGameView>> game();
 }

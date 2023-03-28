@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class ServerController {
@@ -73,7 +73,7 @@ public class ServerController {
     public LobbyView joinGame(String nick,
                               HeartbeatHandler heartbeatHandler,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
-                              Supplier<GameController> gameControllerFactory) {
+                              BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
         heartbeats.put(nick, heartbeatHandler);
 
         do {
@@ -106,21 +106,24 @@ public class ServerController {
                     throw new IllegalStateException("Player disconnected during handshake process");
                 }
 
-                final var currGameLocked = serverLobby.game().get();
+                final var currGameAndController = serverLobby.game().get();
+                final var currGameLocked = currGameAndController != null ? currGameAndController.game() : null;
                 try (var currGameCloseable = LockProtected.useNullable(currGameLocked)) {
                     var currGame = currGameCloseable.obj();
 
                     registerObserverFor(nick, serverLobby.joinedPlayers(), lobbyUpdater::updateJoinedPlayers);
                     registerObserverFor(nick, serverLobby.game(), game -> {
                         if (game != null) {
-                            try (var gameCloseable = game.use()) {
-                                updateGameForPlayer(nick, gameCloseable.obj(), lobbyUpdater, gameControllerFactory);
+                            try (var gameCloseable = game.game().use()) {
+                                updateGameForPlayer(nick, gameCloseable.obj(), game.controller(), lobbyUpdater,
+                                        gameControllerFactory);
                             }
                         }
                     });
 
                     if (currGame != null)
-                        updateGameForPlayer(nick, currGame, lobbyUpdater, gameControllerFactory);
+                        updateGameForPlayer(nick, currGame, currGameAndController.controller(), lobbyUpdater,
+                                gameControllerFactory);
                 } catch (DisconnectedException ex) {
                     disconnectPlayer(nick, ex);
                     throw new IllegalStateException("Player disconnected during handshake process");
@@ -133,8 +136,9 @@ public class ServerController {
 
     private void updateGameForPlayer(String nick,
                                      ServerGame game,
+                                     GameServerController gameController,
                                      LobbyUpdater lobbyUpdater,
-                                     Supplier<GameController> gameControllerFactory)
+                                     BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
             throws DisconnectedException {
 
         final Map<String, Player> clientPlayers = game.getPlayers().stream()
@@ -166,7 +170,7 @@ public class ServerController {
                                 .collect(Collectors.toList()),
                         thePlayer.getPersonalGoal(),
                         game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get())),
-                gameControllerFactory.get()));
+                gameControllerFactory.apply(thePlayer, gameController)));
         // Register all listeners to the game model
         game.getBoard().tiles().forEach(tileAndCoords -> registerObserverFor(thePlayer, tileAndCoords.tile(),
                 tile -> gameUpdater.updateBoardTile(tileAndCoords.row(), tileAndCoords.col(), tile)));
@@ -195,7 +199,8 @@ public class ServerController {
 
         try (var lobbyCloseable = LockProtected.useNullable(getLobbyFor(nick))) {
             var lobby = lobbyCloseable.obj();
-            var lockedGame = lobby != null ? lobby.game().get() : null;
+            var gameAndController = lobby != null ? lobby.game().get() : null;
+            var lockedGame = gameAndController != null ? gameAndController.game() : null;
             try (var gameCloseable = LockProtected.useNullable(lockedGame)) {
                 var game = gameCloseable.obj();
                 if (game != null && player == null)
