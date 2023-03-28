@@ -11,4 +11,6 @@ public interface RmiConnectionController extends Remote {
                   RmiHeartbeatHandler heartbeatHandler,
                   RmiLobbyUpdaterFactory updaterFactory)
             throws RemoteException;
+
+    void ready(boolean ready) throws RemoteException;
 }

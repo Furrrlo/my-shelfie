@@ -15,7 +15,7 @@ public interface LobbyView extends Serializable {
     /**
      * @return Property list of joined players
      */
-    Provider<List<String>> joinedPlayers();
+    Provider<? extends List<? extends LobbyPlayer>> joinedPlayers();
 
     Provider<? extends @Nullable GameAndController<?>> game();
 }

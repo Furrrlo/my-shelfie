@@ -1,9 +1,11 @@
 package it.polimi.ingsw.client.network.socket;
 
+import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyView;
 import it.polimi.ingsw.socket.packets.JoinGamePacket;
 import it.polimi.ingsw.socket.packets.LobbyPacket;
+import it.polimi.ingsw.socket.packets.ReadyPacket;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -61,6 +63,18 @@ public class SocketClientNetManager implements ClientNetManager {
                         return null;
                     });
             return lobby;
+        }
+    }
+
+    @Override
+    public void ready(boolean ready) throws DisconnectedException {
+        if (socketManager == null)
+            throw new UnsupportedOperationException("You have not joined a game");
+
+        try {
+            socketManager.send(new ReadyPacket(ready));
+        } catch (IOException e) {
+            throw new DisconnectedException(e);
         }
     }
 }

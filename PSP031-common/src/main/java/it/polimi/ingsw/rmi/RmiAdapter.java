@@ -4,7 +4,7 @@ import it.polimi.ingsw.DisconnectedException;
 
 import java.rmi.RemoteException;
 
-class RmiAdapter {
+public class RmiAdapter {
 
     protected void adapt(RmiRunnable runnable) throws DisconnectedException {
         try {
@@ -22,12 +22,12 @@ class RmiAdapter {
         }
     }
 
-    interface RmiRunnable {
+    protected interface RmiRunnable {
 
         void run() throws RemoteException;
     }
 
-    interface RmiSupplier<T> {
+    protected interface RmiSupplier<T> {
 
         T get() throws RemoteException;
     }

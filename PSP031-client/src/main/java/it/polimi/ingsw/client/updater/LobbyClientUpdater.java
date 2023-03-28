@@ -3,10 +3,15 @@ package it.polimi.ingsw.client.updater;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Lobby;
+import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.updater.LobbyUpdater;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class LobbyClientUpdater implements LobbyUpdater {
 
@@ -18,7 +23,23 @@ public abstract class LobbyClientUpdater implements LobbyUpdater {
 
     @Override
     public void updateJoinedPlayers(List<String> joinedPlayers) {
-        lobby.joinedPlayers().set(joinedPlayers);
+        lobby.joinedPlayers().update(players -> {
+            var newP = new ArrayList<>(players);
+            var oldPlayers = players.stream().collect(Collectors.toMap(
+                    LobbyPlayer::getNick,
+                    Function.identity()));
+
+            for (String s : joinedPlayers) {
+                if (!oldPlayers.containsKey(s))
+                    newP.add(new LobbyPlayer(s, false));
+            }
+
+            oldPlayers.forEach((nick, player) -> {
+                if (!joinedPlayers.contains(nick))
+                    newP.remove(player);
+            });
+            return newP;
+        });
     }
 
     @Override

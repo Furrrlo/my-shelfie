@@ -1,5 +1,6 @@
 package it.polimi.ingsw.server.model;
 
+import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.SerializableProperty;
 import it.polimi.ingsw.server.controller.LockProtected;
@@ -12,7 +13,7 @@ import java.util.Objects;
 public class ServerLobby implements ServerLobbyView {
 
     private final int requiredPlayers;
-    private final Property<List<String>> joinedPlayers;
+    private final Property<List<LobbyPlayer>> joinedPlayers;
     private final Property<@Nullable ServerGameAndController<ServerGame>> game;
 
     /**
@@ -30,7 +31,7 @@ public class ServerLobby implements ServerLobbyView {
     }
 
     @Override
-    public Property<List<String>> joinedPlayers() {
+    public Property<List<LobbyPlayer>> joinedPlayers() {
         return joinedPlayers;
     }
 

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.server.model;
 
+import it.polimi.ingsw.model.LobbyPlayerView;
 import it.polimi.ingsw.model.Provider;
 import it.polimi.ingsw.server.controller.LockProtected;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +17,7 @@ public interface ServerLobbyView {
     /**
      * @return Property list of joined players
      */
-    Provider<List<String>> joinedPlayers();
+    Provider<? extends List<? extends LobbyPlayerView>> joinedPlayers();
 
     Provider<? extends @Nullable ServerGameAndController<? extends ServerGameView>> game();
 }

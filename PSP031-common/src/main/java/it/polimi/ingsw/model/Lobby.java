@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Lobby implements LobbyView {
 
     private final int requiredPlayers;
-    private final Property<List<String>> joinedPlayers;
+    private final Property<List<LobbyPlayer>> joinedPlayers;
     private final Property<@Nullable GameAndController<Game>> game;
 
     /**
@@ -20,12 +20,12 @@ public class Lobby implements LobbyView {
         this(requiredPlayers, new ArrayList<>());
     }
 
-    public Lobby(int requiredPlayers, List<String> joinedPlayers) {
+    public Lobby(int requiredPlayers, List<LobbyPlayer> joinedPlayers) {
         this(requiredPlayers, joinedPlayers, null);
     }
 
     public Lobby(int requiredPlayers,
-                 List<String> joinedPlayers,
+                 List<LobbyPlayer> joinedPlayers,
                  @Nullable GameAndController<Game> game) {
 
         this.requiredPlayers = requiredPlayers;
@@ -39,7 +39,7 @@ public class Lobby implements LobbyView {
     }
 
     @Override
-    public Property<List<String>> joinedPlayers() {
+    public Property<List<LobbyPlayer>> joinedPlayers() {
         return joinedPlayers;
     }
 

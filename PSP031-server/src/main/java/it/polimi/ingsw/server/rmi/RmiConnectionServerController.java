@@ -2,14 +2,17 @@ package it.polimi.ingsw.server.rmi;
 
 import it.polimi.ingsw.rmi.*;
 import it.polimi.ingsw.server.controller.ServerController;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.util.Objects;
 
 public class RmiConnectionServerController implements RmiConnectionController {
 
     private final ServerController controller;
+    private @Nullable String nick;
 
     public static void bind(ServerController controller) throws RemoteException {
         bind(RmiConnectionController.REMOTE_NAME, controller);
@@ -33,6 +36,7 @@ public class RmiConnectionServerController implements RmiConnectionController {
                          RmiHeartbeatHandler handler,
                          RmiLobbyUpdaterFactory updaterFactory)
             throws RemoteException {
+        this.nick = nick;
         controller.joinGame(
                 nick,
                 new RmiHeartbeatHandler.Adapter(handler),
@@ -45,5 +49,10 @@ public class RmiConnectionServerController implements RmiConnectionController {
                         throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                     }
                 });
+    }
+
+    @Override
+    public void ready(boolean ready) throws RemoteException {
+        controller.ready(Objects.requireNonNull(nick, "You have not joined a game"), ready);
     }
 }

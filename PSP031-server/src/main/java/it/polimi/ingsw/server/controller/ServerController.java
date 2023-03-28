@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -85,14 +86,16 @@ public class ServerController {
                 // This is basically double-checked locking, getOrCreateGameLobbySomehow() checks with no lock
                 // so that it can discard options fast, then here we re-check while actually holding the lock
                 // to guarantee concurrency
-                final List<String> currentPlayers = serverLobby.joinedPlayers().get();
+                final List<String> currentPlayers = serverLobby.joinedPlayers().get().stream()
+                        .map(LobbyPlayer::getNick)
+                        .toList();
                 if (!currentPlayers.contains(nick) && currentPlayers.size() >= serverLobby.getRequiredPlayers())
                     continue;
 
                 if (!currentPlayers.contains(nick)) {
                     serverLobby.joinedPlayers().update(l -> {
                         final var newList = new ArrayList<>(l);
-                        newList.add(nick);
+                        newList.add(new LobbyPlayer(nick, false));
                         return newList;
                     });
                 }
@@ -111,7 +114,10 @@ public class ServerController {
                 try (var currGameCloseable = LockProtected.useNullable(currGameLocked)) {
                     var currGame = currGameCloseable.obj();
 
-                    registerObserverFor(nick, serverLobby.joinedPlayers(), lobbyUpdater::updateJoinedPlayers);
+                    registerObserverFor(nick, serverLobby.joinedPlayers(), lobbyPlayers -> lobbyUpdater
+                            .updateJoinedPlayers(lobbyPlayers.stream()
+                                    .map(LobbyPlayer::getNick)
+                                    .collect(Collectors.toList())));
                     registerObserverFor(nick, serverLobby.game(), game -> {
                         if (game != null) {
                             try (var gameCloseable = game.game().use()) {
@@ -132,6 +138,16 @@ public class ServerController {
                 return lobby;
             }
         } while (true);
+    }
+
+    public void ready(String nick, boolean ready) {
+        try (var use = Objects.requireNonNull(getLobbyFor(nick), "Player should be in a lobby").use()) {
+            LobbyPlayer lobbyPlayer = use.obj().joinedPlayers().get().stream()
+                    .filter(p -> p.getNick().equals(nick))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Somehow missing the player " + nick));
+            lobbyPlayer.ready().set(ready);
+        }
     }
 
     private void updateGameForPlayer(String nick,

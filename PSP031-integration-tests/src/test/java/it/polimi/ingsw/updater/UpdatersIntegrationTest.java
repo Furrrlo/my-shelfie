@@ -82,7 +82,8 @@ public class UpdatersIntegrationTest {
         final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
         ensurePropertyUpdated(
                 "joinedPlayers",
-                List.of(nick, "player2", "player3", "player4"),
+                List.of(new LobbyPlayer(nick), new LobbyPlayer("player2"), new LobbyPlayer("player3"),
+                        new LobbyPlayer("player4")),
                 serverLobby.joinedPlayers(),
                 lobbyView.joinedPlayers());
 
@@ -96,7 +97,7 @@ public class UpdatersIntegrationTest {
                 new Board(serverLobby.joinedPlayers().get().size()),
                 List.of(),
                 players = serverLobby.joinedPlayers().get().stream()
-                        .map(n -> new ServerPlayer(n, new PersonalGoal(new Tile[6][5])))
+                        .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
                         .collect(Collectors.toList()),
                 rnd.nextInt(players.size()),
                 List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),new GameServerController(serverGame)));
@@ -153,8 +154,8 @@ public class UpdatersIntegrationTest {
 
     private static <T> void ensurePropertyUpdated(String name,
                                                   T value,
-                                                  Property<T> serverProperty,
-                                                  Provider<T> clientProvider)
+                                                  Property<? extends T> serverProperty,
+                                                  Provider<? extends T> clientProvider)
             throws ExecutionException, InterruptedException {
         assertEquals(
                 serverProperty.get(),
@@ -172,7 +173,7 @@ public class UpdatersIntegrationTest {
     private static <S, C> void ensurePropertyUpdated(String name,
                                                      S serverValue,
                                                      C clientValue,
-                                                     Property<S> serverProperty,
+                                                     Property<? extends S> serverProperty,
                                                      Provider<? extends C> clientProvider)
             throws ExecutionException, InterruptedException {
 
@@ -180,7 +181,7 @@ public class UpdatersIntegrationTest {
         final Consumer<C> observer;
         clientProvider.registerObserver(observer = received::complete);
 
-        serverProperty.set(serverValue);
+        ((Property<S>) serverProperty).set(serverValue);
         assertEquals(
                 serverValue,
                 serverProperty.get(),

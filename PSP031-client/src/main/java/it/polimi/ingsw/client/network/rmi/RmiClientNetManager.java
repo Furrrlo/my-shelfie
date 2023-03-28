@@ -1,12 +1,10 @@
 package it.polimi.ingsw.client.network.rmi;
 
+import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.model.LobbyView;
-import it.polimi.ingsw.rmi.RmiConnectionController;
-import it.polimi.ingsw.rmi.RmiLobbyUpdater;
-import it.polimi.ingsw.rmi.RmiLobbyUpdaterFactory;
-import it.polimi.ingsw.rmi.UnicastRemoteObjects;
+import it.polimi.ingsw.rmi.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -16,9 +14,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Objects;
 
-public class RmiClientNetManager implements ClientNetManager {
+public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
 
     private final String remoteName;
+    private @Nullable RmiConnectionController server;
 
     public RmiClientNetManager() {
         this(RmiConnectionController.REMOTE_NAME);
@@ -31,8 +30,10 @@ public class RmiClientNetManager implements ClientNetManager {
 
     @Override
     public LobbyView joinGame(String nick) throws RemoteException, NotBoundException {
-        final Registry registry = LocateRegistry.getRegistry();
-        final RmiConnectionController server = (RmiConnectionController) registry.lookup(remoteName);
+        if (server == null) {
+            final Registry registry = LocateRegistry.getRegistry();
+            server = (RmiConnectionController) registry.lookup(remoteName);
+        }
 
         final InterceptingFactory updaterFactory = new InterceptingFactory();
         server.joinGame(
@@ -40,6 +41,15 @@ public class RmiClientNetManager implements ClientNetManager {
                 UnicastRemoteObjects.export(new RmiHeartbeatClientHandler(), 0),
                 UnicastRemoteObjects.export(updaterFactory, 0));
         return updaterFactory.getUpdater().getGameCreationState();
+    }
+
+    @Override
+    public void ready(boolean ready) throws DisconnectedException {
+        adapt(() -> {
+            if (server == null)
+                throw new UnsupportedOperationException("You have not joined a game");
+            server.ready(ready);
+        });
     }
 
     private static class InterceptingFactory implements RmiLobbyUpdaterFactory {
