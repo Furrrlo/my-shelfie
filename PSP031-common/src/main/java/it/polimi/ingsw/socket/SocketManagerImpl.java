@@ -64,6 +64,11 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
         recvTask.cancel(true);
         sendTask.cancel(true);
+
+        final IOException closeEx = new IOException(CLOSE_EX_MSG);
+        outPacketQueue.forEach(q -> q.future().completeExceptionally(closeEx));
+        outPacketQueue.clear();
+
         // Use a try-with-resources so everything is closed even if any of the close methods fail
         try (var ignoredOos = this.oos;
              var ignoredOis = this.ois) {
@@ -93,8 +98,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 inPacketQueue.add(p);
             } while (!Thread.currentThread().isInterrupted());
         } catch (IOException e) {
-            // TODO: close socket
-            throw new UncheckedIOException(e);
+            log("Failed to read packet, closing...");
+            e.printStackTrace();
+            try {
+                close();
+            } catch (IOException ignored) {
+            }
         }
     }
 
@@ -112,8 +121,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
             } while (!Thread.currentThread().isInterrupted());
         } catch (IOException e) {
-            // TODO: close socket
-            throw new UncheckedIOException(e);
+            log("Failed to write packet, closing...");
+            e.printStackTrace();
+            try {
+                close();
+            } catch (IOException ignored) {
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -131,6 +144,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException {
         ensureOpen();
+        // TODO: this will wait indefinitely when the socket closes, is there any way to fail this?
         return inPacketQueue.takeFirstMatching(filter);
     }
 
