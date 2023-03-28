@@ -45,7 +45,7 @@ public class SocketConnectionServerController implements Runnable {
                 System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
                 threadPool.submit(() -> {
                     try {
-                        final ServerSocketManager socketManager = new ServerSocketManagerImpl(socket);
+                        final ServerSocketManager socketManager = new ServerSocketManagerImpl(threadPool, socket);
                         var rec = socketManager.receive(JoinGamePacket.class);
                         JoinGamePacket p = rec.getPacket();
                         System.out.println("[Server] " + p.nick() + " is joining...");

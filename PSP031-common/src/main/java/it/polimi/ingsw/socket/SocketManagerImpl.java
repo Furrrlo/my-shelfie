@@ -7,10 +7,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
@@ -23,8 +20,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final BlockingDeque<QueuedOutput> outPacketQueue = new LinkedBlockingDeque<>();
     private final NBlockingQueue<SeqPacket> inPacketQueue = new NBlockingQueue<>();
 
-    private final Thread recvThread;
-    private final Thread sendThread;
+    private final Future<?> recvTask;
+    private final Future<?> sendTask;
 
     private final AtomicLong seq = new AtomicLong();
     private final String name;
@@ -33,28 +30,28 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     record QueuedOutput(SeqPacket packet, CompletableFuture<Void> future) {
     }
 
-    public SocketManagerImpl(Socket socket, String name) throws IOException {
-        this(name, socket, socket.getInputStream(), socket.getOutputStream());
+    public SocketManagerImpl(String name, ExecutorService executor, Socket socket) throws IOException {
+        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream());
     }
 
     @VisibleForTesting
-    SocketManagerImpl(String name, InputStream is, OutputStream os) throws IOException {
-        this(name, null, is, os);
+    SocketManagerImpl(String name, ExecutorService executor, InputStream is, OutputStream os) throws IOException {
+        this(name, executor, null, is, os);
     }
 
-    private SocketManagerImpl(String name, @Nullable Socket socket, InputStream is, OutputStream os) throws IOException {
+    private SocketManagerImpl(String name,
+                              ExecutorService executor,
+                              @Nullable Socket socket,
+                              InputStream is,
+                              OutputStream os)
+            throws IOException {
         this.socket = socket;
         this.name = name;
         this.oos = os instanceof ObjectOutputStream oos ? oos : new ObjectOutputStream(os);
         this.ois = is instanceof ObjectInputStream ois ? ois : new ObjectInputStream(is);
 
-        recvThread = new Thread(this::readLoop);
-        recvThread.setName(name + "SocketManagerImpl-recv-thread");
-        recvThread.start();
-
-        sendThread = new Thread(this::writeLoop);
-        sendThread.setName(name + "SocketManagerImpl-send-thread");
-        sendThread.start();
+        recvTask = executor.submit(this::readLoop);
+        sendTask = executor.submit(this::writeLoop);
     }
 
     private void readLoop() {
