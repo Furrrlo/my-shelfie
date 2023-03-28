@@ -15,7 +15,8 @@ import java.io.IOException;
  * @param <ACK_OUT> type of AckPacket that can be sent
  * @param <OUT> type of Packet that can be sent
  */
-public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet> {
+public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet>
+        extends Closeable {
 
     /**
      * Send a packet and wait for an ack.

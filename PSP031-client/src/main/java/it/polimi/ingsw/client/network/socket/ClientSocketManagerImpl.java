@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,8 +18,10 @@ public class ClientSocketManagerImpl
         extends SocketManagerImpl<S2CPacket, S2CAckPacket, C2SAckPacket, C2SPacket>
         implements ClientSocketManager {
 
+    private final ExecutorService executor;
+
     public ClientSocketManagerImpl(Socket socket) throws IOException {
-        super("Client", Executors.newFixedThreadPool(2, new ThreadFactory() {
+        this(Executors.newFixedThreadPool(2, new ThreadFactory() {
 
             private final AtomicInteger threadNum = new AtomicInteger();
 
@@ -29,5 +32,18 @@ public class ClientSocketManagerImpl
                 return th;
             }
         }), socket);
+    }
+
+    private ClientSocketManagerImpl(ExecutorService executor, Socket socket) throws IOException {
+        super("Client", executor, socket);
+        this.executor = executor;
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+
+        if (!executor.isShutdown())
+            executor.shutdown();
     }
 }

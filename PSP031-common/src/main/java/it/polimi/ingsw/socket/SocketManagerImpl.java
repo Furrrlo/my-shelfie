@@ -14,6 +14,10 @@ import java.util.function.Predicate;
 public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet>
         implements SocketManager<IN, ACK_IN, ACK_OUT, OUT> {
 
+    @VisibleForTesting
+    static final String CLOSE_EX_MSG = "Socket was closed";
+
+    private volatile boolean isClosed;
     private final @Nullable Socket socket;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
@@ -52,6 +56,25 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
         recvTask = executor.submit(this::readLoop);
         sendTask = executor.submit(this::writeLoop);
+    }
+
+    @Override
+    public void close() throws IOException {
+        isClosed = true;
+
+        recvTask.cancel(true);
+        sendTask.cancel(true);
+        // Use a try-with-resources so everything is closed even if any of the close methods fail
+        try (var ignoredOos = this.oos;
+             var ignoredOis = this.ois) {
+            if (socket != null)
+                socket.close();
+        }
+    }
+
+    private void ensureOpen() throws IOException {
+        if (isClosed)
+            throw new IOException(CLOSE_EX_MSG);
     }
 
     private void readLoop() {
@@ -96,7 +119,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
     }
 
-    private CompletableFuture<Void> doSend(SeqPacket toSend) {
+    private CompletableFuture<Void> doSend(SeqPacket toSend) throws IOException {
+        ensureOpen();
+
         final CompletableFuture<Void> hasSent = new CompletableFuture<>();
         log("Sending " + toSend + "...");
         outPacketQueue.add(new QueuedOutput(toSend, hasSent));
@@ -104,7 +129,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         return hasSent;
     }
 
-    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException {
+    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException {
+        ensureOpen();
         return inPacketQueue.takeFirstMatching(filter);
     }
 
@@ -138,7 +164,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     }
 
     @Override
-    public <R extends IN> PacketReplyContext<ACK_IN, ACK_OUT, R> receive(Class<R> type) {
+    public <R extends IN> PacketReplyContext<ACK_IN, ACK_OUT, R> receive(Class<R> type) throws IOException {
         try {
             log("Waiting for  " + type + "...");
             return new PacketReplyContextImpl<>(doReceive(packet -> type.isInstance(packet.packet())));
