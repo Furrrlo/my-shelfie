@@ -183,6 +183,15 @@ public enum Type implements Serializable {
     CROSS{
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
+            for(int r=0; r<ROWS-2; r++){
+                for(int c=0; c<COLUMNS-2; c++){
+                    if(     shelfie.tile(r,c).equals(shelfie.tile(r+2,c))&&
+                            shelfie.tile(r,c).equals(shelfie.tile(r,c+2))&&
+                            shelfie.tile(r,c).equals(shelfie.tile(r+1,c+1))&&
+                            shelfie.tile(r,c).equals(shelfie.tile(r+2,c+2))
+                    ) return true;
+                }
+            }
             return false;
         }
     },
