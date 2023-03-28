@@ -97,6 +97,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 log("Received packet: " + p);
                 inPacketQueue.add(p);
             } while (!Thread.currentThread().isInterrupted());
+        } catch (InterruptedIOException e) {
+            // Go on, interruption is expected
         } catch (IOException e) {
             log("Failed to read packet, closing...");
             e.printStackTrace();
