@@ -1,5 +1,6 @@
 package it.polimi.ingsw.socket;
 
+import it.polimi.ingsw.socket.packets.AckPacket;
 import it.polimi.ingsw.socket.packets.Packet;
 
 /**
@@ -11,5 +12,5 @@ import it.polimi.ingsw.socket.packets.Packet;
  *
  * @see it.polimi.ingsw.socket.SocketManager#send(Packet, Class)
  */
-record SeqAckPacket(Packet packet, long seqN, long seqAck) implements SeqPacket {
+record SeqAckPacket(AckPacket packet, long seqN, long seqAck) implements SeqPacket {
 }
