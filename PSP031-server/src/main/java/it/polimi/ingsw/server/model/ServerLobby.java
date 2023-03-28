@@ -3,7 +3,6 @@ package it.polimi.ingsw.server.model;
 import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.SerializableProperty;
-import it.polimi.ingsw.server.controller.LockProtected;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

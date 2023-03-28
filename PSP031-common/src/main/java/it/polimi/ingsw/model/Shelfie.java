@@ -29,9 +29,8 @@ public class Shelfie implements ShelfieView {
     public Shelfie(@Nullable Color[][] tiles) {
         this.shelfie = Arrays.stream(tiles)
                 .map(row -> Arrays.stream(row)
-                        .map(color -> color == null ?
-                                SerializableProperty.nullableProperty(null) :
-                                SerializableProperty.nullableProperty(new Tile(color)))
+                        .map(color -> color == null ? SerializableProperty.nullableProperty(null)
+                                : SerializableProperty.nullableProperty(new Tile(color)))
                         .toArray(Property[]::new))
                 .toArray(Property[][]::new);
     }

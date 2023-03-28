@@ -27,8 +27,10 @@ public final class LobbyPlayer implements LobbyPlayerView {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         LobbyPlayer that = (LobbyPlayer) o;
         return nick.equals(that.nick) && ready.equals(that.ready);
     }

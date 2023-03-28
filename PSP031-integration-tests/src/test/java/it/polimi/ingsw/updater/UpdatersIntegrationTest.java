@@ -100,7 +100,8 @@ public class UpdatersIntegrationTest {
                         .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
                         .collect(Collectors.toList()),
                 rnd.nextInt(players.size()),
-                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),new GameServerController(serverGame)));
+                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),
+                new GameServerController(serverGame)));
 
         final var clientGame = gamePromise.get().game();
         assertEquals(
