@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -21,6 +22,18 @@ public class Shelfie implements ShelfieView {
                 shelfie[r][c] = SerializableProperty.nullableProperty(null);
             }
         }
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    public Shelfie(@Nullable Color[][] tiles) {
+        this.shelfie = Arrays.stream(tiles)
+                .map(row -> Arrays.stream(row)
+                        .map(color -> color == null ?
+                                SerializableProperty.nullableProperty(null) :
+                                SerializableProperty.nullableProperty(new Tile(color)))
+                        .toArray(Property[]::new))
+                .toArray(Property[][]::new);
     }
 
     @Override
