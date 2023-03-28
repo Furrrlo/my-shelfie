@@ -129,6 +129,18 @@ public enum Type implements Serializable {
     DIAGONAL{
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
+            for( int r=0; r<ROWS-4; r++ ){
+                if(Objects.equals(shelfie.tile(r, 0), shelfie.tile(r + 1, 1)) &&
+                        shelfie.tile(r+1,1).equals(shelfie.tile(r+2,2))&&
+                        shelfie.tile(r+2,2).equals(shelfie.tile(r+3,3))&&
+                        shelfie.tile(r+3,3).equals(shelfie.tile(r+4,4))
+                ) return true;
+                if(Objects.equals(shelfie.tile(r, 4), shelfie.tile(r + 1, 3)) &&
+                        shelfie.tile(r+1,3).equals(shelfie.tile(r+2,2))&&
+                        shelfie.tile(r+2,2).equals(shelfie.tile(r+3,1))&&
+                        shelfie.tile(r+3,1).equals(shelfie.tile(r+4,0))
+                ) return true;
+            }
             return false;
         }
     },
@@ -139,9 +151,27 @@ public enum Type implements Serializable {
         }
     },
     TWO_ALL_DIFF_COLUMNS{
+        /**
+         * @param shelfie : shelfie passed as parametre
+         * @param c : index of column passed as parametre
+         * @return true if the tiles of a given column of a given shelfie are all different, otherwise returns false
+         */
+        public boolean isDifferentColumn(Shelfie shelfie, int c){
+            for(int r=0; r<ROWS; r++ ){
+                for( int j = r+1; j<ROWS; j++ )
+                    if(shelfie.tile(r,c).equals(shelfie.tile(j,c)))
+                        return false;
+            }
+            return true;
+        }
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-            return false;
+            int count = 0;
+            for(int c=0; c<COLUMNS; c++ ){
+                if(isDifferentColumn(shelfie, c))
+                    count++;
+            }
+            return count >= 2;
         }
     },
     TWO_ALL_DIFF_ROWS{
