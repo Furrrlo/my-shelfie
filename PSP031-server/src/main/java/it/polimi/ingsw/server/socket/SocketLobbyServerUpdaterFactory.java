@@ -1,6 +1,6 @@
 package it.polimi.ingsw.server.socket;
 
-import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.socket.SocketManager;
 import it.polimi.ingsw.socket.packets.C2SAckPacket;
@@ -24,9 +24,9 @@ public class SocketLobbyServerUpdaterFactory implements LobbyUpdaterFactory {
     }
 
     @Override
-    public LobbyUpdater create(Lobby lobby) throws DisconnectedException {
+    public LobbyUpdater create(LobbyAndController<Lobby> lobbyAndController) {
         try {
-            ctx.reply(new LobbyPacket(lobby));
+            ctx.reply(new LobbyPacket(lobbyAndController.lobby()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

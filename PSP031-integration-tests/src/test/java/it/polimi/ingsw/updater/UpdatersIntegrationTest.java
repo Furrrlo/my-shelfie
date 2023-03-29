@@ -6,8 +6,10 @@ import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.controller.GameServerController;
+import it.polimi.ingsw.server.controller.LobbyServerController;
 import it.polimi.ingsw.server.controller.LockProtected;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.server.model.*;
@@ -21,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -44,9 +47,9 @@ public class UpdatersIntegrationTest {
         bindServerController.accept(new ServerController() {
 
             @Override
-            protected LockProtected<ServerLobby> getOrCreateLobby(String nick) {
+            protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
-                serverLobbyPromise.complete(lockedLobby.getUnsafe());
+                serverLobbyPromise.complete(lockedLobby.lobby().getUnsafe());
                 return lockedLobby;
             }
 
@@ -54,6 +57,7 @@ public class UpdatersIntegrationTest {
             public LobbyView joinGame(String nick,
                                       HeartbeatHandler heartbeatHandler,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
+                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
                 final LobbyUpdaterFactory wrappedFactory = lobby -> new DelegatingLobbyUpdater(
                         lobbyUpdaterFactory.create(lobby)) {
@@ -64,14 +68,15 @@ public class UpdatersIntegrationTest {
                         return gameUpdater;
                     }
                 };
-                var lobby = super.joinGame(nick, heartbeatHandler, wrappedFactory, gameControllerFactory);
+                var lobby = super.joinGame(nick, heartbeatHandler, wrappedFactory, lobbyControllerFactory,
+                        gameControllerFactory);
                 serverJoinedNick.complete(nick);
                 serverLobbyToSerialize.complete(lobby);
                 return lobby;
             }
         });
 
-        LobbyView lobbyView = clientNetManagerFactory.get().joinGame(nick);
+        LobbyView lobbyView = clientNetManagerFactory.get().joinGame(nick).lobby();
         assertEquals(
                 nick,
                 serverJoinedNick.get(500, TimeUnit.MILLISECONDS));
@@ -171,6 +176,7 @@ public class UpdatersIntegrationTest {
                 "Final value of property " + name);
     }
 
+    @SuppressWarnings("unchecked")
     private static <S, C> void ensurePropertyUpdated(String name,
                                                      S serverValue,
                                                      C clientValue,

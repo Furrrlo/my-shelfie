@@ -5,8 +5,11 @@ import it.polimi.ingsw.socket.packets.JoinGamePacket;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -39,30 +42,56 @@ public class SocketConnectionServerController implements Runnable {
 
     @Override
     public void run() {
-        do {
-            try {
+        try {
+            do {
                 final Socket socket = socketServer.accept();
                 System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
                 threadPool.submit(() -> {
                     try {
-                        final ServerSocketManager socketManager = new ServerSocketManagerImpl(threadPool, socket);
-                        var rec = socketManager.receive(JoinGamePacket.class);
-                        JoinGamePacket p = rec.getPacket();
-                        System.out.println("[Server] " + p.nick() + " is joining...");
-                        socketManager.setNick(p.nick());
-                        controller.joinGame(
-                                p.nick(),
-                                new SocketHeartbeatHandler(socketManager),
-                                new SocketLobbyServerUpdaterFactory(socketManager, rec),
-                                (serverPlayer, game) -> new SocketServerGameController(socketManager, serverPlayer, game));
-
+                        doJoin(new ServerSocketManagerImpl(threadPool, socket));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } while (!Thread.interrupted());
+            } while (!Thread.interrupted());
+        } catch (InterruptedIOException ignored) {
+            // Thread was interrupted to stop, normal control flow
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void doJoin(ServerSocketManager socketManager) throws IOException {
+        final var rec = socketManager.receive(JoinGamePacket.class);
+        final var nick = rec.getPacket().nick();
+        System.out.println("[Server] " + nick + " is joining...");
+        socketManager.setNick(nick);
+
+        controller.joinGame(
+                nick,
+                new SocketHeartbeatHandler(socketManager),
+                new SocketLobbyServerUpdaterFactory(socketManager, rec),
+                lobbyController -> {
+                    var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
+                    CompletableFuture.runAsync(socketController, threadPool).handle((__, ex) -> {
+                        if (ex == null)
+                            return __;
+
+                        controller.disconnectPlayer(nick, ex);
+                        return __;
+                    });
+                    return socketController;
+                },
+                (serverPlayer, game) -> {
+                    var socketController = new SocketServerGameController(socketManager, serverPlayer, game);
+                    CompletableFuture.runAsync(socketController, threadPool).handle((__, ex) -> {
+                        if (ex == null)
+                            return __;
+
+                        controller.disconnectPlayer(nick, ex);
+                        return __;
+                    });
+                    return socketController;
+                });
     }
 }

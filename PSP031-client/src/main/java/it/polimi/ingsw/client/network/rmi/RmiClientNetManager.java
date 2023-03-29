@@ -1,9 +1,8 @@
 package it.polimi.ingsw.client.network.rmi;
 
-import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.Lobby;
-import it.polimi.ingsw.model.LobbyView;
 import it.polimi.ingsw.rmi.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -29,7 +28,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
     }
 
     @Override
-    public LobbyView joinGame(String nick) throws RemoteException, NotBoundException {
+    public LobbyAndController<Lobby> joinGame(String nick) throws RemoteException, NotBoundException {
         if (server == null) {
             final Registry registry = LocateRegistry.getRegistry();
             server = (RmiConnectionController) registry.lookup(remoteName);
@@ -40,16 +39,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
                 nick,
                 UnicastRemoteObjects.export(new RmiHeartbeatClientHandler(), 0),
                 UnicastRemoteObjects.export(updaterFactory, 0));
-        return updaterFactory.getUpdater().getGameCreationState();
-    }
-
-    @Override
-    public void ready(boolean ready) throws DisconnectedException {
-        adapt(() -> {
-            if (server == null)
-                throw new UnsupportedOperationException("You have not joined a game");
-            server.ready(ready);
-        });
+        return updaterFactory.getUpdater().getLobbyAndController();
     }
 
     private static class InterceptingFactory implements RmiLobbyUpdaterFactory {
@@ -63,7 +53,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
         }
 
         @Override
-        public RmiLobbyUpdater create(Lobby lobby) throws RemoteException {
+        public RmiLobbyUpdater create(LobbyAndController<Lobby> lobby) throws RemoteException {
             if (updater != null)
                 throw new UnsupportedOperationException("Expected ConnectionServerController to invoke " +
                         "GameCreationStateUpdaterFactory exactly once, was 2+");

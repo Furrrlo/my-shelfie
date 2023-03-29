@@ -1,6 +1,7 @@
 package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.updater.LobbyUpdater;
 import it.polimi.ingsw.updater.LobbyUpdaterFactory;
@@ -10,7 +11,7 @@ import java.rmi.RemoteException;
 
 public interface RmiLobbyUpdaterFactory extends Remote {
 
-    RmiLobbyUpdater create(Lobby lobby) throws RemoteException;
+    RmiLobbyUpdater create(LobbyAndController<Lobby> lobby) throws RemoteException;
 
     class Adapter extends RmiAdapter implements LobbyUpdaterFactory {
 
@@ -21,7 +22,7 @@ public interface RmiLobbyUpdaterFactory extends Remote {
         }
 
         @Override
-        public LobbyUpdater create(Lobby lobby) throws DisconnectedException {
+        public LobbyUpdater create(LobbyAndController<Lobby> lobby) throws DisconnectedException {
             return adapt(() -> new RmiLobbyUpdater.Adapter(updater.create(lobby)));
         }
     }

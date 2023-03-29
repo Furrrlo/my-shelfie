@@ -7,10 +7,11 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.socket.packets.MakeMovePacket;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 
-public class SocketServerGameController implements GameController {
+public class SocketServerGameController implements GameController, Runnable {
     private final ServerSocketManager socketManager;
     private final ServerPlayer player;
     private final GameServerController controller;
@@ -23,17 +24,19 @@ public class SocketServerGameController implements GameController {
         this.controller = controller;
     }
 
+    @Override
     public void run() {
-
         try {
             do {
                 try (var ctx = socketManager.receive(MakeMovePacket.class)) {
                     final MakeMovePacket p = ctx.getPacket();
                     makeMove(p.selected(), p.shelfCol());
                 }
-            } while (true);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            } while (!Thread.currentThread().isInterrupted());
+        } catch (InterruptedIOException ignored) {
+            // Thread was interrupted to stop, normal control flow
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 

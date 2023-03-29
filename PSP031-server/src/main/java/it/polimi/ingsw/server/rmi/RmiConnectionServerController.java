@@ -7,7 +7,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.util.Objects;
 
 public class RmiConnectionServerController implements RmiConnectionController {
 
@@ -41,6 +40,14 @@ public class RmiConnectionServerController implements RmiConnectionController {
                 nick,
                 new RmiHeartbeatHandler.Adapter(handler),
                 new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
+                controller -> {
+                    try {
+                        return new RmiLobbyController.Adapter(
+                                UnicastRemoteObjects.export(new RmiLobbyServerController(nick, controller), 0));
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
+                    }
+                },
                 (player, game) -> {
                     try {
                         return new RmiGameController.Adapter(
@@ -49,10 +56,5 @@ public class RmiConnectionServerController implements RmiConnectionController {
                         throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                     }
                 });
-    }
-
-    @Override
-    public void ready(boolean ready) throws RemoteException {
-        controller.ready(Objects.requireNonNull(nick, "You have not joined a game"), ready);
     }
 }

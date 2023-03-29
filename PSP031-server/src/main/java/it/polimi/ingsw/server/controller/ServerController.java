@@ -3,10 +3,13 @@ package it.polimi.ingsw.server.controller;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.HeartbeatHandler;
+import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerLobby;
+import it.polimi.ingsw.server.model.ServerLobbyAndController;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.updater.LobbyUpdater;
@@ -22,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ServerController {
@@ -60,25 +64,28 @@ public class ServerController {
     }
 
     @VisibleForTesting
-    protected @Nullable LockProtected<ServerLobby> getLobbyFor(String nick) {
+    protected @Nullable ServerLobbyAndController<ServerLobby> getLobbyFor(String nick) {
         // TODO: like search a game
         return null;
     }
 
     @VisibleForTesting
-    protected LockProtected<ServerLobby> getOrCreateLobby(String nick) {
+    protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
         // TODO: like pick game or create one if needed
-        return new LockProtected<>(new ServerLobby(4));
+        var lockedLobby = new LockProtected<>(new ServerLobby(4));
+        return new ServerLobbyAndController<>(lockedLobby, new LobbyServerController(lockedLobby));
     }
 
     public LobbyView joinGame(String nick,
                               HeartbeatHandler heartbeatHandler,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
+                              Function<LobbyServerController, LobbyController> lobbyControllerFactory,
                               BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
         heartbeats.put(nick, heartbeatHandler);
 
         do {
-            final LockProtected<ServerLobby> lockedServerLobby = getOrCreateLobby(nick);
+            final var serverLobbyAndController = getOrCreateLobby(nick);
+            final var lockedServerLobby = serverLobbyAndController.lobby();
 
             try (var serverLobbyCloseable = lockedServerLobby.use()) {
                 var serverLobby = serverLobbyCloseable.obj();
@@ -104,7 +111,8 @@ public class ServerController {
 
                 final LobbyUpdater lobbyUpdater;
                 try {
-                    lobbyUpdater = lobbyUpdaterFactory.create(lobby);
+                    lobbyUpdater = lobbyUpdaterFactory.create(new LobbyAndController<>(lobby,
+                            lobbyControllerFactory.apply(serverLobbyAndController.controller())));
                 } catch (DisconnectedException e) {
                     throw new IllegalStateException("Player disconnected during handshake process");
                 }
@@ -121,14 +129,22 @@ public class ServerController {
                     registerObserverFor(nick, serverLobby.game(), game -> {
                         if (game != null) {
                             try (var gameCloseable = game.game().use()) {
-                                updateGameForPlayer(nick, gameCloseable.obj(), game.controller(), lobbyUpdater,
+                                updateGameForPlayer(
+                                        nick,
+                                        gameCloseable.obj(),
+                                        game.controller(),
+                                        lobbyUpdater,
                                         gameControllerFactory);
                             }
                         }
                     });
 
-                    if (currGame != null)
-                        updateGameForPlayer(nick, currGame, currGameAndController.controller(), lobbyUpdater,
+                    if (currGameAndController != null)
+                        updateGameForPlayer(
+                                nick,
+                                Objects.requireNonNull(currGame, "Controller is not null but game is null?"),
+                                currGameAndController.controller(),
+                                lobbyUpdater,
                                 gameControllerFactory);
                 } catch (DisconnectedException ex) {
                     disconnectPlayer(nick, ex);
@@ -138,16 +154,6 @@ public class ServerController {
                 return lobby;
             }
         } while (true);
-    }
-
-    public void ready(String nick, boolean ready) {
-        try (var use = Objects.requireNonNull(getLobbyFor(nick), "Player should be in a lobby").use()) {
-            LobbyPlayer lobbyPlayer = use.obj().joinedPlayers().get().stream()
-                    .filter(p -> p.getNick().equals(nick))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Somehow missing the player " + nick));
-            lobbyPlayer.ready().set(ready);
-        }
     }
 
     private void updateGameForPlayer(String nick,
@@ -206,14 +212,20 @@ public class ServerController {
                         .collect(Collectors.toList()))));
     }
 
-    private void disconnectPlayer(String nick, Throwable cause) {
-        disconnectPlayer(nick, null, cause);
+    public void disconnectPlayer(String nick, Throwable cause) {
+        doDisconnectPlayer(nick, null, cause);
     }
 
-    private void disconnectPlayer(String nick, @Nullable ServerPlayer player, Throwable cause) {
+    public void disconnectPlayer(ServerPlayer player, Throwable cause) {
+        doDisconnectPlayer(player.getNick(), player, cause);
+    }
+
+    private void doDisconnectPlayer(String nick, @Nullable ServerPlayer player, Throwable cause) {
         heartbeats.remove(nick);
 
-        try (var lobbyCloseable = LockProtected.useNullable(getLobbyFor(nick))) {
+        final var lobbyAndController = getLobbyFor(nick);
+        final var lockedLobby = lobbyAndController != null ? lobbyAndController.lobby() : null;
+        try (var lobbyCloseable = LockProtected.useNullable(lockedLobby)) {
             var lobby = lobbyCloseable.obj();
             var gameAndController = lobby != null ? lobby.game().get() : null;
             var lockedGame = gameAndController != null ? gameAndController.game() : null;
@@ -235,7 +247,13 @@ public class ServerController {
     }
 
     private <T> void registerObserverFor(ServerPlayer player, Provider<T> toObserve, ThrowingConsumer<T> observer) {
-        registerObserverFor(player.getNick(), player, toObserve, observer);
+        observableTracker.registerObserverFor(player.getNick(), toObserve, t -> {
+            try {
+                observer.accept(t);
+            } catch (DisconnectedException e) {
+                disconnectPlayer(player, e);
+            }
+        });
     }
 
     private <T> void registerObserverFor(String nick, Provider<T> toObserve, ThrowingConsumer<T> observer) {
@@ -244,19 +262,6 @@ public class ServerController {
                 observer.accept(t);
             } catch (DisconnectedException e) {
                 disconnectPlayer(nick, e);
-            }
-        });
-    }
-
-    private <T> void registerObserverFor(String nick,
-                                         @Nullable ServerPlayer player,
-                                         Provider<T> toObserve,
-                                         ThrowingConsumer<T> observer) {
-        observableTracker.registerObserverFor(nick, toObserve, t -> {
-            try {
-                observer.accept(t);
-            } catch (DisconnectedException e) {
-                disconnectPlayer(nick, player, e);
             }
         });
     }

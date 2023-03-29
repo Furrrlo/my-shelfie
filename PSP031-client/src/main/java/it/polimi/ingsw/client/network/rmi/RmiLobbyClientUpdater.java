@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.network.rmi;
 
 import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.client.updater.LobbyClientUpdater;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Lobby;
@@ -13,12 +14,15 @@ import java.rmi.RemoteException;
 
 class RmiLobbyClientUpdater extends LobbyClientUpdater implements RmiLobbyUpdater {
 
-    public RmiLobbyClientUpdater(Lobby lobby) {
-        super(lobby);
+    private final LobbyAndController<Lobby> lobbyAndController;
+
+    public RmiLobbyClientUpdater(LobbyAndController<Lobby> lobbyAndController) {
+        super(lobbyAndController.lobby());
+        this.lobbyAndController = lobbyAndController;
     }
 
-    Lobby getGameCreationState() {
-        return lobby;
+    LobbyAndController<Lobby> getLobbyAndController() {
+        return lobbyAndController;
     }
 
     @Override
