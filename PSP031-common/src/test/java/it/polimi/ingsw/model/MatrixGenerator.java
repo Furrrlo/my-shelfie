@@ -6,13 +6,15 @@ public class MatrixGenerator {
     public MatrixGenerator() {}
     int ROWS = 6;
     int COLUMNS = 5;
-    String[] colors = { "Color.GREEN",
+    String[] colors = {
+            "Color.GREEN",
             "Color.YELLOW",
             "Color.ORANGE",
             "Color.BLUE",
             "Color.LIGHTBLUE",
             "Color.PINK",
-            "null"};
+            "null"
+            };
     public void printMatrix(){
         Random rand = new Random();
         System.out.println("Color[][] matrix = {");
