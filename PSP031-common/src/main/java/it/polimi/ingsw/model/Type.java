@@ -37,9 +37,10 @@ public enum Type implements Serializable {
     ALL_CORNERS {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-            return shelfie.tile(0, 0).equals(shelfie.tile(0, COLUMNS - 1)) &&
-                    shelfie.tile(0, COLUMNS - 1).equals(shelfie.tile(ROWS - 1, 0)) &&
-                    shelfie.tile(ROWS - 1, 0).equals(shelfie.tile(ROWS - 1, COLUMNS - 1));
+            return  shelfie.tile(0,0).get()!=null &&
+                    Objects.equals(shelfie.tile(0, 0).get(), shelfie.tile(0, COLUMNS - 1).get()) &&
+                    Objects.requireNonNull(shelfie.tile(0, COLUMNS - 1).get()).equals(shelfie.tile(ROWS - 1, 0).get()) &&
+                    Objects.requireNonNull(shelfie.tile(ROWS - 1, 0).get()).equals(shelfie.tile(ROWS - 1, COLUMNS - 1).get());
         }
     },
     FOUR_QUADRIPLETS {
