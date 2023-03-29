@@ -21,7 +21,7 @@ class TypeTest {
     }
     @Test
     void checkCommonGoal_SIX_COUPLES_allNull(){
-        Color[][] Nullmatrix = {
+        Color[][] matrix = {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
@@ -29,7 +29,7 @@ class TypeTest {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null }
         };
-        assertFalse(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(Nullmatrix)));
+        assertFalse(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
     }
     @Test
     void checkCommonGoal_SIX_COUPLES_borderCouples(){
@@ -43,6 +43,20 @@ class TypeTest {
                 };
         assertTrue(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
     }
+
+    @Test
+    void checkCommonGoal_SIX_COUPLES_normal_false(){
+        Color[][] matrix = {
+                new Color[] { Color.BLUE     , Color.BLUE     , Color.PINK     , Color.PINK     , Color.PINK      },
+                new Color[] { Color.BLUE     , null           , null           , null           , Color.PINK      },
+                new Color[] { Color.BLUE     , null           , null           , null           , Color.PINK      },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            },
+                new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            }
+                };
+        assertTrue(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
+    }
+
     @Test
     void checkCommonGoal_SIX_COUPLES_missingOne(){
         Color[][] matrix = {
@@ -71,7 +85,7 @@ class TypeTest {
     }
     @Test
     void checkCommonGoal_ALL_CORNERS_allNull(){
-        Color[][] Nullmatrix = {
+        Color[][] matrix = {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
@@ -79,7 +93,7 @@ class TypeTest {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null }
         };
-        assertFalse(Type.ALL_CORNERS.checkCommonGoal(new Shelfie(Nullmatrix)));
+        assertFalse(Type.ALL_CORNERS.checkCommonGoal(new Shelfie(matrix)));
     }
     @Test
     void checkCommonGoal_ALL_CORNERS_normal_false(){
@@ -98,7 +112,7 @@ class TypeTest {
     @Test
     void checkCommonGoal_Four_QuadripletsNull() {
 
-        Color[][] tilesNull = {
+        Color[][] matrix = {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
@@ -106,13 +120,13 @@ class TypeTest {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null }
         };
-        assertFalse(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(tilesNull)));
+        assertFalse(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(matrix)));
     }
 
     @Test
-    void checkCommonGoal_Four_QuadripletsSingleQUadriplet() {
+    void checkCommonGoal_Four_Quadriplets_SingleQuadriplet() {
 
-        Color[][] singleQuadriplet = {
+        Color[][] matrix = {
                 new Color[] { Color.GREEN, Color.GREEN, null, null, null },
                 new Color[] { null, Color.GREEN, Color.GREEN, Color.GREEN, null },
                 new Color[] { null, null, null, null, null },
@@ -121,13 +135,13 @@ class TypeTest {
                 new Color[] { null, null, null, null, null }
         };
 
-        assertFalse(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(singleQuadriplet)));
+        assertFalse(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(matrix)));
     }
 
     @Test
     void checkCommonGoal_Four_QuadripletsEasy() {
 
-        Color[][] fourQuadripletEasy = {
+        Color[][] matrix = {
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
@@ -136,23 +150,21 @@ class TypeTest {
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE }
         };
 
-        assertTrue(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(fourQuadripletEasy)));
+        assertTrue(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(matrix)));
     }
 
     @Test
     void checkCommonGoal_Four_QuadripletsNormal() {
 
-        Color[][] fourQuadripletNormal = {
-                new Color[] { Color.GREEN, Color.GREEN, Color.GREEN, Color.LIGHTBLUE, Color.BLUE },
-                new Color[] { Color.GREEN, Color.ORANGE, Color.LIGHTBLUE, Color.ORANGE, Color.BLUE },
-                new Color[] { Color.PINK, Color.ORANGE, Color.YELLOW, Color.ORANGE, Color.BLUE },
-                new Color[] { Color.PINK, Color.PINK, null, null, Color.BLUE },
-                new Color[] { Color.PINK, Color.YELLOW, null, Color.ORANGE, null },
-                new Color[] { null, null, null, null, null }
+        Color[][] matrix = {
+                new Color[] { Color.GREEN, Color.GREEN , Color.GREEN    , Color.LIGHTBLUE, Color.BLUE },
+                new Color[] { Color.GREEN, Color.ORANGE, Color.LIGHTBLUE, Color.ORANGE   , Color.BLUE },
+                new Color[] { Color.PINK , Color.ORANGE, Color.YELLOW   , Color.ORANGE   , Color.BLUE },
+                new Color[] { Color.PINK , Color.PINK  , null           , null           , Color.BLUE },
+                new Color[] { Color.PINK , Color.YELLOW, null           , Color.ORANGE   , null       },
+                new Color[] { null       , Color.GREEN , Color.GREEN    , Color.GREEN    , Color.GREEN}
         };
 
-        assertTrue(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(fourQuadripletNormal)));
+        assertTrue(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(matrix)));
     }
-
-
 }

@@ -7,7 +7,8 @@ import static it.polimi.ingsw.model.ShelfieView.*;
 
 public enum Type implements Serializable {
     SIX_COUPLES {
-        /** Returns number of couples in given shelfie **/
+        /** Returns number of couples in given shelfie and marks them with progressive number representing the
+         * order in which they have been identified by the program **/
         public int numCouples(Shelfie shelfie){
             int[][] checked = new int[ROWS][COLUMNS];
             int count = 0;
@@ -16,14 +17,14 @@ public enum Type implements Serializable {
                     if ( c<COLUMNS-1 && shelfie.tile(r,c).get()!=null && Objects.equals(shelfie.tile(r, c + 1).get(), shelfie.tile(r, c).get()) &&
                             checked[r][c] == 0 && checked[r][c+1] == 0) {
                         count++;
-                        checked[r][c] = 1;
-                        checked[r][c + 1] = 1;
+                        checked[r][c] = count;
+                        checked[r][c + 1] = count;
                     }
                     if ( r<ROWS-1 && shelfie.tile(r,c).get()!=null&&  Objects.equals(shelfie.tile(r + 1, c).get(), shelfie.tile(r, c).get()) &&
                             checked[r][c] == 0 && checked[r + 1][c] == 0) {
                         count++;
-                        checked[r][c] = 1;
-                        checked[r + 1][c] = 1;
+                        checked[r][c] = count;
+                        checked[r + 1][c] = count;
                     }
                 }
             }
@@ -54,56 +55,57 @@ public enum Type implements Serializable {
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLUMNS; c++) {
                     if (checked[r][c] == 0 && shelfie.tile(r, c).get() != null) {
-                        if (getCheckedForTiles(shelfie, r, c, checked) >= 4)
+                        if (getQuadrupletCheck(shelfie, r, c, checked, count+1) >= 4)
                             count++;
                     }
                 }
             }
             return count >= 4;
         }
-
-        /**
-         * @param shelfie
-         * @return number of reached tiles and checks the inspected ones
-         */
-        public int getCheckedForTiles(Shelfie shelfie, int row, int col, int[][] checked) {
+        /** Returns the number of adjacent tiles to the one specified by given row and col, marking them if more than 4
+         * with the number of quadriplet they belong to (specified by parameter marker), if not, marks them with -1
+         * to ensure they don't get inspected further**/
+        public int getQuadrupletCheck(Shelfie shelfie, int row, int col, int[][] checked, int marker) {
             List<Index> indexes = new ArrayList<>();
             indexes.add(new Index(row, col));
-            checked[row][col] = 1;
+            checked[row][col] = marker;
             int prevSize = 0;
             do {
                 prevSize = indexes.size();
                 for (int i = 0; i < indexes.size(); i++) {
-                    if (indexes.get(i).r < ROWS - 2
+                    if (indexes.get(i).r < ROWS - 1
                             && Objects.equals(shelfie.tile(indexes.get(i).r + 1, indexes.get(i).c),
                                     shelfie.tile(indexes.get(i).r, indexes.get(i).c))
                             && !indexes.contains(new Index(indexes.get(i).r + 1, indexes.get(i).c))) {
                         indexes.add(new Index(indexes.get(i).r + 1, indexes.get(i).c));
-                        checked[indexes.get(i).r + 1][indexes.get(i).c] = 1;
+                        checked[indexes.get(i).r + 1][indexes.get(i).c] = marker;
                     }
-                    if (indexes.get(i).c < COLUMNS - 2
+                    if (indexes.get(i).c < COLUMNS - 1
                             && Objects.equals(shelfie.tile(indexes.get(i).r, indexes.get(i).c + 1),
                                     shelfie.tile(indexes.get(i).r, indexes.get(i).c))
                             && !indexes.contains(new Index(indexes.get(i).r, indexes.get(i).c + 1))) {
                         indexes.add(new Index(indexes.get(i).r, indexes.get(i).c + 1));
-                        checked[indexes.get(i).r][indexes.get(i).c + 1] = 1;
+                        checked[indexes.get(i).r][indexes.get(i).c + 1] = marker;
                     }
                     if (indexes.get(i).r > 0
                             && shelfie.tile(indexes.get(i).r - 1, indexes.get(i).c) == shelfie.tile(indexes.get(i).r,
                                     indexes.get(i).c)
                             && !indexes.contains(new Index(indexes.get(i).r - 1, indexes.get(i).c))) {
                         indexes.add(new Index(indexes.get(i).r - 1, indexes.get(i).c));
-                        checked[indexes.get(i).r - 1][indexes.get(i).c] = 1;
+                        checked[indexes.get(i).r - 1][indexes.get(i).c] = marker;
                     }
                     if (indexes.get(i).c > 0
                             && Objects.equals(shelfie.tile(indexes.get(i).r, indexes.get(i).c - 1),
                                     shelfie.tile(indexes.get(i).r, indexes.get(i).c))
                             && !indexes.contains(new Index(indexes.get(i).r, indexes.get(i).c - 1))) {
                         indexes.add(new Index(indexes.get(i).r, indexes.get(i).c - 1));
-                        checked[indexes.get(i).r][indexes.get(i).c - 1] = 1;
+                        checked[indexes.get(i).r][indexes.get(i).c - 1] = marker;
                     }
                 }
             } while (indexes.size() > prevSize);
+            if(indexes.size()<4)
+                for( Index i : indexes)
+                    checked[i.r][i.c]=-1;
             return indexes.size();
         }
     },
