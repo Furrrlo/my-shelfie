@@ -5,6 +5,7 @@ import it.polimi.ingsw.socket.packets.Packet;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 
 /**
  * Handle socket communication from multiple threads, using a queue.
@@ -28,7 +29,8 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
      *
      *
      * @param p packet to be sent
-     * @throws IOException
+     * @throws IOException if sending and/or receiving fails
+     * @throws InterruptedIOException if interrupted while sending and/or receiving
      */
     void send(OUT p) throws IOException;
 
@@ -44,7 +46,8 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
      * @param p packet to be sent
      * @param replyType type of the AckPacket to wait for
      * @return {@link PacketReplyContext} the context of the received ack
-     * @throws IOException
+     * @throws IOException if sending fails
+     * @throws InterruptedIOException if interrupted while receiving
      */
     <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> send(OUT p, Class<R> replyType) throws IOException;
 
@@ -53,7 +56,8 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
      *
      * @param type type of the Packet to wait for
      * @return {@link PacketReplyContext} the context of the received packet
-     * @throws IOException
+     * @throws IOException if receiving fails
+     * @throws InterruptedIOException if interrupted while receiving
      */
     <R extends IN> PacketReplyContext<ACK_IN, ACK_OUT, R> receive(Class<R> type) throws IOException;
 
@@ -80,14 +84,16 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
         /**
          * Send a {@link SimpleAckPacket} with the {@link SeqAckPacket#seqAck()} of this packet
          *
-         * @throws IOException
+         * @throws IOException if sending fails
+         * @throws InterruptedIOException if interrupted while sending
          */
         void ack() throws IOException;
 
         /**
          * call {@link #ack()}
          *
-         * @throws IOException
+         * @throws IOException if sending fails
+         * @throws InterruptedIOException if interrupted while sending
          */
         @Override
         default void close() throws IOException {
@@ -99,7 +105,8 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
          * This will also acknowledge the current packet
          *
          * @param p packet to send
-         * @throws IOException
+         * @throws IOException if sending and/or receiving fails
+         * @throws InterruptedIOException if interrupted while sending and/or receiving
          */
         void reply(ACK_OUT p) throws IOException;
 
@@ -110,7 +117,8 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
          * @param p packet to send
          * @param replyType type of the AckPacket to wait for
          * @return context of the received AckPacket
-         * @throws IOException
+         * @throws IOException if sending and/or receiving fails
+         * @throws InterruptedIOException if interrupted while sending and/or receiving
          */
         <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> reply(ACK_OUT p, Class<R> replyType) throws IOException;
     }

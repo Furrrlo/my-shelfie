@@ -11,6 +11,8 @@ public interface PersonalGoalView extends Serializable {
     int COLUMNS = Shelfie.COLUMNS;
 
     /**
+     * Returns the tile in position r & c
+     * 
      * @param r defines row of personalGoal
      * @param c defines column of personalGoal
      * @return tile of personal Goal

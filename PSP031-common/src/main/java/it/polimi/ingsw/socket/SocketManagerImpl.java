@@ -105,6 +105,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             try {
                 close();
             } catch (IOException ignored) {
+                // Ignore
             }
         }
     }
@@ -128,6 +129,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             try {
                 close();
             } catch (IOException ignored) {
+                // Ignore
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -189,6 +191,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
     }
 
+    @Override
     public void setNick(String nick) {
         this.nick = nick;
     }

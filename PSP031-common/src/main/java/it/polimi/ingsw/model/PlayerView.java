@@ -4,13 +4,9 @@ import java.io.Serializable;
 
 public interface PlayerView extends Serializable {
 
-    /**
-     * @return player's nick
-     */
+    /** Return player's nick */
     String getNick();
 
-    /**
-     * @return shelfie as matrix of tiles
-     */
+    /** Return shelfie as matrix of tiles */
     ShelfieView getShelfie();
 }

@@ -11,6 +11,8 @@ public interface ShelfieView extends Serializable {
     int COLUMNS = 5;
 
     /**
+     * Returns the tile in position r & c
+     * 
      * @param r defines row of shelfie
      * @param c defines column of shelfie
      * @return tile in position r & c

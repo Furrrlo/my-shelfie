@@ -14,9 +14,7 @@ public class Tile implements Serializable {
         this.color = color;
     }
 
-    /**
-     * @return color of specified tile
-     */
+    /** Return color of specified tile */
     public Color getColor() {
         return this.color;
     }

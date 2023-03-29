@@ -83,6 +83,6 @@ class SocketManagerImplTest {
         }
     }
 
-    private record TestPacketReq(double rnd) implements Packet {
+    private record TestPacketReq(@SuppressWarnings("unused") double rnd) implements Packet {
     }
 }

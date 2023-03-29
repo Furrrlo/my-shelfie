@@ -7,38 +7,24 @@ import java.util.List;
 
 public interface GameView extends Serializable {
 
-    /**
-     * @return game ID
-     */
+    /** Returns game ID */
     int getGameID();
 
-    /**
-     * @return playing board
-     */
+    /** Returns playing board */
     BoardView getBoard();
 
-    /**
-     * @return list of players
-     */
+    /** Returns list of players */
     List<? extends PlayerView> getPlayers();
 
-    /**
-     * @return player whose now playing
-     */
+    /** Return player whose now playing */
     Provider<? extends PlayerView> currentTurn();
 
-    /**
-     * @return personal goal of the player
-     */
+    /** Return personal goal of the player */
     PersonalGoalView getPersonalGoal();
 
-    /**
-     * @return list of common goals of the game
-     */
+    /** Return list of common goals of the game */
     List<? extends CommonGoalView> getCommonGoals();
 
-    /**
-     * @return first player completing his shelfie
-     */
+    /** Return first player completing his shelfie */
     Provider<? extends @Nullable PlayerView> firstFinisher();
 }
