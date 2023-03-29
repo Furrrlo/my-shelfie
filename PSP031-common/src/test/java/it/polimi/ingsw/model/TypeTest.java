@@ -65,4 +65,5 @@ class TypeTest {
         assertTrue(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(fourQuadripletNormal)));
     }
 
+
 }
