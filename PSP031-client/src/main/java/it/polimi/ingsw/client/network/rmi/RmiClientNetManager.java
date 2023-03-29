@@ -15,22 +15,24 @@ import java.util.Objects;
 
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
 
+    private final int port;
     private final String remoteName;
     private @Nullable RmiConnectionController server;
 
     public RmiClientNetManager() {
-        this(RmiConnectionController.REMOTE_NAME);
+        this(Registry.REGISTRY_PORT, RmiConnectionController.REMOTE_NAME);
     }
 
     @VisibleForTesting
-    public RmiClientNetManager(String remoteName) {
+    public RmiClientNetManager(int port, String remoteName) {
+        this.port = port;
         this.remoteName = remoteName;
     }
 
     @Override
     public LobbyAndController<Lobby> joinGame(String nick) throws RemoteException, NotBoundException {
         if (server == null) {
-            final Registry registry = LocateRegistry.getRegistry();
+            final Registry registry = LocateRegistry.getRegistry(port);
             server = (RmiConnectionController) registry.lookup(remoteName);
         }
 

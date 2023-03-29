@@ -7,6 +7,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class RmiConnectionServerController implements RmiConnectionController {
 
@@ -14,14 +15,15 @@ public class RmiConnectionServerController implements RmiConnectionController {
     private @Nullable String nick;
 
     public static void bind(ServerController controller) throws RemoteException {
-        bind(RmiConnectionController.REMOTE_NAME, controller);
+        bind(LocateRegistry.createRegistry(Registry.REGISTRY_PORT), RmiConnectionController.REMOTE_NAME, controller);
     }
 
     @VisibleForTesting
-    public static void bind(String remoteName,
+    public static void bind(Registry registry,
+                            String remoteName,
                             ServerController controller)
             throws RemoteException {
-        LocateRegistry.createRegistry(1099).rebind(
+        registry.rebind(
                 remoteName,
                 UnicastRemoteObjects.export(new RmiConnectionServerController(controller), 0));
     }
