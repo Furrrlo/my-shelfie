@@ -1,0 +1,78 @@
+@startuml
+actor       Bob                              as client
+participant SocketClientNetManager           as clientNetManager
+participant SocketLobbyClientUpdater         as clientLobbyUpdater
+participant SocketLobbyController            as clientLobbyController
+participant ClientSocketManager              as clientSocketManager
+participant ServerSocketManager              as serverSocketManager
+participant SocketServerLobbyController      as serverLobbyController
+participant SocketLobbyServerUpdater         as serverLobbyUpdater
+participant SocketConnectionServerController as serverController
+entity      Server                           as server
+
+create serverController
+server -> serverController : new(port)
+
+client -> clientNetManager ++ : joinGame("Bob")
+clientNetManager -> clientSocketManager ** : new(serverAddress)
+clientSocketManager -> serverController ++ : connect
+serverSocketManager <- serverController ** : new(socket)
+deactivate serverController
+serverSocketManager <- serverController ++ : receive(JoinGamePacket.class)
+clientNetManager -> clientSocketManager ++ : send(new JoinGamePacket("Bob"))
+clientSocketManager --> serverSocketManager : JoinGamePacket("Bob")
+serverSocketManager -> serverController --++ : returns JoinGamePacket("Bob")
+serverController -> server ++ : joinGame("Bob")
+serverController <- server -- : returns Lobby
+serverController -> serverLobbyUpdater ** : new()
+serverController -> serverLobbyController ** : new()
+serverLobbyController -> serverSocketManager ++ : receive(ReadyPacket.class)
+serverSocketManager <- serverController --++ : reply(new LobbyPacket(lobby))
+clientSocketManager <-- serverSocketManager : LobbyPacket(lobby)
+clientNetManager <- clientSocketManager -- : returns LobbyPacket
+clientSocketManager --> serverSocketManager : ack
+serverSocketManager -> serverController -- : ack
+clientNetManager -> clientLobbyUpdater ** : new(lobby)
+clientLobbyUpdater -> clientSocketManager ++ : receive(LobbyUpdaterPacket.class)
+clientNetManager -> clientLobbyController ** : new()
+clientNetManager -> client -- : returns new LobbyAndController(lobby, controller)
+
+... After a while ...
+note across : Bob decides that he's ready to start the game
+
+client -> clientLobbyController ++ : ready(true)
+clientLobbyController -> clientSocketManager ++ : send(new ReadyPacket(true))
+clientSocketManager --> serverSocketManager : ReadyPacket(true)
+serverSocketManager -> serverLobbyController --++ : returns ReadyPacket(true)
+serverLobbyController -> server ++ : ready("Bob", true)
+serverLobbyUpdater <- server ++ : updatePlayerReady("Bob", true)
+serverSocketManager <- serverLobbyUpdater ++ : send(new UpdatePlayerReadyPacket("Bob", true))
+clientSocketManager <-- serverSocketManager : UpdatePlayerReadyPacket("Bob", true)
+clientLobbyUpdater <- clientSocketManager --++ : returns UpdatePlayerReadyPacket("Bob", true)
+client o<-- clientLobbyUpdater : receives player update via listener
+clientLobbyUpdater -> clientSocketManager -- : ack
+clientSocketManager --> serverSocketManager : ack
+clientLobbyUpdater -> clientSocketManager ++ : receive(LobbyUpdaterPacket.class)
+serverSocketManager -> serverLobbyUpdater -- : returns
+serverLobbyUpdater -> server -- : returns
+note right of server
+    If there's not enough players or a player is not ready yet,
+    the server would stop here and return.
+    In this case, there's enough players and all are ready
+end note
+serverLobbyController <- server ++ : updateGame(new GameAndController())
+serverSocketManager <- serverLobbyController ++ : send(new CreateGamePacket(game))
+clientSocketManager <-- serverSocketManager : CreateGamePacket(game)
+clientLobbyUpdater <- clientSocketManager --++ : returns CreateGamePacket(game)
+client o<-- clientLobbyUpdater : receives game and GameController via listener
+clientLobbyUpdater -> clientSocketManager -- : ack()
+clientSocketManager --> serverSocketManager : ack
+serverSocketManager -> serverLobbyController -- : returns
+serverLobbyController -> server -- : returns
+serverLobbyController <- server -- : returns
+serverSocketManager <- serverLobbyController -- : ack()
+clientSocketManager <-- serverSocketManager : ack
+clientLobbyController <- clientSocketManager -- : returns
+client <- clientLobbyController -- : returns
+
+@enduml
