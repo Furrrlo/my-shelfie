@@ -80,17 +80,31 @@ public class UpdatersIntegrationTest {
         assertEquals(
                 nick,
                 serverJoinedNick.get(500, TimeUnit.MILLISECONDS));
-        assertEquals(
-                serverLobbyToSerialize.get(500, TimeUnit.MILLISECONDS),
-                lobbyView);
+        // The serialized lobby does not contain the player that just joined
+        // (it gets added by an update), while the deserialized lobby is
+        // already updated before being returned by the ClientNetManager,
+        // so we can't check it
+        // assertEquals(
+        //      serverLobbyToSerialize.get(500, TimeUnit.MILLISECONDS),
+        //      lobbyView);
 
         final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
         ensurePropertyUpdated(
                 "joinedPlayers",
-                List.of(new LobbyPlayer(nick), new LobbyPlayer("player2"), new LobbyPlayer("player3"),
-                        new LobbyPlayer("player4")),
+                List.of(serverLobby.joinedPlayers().get().get(0), // Our own player should already be in there 
+                        new LobbyPlayer("player2"), new LobbyPlayer("player3"), new LobbyPlayer("player4")),
                 serverLobby.joinedPlayers(),
                 lobbyView.joinedPlayers());
+
+        for (int i = 0; i < serverLobby.joinedPlayers().get().size(); i++) {
+            final var serverLobbyPlayer = serverLobby.joinedPlayers().get().get(i);
+            final var clientLobbyPlayer = lobbyView.joinedPlayers().get().get(i);
+            ensurePropertyUpdated(
+                    serverLobbyPlayer.getNick() + ".ready",
+                    true,
+                    serverLobbyPlayer.ready(),
+                    clientLobbyPlayer.ready());
+        }
 
         final var gamePromise = new CompletableFuture<GameAndController<?>>();
         lobbyView.game().registerObserver(gamePromise::complete);

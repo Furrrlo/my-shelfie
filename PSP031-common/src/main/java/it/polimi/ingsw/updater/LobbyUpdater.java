@@ -10,5 +10,7 @@ public interface LobbyUpdater {
 
     void updateJoinedPlayers(List<String> joinedPlayers) throws DisconnectedException;
 
+    void updatePlayerReady(String nick, boolean ready) throws DisconnectedException;
+
     GameUpdater updateGame(GameAndController<Game> gameAndController) throws DisconnectedException;
 }

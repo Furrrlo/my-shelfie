@@ -5,6 +5,7 @@ import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.socket.packets.CreateGamePacket;
 import it.polimi.ingsw.socket.packets.UpdateJoinedPlayerPacket;
+import it.polimi.ingsw.socket.packets.UpdatePlayerReadyPacket;
 import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.updater.LobbyUpdater;
 
@@ -27,6 +28,15 @@ public class SocketLobbyServerUpdater implements LobbyUpdater {
             socketManager.send(new UpdateJoinedPlayerPacket(joinedPlayers));
         } catch (IOException e) {
             throw new RuntimeException(e); //TODO: ???
+        }
+    }
+
+    @Override
+    public void updatePlayerReady(String nick, boolean ready) throws DisconnectedException {
+        try {
+            socketManager.send(new UpdatePlayerReadyPacket(nick, ready));
+        } catch (IOException ex) {
+            throw new DisconnectedException(ex);
         }
     }
 

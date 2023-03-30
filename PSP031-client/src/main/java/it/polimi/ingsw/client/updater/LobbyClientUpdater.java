@@ -20,6 +20,13 @@ public abstract class LobbyClientUpdater implements LobbyUpdater {
         this.lobby = lobby;
     }
 
+    private LobbyPlayer findPlayerBy(String nick) {
+        return lobby.joinedPlayers().get().stream()
+                .filter(p -> p.getNick().equals(nick))
+                .findFirst()
+                .orElseThrow();
+    }
+
     @Override
     public void updateJoinedPlayers(List<String> joinedPlayers) {
         lobby.joinedPlayers().update(players -> {
@@ -39,6 +46,11 @@ public abstract class LobbyClientUpdater implements LobbyUpdater {
             });
             return newP;
         });
+    }
+
+    @Override
+    public void updatePlayerReady(String nick, boolean ready) {
+        findPlayerBy(nick).ready().set(ready);
     }
 
     @Override

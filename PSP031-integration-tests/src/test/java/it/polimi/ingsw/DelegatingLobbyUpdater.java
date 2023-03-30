@@ -20,6 +20,11 @@ public class DelegatingLobbyUpdater implements LobbyUpdater {
     }
 
     @Override
+    public void updatePlayerReady(String nick, boolean ready) throws DisconnectedException {
+        delegate.updatePlayerReady(nick, ready);
+    }
+
+    @Override
     public GameUpdater updateGame(GameAndController<Game> gameAndController) throws DisconnectedException {
         return delegate.updateGame(gameAndController);
     }

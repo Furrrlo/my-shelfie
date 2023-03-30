@@ -7,6 +7,7 @@ import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.socket.packets.CreateGamePacket;
 import it.polimi.ingsw.socket.packets.LobbyUpdaterPacket;
 import it.polimi.ingsw.socket.packets.UpdateJoinedPlayerPacket;
+import it.polimi.ingsw.socket.packets.UpdatePlayerReadyPacket;
 import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +33,8 @@ public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supp
                     final LobbyUpdaterPacket p = ctx.getPacket();
                     if (p instanceof UpdateJoinedPlayerPacket packet) {
                         updateJoinedPlayers(packet.players());
+                    } else if (p instanceof UpdatePlayerReadyPacket packet) {
+                        updatePlayerReady(packet.nick(), packet.ready());
                     } else if (p instanceof CreateGamePacket packet) {
                         return (SocketGameClientUpdater) updateGame(new GameAndController<>(
                                 packet.game(),

@@ -19,12 +19,10 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -99,14 +97,6 @@ public class ServerController {
                 if (!currentPlayers.contains(nick) && currentPlayers.size() >= serverLobby.getRequiredPlayers())
                     continue;
 
-                if (!currentPlayers.contains(nick)) {
-                    serverLobby.joinedPlayers().update(l -> {
-                        final var newList = new ArrayList<>(l);
-                        newList.add(new LobbyPlayer(nick, false));
-                        return newList;
-                    });
-                }
-
                 final Lobby lobby = new Lobby(serverLobby.getRequiredPlayers(), serverLobby.joinedPlayers().get());
 
                 final LobbyUpdater lobbyUpdater;
@@ -122,10 +112,25 @@ public class ServerController {
                 try (var currGameCloseable = LockProtected.useNullable(currGameLocked)) {
                     var currGame = currGameCloseable.obj();
 
-                    registerObserverFor(nick, serverLobby.joinedPlayers(), lobbyPlayers -> lobbyUpdater
-                            .updateJoinedPlayers(lobbyPlayers.stream()
-                                    .map(LobbyPlayer::getNick)
-                                    .collect(Collectors.toList())));
+                    // Doesn't need to be concurrent as it will only be called inside the lobby lock
+                    final var playersRegisteredObservers = new HashMap<LobbyPlayer, Consumer<?>>();
+                    for (LobbyPlayer player : serverLobby.joinedPlayers().get())
+                        playersRegisteredObservers.put(
+                                player,
+                                registerObserverFor(nick, player.ready(),
+                                        ready -> lobbyUpdater.updatePlayerReady(player.getNick(), ready)));
+
+                    registerObserverFor(nick, serverLobby.joinedPlayers(), newLobbyPlayers -> {
+                        lobbyUpdater.updateJoinedPlayers(newLobbyPlayers.stream()
+                                .map(LobbyPlayer::getNick)
+                                .collect(Collectors.toList()));
+                        // Add observers to players which joined
+                        for (LobbyPlayer p0 : newLobbyPlayers)
+                            playersRegisteredObservers.computeIfAbsent(p0, p -> registerObserverFor(nick, p.ready(),
+                                    ready -> lobbyUpdater.updatePlayerReady(p.getNick(), ready)));
+                        // Remove observers from players which left
+                        playersRegisteredObservers.entrySet().removeIf(e -> !newLobbyPlayers.contains(e.getKey()));
+                    });
                     registerObserverFor(nick, serverLobby.game(), game -> {
                         if (game != null) {
                             try (var gameCloseable = game.game().use()) {
@@ -138,6 +143,16 @@ public class ServerController {
                             }
                         }
                     });
+
+                    // Add the player after registering the listeners, 
+                    // so the joining player will also receive it
+                    if (!currentPlayers.contains(nick)) {
+                        serverLobby.joinedPlayers().update(l -> {
+                            final var newList = new ArrayList<>(l);
+                            newList.add(new LobbyPlayer(nick, false));
+                            return newList;
+                        });
+                    }
 
                     if (currGameAndController != null)
                         updateGameForPlayer(
@@ -246,24 +261,28 @@ public class ServerController {
         }
     }
 
-    private <T> void registerObserverFor(ServerPlayer player, Provider<T> toObserve, ThrowingConsumer<T> observer) {
-        observableTracker.registerObserverFor(player.getNick(), toObserve, t -> {
+    private <T> Consumer<T> registerObserverFor(ServerPlayer player, Provider<T> toObserve, ThrowingConsumer<T> observer) {
+        Consumer<T> throwingObserver;
+        observableTracker.registerObserverFor(player.getNick(), toObserve, throwingObserver = t -> {
             try {
                 observer.accept(t);
             } catch (DisconnectedException e) {
                 disconnectPlayer(player, e);
             }
         });
+        return throwingObserver;
     }
 
-    private <T> void registerObserverFor(String nick, Provider<T> toObserve, ThrowingConsumer<T> observer) {
-        observableTracker.registerObserverFor(nick, toObserve, t -> {
+    private <T> Consumer<T> registerObserverFor(String nick, Provider<T> toObserve, ThrowingConsumer<T> observer) {
+        Consumer<T> throwingObserver;
+        observableTracker.registerObserverFor(nick, toObserve, throwingObserver = t -> {
             try {
                 observer.accept(t);
             } catch (DisconnectedException e) {
                 disconnectPlayer(nick, e);
             }
         });
+        return throwingObserver;
     }
 
     private interface ThrowingConsumer<T> {
