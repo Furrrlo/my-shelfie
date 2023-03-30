@@ -8,19 +8,22 @@ class TypeTest {
 
     /** testing Type.SIX_COUPLES.checkCommonGoal() **/
     @Test
-    void checkCommonGoal_SIX_COUPLES_normal(){
+    void checkCommonGoal_SIX_COUPLES_normal() {
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.BLUE     , Color.GREEN    , Color.ORANGE   , Color.PINK     , Color.BLUE      },
                 new Color[] { Color.GREEN    , Color.YELLOW   , Color.GREEN    , Color.ORANGE   , Color.PINK      },
                 new Color[] { Color.YELLOW   , Color.PINK     , Color.BLUE     , Color.ORANGE   , Color.BLUE      },
                 new Color[] { Color.YELLOW   , Color.PINK     , Color.BLUE     , Color.GREEN    , Color.BLUE      },
                 new Color[] { Color.LIGHTBLUE, Color.YELLOW   , Color.BLUE     , Color.PINK     , Color.LIGHTBLUE },
                 new Color[] { Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.YELLOW   , Color.ORANGE    }
+                //@formatter:on
         };
         assertTrue(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
     }
+
     @Test
-    void checkCommonGoal_SIX_COUPLES_allNull(){
+    void checkCommonGoal_SIX_COUPLES_allNull() {
         Color[][] matrix = {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
@@ -31,60 +34,70 @@ class TypeTest {
         };
         assertFalse(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
     }
+
     @Test
-    void checkCommonGoal_SIX_COUPLES_borderCouples(){
+    void checkCommonGoal_SIX_COUPLES_borderCouples() {
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.BLUE     , Color.YELLOW   , Color.YELLOW   , null           , Color.PINK      },
                 new Color[] { Color.BLUE     , null           , null           , null           , Color.PINK      },
                 new Color[] { null           , null           , null           , null           , null            },
                 new Color[] { null           , null           , null           , null           , null            },
                 new Color[] { Color.LIGHTBLUE, null           , null           , null           , Color.ORANGE    },
                 new Color[] { Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , null           , Color.ORANGE    }
-                };
+                //@formatter:on
+        };
         assertTrue(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
     }
 
     @Test
-    void checkCommonGoal_SIX_COUPLES_normal_false(){
+    void checkCommonGoal_SIX_COUPLES_normal_false() {
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.BLUE     , Color.BLUE     , Color.PINK     , Color.PINK     , Color.PINK      },
                 new Color[] { Color.BLUE     , null           , null           , null           , Color.PINK      },
                 new Color[] { Color.BLUE     , null           , null           , null           , Color.PINK      },
                 new Color[] { null           , null           , null           , null           , null            },
                 new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            },
                 new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            }
-                };
+                //@formatter:on
+        };
         assertTrue(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
     }
 
     @Test
-    void checkCommonGoal_SIX_COUPLES_missingOne(){
+    void checkCommonGoal_SIX_COUPLES_missingOne() {
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.BLUE     , Color.YELLOW   , Color.YELLOW   , null           , Color.PINK      },
                 new Color[] { Color.BLUE     , null           , null           , null           , Color.PINK      },
                 new Color[] { null           , null           , null           , null           , null            },
                 new Color[] { null           , null           , null           , null           , null            },
                 new Color[] { null           , null           , null           , null           , Color.ORANGE    },
                 new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , Color.ORANGE    }
+                //@formatter:on
         };
         assertFalse(Type.SIX_COUPLES.checkCommonGoal(new Shelfie(matrix)));
     }
 
     /** testing Type.ALL_CORNERS.checkCommonGoal() **/
     @Test
-    void checkCommonGoal_ALL_CORNERS_normal_true(){
+    void checkCommonGoal_ALL_CORNERS_normal_true() {
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.PINK     , Color.PINK      },
                 new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE     , Color.PINK     , Color.BLUE      },
                 new Color[] { Color.BLUE     , Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE      },
                 new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.YELLOW   , Color.LIGHTBLUE, Color.ORANGE    },
                 new Color[] { Color.YELLOW   , Color.BLUE     , Color.GREEN    , Color.PINK     , null            },
                 new Color[] { Color.PINK     , Color.ORANGE   , null           , Color.LIGHTBLUE, Color.PINK      }
-                };
+                //@formatter:on
+        };
         assertTrue(Type.ALL_CORNERS.checkCommonGoal(new Shelfie(matrix)));
     }
+
     @Test
-    void checkCommonGoal_ALL_CORNERS_allNull(){
+    void checkCommonGoal_ALL_CORNERS_allNull() {
         Color[][] matrix = {
                 new Color[] { null, null, null, null, null },
                 new Color[] { null, null, null, null, null },
@@ -95,15 +108,18 @@ class TypeTest {
         };
         assertFalse(Type.ALL_CORNERS.checkCommonGoal(new Shelfie(matrix)));
     }
+
     @Test
-    void checkCommonGoal_ALL_CORNERS_normal_false(){
+    void checkCommonGoal_ALL_CORNERS_normal_false() {
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.PINK     , Color.GREEN     },
                 new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE     , Color.PINK     , Color.BLUE      },
                 new Color[] { Color.BLUE     , Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE      },
                 new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.YELLOW   , Color.LIGHTBLUE, Color.ORANGE    },
                 new Color[] { Color.YELLOW   , Color.BLUE     , Color.GREEN    , Color.PINK     , null            },
                 new Color[] { Color.PINK     , Color.ORANGE   , null           , Color.LIGHTBLUE, Color.PINK      }
+                //@formatter:on
         };
         assertFalse(Type.ALL_CORNERS.checkCommonGoal(new Shelfie(matrix)));
     }
@@ -127,12 +143,14 @@ class TypeTest {
     void checkCommonGoal_Four_Quadriplets_SingleQuadriplet() {
 
         Color[][] matrix = {
-                new Color[] { Color.GREEN, Color.GREEN, null, null, null },
-                new Color[] { null, Color.GREEN, Color.GREEN, Color.GREEN, null },
-                new Color[] { null, null, null, null, null },
-                new Color[] { null, null, null, null, null },
-                new Color[] { null, null, null, null, null },
-                new Color[] { null, null, null, null, null }
+                //@formatter:off
+                new Color[] { Color.GREEN, Color.GREEN, null       , null       , null },
+                new Color[] { null       , Color.GREEN, Color.GREEN, Color.GREEN, null },
+                new Color[] { null       , null       , null       , null       , null },
+                new Color[] { null       , null       , null       , null       , null },
+                new Color[] { null       , null       , null       , null       , null },
+                new Color[] { null       , null       , null       , null       , null }
+                //@formatter:on
         };
 
         assertFalse(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(matrix)));
@@ -142,12 +160,14 @@ class TypeTest {
     void checkCommonGoal_Four_QuadripletsEasy() {
 
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.PINK, null, Color.ORANGE, Color.BLUE }
+                //@formatter:on
         };
 
         assertTrue(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(matrix)));
@@ -157,12 +177,14 @@ class TypeTest {
     void checkCommonGoal_Four_QuadripletsNormal() {
 
         Color[][] matrix = {
+                //@formatter:off
                 new Color[] { Color.GREEN, Color.GREEN , Color.GREEN    , Color.LIGHTBLUE, Color.BLUE },
                 new Color[] { Color.GREEN, Color.ORANGE, Color.LIGHTBLUE, Color.ORANGE   , Color.BLUE },
                 new Color[] { Color.PINK , Color.ORANGE, Color.YELLOW   , Color.ORANGE   , Color.BLUE },
                 new Color[] { Color.PINK , Color.PINK  , null           , null           , Color.BLUE },
                 new Color[] { Color.PINK , Color.YELLOW, null           , Color.ORANGE   , null       },
                 new Color[] { null       , Color.GREEN , Color.GREEN    , Color.GREEN    , Color.GREEN}
+                //@formatter:on
         };
 
         assertTrue(Type.FOUR_QUADRIPLETS.checkCommonGoal(new Shelfie(matrix)));

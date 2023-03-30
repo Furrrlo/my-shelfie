@@ -1,9 +1,12 @@
 package it.polimi.ingsw.model;
+
 import java.util.Random;
 
 public class MatrixGenerator {
 
-    public MatrixGenerator() {}
+    public MatrixGenerator() {
+    }
+
     int ROWS = 6;
     int COLUMNS = 5;
     String[] colors = {
@@ -14,16 +17,17 @@ public class MatrixGenerator {
             "Color.LIGHTBLUE",
             "Color.PINK",
             "null"
-            };
-    public void printMatrix(){
+    };
+
+    public void printMatrix() {
         Random rand = new Random();
         System.out.println("Color[][] matrix = {");
-        for( int r=0; r<ROWS; r++ ){
-            String msg = "new Color[] { ";
-            for( int c=0; c<COLUMNS-1; c++){
-                msg = msg + String.format("%-15s", colors[rand.nextInt(colors.length)]) + ", ";
+        for (int r = 0; r < ROWS; r++) {
+            StringBuilder msg = new StringBuilder("new Color[] { ");
+            for (int c = 0; c < COLUMNS - 1; c++) {
+                msg.append(String.format("%-15s", colors[rand.nextInt(colors.length)])).append(", ");
             }
-            msg = msg + String.format("%-15s", colors[rand.nextInt(colors.length)]) + " },";
+            msg.append(String.format("%-15s", colors[rand.nextInt(colors.length)])).append(" },");
             System.out.println(msg);
         }
     }
@@ -34,4 +38,3 @@ public class MatrixGenerator {
         m.printMatrix();
     }
 }
-

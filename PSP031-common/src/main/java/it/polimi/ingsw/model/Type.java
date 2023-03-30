@@ -7,20 +7,24 @@ import static it.polimi.ingsw.model.ShelfieView.*;
 
 public enum Type implements Serializable {
     SIX_COUPLES {
-        /** Returns number of couples in given shelfie and marks them with progressive number representing the
-         * order in which they have been identified by the program **/
-        public int numCouples(Shelfie shelfie){
+        /**
+         * Returns number of couples in given shelfie and marks them with progressive number representing the
+         * order in which they have been identified by the program
+         **/
+        public int numCouples(Shelfie shelfie) {
             int[][] checked = new int[ROWS][COLUMNS];
             int count = 0;
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLUMNS; c++) {
-                    if ( c<COLUMNS-1 && shelfie.tile(r,c).get()!=null && Objects.equals(shelfie.tile(r, c + 1).get(), shelfie.tile(r, c).get()) &&
-                            checked[r][c] == 0 && checked[r][c+1] == 0) {
+                    if (c < COLUMNS - 1 && shelfie.tile(r, c).get() != null
+                            && Objects.equals(shelfie.tile(r, c + 1).get(), shelfie.tile(r, c).get()) &&
+                            checked[r][c] == 0 && checked[r][c + 1] == 0) {
                         count++;
                         checked[r][c] = count;
                         checked[r][c + 1] = count;
                     }
-                    if ( r<ROWS-1 && shelfie.tile(r,c).get()!=null&&  Objects.equals(shelfie.tile(r + 1, c).get(), shelfie.tile(r, c).get()) &&
+                    if (r < ROWS - 1 && shelfie.tile(r, c).get() != null
+                            && Objects.equals(shelfie.tile(r + 1, c).get(), shelfie.tile(r, c).get()) &&
                             checked[r][c] == 0 && checked[r + 1][c] == 0) {
                         count++;
                         checked[r][c] = count;
@@ -30,15 +34,16 @@ public enum Type implements Serializable {
             }
             return count;
         }
+
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-            return numCouples(shelfie)>=6; 
+            return numCouples(shelfie) >= 6;
         }
     },
     ALL_CORNERS {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-            return  shelfie.tile(0,0).get()!=null &&
+            return shelfie.tile(0, 0).get() != null &&
                     Objects.equals(shelfie.tile(0, 0).get(), shelfie.tile(0, COLUMNS - 1).get()) &&
                     Objects.requireNonNull(shelfie.tile(0, COLUMNS - 1).get()).equals(shelfie.tile(ROWS - 1, 0).get()) &&
                     Objects.requireNonNull(shelfie.tile(ROWS - 1, 0).get()).equals(shelfie.tile(ROWS - 1, COLUMNS - 1).get());
@@ -55,16 +60,19 @@ public enum Type implements Serializable {
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLUMNS; c++) {
                     if (checked[r][c] == 0 && shelfie.tile(r, c).get() != null) {
-                        if (getQuadrupletCheck(shelfie, r, c, checked, count+1) >= 4)
+                        if (getQuadrupletCheck(shelfie, r, c, checked, count + 1) >= 4)
                             count++;
                     }
                 }
             }
             return count >= 4;
         }
-        /** Returns the number of adjacent tiles to the one specified by given row and col, marking them if more than 4
+
+        /**
+         * Returns the number of adjacent tiles to the one specified by given row and col, marking them if more than 4
          * with the number of quadriplet they belong to (specified by parameter marker), if not, marks them with -1
-         * to ensure they don't get inspected further**/
+         * to ensure they don't get inspected further
+         **/
         public int getQuadrupletCheck(Shelfie shelfie, int row, int col, int[][] checked, int marker) {
             List<Index> indexes = new ArrayList<>();
             indexes.add(new Index(row, col));
@@ -103,9 +111,9 @@ public enum Type implements Serializable {
                     }
                 }
             } while (indexes.size() > prevSize);
-            if(indexes.size()<4)
-                for( Index i : indexes)
-                    checked[i.r][i.c]=-1;
+            if (indexes.size() < 4)
+                for (Index i : indexes)
+                    checked[i.r][i.c] = -1;
             return indexes.size();
         }
     },
