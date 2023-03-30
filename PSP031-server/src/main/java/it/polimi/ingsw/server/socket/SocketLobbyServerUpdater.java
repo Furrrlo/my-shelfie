@@ -13,12 +13,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class SocketLobbyServerUpdater implements LobbyUpdater {
-    //TODO: serve?
-    //private final Lobby lobby;
     private final ServerSocketManager socketManager;
 
     public SocketLobbyServerUpdater(ServerSocketManager socketManager) {
-        //this.lobby = lobby;
         this.socketManager = socketManager;
     }
 
@@ -27,7 +24,7 @@ public class SocketLobbyServerUpdater implements LobbyUpdater {
         try {
             socketManager.send(new UpdateJoinedPlayerPacket(joinedPlayers));
         } catch (IOException e) {
-            throw new RuntimeException(e); //TODO: ???
+            throw new DisconnectedException(e);
         }
     }
 
@@ -45,7 +42,7 @@ public class SocketLobbyServerUpdater implements LobbyUpdater {
         try {
             socketManager.send(new CreateGamePacket(gameAndController.game()));
         } catch (IOException e) {
-            throw new RuntimeException(e); //TODO: ???
+            throw new DisconnectedException(e);
         }
         return new SocketServerGameUpdater(socketManager);
     }
