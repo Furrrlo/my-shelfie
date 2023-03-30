@@ -180,23 +180,17 @@ public enum Type implements Serializable {
         }
     },
     EIGHT_EQUAL_TILES {
-        /**
-         *
-         * @param shelfie
-         * @param color
-         * @return how many tiles of a given color are present in the shelfie
-         */
+        /** Returns the amount of tiles of a given color present in the shelfie */
         public int equalColoredTiles(Shelfie shelfie, Color color) {
             int count = 0;
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLUMNS; c++) {
-                    if (shelfie.tile(r, c).get().getColor().equals(color))
+                    if ( shelfie.tile(r,c).get()!= null && Objects.requireNonNull(shelfie.tile(r, c).get()).getColor().equals(color))
                         count++;
                 }
             }
             return count;
         }
-
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             for (Color c : Color.values()) {
@@ -207,21 +201,34 @@ public enum Type implements Serializable {
         }
     },
     DIAGONAL {
+        /** Returns true if the diagonal in the shelfie built from tile in position r,c is made by the same colored
+         * tiles, and it's made by exactly 5 tiles, otherwise returns false */
+        public boolean checkDiagonal(Shelfie shelfie, int r, int c){
+            boolean found = true;
+            if(r >= ROWS-4 || !(c==0 || c==COLUMNS-1) || shelfie.tile(r,c).get()==null)
+                return false;
+            if(c==0)
+                for(int i=0; i<4 && found; i++){
+                    if(!Objects.equals(shelfie.tile(r, c).get(), shelfie.tile(r + i, c + i).get()))
+                        found = false;
+                }
+            if(c==COLUMNS-1)
+                for(int i=0; i<4 && found; i--){
+                    if(!Objects.equals(shelfie.tile(r, c).get(), shelfie.tile(r + i, c + i).get()))
+                        found = false;
+                }
+            return found;
+        }
+
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-            for (int r = 0; r < ROWS - 4; r++) {
-                if (Objects.equals(shelfie.tile(r, 0), shelfie.tile(r + 1, 1)) &&
-                        shelfie.tile(r + 1, 1).equals(shelfie.tile(r + 2, 2)) &&
-                        shelfie.tile(r + 2, 2).equals(shelfie.tile(r + 3, 3)) &&
-                        shelfie.tile(r + 3, 3).equals(shelfie.tile(r + 4, 4)))
-                    return true;
-                if (Objects.equals(shelfie.tile(r, 4), shelfie.tile(r + 1, 3)) &&
-                        shelfie.tile(r + 1, 3).equals(shelfie.tile(r + 2, 2)) &&
-                        shelfie.tile(r + 2, 2).equals(shelfie.tile(r + 3, 1)) &&
-                        shelfie.tile(r + 3, 1).equals(shelfie.tile(r + 4, 0)))
-                    return true;
+            boolean found = false;
+            for (int r = 0; r < ROWS && !found; r++) {
+                for (int c=0; c < COLUMNS &&!found; c++ ){
+                    found = checkDiagonal(shelfie, r, c);
+                }
             }
-            return false;
+            return found;
         }
     },
     FOUR_ROWS {
