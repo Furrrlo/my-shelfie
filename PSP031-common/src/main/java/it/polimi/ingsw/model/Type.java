@@ -110,11 +110,8 @@ public enum Type implements Serializable {
         }
     },
     TWO_SQUARES {
-        /**
-         *
-         * @param shelfie
-         * @return the number of existing squares of given color in a given shelfie
-         */
+        /** Returns the number of existing squares in a given shelfie, and marks the existing ones with
+         * progressive numbers according to the order they have been found **/
         public int numSquares(Shelfie shelfie) {
             int count = 0;
             int[][] checked = new int[ROWS][COLUMNS];
@@ -122,46 +119,53 @@ public enum Type implements Serializable {
             for (int r = 0; r < ROWS - 1; r++) {
                 for (int c = 0; c < COLUMNS - 1; c++) {
                     if (checked[r][c] == 0 && checked[r + 1][c] == 0 && checked[r][c + 1] == 0 && checked[r + 1][c + 1] == 0) {
-                        if (shelfie.tile(r + 1, c).equals(shelfie.tile(r, c)) &&
-                                shelfie.tile(r, c + 1).equals(shelfie.tile(r, c)) &&
-                                shelfie.tile(r + 1, c + 1).equals(shelfie.tile(r, c))) {
+                        if (    shelfie.tile(r,c).get() !=null &&
+                                Objects.equals(shelfie.tile(r + 1, c).get(), shelfie.tile(r, c).get()) &&
+                                Objects.equals(shelfie.tile(r, c + 1).get(), shelfie.tile(r, c).get()) &&
+                                Objects.equals(shelfie.tile(r + 1, c + 1).get(), shelfie.tile(r, c).get()))
+                        {
                             count++;
-                            checked[r][c] = 1;
-                            checked[r + 1][c] = 1;
-                            checked[r][c + 1] = 1;
-                            checked[r + 1][c + 1] = 1;
+                            checked[r][c] = count;
+                            checked[r + 1][c] = count;
+                            checked[r][c + 1] = count;
+                            checked[r + 1][c + 1] = count;
                         }
                     }
                 }
             }
             return count;
         }
-
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             return numSquares(shelfie) >= 2;
         }
     },
     THREE_COLUMNS {
-        /**
-         * @param shelfie : shelfie passed as parameter
-         * @param c : index of column passed as parameter
-         * @return how many different colors are present in a given column of a given shelfie
-         */
-        public int numColorsForColumn(Shelfie shelfie, int c) {
+        /** Returns the number of different colors present in a given column c of a shelfie, and if the number of
+         * colors is less than 4, it marks the columns with a progressive number according to the order they have
+         * been found */
+        public int numColorsForColumn(Shelfie shelfie, int c, int[][] checked, int marker ) {
             List<Color> colors = new ArrayList<Color>();
-            for (int r = 0; r < ROWS; r++) {
-                if (shelfie.tile(r, c).get() != null && !colors.contains(shelfie.tile(r, c).get().getColor()))
-                    colors.add(shelfie.tile(r, c).get().getColor());
-            }
-            return colors.size();
-        }
+            boolean fullColumn = true;
 
+            for (int r = 0; r < ROWS && fullColumn; r++) {
+                if (shelfie.tile(r, c).get() != null && !colors.contains(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor()))
+                    colors.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());
+                if ( shelfie.tile(r,c).get() == null )
+                    fullColumn = false;
+            }
+            if(colors.size()<=3 && fullColumn)
+                for(int r=0; r<ROWS; r++){
+                    checked[r][c] = marker;
+                }
+            return fullColumn? colors.size() : 100;
+        }
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int count = 0;
+            int[][] checked = new int[ROWS][COLUMNS];
             for (int c = 0; c < COLUMNS; c++) {
-                if (numColorsForColumn(shelfie, c) <= 3)
+                if (numColorsForColumn(shelfie, c, checked, count+1) <= 3)
                     count++;
             }
             return count >= 3;
