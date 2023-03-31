@@ -311,6 +311,7 @@ class TypeTest {
                 //@formatter:on
         };
         assertTrue(Type.DIAGONAL.checkCommonGoal(new Shelfie(matrix)));
+        new Shelfie(matrix).printColoredShelfie();
     }
     @Test
     void checkCommonGoal_DIAGONAL_allNull() {
@@ -323,5 +324,17 @@ class TypeTest {
                 new Color[] { null           , null           , null           , null           , null            }
         };
         assertFalse(Type.DIAGONAL.checkCommonGoal(new Shelfie(matrix)));
+    }
+    @Test
+    void printColoredShelfie(){
+        Color[][] matrix = {
+                new Color[] { Color.LIGHTBLUE, Color.YELLOW   , Color.LIGHTBLUE, Color.GREEN    , Color.GREEN     },
+                new Color[] { Color.PINK     , Color.GREEN    , Color.PINK     , Color.YELLOW   , Color.ORANGE    },
+                new Color[] { Color.GREEN    , Color.GREEN    , Color.YELLOW   , Color.GREEN    , Color.GREEN     },
+                new Color[] { Color.BLUE     , Color.GREEN    , Color.ORANGE   , Color.BLUE     , Color.BLUE      },
+                new Color[] { Color.LIGHTBLUE, Color.PINK     , Color.GREEN    , Color.ORANGE   , Color.LIGHTBLUE },
+                new Color[] { Color.LIGHTBLUE, Color.PINK     , Color.YELLOW   , Color.BLUE     , Color.LIGHTBLUE }
+        };
+        new Shelfie(matrix).printColoredShelfie();
     }
 }

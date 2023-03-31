@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -33,6 +34,37 @@ public class Shelfie implements ShelfieView {
                                 : SerializableProperty.nullableProperty(new Tile(color)))
                         .toArray(Property[]::new))
                 .toArray(Property[][]::new);
+    }
+
+    @VisibleForTesting
+    public void printColoredShelfie(){
+        for(int row=0; row<ROWS; row++){
+            StringBuilder msg = new StringBuilder();
+            if(row==0)
+                msg.append("   1  2  3  4  5 \n");
+            for(int col=0; col<COLUMNS; col++ ){
+                if(col==0)
+                    msg.append(row + 1).append(" ");
+                if(this.tile(row,col).get()==null) {
+                    msg.append("***");
+                } else {
+                    Color color = Objects.requireNonNull(this.tile(row, col).get()).getColor();
+                    if (color.equals(Color.BLUE))
+                        msg.append(ConsoleColors.BLUE).append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(ConsoleColors.BLUE_BOLD).append("***").append(ConsoleColors.RESET);
+                    if (color.equals(Color.GREEN))
+                        msg.append(ConsoleColors.GREEN).append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append(ConsoleColors.GREEN_BOLD).append("***").append(ConsoleColors.RESET);
+                    if (color.equals(Color.ORANGE))
+                        msg.append(ConsoleColors.RED).append(ConsoleColors.RED_BACKGROUND_BRIGHT).append(ConsoleColors.RED_BOLD).append("***").append(ConsoleColors.RESET);
+                    if (color.equals(Color.PINK))
+                        msg.append(ConsoleColors.PURPLE).append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append(ConsoleColors.PURPLE_BOLD).append("***").append(ConsoleColors.RESET);
+                    if (color.equals(Color.YELLOW))
+                        msg.append(ConsoleColors.YELLOW).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append(ConsoleColors.YELLOW_BOLD).append("***").append(ConsoleColors.RESET);
+                    if (color.equals(Color.LIGHTBLUE))
+                        msg.append(ConsoleColors.CYAN).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append(ConsoleColors.CYAN_BOLD).append("***").append(ConsoleColors.RESET);
+                }
+            }
+            System.out.println(msg);
+        }
     }
 
     @Override
