@@ -465,6 +465,173 @@ class TypeTest {
             assertFalse(Type.TWO_ALL_DIFF_ROWS.checkCommonGoal(new Shelfie(matrix)));
         }
 
+       /** testing Type.CROSS.checkCommonGoal() */
+       @Test
+       void checkCommonGoal_CROSS_allNull() {
+           Color[][] matrix = {
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null }
+           };
+           assertFalse(Type.CROSS.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_CROSS_normal_true() {
+           Color[][] matrix = {
+                   new Color[] { Color.ORANGE, Color.BLUE, Color.ORANGE, Color.PINK, Color.ORANGE },
+                   new Color[] { Color.GREEN, Color.ORANGE, Color.PINK, Color.PINK, Color.YELLOW },
+                   new Color[] { Color.ORANGE, Color.YELLOW, Color.ORANGE, Color.LIGHTBLUE, Color.YELLOW },
+                   new Color[] { Color.BLUE, Color.ORANGE, Color.BLUE, Color.ORANGE, Color.BLUE },
+                   new Color[] { Color.PINK, Color.ORANGE, Color.GREEN, Color.YELLOW, Color.ORANGE },
+                   new Color[] { Color.YELLOW, Color.GREEN, Color.YELLOW, Color.YELLOW, null }
+           };
+           assertTrue(Type.CROSS.checkCommonGoal(new Shelfie(matrix)));
+       }
+   
+       @Test
+       void checkCommonGoal_CROSS_normal1_true() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.PINK     , Color.PINK     , Color.PINK      },
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.PINK     , Color.PINK     , Color.ORANGE    },
+                new Color[] { Color.ORANGE   , Color.LIGHTBLUE, Color.PINK     , Color.ORANGE   , Color.PINK      },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
+                //@formatter:on
+           };
+           assertTrue(Type.CROSS.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_CROSS_normal_false() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.PINK     , Color.PINK     , null            },
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.PINK     , Color.PINK     , Color.ORANGE    },
+                new Color[] { Color.ORANGE   , Color.LIGHTBLUE, Color.PINK     , Color.ORANGE   , Color.PINK      },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
+                //@formatter:on
+           };
+           assertFalse(Type.CROSS.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       /** testing Type.TRIANGLE.checkCommonGoal() */
+       @Test
+       void checkCommonGoal_TRIANGLE_allNull() {
+           Color[][] matrix = {
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null },
+                   new Color[] { null, null, null, null, null }
+           };
+           assertFalse(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_TRIANGLE_from_0_4_true() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , null      },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.PINK     , null     , null            },
+                new Color[] { Color.YELLOW   , Color.GREEN    , null     , null     , null    },
+                new Color[] { Color.ORANGE   , null, null     , null   , null      },
+                new Color[] { null     , null, null, null           , null            },
+                //@formatter:on
+           };
+           new Shelfie(matrix).printColoredShelfie();
+           assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_TRIANGLE_from_1_4_true() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.YELLOW      },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.PINK     , Color.YELLOW     , null            },
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.YELLOW     , null     , null    },
+                new Color[] { Color.ORANGE   , Color.YELLOW, null     , null   , null      },
+                new Color[] { Color.YELLOW     , null, null, null           , null            },
+                //@formatter:on
+           };
+           new Shelfie(matrix).printColoredShelfie();
+           assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_TRIANGLE_from_0_0_true() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { null   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.BLUE      },
+                new Color[] { null   , null   , Color.PINK     , Color.PINK     , Color.ORANGE            },
+                new Color[] { null   , null    , null     , Color.PINK     , Color.ORANGE    },
+                new Color[] { null   , null, null     , null   , Color.PINK      },
+                new Color[] { null     , null, null, null           , null            },
+                //@formatter:on
+           };
+           new Shelfie(matrix).printColoredShelfie();
+           assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_TRIANGLE_from_1_0_true() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE  , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { Color.GREEN   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.BLUE      },
+                new Color[] { null          , Color.ORANGE  , Color.PINK     , Color.PINK     , Color.ORANGE            },
+                new Color[] { null          , null          , Color.GREEN    , Color.PINK     , Color.ORANGE    },
+                new Color[] { null          , null           , null           , Color.GREEN    , Color.PINK      },
+                new Color[] { null          , null           , null           , null           , Color.GREEN            },
+                //@formatter:on
+           };
+           new Shelfie(matrix).printColoredShelfie();
+           assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_TRIANGLE_from_0_4_false() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , null      },
+                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.PINK     , null     , null            },
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.PINK     , null     , null    },
+                new Color[] { Color.ORANGE   , null, null     , null   , null      },
+                new Color[] { null     , null, null, null           , null            },
+                //@formatter:on
+           };
+           new Shelfie(matrix).printColoredShelfie();
+           assertFalse(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
+       }
+
+       @Test
+       void checkCommonGoal_TRIANGLE_from_1_0_false() {
+           Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.ORANGE  , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
+                new Color[] { Color.GREEN   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.GREEN          , Color.ORANGE  , Color.PINK     , Color.PINK     , Color.ORANGE            },
+                new Color[] { null          , null          , Color.GREEN    , Color.PINK     , Color.ORANGE    },
+                new Color[] { null          , null           , null           , Color.GREEN    , Color.PINK      },
+                new Color[] { null          , null           , null           , null           , Color.GREEN            },
+                //@formatter:on
+           };
+           new Shelfie(matrix).printColoredShelfie();
+           assertFalse(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
+       }
+
     @Test
     void printColoredShelfie() {
         Color[][] matrix = {
