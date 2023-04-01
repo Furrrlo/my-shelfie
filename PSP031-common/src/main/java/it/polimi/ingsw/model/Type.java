@@ -7,12 +7,20 @@ import static it.polimi.ingsw.model.ShelfieView.*;
 
 public enum Type implements Serializable {
     SIX_COUPLES {
+        @Override
+        public boolean checkCommonGoal(Shelfie shelfie) {
+            int[][] checked = new int[ROWS][COLUMNS];
+            int count = numCouples(shelfie, checked);
+            if (count >= 6)
+                printCommonGoal(shelfie, checked, "SIX COUPLES");
+            return count >= 6;
+        }
+
         /**
          * Returns number of couples in given shelfie and marks them with progressive number representing the
          * order in which they have been identified by the program
          **/
-        public int numCouples(Shelfie shelfie) {
-            int[][] checked = new int[ROWS][COLUMNS];
+        public int numCouples(Shelfie shelfie, int[][] checked) {
             int count = 0;
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLUMNS; c++) {
@@ -33,11 +41,6 @@ public enum Type implements Serializable {
                 }
             }
             return count;
-        }
-
-        @Override
-        public boolean checkCommonGoal(Shelfie shelfie) {
-            return numCouples(shelfie) >= 6;
         }
     },
     ALL_CORNERS {
@@ -362,4 +365,63 @@ public enum Type implements Serializable {
      * @return true if the common goal of given type is achieved
      **/
     public abstract boolean checkCommonGoal(Shelfie shelfie);
+
+    public void printCommonGoal(Shelfie shelfie, int[][] checked, String s) {
+        System.out.println("Congratulation you achieved : " + s + " common goal");
+        for (int row = 0; row < ROWS; row++) {
+            StringBuilder msg = new StringBuilder();
+            if (row == 0) {
+                msg.append("   1  2  3  4  5 \n");
+            }
+            for (int col = 0; col < COLUMNS; col++) {
+                if (col == 0)
+                    msg.append(row + 1).append(" ");
+                if (shelfie.tile(row, col).get() == null) {
+                    msg.append("| |");
+                } else {
+                    Color color = Objects.requireNonNull(shelfie.tile(row, col).get()).getColor();
+                    if (checked[row][col] < 1) {
+                        if (color.equals(Color.BLUE))
+                            msg.append(ConsoleColors.BLUE_BACKGROUND).append("   ").append(ConsoleColors.RESET);
+                        if (color.equals(Color.GREEN))
+                            msg.append(ConsoleColors.GREEN_BACKGROUND).append("   ").append(ConsoleColors.RESET);
+                        if (color.equals(Color.ORANGE))
+                            msg.append(ConsoleColors.ORANGE_BACKGROUND).append("   ").append(ConsoleColors.RESET);
+                        if (color.equals(Color.PINK))
+                            msg.append(ConsoleColors.PURPLE_BACKGROUND).append("   ").append(ConsoleColors.RESET);
+                        if (color.equals(Color.YELLOW))
+                            msg.append(ConsoleColors.YELLOW_BACKGROUND).append("   ").append(ConsoleColors.RESET);
+                        if (color.equals(Color.LIGHTBLUE))
+                            msg.append(ConsoleColors.CYAN_BACKGROUND).append("   ").append(ConsoleColors.RESET);
+                    } else {
+                        if (color.equals(Color.BLUE))
+                            msg.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
+                                    .append(checked[row][col]).append(" ")
+                                    .append(ConsoleColors.RESET);
+                        if (color.equals(Color.GREEN))
+                            msg.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
+                                    .append(checked[row][col]).append(" ")
+                                    .append(ConsoleColors.RESET);
+                        if (color.equals(Color.ORANGE))
+                            msg.append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
+                                    .append(checked[row][col]).append(" ")
+                                    .append(ConsoleColors.RESET);
+                        if (color.equals(Color.PINK))
+                            msg.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
+                                    .append(checked[row][col]).append(" ")
+                                    .append(ConsoleColors.RESET);
+                        if (color.equals(Color.YELLOW))
+                            msg.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
+                                    .append(checked[row][col]).append(" ")
+                                    .append(ConsoleColors.RESET);
+                        if (color.equals(Color.LIGHTBLUE))
+                            msg.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
+                                    .append(checked[row][col]).append(" ")
+                                    .append(ConsoleColors.RESET);
+                    }
+                }
+            }
+            System.out.println(msg);
+        }
+    }
 }

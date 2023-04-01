@@ -53,7 +53,7 @@ class TypeTest {
     }
 
     @Test
-    void checkCommonGoal_SIX_COUPLES_normal_false() {
+    void checkCommonGoal_SIX_COUPLES_normal_true1() {
         Color[][] matrix = {
                 //@formatter:off
                 new Color[] { Color.BLUE     , Color.BLUE     , Color.PINK     , Color.PINK     , Color.PINK      },
