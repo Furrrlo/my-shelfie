@@ -325,6 +325,59 @@ class TypeTest {
         };
         assertFalse(Type.DIAGONAL.checkCommonGoal(new Shelfie(matrix)));
     }
+
+    /** testing Type.FOUR_ROWS.checkCommonGoal() */
+    @Test
+    void checkCommonGoal_FOUR_ROWS_allNull() {
+        Color[][] matrix = {
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            }
+    };
+    assertFalse(Type.FOUR_ROWS.checkCommonGoal(new Shelfie(matrix)));
+    }
+    @Test
+    void checkCommonGoal_FOUR_ROWS_easy() {
+        Color[][] matrix = {
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE    },
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE    },
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE    },
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE    },
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE    },
+            new Color[] { null           , null           , null           , null           , null            }
+    };
+    assertTrue(Type.FOUR_ROWS.checkCommonGoal(new Shelfie(matrix)));    
+    }
+
+    @Test
+    void checkCommonGoal_FOUR_ROWS_normal_true() {
+        Color[][] matrix = {
+            new Color[] { Color.ORANGE   , Color.BLUE   , Color.ORANGE   , Color.PINK   , Color.ORANGE    },
+            new Color[] { Color.ORANGE   , Color.BLUE   , Color.ORANGE   , null   , Color.ORANGE    },
+            new Color[] { Color.LIGHTBLUE   , Color.YELLOW   , Color.GREEN   , Color.LIGHTBLUE   , Color.YELLOW    },
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.BLUE   , Color.BLUE   , Color.BLUE    },
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.ORANGE   , Color.GREEN    },
+            new Color[] { null           , null           , null           , null           , null            }
+    };
+    assertTrue(Type.FOUR_ROWS.checkCommonGoal(new Shelfie(matrix)));    
+    }
+
+    @Test
+    void checkCommonGoal_FOUR_ROWS_normal_false() {
+        Color[][] matrix = {
+            new Color[] { Color.ORANGE   , Color.BLUE   , Color.ORANGE   , Color.PINK   , Color.ORANGE    },
+            new Color[] { Color.ORANGE   , Color.BLUE   , Color.ORANGE   , null   , Color.ORANGE    },
+            new Color[] { Color.LIGHTBLUE   , Color.YELLOW   , Color.GREEN   , Color.LIGHTBLUE   , Color.YELLOW    },
+            new Color[] { Color.ORANGE   , Color.ORANGE   , Color.BLUE   , Color.BLUE   , Color.BLUE    },
+            new Color[] { Color.ORANGE   , null   , Color.ORANGE   , Color.ORANGE   , Color.GREEN    },
+            new Color[] { null           , null           , null           , null           , null            }
+    };
+    assertFalse(Type.FOUR_ROWS.checkCommonGoal(new Shelfie(matrix)));    
+    }
+
     @Test
     void printColoredShelfie(){
         Color[][] matrix = {

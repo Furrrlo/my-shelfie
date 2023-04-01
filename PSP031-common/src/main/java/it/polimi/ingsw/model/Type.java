@@ -232,9 +232,8 @@ public enum Type implements Serializable {
         }
     },
     FOUR_ROWS {
-        //SIAMO ARRIVATI QUI
+        //Four lines each formed by 5 tiles of maximum three different types. One line can show the same or a different combination of another line.
         /**
-         *
          * @param shelfie
          * @param r
          * @return how many colors are present in a given row of a given shelfie
@@ -242,6 +241,8 @@ public enum Type implements Serializable {
         public int numColorsForRow(Shelfie shelfie, int r) {
             List<Color> count = new ArrayList<Color>();
             for (int c = 0; c < COLUMNS; c++) {
+                //if there is at least a null tile the row doesn't count because it must be full
+                if (shelfie.tile(r, c).get()==null) return ROWS;
                 if (!count.contains(shelfie.tile(r, c).get().getColor()))
                     count.add(shelfie.tile(r, c).get().getColor());
             }
