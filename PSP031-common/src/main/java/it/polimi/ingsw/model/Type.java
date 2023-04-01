@@ -118,8 +118,10 @@ public enum Type implements Serializable {
         }
     },
     TWO_SQUARES {
-        /** Returns the number of existing squares in a given shelfie, and marks the existing ones with
-         * progressive numbers according to the order they have been found **/
+        /**
+         * Returns the number of existing squares in a given shelfie, and marks the existing ones with
+         * progressive numbers according to the order they have been found
+         **/
         public int numSquares(Shelfie shelfie) {
             int count = 0;
             int[][] checked = new int[ROWS][COLUMNS];
@@ -127,11 +129,10 @@ public enum Type implements Serializable {
             for (int r = 0; r < ROWS - 1; r++) {
                 for (int c = 0; c < COLUMNS - 1; c++) {
                     if (checked[r][c] == 0 && checked[r + 1][c] == 0 && checked[r][c + 1] == 0 && checked[r + 1][c + 1] == 0) {
-                        if (    shelfie.tile(r,c).get() !=null &&
+                        if (shelfie.tile(r, c).get() != null &&
                                 Objects.equals(shelfie.tile(r + 1, c).get(), shelfie.tile(r, c).get()) &&
                                 Objects.equals(shelfie.tile(r, c + 1).get(), shelfie.tile(r, c).get()) &&
-                                Objects.equals(shelfie.tile(r + 1, c + 1).get(), shelfie.tile(r, c).get()))
-                        {
+                                Objects.equals(shelfie.tile(r + 1, c + 1).get(), shelfie.tile(r, c).get())) {
                             count++;
                             checked[r][c] = count;
                             checked[r + 1][c] = count;
@@ -143,37 +144,42 @@ public enum Type implements Serializable {
             }
             return count;
         }
+
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             return numSquares(shelfie) >= 2;
         }
     },
     THREE_COLUMNS {
-        /** Returns the number of different colors present in a given column c of a shelfie, and if the number of
+        /**
+         * Returns the number of different colors present in a given column c of a shelfie, and if the number of
          * colors is less than 4, it marks the columns with a progressive number according to the order they have
-         * been found */
-        public int numColorsForColumn(Shelfie shelfie, int c, int[][] checked, int marker ) {
+         * been found
+         */
+        public int numColorsForColumn(Shelfie shelfie, int c, int[][] checked, int marker) {
             List<Color> colors = new ArrayList<Color>();
             boolean fullColumn = true;
 
             for (int r = 0; r < ROWS && fullColumn; r++) {
-                if (shelfie.tile(r, c).get() != null && !colors.contains(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor()))
+                if (shelfie.tile(r, c).get() != null
+                        && !colors.contains(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor()))
                     colors.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());
-                if ( shelfie.tile(r,c).get() == null )
+                if (shelfie.tile(r, c).get() == null)
                     fullColumn = false;
             }
-            if(colors.size()<=3 && fullColumn)
-                for(int r=0; r<ROWS; r++){
+            if (colors.size() <= 3 && fullColumn)
+                for (int r = 0; r < ROWS; r++) {
                     checked[r][c] = marker;
                 }
-            return fullColumn? colors.size() : 100;
+            return fullColumn ? colors.size() : 100;
         }
+
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int count = 0;
             int[][] checked = new int[ROWS][COLUMNS];
             for (int c = 0; c < COLUMNS; c++) {
-                if (numColorsForColumn(shelfie, c, checked, count+1) <= 3)
+                if (numColorsForColumn(shelfie, c, checked, count + 1) <= 3)
                     count++;
             }
             return count >= 3;
@@ -185,12 +191,14 @@ public enum Type implements Serializable {
             int count = 0;
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLUMNS; c++) {
-                    if ( shelfie.tile(r,c).get()!= null && Objects.requireNonNull(shelfie.tile(r, c).get()).getColor().equals(color))
+                    if (shelfie.tile(r, c).get() != null
+                            && Objects.requireNonNull(shelfie.tile(r, c).get()).getColor().equals(color))
                         count++;
                 }
             }
             return count;
         }
+
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             for (Color c : Color.values()) {
@@ -201,20 +209,22 @@ public enum Type implements Serializable {
         }
     },
     DIAGONAL {
-        /** Returns true if the diagonal in the shelfie built from tile in position r,c is made by the same colored
-         * tiles, and it's made by exactly 5 tiles, otherwise returns false */
-        public boolean checkDiagonal(Shelfie shelfie, int r, int c){
+        /**
+         * Returns true if the diagonal in the shelfie built from tile in position r,c is made by the same colored
+         * tiles, and it's made by exactly 5 tiles, otherwise returns false
+         */
+        public boolean checkDiagonal(Shelfie shelfie, int r, int c) {
             boolean found = true;
-            if(r >= ROWS-4 || !(c==0 || c==COLUMNS-1) || shelfie.tile(r,c).get()==null)
+            if (r >= ROWS - 4 || !(c == 0 || c == COLUMNS - 1) || shelfie.tile(r, c).get() == null)
                 return false;
-            if(c==0)
-                for(int i=0; i<4 && found; i++){
-                    if(!Objects.equals(shelfie.tile(r, c).get(), shelfie.tile(r + i, c + i).get()))
+            if (c == 0)
+                for (int i = 0; i < 4 && found; i++) {
+                    if (!Objects.equals(shelfie.tile(r, c).get(), shelfie.tile(r + i, c + i).get()))
                         found = false;
                 }
-            if(c==COLUMNS-1)
-                for(int i=0; i<4 && found; i--){
-                    if(!Objects.equals(shelfie.tile(r, c).get(), shelfie.tile(r + i, c + i).get()))
+            if (c == COLUMNS - 1)
+                for (int i = 0; i < 4 && found; i--) {
+                    if (!Objects.equals(shelfie.tile(r, c).get(), shelfie.tile(r + i, c + i).get()))
                         found = false;
                 }
             return found;
@@ -224,7 +234,7 @@ public enum Type implements Serializable {
         public boolean checkCommonGoal(Shelfie shelfie) {
             boolean found = false;
             for (int r = 0; r < ROWS && !found; r++) {
-                for (int c=0; c < COLUMNS &&!found; c++ ){
+                for (int c = 0; c < COLUMNS && !found; c++) {
                     found = checkDiagonal(shelfie, r, c);
                 }
             }
@@ -242,7 +252,8 @@ public enum Type implements Serializable {
             List<Color> count = new ArrayList<Color>();
             for (int c = 0; c < COLUMNS; c++) {
                 //if there is at least a null tile the row doesn't count because it must be full
-                if (shelfie.tile(r, c).get()==null) return ROWS;
+                if (shelfie.tile(r, c).get() == null)
+                    return ROWS;
                 if (!count.contains(shelfie.tile(r, c).get().getColor()))
                     count.add(shelfie.tile(r, c).get().getColor());
             }
@@ -268,20 +279,29 @@ public enum Type implements Serializable {
          * @param c : index of column passed as parametre
          * @return true if the tiles of a given column of a given shelfie are all different, otherwise returns false
          */
+        public int numColorsForColumn(Shelfie shelfie, int c) {
+            List<Color> count = new ArrayList<Color>();
+            for (int r = 0; r < ROWS; r++) {
+                if (shelfie.tile(r, c).get() != null && !count.contains(shelfie.tile(r, c).get().getColor()))
+                    count.add(shelfie.tile(r, c).get().getColor());
+            }
+            return count.size();
+        }
+        /* 
         public boolean isDifferentColumn(Shelfie shelfie, int c) {
             for (int r = 0; r < ROWS; r++) {
                 for (int j = r + 1; j < ROWS; j++)
-                    if (shelfie.tile(r, c).equals(shelfie.tile(j, c)))
+                    if (shelfie.tile(r, c).equals(shelfie.tile(j, c)) || shelfie.tile(r, c).get() == null)
                         return false;
             }
             return true;
-        }
+        }*/
 
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int count = 0;
             for (int c = 0; c < COLUMNS; c++) {
-                if (isDifferentColumn(shelfie, c))
+                if (numColorsForColumn(shelfie, c) == ROWS)
                     count++;
             }
             return count >= 2;
@@ -294,7 +314,19 @@ public enum Type implements Serializable {
          * @param r
          * @return true if the tiles of a given row of a given shelfie are all different, otherwise return false
          */
-        public boolean isDifferentRow(Shelfie shelfie, int r) {
+        public int numColorsForRow(Shelfie shelfie, int r) {
+            List<Color> count = new ArrayList<Color>();
+            for (int c = 0; c < COLUMNS; c++) {
+                //if there is at least a null tile the row doesn't count because it must be full
+                if (shelfie.tile(r, c).get() != null && !count.contains(shelfie.tile(r, c).get().getColor()))
+                    count.add(shelfie.tile(r, c).get().getColor());
+            }
+            return count.size();
+        }
+        
+        
+        /* 
+         public boolean isDifferentRow(Shelfie shelfie, int r) {
             for (int c = 0; c < COLUMNS; c++) {
                 for (int j = c + 1; j < COLUMNS; j++) {
                     if (shelfie.tile(r, c).equals(shelfie.tile(r, j)))
@@ -302,19 +334,16 @@ public enum Type implements Serializable {
                 }
             }
             return true;
-        }
+        }*/
 
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int count = 0;
             for (int r = 0; r < ROWS; r++) {
-                if (isDifferentRow(shelfie, r))
+                if (numColorsForRow(shelfie, r) == COLUMNS)
                     count++;
             }
-            if (count >= 2)
-                return true;
-            else
-                return false;
+            return count >= 2;
         }
     },
     CROSS {
