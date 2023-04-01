@@ -157,7 +157,7 @@ public enum Type implements Serializable {
          * been found
          */
         public int numColorsForColumn(Shelfie shelfie, int c, int[][] checked, int marker) {
-            List<Color> colors = new ArrayList<Color>();
+            List<Color> colors = new ArrayList<>();
             boolean fullColumn = true;
 
             for (int r = 0; r < ROWS && fullColumn; r++) {
@@ -246,13 +246,13 @@ public enum Type implements Serializable {
          * Returns the number of different colors present in a given row r of a shelfie, excluding null tiles
          */
         public int numColorsForRow(Shelfie shelfie, int r) {
-            List<Color> count = new ArrayList<Color>();
+            List<Color> count = new ArrayList<>();
             for (int c = 0; c < COLUMNS; c++) {
                 //if there is at least a null tile the row doesn't count because it must be full
                 if (shelfie.tile(r, c).get() == null)
                     return ROWS;
-                if (!count.contains(shelfie.tile(r, c).get().getColor()))
-                    count.add(shelfie.tile(r, c).get().getColor());
+                if (!count.contains(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor()))
+                    count.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());
             }
             return count.size();
         }
@@ -270,13 +270,14 @@ public enum Type implements Serializable {
 
     TWO_ALL_DIFF_COLUMNS {
         /**
-        * Returns the number of different colors present in a given color c of a shelfie, excluding null tiles
-        */
+         * Returns the number of different colors present in a given color c of a shelfie, excluding null tiles
+         */
         public int numColorsForColumn(Shelfie shelfie, int c) {
-            List<Color> count = new ArrayList<Color>();
+            List<Color> count = new ArrayList<>();
             for (int r = 0; r < ROWS; r++) {
-                if (shelfie.tile(r, c).get() != null && !count.contains(shelfie.tile(r, c).get().getColor()))
-                    count.add(shelfie.tile(r, c).get().getColor());
+                if (shelfie.tile(r, c).get() != null
+                        && !count.contains(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor()))
+                    count.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());
             }
             return count.size();
         }
@@ -296,10 +297,11 @@ public enum Type implements Serializable {
          * Returns the number of different colors present in a given row r of a shelfie, excluding null tiles
          */
         public int numColorsForRow(Shelfie shelfie, int r) {
-            List<Color> count = new ArrayList<Color>();
+            List<Color> count = new ArrayList<>();
             for (int c = 0; c < COLUMNS; c++) {
-                if (shelfie.tile(r, c).get() != null && !count.contains(shelfie.tile(r, c).get().getColor()))
-                    count.add(shelfie.tile(r, c).get().getColor());
+                if (shelfie.tile(r, c).get() != null
+                        && !count.contains(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor()))
+                    count.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());
             }
             return count.size();
         }
@@ -319,11 +321,11 @@ public enum Type implements Serializable {
         public boolean checkCommonGoal(Shelfie shelfie) {
             for (int r = 0; r < ROWS - 2; r++) {
                 for (int c = 0; c < COLUMNS - 2; c++) {
-                    if (shelfie.tile(r, c).get()!=null && 
-                        shelfie.tile(r, c).equals(shelfie.tile(r + 2, c)) &&
-                        shelfie.tile(r, c).equals(shelfie.tile(r, c + 2)) &&
-                        shelfie.tile(r, c).equals(shelfie.tile(r + 1, c + 1)) &&
-                        shelfie.tile(r, c).equals(shelfie.tile(r + 2, c + 2)))
+                    if (shelfie.tile(r, c).get() != null &&
+                            shelfie.tile(r, c).equals(shelfie.tile(r + 2, c)) &&
+                            shelfie.tile(r, c).equals(shelfie.tile(r, c + 2)) &&
+                            shelfie.tile(r, c).equals(shelfie.tile(r + 1, c + 1)) &&
+                            shelfie.tile(r, c).equals(shelfie.tile(r + 2, c + 2)))
                         return true;
                 }
             }
@@ -333,22 +335,24 @@ public enum Type implements Serializable {
     TRIANGLE {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-      
-            for(int r=0;r<2;r++){
-            if (    shelfie.tile(r+0, 0).get() != null && shelfie.tile(r+1, 0).get() == null &&
-                    shelfie.tile(r+1, 1).get() != null && shelfie.tile(r+2, 1).get() == null &&
-                    shelfie.tile(r+2, 2).get() != null && shelfie.tile(r+3, 2).get() == null &&
-                    shelfie.tile(r+3, 3).get() != null && shelfie.tile(r+4, 3).get() == null &&
-                    shelfie.tile(r+4, 4).get() != null)
-                return true;}
-            for(int r=0;r<2;r++){
-            if (    shelfie.tile(r+0, 4).get() != null && shelfie.tile(r+1, 4).get() == null &&
-                    shelfie.tile(r+1, 3).get() != null && shelfie.tile(r+2, 3).get() == null &&
-                    shelfie.tile(r+2, 2).get() != null && shelfie.tile(r+3, 2).get() == null &&
-                    shelfie.tile(r+3, 1).get() != null && shelfie.tile(r+4, 1).get() == null &&
-                    shelfie.tile(r+4, 0).get() != null)
-                return true;}
-            
+
+            for (int r = 0; r < 2; r++) {
+                if (shelfie.tile(r, 0).get() != null && shelfie.tile(r + 1, 0).get() == null &&
+                        shelfie.tile(r + 1, 1).get() != null && shelfie.tile(r + 2, 1).get() == null &&
+                        shelfie.tile(r + 2, 2).get() != null && shelfie.tile(r + 3, 2).get() == null &&
+                        shelfie.tile(r + 3, 3).get() != null && shelfie.tile(r + 4, 3).get() == null &&
+                        shelfie.tile(r + 4, 4).get() != null)
+                    return true;
+            }
+            for (int r = 0; r < 2; r++) {
+                if (shelfie.tile(r, 4).get() != null && shelfie.tile(r + 1, 4).get() == null &&
+                        shelfie.tile(r + 1, 3).get() != null && shelfie.tile(r + 2, 3).get() == null &&
+                        shelfie.tile(r + 2, 2).get() != null && shelfie.tile(r + 3, 2).get() == null &&
+                        shelfie.tile(r + 3, 1).get() != null && shelfie.tile(r + 4, 1).get() == null &&
+                        shelfie.tile(r + 4, 0).get() != null)
+                    return true;
+            }
+
             return false;
 
         }
