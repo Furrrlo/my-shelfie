@@ -7,6 +7,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
@@ -97,9 +98,13 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 log("Received packet: " + p);
                 inPacketQueue.add(p);
             } while (!Thread.currentThread().isInterrupted());
-        } catch (InterruptedIOException e) {
+        } catch (InterruptedIOException | ClosedByInterruptException e) {
             // Go on, interruption is expected
         } catch (IOException e) {
+            // If the interruption flag was set, we got interrupted by close, so it's expected
+            if (Thread.currentThread().isInterrupted())
+                return;
+
             log("Failed to read packet, closing...");
             e.printStackTrace();
             try {
@@ -123,7 +128,13 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                     p.future().completeExceptionally(ex);
                 }
             } while (!Thread.currentThread().isInterrupted());
+        } catch (InterruptedIOException | ClosedByInterruptException | InterruptedException e) {
+            // Go on, interruption is expected
         } catch (IOException e) {
+            // If the interruption flag was set, we got interrupted by close, so it's expected
+            if (Thread.currentThread().isInterrupted())
+                return;
+
             log("Failed to write packet, closing...");
             e.printStackTrace();
             try {
@@ -131,8 +142,6 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             } catch (IOException ignored) {
                 // Ignore
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 
