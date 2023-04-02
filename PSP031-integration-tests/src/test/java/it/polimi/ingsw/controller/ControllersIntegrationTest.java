@@ -15,11 +15,12 @@ import it.polimi.ingsw.server.model.*;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.Arguments;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ControllersIntegrationTest {
 
-    public static void doTestControllers(Consumer<ServerController> bindServerController,
+    public static void doTestControllers(Function<ServerController, Closeable> bindServerController,
                                          Supplier<ClientNetManager> clientNetManagerFactory)
             throws Throwable {
         final var nick = "test_nickname";
@@ -35,7 +36,7 @@ public class ControllersIntegrationTest {
         var readyPromise = new CompletableFuture<Arguments>();
 
         final var serverLobbyPromise = new CompletableFuture<ServerLobby>();
-        bindServerController.accept(new ServerController() {
+        try (Closeable ignored = bindServerController.apply(new ServerController() {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
@@ -50,51 +51,52 @@ public class ControllersIntegrationTest {
                             }
                         });
             }
-        });
+        })) {
 
-        var lobbyAndController = clientNetManagerFactory.get().joinGame(nick);
-        LobbyController lobbyController = lobbyAndController.controller();
+            var lobbyAndController = clientNetManagerFactory.get().joinGame(nick);
+            LobbyController lobbyController = lobbyAndController.controller();
 
-        final var gameAndControllerPromise = new CompletableFuture<GameAndController<?>>();
-        lobbyAndController.lobby().game().registerObserver(gameAndControllerPromise::complete);
-        assertControllerMethodCalled(
-                "ready",
-                () -> lobbyController.ready(true),
-                Arguments.of(nick, true),
-                readyPromise);
+            final var gameAndControllerPromise = new CompletableFuture<GameAndController<?>>();
+            lobbyAndController.lobby().game().registerObserver(gameAndControllerPromise::complete);
+            assertControllerMethodCalled(
+                    "ready",
+                    () -> lobbyController.ready(true),
+                    Arguments.of(nick, true),
+                    readyPromise);
 
-        final var makeMovePromise = new CompletableFuture<Arguments>();
+            final var makeMovePromise = new CompletableFuture<Arguments>();
 
-        final ServerGame serverGame;
-        final List<ServerPlayer> players;
-        final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
-        serverLobby.game().set(new ServerGameAndController<>(new LockProtected<>(serverGame = new ServerGame(
-                0,
-                new Board(serverLobby.joinedPlayers().get().size()),
-                List.of(),
-                players = serverLobby.joinedPlayers().get().stream()
-                        .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
-                        .collect(Collectors.toList()),
-                players.size() - 1,
-                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),
-                new GameServerController(serverGame) {
-                    @Override
-                    public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
-                        makeMovePromise.complete(Arguments.of(player, selected, shelfCol));
-                    }
-                }));
-        final var thePlayer = players.stream()
-                .filter(p -> p.getNick().equals(nick))
-                .findFirst()
-                .orElseThrow();
+            final LockProtected<ServerGame> serverGame;
+            final List<ServerPlayer> players;
+            final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
+            serverLobby.game().set(new ServerGameAndController<>(serverGame = new LockProtected<>(new ServerGame(
+                    0,
+                    new Board(serverLobby.joinedPlayers().get().size()),
+                    List.of(),
+                    players = serverLobby.joinedPlayers().get().stream()
+                            .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
+                            .collect(Collectors.toList()),
+                    players.size() - 1,
+                    List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),
+                    new GameServerController(serverGame) {
+                        @Override
+                        public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
+                            makeMovePromise.complete(Arguments.of(player, selected, shelfCol));
+                        }
+                    }));
+            final var thePlayer = players.stream()
+                    .filter(p -> p.getNick().equals(nick))
+                    .findFirst()
+                    .orElseThrow();
 
-        var gameAndController = gameAndControllerPromise.get(500, TimeUnit.MILLISECONDS);
-        var gameController = gameAndController.controller();
-        assertControllerMethodCalled(
-                "makeMove",
-                () -> gameController.makeMove(List.of(new BoardCoord(0, 0), new BoardCoord(5, 5)), 0),
-                Arguments.of(thePlayer, List.of(new BoardCoord(0, 0), new BoardCoord(5, 5)), 0),
-                makeMovePromise);
+            var gameAndController = gameAndControllerPromise.get(500, TimeUnit.MILLISECONDS);
+            var gameController = gameAndController.controller();
+            assertControllerMethodCalled(
+                    "makeMove",
+                    () -> gameController.makeMove(List.of(new BoardCoord(0, 0), new BoardCoord(5, 5)), 0),
+                    Arguments.of(thePlayer, List.of(new BoardCoord(0, 0), new BoardCoord(5, 5)), 0),
+                    makeMovePromise);
+        }
     }
 
     private static void assertControllerMethodCalled(String name,

@@ -18,7 +18,7 @@ public class RmiIntegrationTest {
         UpdatersIntegrationTest.doTestUpdaters(
                 serverController -> {
                     try {
-                        RmiConnectionServerController.bind(
+                        return RmiConnectionServerController.bind(
                                 LocateRegistry.createRegistry(0, null, rmiServerSocketFactory),
                                 remoteName,
                                 serverController);
@@ -36,7 +36,7 @@ public class RmiIntegrationTest {
         ControllersIntegrationTest.doTestControllers(
                 serverController -> {
                     try {
-                        RmiConnectionServerController.bind(
+                        return RmiConnectionServerController.bind(
                                 LocateRegistry.createRegistry(0, null, rmiServerSocketFactory),
                                 remoteName,
                                 serverController);

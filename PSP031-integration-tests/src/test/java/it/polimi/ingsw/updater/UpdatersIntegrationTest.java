@@ -8,13 +8,11 @@ import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.*;
-import it.polimi.ingsw.server.controller.GameServerController;
-import it.polimi.ingsw.server.controller.LobbyServerController;
-import it.polimi.ingsw.server.controller.LockProtected;
-import it.polimi.ingsw.server.controller.ServerController;
+import it.polimi.ingsw.server.controller.*;
 import it.polimi.ingsw.server.model.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -31,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UpdatersIntegrationTest {
 
-    public static void doTestUpdaters(Consumer<ServerController> bindServerController,
+    public static void doTestUpdaters(Function<ServerController, Closeable> bindServerController,
                                       Supplier<ClientNetManager> clientNetManagerFactory)
             throws Exception {
         final String nick = "test_nickname";
@@ -44,7 +42,7 @@ public class UpdatersIntegrationTest {
 
         final var serverGameToSerialize = new CompletableFuture<Game>();
 
-        bindServerController.accept(new ServerController() {
+        try (Closeable ignored = bindServerController.apply(new ServerController() {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
@@ -56,6 +54,7 @@ public class UpdatersIntegrationTest {
             @Override
             public LobbyView joinGame(String nick,
                                       HeartbeatHandler heartbeatHandler,
+                                      PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Function<LobbyServerController, LobbyController> lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
@@ -68,107 +67,110 @@ public class UpdatersIntegrationTest {
                         return gameUpdater;
                     }
                 };
-                var lobby = super.joinGame(nick, heartbeatHandler, wrappedFactory, lobbyControllerFactory,
+                var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, wrappedFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 serverJoinedNick.complete(nick);
                 serverLobbyToSerialize.complete(lobby);
                 return lobby;
             }
-        });
+        })) {
 
-        LobbyView lobbyView = clientNetManagerFactory.get().joinGame(nick).lobby();
-        assertEquals(
-                nick,
-                serverJoinedNick.get(500, TimeUnit.MILLISECONDS));
-        // The serialized lobby does not contain the player that just joined
-        // (it gets added by an update), while the deserialized lobby is
-        // already updated before being returned by the ClientNetManager,
-        // so we can't check it
-        // assertEquals(
-        //      serverLobbyToSerialize.get(500, TimeUnit.MILLISECONDS),
-        //      lobbyView);
+            LobbyView lobbyView = clientNetManagerFactory.get().joinGame(nick).lobby();
+            assertEquals(
+                    nick,
+                    serverJoinedNick.get(500, TimeUnit.MILLISECONDS));
+            // The serialized lobby does not contain the player that just joined
+            // (it gets added by an update), while the deserialized lobby is
+            // already updated before being returned by the ClientNetManager,
+            // so we can't check it
+            // assertEquals(
+            //      serverLobbyToSerialize.get(500, TimeUnit.MILLISECONDS),
+            //      lobbyView);
 
-        final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
-        ensurePropertyUpdated(
-                "joinedPlayers",
-                List.of(serverLobby.joinedPlayers().get().get(0), // Our own player should already be in there 
-                        new LobbyPlayer("player2"), new LobbyPlayer("player3"), new LobbyPlayer("player4")),
-                serverLobby.joinedPlayers(),
-                lobbyView.joinedPlayers());
-
-        for (int i = 0; i < serverLobby.joinedPlayers().get().size(); i++) {
-            final var serverLobbyPlayer = serverLobby.joinedPlayers().get().get(i);
-            final var clientLobbyPlayer = lobbyView.joinedPlayers().get().get(i);
+            final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
             ensurePropertyUpdated(
-                    serverLobbyPlayer.getNick() + ".ready",
-                    true,
-                    serverLobbyPlayer.ready(),
-                    clientLobbyPlayer.ready());
-        }
+                    "joinedPlayers",
+                    List.of(serverLobby.joinedPlayers().get().get(0), // Our own player should already be in there 
+                            new LobbyPlayer("player2"), new LobbyPlayer("player3"), new LobbyPlayer("player4")),
+                    serverLobby.joinedPlayers(),
+                    lobbyView.joinedPlayers());
 
-        final var gamePromise = new CompletableFuture<GameAndController<?>>();
-        lobbyView.game().registerObserver(gamePromise::complete);
-
-        final ServerGame serverGame;
-        final List<ServerPlayer> players;
-        serverLobby.game().set(new ServerGameAndController<>(new LockProtected<>(serverGame = new ServerGame(
-                0,
-                new Board(serverLobby.joinedPlayers().get().size()),
-                List.of(),
-                players = serverLobby.joinedPlayers().get().stream()
-                        .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
-                        .collect(Collectors.toList()),
-                rnd.nextInt(players.size()),
-                List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),
-                new GameServerController(serverGame)));
-
-        final var clientGame = gamePromise.get().game();
-        assertEquals(
-                serverGameToSerialize.get(500, TimeUnit.MILLISECONDS),
-                clientGame);
-
-        ensurePropertyUpdated(
-                "currentTurn",
-                serverGame.getPlayers().get(0),
-                clientGame.getPlayers().get(0),
-                serverGame.currentTurn(),
-                clientGame.currentTurn());
-        ensurePropertyUpdated(
-                "firstFinisher",
-                serverGame.getPlayers().get(0),
-                clientGame.getPlayers().get(0),
-                serverGame.firstFinisher(),
-                clientGame.firstFinisher());
-
-        for (int i = 0; i < serverGame.getPlayers().size(); i++) {
-            final var serverPlayer = serverGame.getPlayers().get(i);
-            final var clientPlayer = clientGame.getPlayers().get(i);
-
-            for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
+            for (int i = 0; i < serverLobby.joinedPlayers().get().size(); i++) {
+                final var serverLobbyPlayer = serverLobby.joinedPlayers().get().get(i);
+                final var clientLobbyPlayer = lobbyView.joinedPlayers().get().get(i);
                 ensurePropertyUpdated(
-                        serverPlayer.getNick() + "ShelfTile" + tile.row() + "x" + tile.col(),
+                        serverLobbyPlayer.getNick() + ".ready",
+                        true,
+                        serverLobbyPlayer.ready(),
+                        clientLobbyPlayer.ready());
+            }
+
+            final var gamePromise = new CompletableFuture<GameAndController<?>>();
+            lobbyView.game().registerObserver(gamePromise::complete);
+
+            final ServerGame serverGame;
+            final LockProtected<ServerGame> lockedServerGame;
+            final List<ServerPlayer> players;
+            serverLobby.game().set(new ServerGameAndController<>(
+                    lockedServerGame = new LockProtected<>(serverGame = new ServerGame(
+                            0,
+                            new Board(serverLobby.joinedPlayers().get().size()),
+                            List.of(),
+                            players = serverLobby.joinedPlayers().get().stream()
+                                    .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
+                                    .collect(Collectors.toList()),
+                            rnd.nextInt(players.size()),
+                            List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),
+                    new GameServerController(lockedServerGame)));
+
+            final var clientGame = gamePromise.get().game();
+            assertEquals(
+                    serverGameToSerialize.get(500, TimeUnit.MILLISECONDS),
+                    clientGame);
+
+            ensurePropertyUpdated(
+                    "currentTurn",
+                    serverGame.getPlayers().get(0),
+                    clientGame.getPlayers().get(0),
+                    serverGame.currentTurn(),
+                    clientGame.currentTurn());
+            ensurePropertyUpdated(
+                    "firstFinisher",
+                    serverGame.getPlayers().get(0),
+                    clientGame.getPlayers().get(0),
+                    serverGame.firstFinisher(),
+                    clientGame.firstFinisher());
+
+            for (int i = 0; i < serverGame.getPlayers().size(); i++) {
+                final var serverPlayer = serverGame.getPlayers().get(i);
+                final var clientPlayer = clientGame.getPlayers().get(i);
+
+                for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
+                    ensurePropertyUpdated(
+                            serverPlayer.getNick() + "ShelfTile" + tile.row() + "x" + tile.col(),
+                            new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                            serverPlayer.getShelfie().tile(tile.row(), tile.col()),
+                            clientPlayer.getShelfie().tile(tile.row(), tile.col()));
+            }
+
+            for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverGame.getBoard().tiles()::iterator)
+                ensurePropertyUpdated(
+                        "board" + tile.row() + "x" + tile.col(),
                         new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
-                        serverPlayer.getShelfie().tile(tile.row(), tile.col()),
-                        clientPlayer.getShelfie().tile(tile.row(), tile.col()));
-        }
+                        serverGame.getBoard().tile(tile.row(), tile.col()),
+                        clientGame.getBoard().tile(tile.row(), tile.col()));
 
-        for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverGame.getBoard().tiles()::iterator)
-            ensurePropertyUpdated(
-                    "board" + tile.row() + "x" + tile.col(),
-                    new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
-                    serverGame.getBoard().tile(tile.row(), tile.col()),
-                    clientGame.getBoard().tile(tile.row(), tile.col()));
+            for (int i = 0; i < serverGame.getCommonGoals().size(); i++) {
+                final var serverCommonGoal = serverGame.getCommonGoals().get(i);
+                final var clientCommonGoal = clientGame.getCommonGoals().get(i);
 
-        for (int i = 0; i < serverGame.getCommonGoals().size(); i++) {
-            final var serverCommonGoal = serverGame.getCommonGoals().get(i);
-            final var clientCommonGoal = clientGame.getCommonGoals().get(i);
-
-            ensurePropertyUpdated(
-                    "commonGoal",
-                    List.of(serverGame.getPlayers().get(0)),
-                    List.of(clientGame.getPlayers().get(0)),
-                    serverCommonGoal.achieved(),
-                    clientCommonGoal.achieved());
+                ensurePropertyUpdated(
+                        "commonGoal",
+                        List.of(serverGame.getPlayers().get(0)),
+                        List.of(clientGame.getPlayers().get(0)),
+                        serverCommonGoal.achieved(),
+                        clientCommonGoal.achieved());
+            }
         }
     }
 
