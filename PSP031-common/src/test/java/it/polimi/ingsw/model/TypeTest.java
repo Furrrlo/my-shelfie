@@ -336,7 +336,6 @@ class TypeTest {
                 //@formatter:on
         };
         assertTrue(Type.DIAGONAL.checkCommonGoal(new Shelfie(matrix)));
-        new Shelfie(matrix).printColoredShelfie();
     }
 
     @Test
