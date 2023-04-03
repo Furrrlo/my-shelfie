@@ -8,6 +8,7 @@ import it.polimi.ingsw.updater.GameUpdater;
 import it.polimi.ingsw.updater.LobbyUpdater;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public abstract class LobbyClientUpdater implements LobbyUpdater {
                 if (!joinedPlayers.contains(nick))
                     newP.remove(player);
             });
-            return newP;
+            return Collections.unmodifiableList(newP);
         });
     }
 

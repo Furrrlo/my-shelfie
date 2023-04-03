@@ -1,8 +1,10 @@
 package it.polimi.ingsw.server.model;
 
-import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.SerializableProperty;
+import it.polimi.ingsw.model.Type;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,11 +12,11 @@ public class ServerCommonGoal implements ServerCommonGoalView {
 
     private final Type type;
 
-    private final Property<List<ServerPlayer>> achieved;
+    private final Property<@Unmodifiable List<ServerPlayer>> achieved;
 
     public ServerCommonGoal(Type type) {
         this.type = type;
-        this.achieved = new SerializableProperty<>(new ArrayList<>());
+        this.achieved = new SerializableProperty<>(List.of());
     }
 
     @Override
@@ -23,7 +25,7 @@ public class ServerCommonGoal implements ServerCommonGoalView {
     }
 
     @Override
-    public Property<List<ServerPlayer>> achieved() {
+    public Property<@Unmodifiable List<ServerPlayer>> achieved() {
         return achieved;
     }
 

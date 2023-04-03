@@ -181,7 +181,7 @@ public class ServerController {
                         serverLobby.joinedPlayers().update(l -> {
                             final var newList = new ArrayList<>(l);
                             newList.add(new LobbyPlayer(nick, false));
-                            return newList;
+                            return Collections.unmodifiableList(newList);
                         });
                     } else
                         System.out.println("[Server] " + nick + " is re-joining previous game...");
@@ -231,15 +231,15 @@ public class ServerController {
                         // Use another stream 'cause we need to keep order
                         game.getPlayers().stream()
                                 .map(p -> clientPlayers.get(p.getNick()))
-                                .collect(Collectors.toList()),
+                                .toList(),
                         game.getPlayers().indexOf(game.currentTurn().get()),
                         game.getCommonGoals().stream()
                                 .map(goal -> new CommonGoal(
                                         goal.getType(),
                                         goal.achieved().get().stream()
                                                 .map(p -> clientPlayers.get(p.getNick()))
-                                                .collect(Collectors.toList())))
-                                .collect(Collectors.toList()),
+                                                .toList()))
+                                .toList(),
                         thePlayer.getPersonalGoal(),
                         game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get())),
                 gameControllerFactory.apply(thePlayer, gameController)));

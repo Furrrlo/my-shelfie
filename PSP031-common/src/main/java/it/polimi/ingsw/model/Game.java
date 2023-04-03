@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,10 +10,10 @@ public class Game implements GameView {
 
     private final int gameID;
     private final Board board;
-    private final List<Player> players;
+    private final @Unmodifiable List<Player> players;
     private final Property<Player> currentTurn;
     private final PersonalGoal personalGoal;
-    private final List<CommonGoal> commonGoal;
+    private final @Unmodifiable List<CommonGoal> commonGoal;
     private final Property<@Nullable Player> firstFinisher;
 
     public Game(int gameID,
@@ -24,10 +25,10 @@ public class Game implements GameView {
                 @Nullable Integer firstFinisherId) {
         this.gameID = gameID;
         this.board = board;
-        this.players = players;
+        this.players = List.copyOf(players);
         this.currentTurn = new SerializableProperty<>(players.get(currentTurnPlayerIdx));
         this.personalGoal = personalGoal;
-        this.commonGoal = commonGoal;
+        this.commonGoal = List.copyOf(commonGoal);
         this.firstFinisher = SerializableProperty
                 .nullableProperty(firstFinisherId == null ? null : players.get(firstFinisherId));
     }
@@ -43,7 +44,7 @@ public class Game implements GameView {
     }
 
     @Override
-    public List<Player> getPlayers() {
+    public @Unmodifiable List<Player> getPlayers() {
         return players;
     }
 
@@ -58,7 +59,7 @@ public class Game implements GameView {
     }
 
     @Override
-    public List<CommonGoal> getCommonGoals() {
+    public @Unmodifiable List<CommonGoal> getCommonGoals() {
         return commonGoal;
     }
 

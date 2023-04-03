@@ -3,6 +3,7 @@ package it.polimi.ingsw.server.model;
 import it.polimi.ingsw.model.LobbyPlayerView;
 import it.polimi.ingsw.model.Provider;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface ServerLobbyView {
     /**
      * @return Property list of joined players
      */
-    Provider<? extends List<? extends LobbyPlayerView>> joinedPlayers();
+    Provider<? extends @Unmodifiable List<? extends LobbyPlayerView>> joinedPlayers();
 
     Provider<? extends @Nullable ServerGameAndController<? extends ServerGameView>> game();
 }

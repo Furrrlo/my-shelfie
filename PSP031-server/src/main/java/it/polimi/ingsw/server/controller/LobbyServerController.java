@@ -8,6 +8,7 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -54,16 +55,17 @@ public class LobbyServerController {
             // TODO: what do we do with the player?
 
             var game = lobbyCloseable.obj().game().get();
-            if (game != null)
+            if (game != null) {
                 game.controller().disconnectPlayer(nick, cause);
-            else
+            } else {
                 // If the game hasn't started yet, just remove the lobbyPlayer
                 lobby.joinedPlayers().update(lobbyPlayers -> {
                     List<LobbyPlayer> newP = new ArrayList<>(lobbyPlayers);
                     newP.remove(lobbyPlayer);
                     System.out.println("[Server] Removed " + nick);
-                    return newP;
+                    return Collections.unmodifiableList(newP);
                 });
+            }
         }
     }
 

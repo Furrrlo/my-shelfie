@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,6 +15,7 @@ public interface GameView extends Serializable {
     BoardView getBoard();
 
     /** Returns list of players */
+    @Unmodifiable
     List<? extends PlayerView> getPlayers();
 
     /** Return player whose now playing */
@@ -23,6 +25,7 @@ public interface GameView extends Serializable {
     PersonalGoalView getPersonalGoal();
 
     /** Return list of common goals of the game */
+    @Unmodifiable
     List<? extends CommonGoalView> getCommonGoals();
 
     /** Return first player completing his shelfie */

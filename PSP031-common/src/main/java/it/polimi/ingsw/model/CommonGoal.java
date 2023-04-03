@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
-import java.util.ArrayList;
+import org.jetbrains.annotations.Unmodifiable;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -8,15 +9,15 @@ public class CommonGoal implements CommonGoalView {
 
     private final Type type;
 
-    private final Property<List<Player>> achieved;
+    private final Property<@Unmodifiable List<Player>> achieved;
 
     public CommonGoal(Type type) {
-        this(type, new ArrayList<>());
+        this(type, List.of());
     }
 
     public CommonGoal(Type type, List<Player> achieved) {
         this.type = type;
-        this.achieved = new SerializableProperty<>(achieved);
+        this.achieved = new SerializableProperty<>(List.copyOf(achieved));
     }
 
     @Override
@@ -25,7 +26,7 @@ public class CommonGoal implements CommonGoalView {
     }
 
     @Override
-    public Property<List<Player>> achieved() {
+    public Property<@Unmodifiable List<Player>> achieved() {
         return achieved;
     }
 

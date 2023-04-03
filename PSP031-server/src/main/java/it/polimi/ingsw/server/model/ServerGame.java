@@ -5,8 +5,11 @@ import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.SerializableProperty;
 import it.polimi.ingsw.model.Tile;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,9 +18,10 @@ public class ServerGame implements ServerGameView {
     private final int gameID;
     private final Board board;
     private final List<Tile> bag;
-    private final List<ServerPlayer> players;
+    private final @UnmodifiableView List<Tile> bagView;
+    private final @Unmodifiable List<ServerPlayer> players;
     private final Property<ServerPlayer> currentTurn;
-    private final List<ServerCommonGoal> commonGoal;
+    private final @Unmodifiable List<ServerCommonGoal> commonGoal;
     private final Property<@Nullable ServerPlayer> firstFinisher;
 
     /**
@@ -33,9 +37,10 @@ public class ServerGame implements ServerGameView {
         this.gameID = gameID;
         this.board = board;
         this.bag = new ArrayList<>(bag);
-        this.players = players;
+        this.bagView = Collections.unmodifiableList(this.bag);
+        this.players = List.copyOf(players);
         this.currentTurn = new SerializableProperty<>(players.get(currentTurnPlayerIdx));
-        this.commonGoal = commonGoal;
+        this.commonGoal = List.copyOf(commonGoal);
         this.firstFinisher = firstFinisher;
     }
 
@@ -50,12 +55,16 @@ public class ServerGame implements ServerGameView {
     }
 
     @Override
+    public @UnmodifiableView List<Tile> getBagView() {
+        return bag;
+    }
+
     public List<Tile> getBag() {
         return bag;
     }
 
     @Override
-    public List<ServerPlayer> getPlayers() {
+    public @Unmodifiable List<ServerPlayer> getPlayers() {
         return players;
     }
 
@@ -65,7 +74,7 @@ public class ServerGame implements ServerGameView {
     }
 
     @Override
-    public List<ServerCommonGoal> getCommonGoals() {
+    public @Unmodifiable List<ServerCommonGoal> getCommonGoals() {
         return commonGoal;
     }
 

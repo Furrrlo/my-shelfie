@@ -4,8 +4,8 @@ import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.SerializableProperty;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,7 +20,7 @@ public class ServerLobby implements ServerLobbyView {
      */
     public ServerLobby(int requiredPlayers) {
         this.requiredPlayers = requiredPlayers;
-        this.joinedPlayers = new SerializableProperty<>(new ArrayList<>());
+        this.joinedPlayers = new SerializableProperty<>(List.of());
         this.game = SerializableProperty.nullableProperty(null);
     }
 
@@ -30,7 +30,7 @@ public class ServerLobby implements ServerLobbyView {
     }
 
     @Override
-    public Property<List<LobbyPlayer>> joinedPlayers() {
+    public Property<@Unmodifiable List<LobbyPlayer>> joinedPlayers() {
         return joinedPlayers;
     }
 

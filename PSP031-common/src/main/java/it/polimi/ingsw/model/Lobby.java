@@ -2,22 +2,22 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.GameAndController;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Lobby implements LobbyView {
 
     private final int requiredPlayers;
-    private final Property<List<LobbyPlayer>> joinedPlayers;
+    private final Property<@Unmodifiable List<LobbyPlayer>> joinedPlayers;
     private final Property<@Nullable GameAndController<Game>> game;
 
     /**
      * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
      */
     public Lobby(int requiredPlayers) {
-        this(requiredPlayers, new ArrayList<>());
+        this(requiredPlayers, List.of());
     }
 
     public Lobby(int requiredPlayers, List<LobbyPlayer> joinedPlayers) {
@@ -29,7 +29,7 @@ public class Lobby implements LobbyView {
                  @Nullable GameAndController<Game> game) {
 
         this.requiredPlayers = requiredPlayers;
-        this.joinedPlayers = new SerializableProperty<>(joinedPlayers);
+        this.joinedPlayers = new SerializableProperty<>(List.copyOf(joinedPlayers));
         this.game = SerializableProperty.nullableProperty(game);
     }
 
@@ -39,7 +39,7 @@ public class Lobby implements LobbyView {
     }
 
     @Override
-    public Property<List<LobbyPlayer>> joinedPlayers() {
+    public Property<@Unmodifiable List<LobbyPlayer>> joinedPlayers() {
         return joinedPlayers;
     }
 
