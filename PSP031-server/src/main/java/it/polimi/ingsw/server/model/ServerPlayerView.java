@@ -1,6 +1,8 @@
 package it.polimi.ingsw.server.model;
 
-import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.PersonalGoal;
+import it.polimi.ingsw.model.Provider;
+import it.polimi.ingsw.model.ShelfieView;
 
 public interface ServerPlayerView {
 
@@ -20,4 +22,6 @@ public interface ServerPlayerView {
     PersonalGoal getPersonalGoal();
 
     Provider<Boolean> connected();
+
+    Provider<Integer> score();
 }

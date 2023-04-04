@@ -3,10 +3,6 @@ package it.polimi.ingsw.controller;
 import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
-import it.polimi.ingsw.model.Board;
-import it.polimi.ingsw.model.PersonalGoal;
-import it.polimi.ingsw.model.Tile;
-import it.polimi.ingsw.model.Type;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.controller.LobbyServerController;
 import it.polimi.ingsw.server.controller.LockProtected;
@@ -22,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -66,25 +61,18 @@ public class ControllersIntegrationTest {
 
             final var makeMovePromise = new CompletableFuture<Arguments>();
 
-            final LockProtected<ServerGame> serverGame;
-            final List<ServerPlayer> players;
+            final LockProtected<ServerGame> lockedServerGame;
+            final ServerGame serverGame;
             final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
-            serverLobby.game().set(new ServerGameAndController<>(serverGame = new LockProtected<>(new ServerGame(
-                    0,
-                    new Board(serverLobby.joinedPlayers().get().size()),
-                    List.of(),
-                    players = serverLobby.joinedPlayers().get().stream()
-                            .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
-                            .collect(Collectors.toList()),
-                    players.size() - 1,
-                    List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),
-                    new GameServerController(serverGame) {
+            serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
+                    serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
+                    new GameServerController(lockedServerGame) {
                         @Override
                         public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
                             makeMovePromise.complete(Arguments.of(player, selected, shelfCol));
                         }
                     }));
-            final var thePlayer = players.stream()
+            final var thePlayer = serverGame.getPlayers().stream()
                     .filter(p -> p.getNick().equals(nick))
                     .findFirst()
                     .orElseThrow();

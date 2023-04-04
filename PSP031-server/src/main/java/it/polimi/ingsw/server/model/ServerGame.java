@@ -1,9 +1,14 @@
 package it.polimi.ingsw.server.model;
 
-import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.Board;
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.SerializableProperty;
+import it.polimi.ingsw.model.Tile;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class ServerGame implements ServerGameView {
 
@@ -15,19 +20,23 @@ public class ServerGame implements ServerGameView {
     private final List<ServerCommonGoal> commonGoal;
     private final Property<@Nullable ServerPlayer> firstFinisher;
 
+    /**
+     * @param bag the starting bad of tiles, which will be copied by the constructor
+     */
     public ServerGame(int gameID,
                       Board board,
                       List<Tile> bag,
                       List<ServerPlayer> players,
                       int currentTurnPlayerIdx,
-                      List<ServerCommonGoal> commonGoal) {
+                      List<ServerCommonGoal> commonGoal,
+                      Property<@Nullable ServerPlayer> firstFinisher) {
         this.gameID = gameID;
         this.board = board;
-        this.bag = bag;
+        this.bag = new ArrayList<>(bag);
         this.players = players;
         this.currentTurn = new SerializableProperty<>(players.get(currentTurnPlayerIdx));
         this.commonGoal = commonGoal;
-        this.firstFinisher = SerializableProperty.nullableProperty(null);
+        this.firstFinisher = firstFinisher;
     }
 
     @Override

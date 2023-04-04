@@ -3,6 +3,7 @@ package it.polimi.ingsw.server.model;
 import it.polimi.ingsw.model.*;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public class ServerPlayer implements ServerPlayerView {
 
@@ -10,12 +11,21 @@ public class ServerPlayer implements ServerPlayerView {
     private final Shelfie shelfie;
     private final PersonalGoal personalGoal;
     private final Property<Boolean> connected;
+    private final Provider<Integer> score;
 
-    public ServerPlayer(String nick, PersonalGoal personalGoal) {
+    /**
+     * @implNote requires a scoreProviderFactory so that it can resolve a circular dependency
+     *           between player and the provider impl, that most likely needs the player instance
+     *           to calculate the score.
+     */
+    public ServerPlayer(String nick,
+                        PersonalGoal personalGoal,
+                        Function<ServerPlayer, Provider<Integer>> scoreProviderFactory) {
         this.nick = nick;
         this.personalGoal = personalGoal;
         this.shelfie = new Shelfie();
         this.connected = new SerializableProperty<>(true);
+        this.score = scoreProviderFactory.apply(this);
     }
 
     @Override
@@ -36,6 +46,11 @@ public class ServerPlayer implements ServerPlayerView {
     @Override
     public Property<Boolean> connected() {
         return connected;
+    }
+
+    @Override
+    public Provider<Integer> score() {
+        return score;
     }
 
     @Override

@@ -23,7 +23,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -110,17 +109,8 @@ public class UpdatersIntegrationTest {
 
             final ServerGame serverGame;
             final LockProtected<ServerGame> lockedServerGame;
-            final List<ServerPlayer> players;
-            serverLobby.game().set(new ServerGameAndController<>(
-                    lockedServerGame = new LockProtected<>(serverGame = new ServerGame(
-                            0,
-                            new Board(serverLobby.joinedPlayers().get().size()),
-                            List.of(),
-                            players = serverLobby.joinedPlayers().get().stream()
-                                    .map(n -> new ServerPlayer(n.getNick(), new PersonalGoal(new Tile[6][5])))
-                                    .collect(Collectors.toList()),
-                            rnd.nextInt(players.size()),
-                            List.of(new ServerCommonGoal(Type.CROSS), new ServerCommonGoal(Type.ALL_CORNERS)))),
+            serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
+                    serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
                     new GameServerController(lockedServerGame)));
 
             final var clientGame = gamePromise.get().game();

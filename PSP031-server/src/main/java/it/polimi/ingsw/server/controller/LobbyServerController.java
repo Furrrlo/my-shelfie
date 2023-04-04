@@ -1,13 +1,20 @@
 package it.polimi.ingsw.server.controller;
 
-import it.polimi.ingsw.model.LobbyPlayer;
+import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.model.ServerCommonGoal;
+import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerLobby;
+import it.polimi.ingsw.server.model.ServerPlayer;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class LobbyServerController {
+
+    private static final List<Tile> BAG_TEMPLATE = List.of(); // TODO: bag
 
     private final LockProtected<ServerLobby> lockedLobby;
 
@@ -68,5 +75,29 @@ public class LobbyServerController {
                     .orElseThrow(() -> new IllegalStateException("Somehow missing the player " + nick));
             lobbyPlayer.ready().set(ready);
         }
+    }
+
+    @VisibleForTesting
+    public static ServerGame createGame(int gameId, List<LobbyPlayer> lobbyPlayers) {
+        final var firstFinisher = SerializableProperty.<ServerPlayer> nullableProperty(null);
+        // TODO: extract 2 common goals randomly
+        final List<ServerCommonGoal> commonGoals = List.of(
+                new ServerCommonGoal(Type.CROSS),
+                new ServerCommonGoal(Type.ALL_CORNERS));
+        final List<ServerPlayer> players;
+        return new ServerGame(
+                gameId,
+                new Board(lobbyPlayers.size()),
+                BAG_TEMPLATE, // This is defensively copied anyway
+                players = lobbyPlayers.stream()
+                        .map(n -> new ServerPlayer(
+                                n.getNick(),
+                                // TODO: extract personal goal randomly
+                                new PersonalGoal(new Tile[6][5]),
+                                p -> new ScoreProvider(p, commonGoals, firstFinisher)))
+                        .collect(Collectors.toList()),
+                players.size() - 1, // TODO: choose who starts randomly
+                commonGoals,
+                firstFinisher);
     }
 }
