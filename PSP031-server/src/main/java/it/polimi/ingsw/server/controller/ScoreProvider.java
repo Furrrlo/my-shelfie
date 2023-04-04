@@ -95,6 +95,8 @@ class ScoreProvider implements Provider<Integer>, Serializable {
     }
 
     private int getFirstFinisherScore() {
+        if (firstFinisher.get() == null)
+            return 0;
         return firstFinisher.get().equals(player) ? 1 : 0;
     }
 
