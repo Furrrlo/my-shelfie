@@ -105,6 +105,7 @@ public class SocketConnectionServerController implements Closeable {
                 connection,
                 new SocketLobbyServerUpdaterFactory(socketManager, rec),
                 lobbyController -> {
+                    //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Shoud we stop it?
                     var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
                     connection.lobbyControllerTask = CompletableFuture.runAsync(socketController, threadPool)
                             .handle((__, ex) -> {

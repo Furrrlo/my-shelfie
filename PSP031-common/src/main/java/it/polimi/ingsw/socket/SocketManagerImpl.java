@@ -61,6 +61,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     @Override
     public void close() throws IOException {
+        log("Closing socket manager...");
         isClosed = true;
 
         recvTask.cancel(true);

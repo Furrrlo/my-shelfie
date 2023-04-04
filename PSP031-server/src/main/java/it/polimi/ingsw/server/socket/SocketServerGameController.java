@@ -26,6 +26,7 @@ public class SocketServerGameController implements GameController, Runnable {
 
     @Override
     public void run() {
+        System.out.println("[Server] Strated game controller");
         try {
             do {
                 try (var ctx = socketManager.receive(MakeMovePacket.class)) {

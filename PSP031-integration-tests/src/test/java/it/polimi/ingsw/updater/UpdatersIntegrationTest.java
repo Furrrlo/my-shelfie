@@ -175,9 +175,9 @@ public class UpdatersIntegrationTest {
     }
 
     public static <T> void ensurePropertyUpdated(String name,
-                                                  T value,
-                                                  Property<? extends T> serverProperty,
-                                                  Provider<? extends T> clientProvider)
+                                                 T value,
+                                                 Property<? extends T> serverProperty,
+                                                 Provider<? extends T> clientProvider)
             throws ExecutionException, InterruptedException {
         assertEquals(
                 serverProperty.get(),
@@ -194,10 +194,10 @@ public class UpdatersIntegrationTest {
 
     @SuppressWarnings("unchecked")
     public static <S, C> void ensurePropertyUpdated(String name,
-                                                     S serverValue,
-                                                     C clientValue,
-                                                     Property<? extends S> serverProperty,
-                                                     Provider<? extends C> clientProvider)
+                                                    S serverValue,
+                                                    C clientValue,
+                                                    Property<? extends S> serverProperty,
+                                                    Provider<? extends C> clientProvider)
             throws ExecutionException, InterruptedException {
 
         final CompletableFuture<C> received = new CompletableFuture<>();

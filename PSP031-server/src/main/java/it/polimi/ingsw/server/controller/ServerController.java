@@ -183,7 +183,8 @@ public class ServerController {
                             newList.add(new LobbyPlayer(nick, false));
                             return newList;
                         });
-                    }else System.out.println("[Server] "+nick+" is re-joining previous game...");
+                    } else
+                        System.out.println("[Server] " + nick + " is re-joining previous game...");
 
                     if (currGameAndController != null)
                         updateGameForPlayer(

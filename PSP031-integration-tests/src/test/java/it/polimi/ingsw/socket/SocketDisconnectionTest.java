@@ -175,27 +175,28 @@ public class SocketDisconnectionTest {
             socketClientManager2.closeSocket();
             serverPlayerDisconnected.get(1500, TimeUnit.MILLISECONDS);
             assertFalse(serverPlayer2.connected().get());
+
+            //Client gets stuck on receive(), kill it
             socketClientManager2.kill();
 
-            //Restart player test_2 creating a new socket
+            //Restart player test_2 creating a new client
             socketClientManager2 = new SocketClientNetManager(
                     new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
             LobbyView lobbyView2_new = socketClientManager2.joinGame("test_2").lobby();
             final var gamePromise2 = new CompletableFuture<GameAndController<?>>();
             lobbyView2_new.game().registerObserver(gamePromise2::complete);
 
-            final var game = gamePromise2.get(500, TimeUnit.MILLISECONDS).game();
-
+            final var newClient2Game = gamePromise2.get(500, TimeUnit.MILLISECONDS).game();
 
             assertTrue(serverPlayer2.connected().get());
 
-            assertEquals(game, client2Game);
-            assertNotSame(game, client2Game);
+            assertEquals(newClient2Game, client2Game);
+            assertNotSame(newClient2Game, client2Game);
 
             //ensure that updaters work on new player
             for (int i = 0; i < serverGame.getPlayers().size(); i++) {
                 final var serverPlayer = serverGame.getPlayers().get(i);
-                final var clientPlayer = game.getPlayers().get(i);
+                final var clientPlayer = newClient2Game.getPlayers().get(i);
 
                 for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
                     ensurePropertyUpdated(
@@ -206,7 +207,7 @@ public class SocketDisconnectionTest {
             }
 
             //check that the old game is no longer updated, just to be sure
-            assertNotEquals(game, client2Game);
+            assertNotEquals(newClient2Game, client2Game);
         }
     }
 }
