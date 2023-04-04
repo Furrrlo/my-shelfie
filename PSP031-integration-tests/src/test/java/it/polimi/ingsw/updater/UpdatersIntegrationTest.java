@@ -174,7 +174,7 @@ public class UpdatersIntegrationTest {
         }
     }
 
-    private static <T> void ensurePropertyUpdated(String name,
+    public static <T> void ensurePropertyUpdated(String name,
                                                   T value,
                                                   Property<? extends T> serverProperty,
                                                   Provider<? extends T> clientProvider)
@@ -193,7 +193,7 @@ public class UpdatersIntegrationTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static <S, C> void ensurePropertyUpdated(String name,
+    public static <S, C> void ensurePropertyUpdated(String name,
                                                      S serverValue,
                                                      C clientValue,
                                                      Property<? extends S> serverProperty,

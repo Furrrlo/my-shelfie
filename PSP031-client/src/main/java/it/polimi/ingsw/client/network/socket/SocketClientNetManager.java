@@ -6,6 +6,7 @@ import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.socket.packets.JoinGamePacket;
 import it.polimi.ingsw.socket.packets.LobbyPacket;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,6 +20,8 @@ public class SocketClientNetManager implements ClientNetManager {
     private final InetSocketAddress serverAddress;
     private @Nullable ClientSocketManager socketManager;
 
+    private @Nullable Socket socket;
+
     public SocketClientNetManager(InetSocketAddress serverAddress) {
         this.serverAddress = serverAddress;
         this.threadPool = Executors.newFixedThreadPool(2, r -> {
@@ -31,7 +34,8 @@ public class SocketClientNetManager implements ClientNetManager {
     @Override
     public LobbyAndController<Lobby> joinGame(String nick) throws IOException {
         if (socketManager == null) {
-            socketManager = new ClientSocketManagerImpl(new Socket(serverAddress.getAddress(), serverAddress.getPort()));
+            socket = new Socket(serverAddress.getAddress(), serverAddress.getPort());
+            socketManager = new ClientSocketManagerImpl(socket);
             socketManager.setNick(nick);
             System.out.println("Connected to : " + serverAddress);
         }
@@ -65,5 +69,17 @@ public class SocketClientNetManager implements ClientNetManager {
                     });
             return new LobbyAndController<>(lobby, new SocketLobbyController(socketManager));
         }
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("NullAway")
+    public void closeSocket() throws IOException {
+        socket.close();
+    }
+
+    @VisibleForTesting
+    public void kill() {
+        //interrupt client updaters
+        threadPool.shutdownNow();
     }
 }
