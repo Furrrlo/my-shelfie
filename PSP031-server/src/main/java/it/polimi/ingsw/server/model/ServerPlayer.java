@@ -9,11 +9,13 @@ public class ServerPlayer implements ServerPlayerView {
     private final String nick;
     private final Shelfie shelfie;
     private final PersonalGoal personalGoal;
+    private final Property<Boolean> connected;
 
     public ServerPlayer(String nick, PersonalGoal personalGoal) {
         this.nick = nick;
         this.personalGoal = personalGoal;
         this.shelfie = new Shelfie();
+        this.connected = new SerializableProperty<>(true);
     }
 
     @Override
@@ -29,6 +31,11 @@ public class ServerPlayer implements ServerPlayerView {
     @Override
     public PersonalGoal getPersonalGoal() {
         return personalGoal;
+    }
+
+    @Override
+    public Property<Boolean> connected() {
+        return connected;
     }
 
     @Override

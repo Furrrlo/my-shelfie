@@ -49,9 +49,11 @@ public class SocketClientNetManager implements ClientNetManager {
                         return null;
                     });
             CompletableFuture.supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
-                    .thenAcceptAsync(clientUpdater -> {
+                    .thenAccept(clientUpdater -> {
+                        System.out.println("[Client][" + nick + "] shutting down lobby updater...");
                         if (clientUpdater != null)
                             clientUpdater.run();
+                        System.out.println("[Client][" + nick + "] shutting down game updater...");
                     }).handle((__, ex) -> {
                         if (ex == null)
                             return __;

@@ -2,7 +2,6 @@ package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
-import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
@@ -18,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
@@ -32,7 +30,9 @@ public class ServerController {
     private final Clock clock;
     private final ScheduledFuture<?> heartbeatTask;
 
-    private final ConcurrentMap<String, HeartbeatHandler> heartbeats = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Consumer<Clock>> heartbeats = new ConcurrentHashMap<>();
+
+    private final List<ServerLobbyAndController<ServerLobby>> lobbies = new CopyOnWriteArrayList<>();
 
     public ServerController() {
         this(Clock.systemUTC(), Executors.newSingleThreadScheduledExecutor(r -> {
@@ -52,26 +52,38 @@ public class ServerController {
     }
 
     private void detectDisconnectedPlayers() {
-        heartbeats.forEach((nick, heartbeatHandler) -> {
-            try {
-                heartbeatHandler.sendHeartbeat(Instant.now(clock));
-            } catch (DisconnectedException ex) {
-                disconnectPlayer(nick, ex);
-            }
-        });
+        heartbeats.forEach((nick, heartbeatHandler) -> heartbeatHandler.accept(clock));
     }
 
     @VisibleForTesting
     protected @Nullable ServerLobbyAndController<ServerLobby> getLobbyFor(String nick) {
         // TODO: like search a game
+        for (var lobby : lobbies) {
+            for (LobbyPlayer p : lobby.lobby().getUnsafe().joinedPlayers().get())
+                if (p.getNick().equals(nick))
+                    return lobby;
+        }
         return null;
     }
 
     @VisibleForTesting
     protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
         // TODO: like pick game or create one if needed
-        var lockedLobby = new LockProtected<>(new ServerLobby(4));
-        return new ServerLobbyAndController<>(lockedLobby, new LobbyServerController(lockedLobby));
+        var lobby = getLobbyFor(nick);
+        if (lobby == null)
+            lobby = lobbies.stream()
+                    .filter(l -> l.lobby().getUnsafe().game().get() == null)
+                    .filter(l -> l.lobby().getUnsafe().joinedPlayers().get().size() < l.lobby().getUnsafe()
+                            .getRequiredPlayers())
+                    .findFirst()
+                    .orElseGet(() -> {
+                        var lockedLobby = new LockProtected<>(new ServerLobby(4));
+                        ServerLobbyAndController<ServerLobby> newLobby = new ServerLobbyAndController<>(lockedLobby,
+                                new LobbyServerController(lockedLobby));
+                        lobbies.add(newLobby);
+                        return newLobby;
+                    });
+        return lobby;
     }
 
     public void runOnLocks(String nick, Runnable runnable) {
@@ -91,7 +103,7 @@ public class ServerController {
     }
 
     public LobbyView joinGame(String nick,
-                              HeartbeatHandler heartbeatHandler,
+                              Consumer<Clock> heartbeatHandler,
                               PlayerObservableTracker observableTracker,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
                               Function<LobbyServerController, LobbyController> lobbyControllerFactory,
@@ -171,7 +183,7 @@ public class ServerController {
                             newList.add(new LobbyPlayer(nick, false));
                             return newList;
                         });
-                    }
+                    }else System.out.println("[Server] "+nick+" is re-joining previous game...");
 
                     if (currGameAndController != null)
                         updateGameForPlayer(
@@ -209,6 +221,7 @@ public class ServerController {
                 .orElseThrow(() -> new IllegalStateException("" +
                         "Missing player " + nick + " which is supposed to be ingame " +
                         "(found players: " + game.getPlayers() + ")"));
+        thePlayer.connected().set(true);
 
         final GameUpdater gameUpdater = lobbyUpdater.updateGame(new GameAndController<>(
                 new Game(

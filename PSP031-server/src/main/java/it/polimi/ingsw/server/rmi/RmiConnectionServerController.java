@@ -1,5 +1,6 @@
 package it.polimi.ingsw.server.rmi;
 
+import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.rmi.*;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
@@ -14,6 +15,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,10 +52,17 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                          RmiHeartbeatHandler handler,
                          RmiLobbyUpdaterFactory updaterFactory) {
         var connection = new PlayerConnection(controller, nick);
+        final var heartbeatHandler = new RmiHeartbeatHandler.Adapter(handler);
         connections.add(connection);
         controller.joinGame(
                 nick,
-                new RmiHeartbeatHandler.Adapter(handler),
+                clock -> {
+                    try {
+                        heartbeatHandler.sendHeartbeat(Instant.now(clock));
+                    } catch (DisconnectedException e) {
+                        connection.disconnectPlayer(e);
+                    }
+                },
                 connection,
                 new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
                 controller -> {

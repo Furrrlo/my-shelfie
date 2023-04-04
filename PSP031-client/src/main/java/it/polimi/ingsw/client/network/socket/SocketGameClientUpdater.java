@@ -19,7 +19,7 @@ public class SocketGameClientUpdater extends GameClientUpdater implements Runnab
 
     @Override
     public void run() {
-        System.out.println("[CLient] Game Updater started");
+        System.out.println("[Client] Game Updater started");
         try {
             do {
                 try (var ctx = socketManager.receive(GameUpdaterPacket.class)) {

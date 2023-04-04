@@ -40,6 +40,7 @@ public class GameServerController {
 
             if (serverPlayer != null) {
                 // TODO: set serverPlayer as not connected
+                serverPlayer.connected().set(false);
             }
         }
     }

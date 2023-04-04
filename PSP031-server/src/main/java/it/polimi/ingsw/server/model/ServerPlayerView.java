@@ -18,4 +18,6 @@ public interface ServerPlayerView {
      * @return personal goal
      */
     PersonalGoal getPersonalGoal();
+
+    Provider<Boolean> connected();
 }

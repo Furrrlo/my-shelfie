@@ -3,6 +3,8 @@ package it.polimi.ingsw.server.controller;
 import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.server.model.ServerLobby;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class LobbyServerController {
@@ -47,6 +49,14 @@ public class LobbyServerController {
             var game = lobbyCloseable.obj().game().get();
             if (game != null)
                 game.controller().disconnectPlayer(nick, cause);
+            else
+                // If the game hasn't started yet, just remove the lobbyPlayer
+                lobby.joinedPlayers().update(lobbyPlayers -> {
+                    List<LobbyPlayer> newP = new ArrayList<>(lobbyPlayers);
+                    newP.remove(lobbyPlayer);
+                    System.out.println("[Server] Removed " + nick);
+                    return newP;
+                });
         }
     }
 

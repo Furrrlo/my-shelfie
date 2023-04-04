@@ -1,5 +1,6 @@
 package it.polimi.ingsw.server.socket;
 
+import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.socket.packets.JoinGamePacket;
@@ -12,6 +13,7 @@ import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,7 +33,7 @@ public class SocketConnectionServerController implements Closeable {
     @VisibleForTesting
     public SocketConnectionServerController(ServerController controller, ServerSocket serverSocket) throws IOException {
         this.controller = controller;
-        this.threadPool = Executors.newFixedThreadPool(10, new ThreadFactory() {
+        this.threadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
             private final AtomicInteger threadNum = new AtomicInteger();
 
             @Override
@@ -89,10 +91,17 @@ public class SocketConnectionServerController implements Closeable {
         socketManager.setNick(nick);
 
         final var connection = new PlayerConnection(controller, socketManager, nick);
+        final var heartbeatHandler = new SocketHeartbeatHandler(socketManager);
         connections.add(connection);
         controller.joinGame(
                 nick,
-                new SocketHeartbeatHandler(socketManager),
+                clock -> {
+                    try {
+                        heartbeatHandler.sendHeartbeat(Instant.now(clock));
+                    } catch (DisconnectedException e) {
+                        connection.disconnectPlayer(e);
+                    }
+                },
                 connection,
                 new SocketLobbyServerUpdaterFactory(socketManager, rec),
                 lobbyController -> {
@@ -121,7 +130,7 @@ public class SocketConnectionServerController implements Closeable {
                 });
     }
 
-    private class PlayerConnection extends BaseServerConnection implements Closeable {
+    private class PlayerConnection extends BaseServerConnection {
 
         private final ServerSocketManager socketManager;
         volatile @Nullable Future<?> lobbyControllerTask;
