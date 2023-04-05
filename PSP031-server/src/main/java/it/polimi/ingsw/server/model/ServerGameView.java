@@ -3,6 +3,7 @@ package it.polimi.ingsw.server.model;
 import it.polimi.ingsw.model.BoardView;
 import it.polimi.ingsw.model.Provider;
 import it.polimi.ingsw.model.Tile;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -46,5 +47,5 @@ public interface ServerGameView {
     /**
      * @return first player compleating his shelfie
      */
-    Provider<? extends ServerPlayerView> firstFinisher();
+    Provider<? extends @Nullable ServerPlayerView> firstFinisher();
 }

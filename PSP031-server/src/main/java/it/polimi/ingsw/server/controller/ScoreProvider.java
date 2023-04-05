@@ -6,6 +6,7 @@ import it.polimi.ingsw.model.SerializableProperty;
 import it.polimi.ingsw.server.model.ServerCommonGoal;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.server.model.ServerPlayerView;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ObjectStreamException;
 import java.io.Serial;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
@@ -35,11 +37,11 @@ class ScoreProvider implements Provider<Integer>, Serializable {
 
     private final ServerPlayer player;
     private final List<ServerCommonGoal> commonGoals;
-    private final Provider<? extends ServerPlayerView> firstFinisher;
+    private final Provider<? extends @Nullable ServerPlayerView> firstFinisher;
 
     public ScoreProvider(ServerPlayer player,
                          List<ServerCommonGoal> commonGoals,
-                         Provider<? extends ServerPlayerView> firstFinisher) {
+                         Provider<? extends @Nullable ServerPlayerView> firstFinisher) {
         this.player = player;
         this.commonGoals = commonGoals;
         this.firstFinisher = firstFinisher;
@@ -95,9 +97,7 @@ class ScoreProvider implements Provider<Integer>, Serializable {
     }
 
     private int getFirstFinisherScore() {
-        if (firstFinisher.get() == null)
-            return 0;
-        return firstFinisher.get().equals(player) ? 1 : 0;
+        return Objects.equals(firstFinisher.get(), player) ? 1 : 0;
     }
 
     @Override

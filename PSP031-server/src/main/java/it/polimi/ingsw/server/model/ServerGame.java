@@ -79,7 +79,7 @@ public class ServerGame implements ServerGameView {
     }
 
     @Override
-    public Property<ServerPlayer> firstFinisher() {
+    public Property<@Nullable ServerPlayer> firstFinisher() {
         return firstFinisher;
     }
 
