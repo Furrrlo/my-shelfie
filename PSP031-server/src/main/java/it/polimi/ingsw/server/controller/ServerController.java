@@ -19,6 +19,8 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.time.Clock;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -32,7 +34,8 @@ public class ServerController {
 
     private final ConcurrentMap<String, Consumer<Clock>> heartbeats = new ConcurrentHashMap<>();
 
-    private final List<ServerLobbyAndController<ServerLobby>> lobbies = new CopyOnWriteArrayList<>();
+    private final Lock lobbiesLock = new ReentrantLock();
+    private final Set<ServerLobbyAndController<ServerLobby>> lobbies = ConcurrentHashMap.newKeySet();
 
     public ServerController() {
         this(Clock.systemUTC(), Executors.newSingleThreadScheduledExecutor(r -> {
@@ -66,15 +69,39 @@ public class ServerController {
         return null;
     }
 
+    /**
+     * @implNote to be as fast as possible, this method does not hold any of the lobby-specific locks
+     *           while checking if the given player can join it.
+     *           It is up to the caller to re-check inside a lock that the ServerLobby#canOnePlayerJoin()
+     *           condition still holds true.
+     */
     @VisibleForTesting
     protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
-        // TODO: like pick game or create one if needed
+        // See if we can find a lobby where the player was already in
+        // Since we only keep players in a lobby after they left when a game has started,
+        // we can avoid holding any lock, as the #joinedPlayers() list becomes immutable de-facto
         var lobby = getLobbyFor(nick);
-        if (lobby == null)
-            lobby = lobbies.stream()
-                    .filter(l -> l.lobby().getUnsafe().game().get() == null)
-                    .filter(l -> l.lobby().getUnsafe().joinedPlayers().get().size() < l.lobby().getUnsafe()
-                            .getRequiredPlayers())
+        if (lobby != null)
+            return lobby;
+        // Fast case: try seeing if there's a lobby already being created while not holding the lobbiesLock
+        // Note:
+        // 1. We are not holding any of the lobbies lock, so after returning this, the caller
+        //    needs to make sure that the canOnePlayerJoin() is still true while on the lobby lock
+        // 2. Since we don't hold the lobbies lock yet, we are not allowed to create and add a new lobby
+        //    to fill in case we find none available.
+        lobby = lobbies.stream()
+                .filter(l -> l.lobby().getUnsafe().canOnePlayerJoin())
+                .findFirst()
+                .orElse(null);
+        if (lobby != null)
+            return lobby;
+        // Double-checked locking: while inside the lock let's recheck if we can find any valid lobby.
+        // If we can't, we are allowed to create a new one, as we are in the lock and nobody else can do
+        // so concurrently to us
+        lobbiesLock.lock();
+        try {
+            return lobbies.stream()
+                    .filter(l -> l.lobby().getUnsafe().canOnePlayerJoin())
                     .findFirst()
                     .orElseGet(() -> {
                         var lockedLobby = new LockProtected<>(new ServerLobby(4));
@@ -83,7 +110,9 @@ public class ServerController {
                         lobbies.add(newLobby);
                         return newLobby;
                     });
-        return lobby;
+        } finally {
+            lobbiesLock.unlock();
+        }
     }
 
     public void runOnLocks(String nick, Runnable runnable) {
@@ -99,7 +128,10 @@ public class ServerController {
         if (lobbies.size() != 1)
             throw new AssertionError("This method is supposed to be used for testing when there's only 1 lobby");
 
-        var lobbyAndController = lobbies.get(0);
+        var lobbyAndController = lobbies.stream()
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("This method is supposed to be used for testing " +
+                        "when there's only 1 lobby"));
         if (lobbyAndController == null)
             runnable.run();
         else
@@ -132,11 +164,11 @@ public class ServerController {
                 // This is basically double-checked locking, getOrCreateGameLobbySomehow() checks with no lock
                 // so that it can discard options fast, then here we re-check while actually holding the lock
                 // to guarantee concurrency
-                final List<String> currentPlayers = serverLobby.joinedPlayers().get().stream()
+                final List<String> joinedPlayersNicks = serverLobby.joinedPlayers().get().stream()
                         .map(LobbyPlayer::getNick)
                         .toList();
-                if (!currentPlayers.contains(nick) && currentPlayers.size() >= serverLobby.getRequiredPlayers())
-                    continue;
+                if (!joinedPlayersNicks.contains(nick) && !serverLobby.canOnePlayerJoin())
+                    continue; // If we fail the test, let's just retry and search a new one
 
                 final Lobby lobby = new Lobby(serverLobby.getRequiredPlayers(), serverLobby.joinedPlayers().get());
 
@@ -189,14 +221,15 @@ public class ServerController {
 
                     // Add the player after registering the listeners, 
                     // so the joining player will also receive it
-                    if (!currentPlayers.contains(nick)) {
+                    if (!joinedPlayersNicks.contains(nick)) {
                         serverLobby.joinedPlayers().update(l -> {
                             final var newList = new ArrayList<>(l);
                             newList.add(new LobbyPlayer(nick, false));
                             return Collections.unmodifiableList(newList);
                         });
-                    } else
+                    } else {
                         System.out.println("[Server] " + nick + " is re-joining previous game...");
+                    }
 
                     if (currGameAndController != null)
                         updateGameForPlayer(

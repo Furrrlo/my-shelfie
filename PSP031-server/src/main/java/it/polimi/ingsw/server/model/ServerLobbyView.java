@@ -20,4 +20,12 @@ public interface ServerLobbyView {
     Provider<? extends @Unmodifiable List<? extends LobbyPlayerView>> joinedPlayers();
 
     Provider<? extends @Nullable ServerGameAndController<? extends ServerGameView>> game();
+
+    default boolean hasGameStarted() {
+        return game().get() == null;
+    }
+
+    default boolean canOnePlayerJoin() {
+        return !hasGameStarted() && joinedPlayers().get().size() < getRequiredPlayers();
+    }
 }
