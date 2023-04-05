@@ -17,7 +17,14 @@ public interface PersonalGoalView extends Serializable {
      * @param c defines column of personalGoal
      * @return tile of personal Goal
      */
-    @Nullable Tile get(int r, int c);
+    @Nullable
+    Tile get(int r, int c);
+
+    @Nullable
+    Tile[][] colorToTiles(@Nullable Color[][] tiles);
+
+    @Nullable
+    Tile[][] getPersonalGoal();
 
     Stream<TileAndCoords<@Nullable Tile>> tiles();
 }
