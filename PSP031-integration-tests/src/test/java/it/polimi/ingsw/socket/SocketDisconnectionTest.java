@@ -16,7 +16,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.time.Clock;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +83,7 @@ public class SocketDisconnectionTest {
         final var rnd = new Random();
 
         final AtomicInteger joinedPlayers = new AtomicInteger();
-        final var serverLobbyPromise = new CompletableFuture<ServerLobby>();
+        final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
         final var serverAllJoined = new CompletableFuture<Void>();
         final var serverPlayerDisconnected = new CompletableFuture<Void>();
 
@@ -97,7 +96,7 @@ public class SocketDisconnectionTest {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
-                serverLobbyPromise.complete(lockedLobby.lobby().getUnsafe());
+                serverLobbyPromise.complete(lockedLobby.lobby());
                 return lockedLobby;
             }
 
@@ -133,10 +132,10 @@ public class SocketDisconnectionTest {
                     1, TimeUnit.SECONDS);
             LobbyView lobbyView3 = socketClientManager3.joinGame("test_3").lobby();
 
-            var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
+            var lockedServerLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
             serverAllJoined.get(500, TimeUnit.MILLISECONDS);
 
-            assertSame(3, serverLobby.joinedPlayers().get().size());
+            assertSame(3, lockedServerLobby.getUnsafe().joinedPlayers().get().size());
 
             final var gamePromise = new CompletableFuture<GameAndController<?>>();
             lobbyView2.game().registerObserver(gamePromise::complete);
@@ -145,22 +144,26 @@ public class SocketDisconnectionTest {
             //Players should be "ready" before starting a game, but we don't care in this test
             final ServerGame serverGame;
             final LockProtected<ServerGame> lockedServerGame;
-            final List<ServerPlayer> players;
-
-            serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
-                    serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
-                    new GameServerController(lockedServerGame)));
+            try (var lobbyCloseable = lockedServerLobby.use()) {
+                var serverLobby = lobbyCloseable.obj();
+                serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
+                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
+                        new GameServerController(lockedServerGame)));
+            }
 
             final var client2Game = gamePromise.get(500, TimeUnit.MILLISECONDS).game();
 
             //Set random tiles to serverPlayers
             //No need to check client updates in this test
-            for (int i = 0; i < serverGame.getPlayers().size(); i++) {
-                final var serverPlayer = serverGame.getPlayers().get(i);
-                for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
-                    serverPlayer.getShelfie().tile(tile.row(), tile.col())
-                            .set(new Tile(Color.values()[rnd.nextInt(Color.values().length)]));
-            }
+            serverController.runOnOnlyLobbyLocks(() -> {
+                for (int i = 0; i < serverGame.getPlayers().size(); i++) {
+                    final var serverPlayer = serverGame.getPlayers().get(i);
+                    for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie()
+                            .tiles()::iterator)
+                        serverPlayer.getShelfie().tile(tile.row(), tile.col())
+                                .set(new Tile(Color.values()[rnd.nextInt(Color.values().length)]));
+                }
+            });
 
             //Disconnect player test_2
             final var serverPlayer2 = serverGame.getPlayers().stream()

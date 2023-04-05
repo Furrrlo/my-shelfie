@@ -30,13 +30,13 @@ public class ControllersIntegrationTest {
 
         var readyPromise = new CompletableFuture<Arguments>();
 
-        final var serverLobbyPromise = new CompletableFuture<ServerLobby>();
+        final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
         try (Closeable ignored = bindServerController.apply(new ServerController() {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lobbyAndController = super.getOrCreateLobby(nick);
-                serverLobbyPromise.complete(lobbyAndController.lobby().getUnsafe());
+                serverLobbyPromise.complete(lobbyAndController.lobby());
                 return new ServerLobbyAndController<>(
                         lobbyAndController.lobby(),
                         new LobbyServerController(lobbyAndController.lobby()) {
@@ -63,15 +63,18 @@ public class ControllersIntegrationTest {
 
             final LockProtected<ServerGame> lockedServerGame;
             final ServerGame serverGame;
-            final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
-            serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
-                    serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
-                    new GameServerController(lockedServerGame) {
-                        @Override
-                        public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
-                            makeMovePromise.complete(Arguments.of(player, selected, shelfCol));
-                        }
-                    }));
+            final var lockedServerLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
+            try (var lobbyCloseable = lockedServerLobby.use()) {
+                var serverLobby = lobbyCloseable.obj();
+                serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
+                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
+                        new GameServerController(lockedServerGame) {
+                            @Override
+                            public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
+                                makeMovePromise.complete(Arguments.of(player, selected, shelfCol));
+                            }
+                        }));
+            }
             final var thePlayer = serverGame.getPlayers().stream()
                     .filter(p -> p.getNick().equals(nick))
                     .findFirst()

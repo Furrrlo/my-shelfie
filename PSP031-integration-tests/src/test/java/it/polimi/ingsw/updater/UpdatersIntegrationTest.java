@@ -36,7 +36,7 @@ public class UpdatersIntegrationTest {
 
         final var serverJoinedNick = new CompletableFuture<String>();
 
-        final var serverLobbyPromise = new CompletableFuture<ServerLobby>();
+        final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
         final var serverLobbyToSerialize = new CompletableFuture<LobbyView>();
 
         final var serverGameToSerialize = new CompletableFuture<Game>();
@@ -47,7 +47,7 @@ public class UpdatersIntegrationTest {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
-                serverLobbyPromise.complete(lockedLobby.lobby().getUnsafe());
+                serverLobbyPromise.complete(lockedLobby.lobby());
                 return lockedLobby;
             }
 
@@ -87,7 +87,8 @@ public class UpdatersIntegrationTest {
             //      serverLobbyToSerialize.get(500, TimeUnit.MILLISECONDS),
             //      lobbyView);
 
-            final var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
+            final var lockedServerLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
+            final var serverLobby = lockedServerLobby.getUnsafe();
             ensurePropertyUpdated(
                     "joinedPlayers",
                     List.of(serverLobby.joinedPlayers().get().get(0), // Our own player should already be in there 
@@ -112,9 +113,11 @@ public class UpdatersIntegrationTest {
 
             final ServerGame serverGame;
             final LockProtected<ServerGame> lockedServerGame;
-            serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
-                    serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
-                    new GameServerController(lockedServerGame)));
+            try (var ignored1 = lockedServerLobby.use()) {
+                serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
+                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
+                        new GameServerController(lockedServerGame)));
+            }
 
             final var clientGame = gamePromise.get().game();
             assertEquals(
