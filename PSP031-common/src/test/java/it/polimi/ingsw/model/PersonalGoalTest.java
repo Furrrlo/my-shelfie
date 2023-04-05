@@ -2,7 +2,8 @@ package it.polimi.ingsw.model;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class PersonalGoalTest {
     @Test
@@ -11,10 +12,11 @@ class PersonalGoalTest {
         PersonalGoal p2 = new PersonalGoal(2);
         assertNotEquals(p1, p2);
     }
+
     @Test
     void equals1() {
         PersonalGoal p1 = new PersonalGoal(0);
         PersonalGoal p2 = new PersonalGoal(0);
-        assertEquals(p1,p2);
+        assertEquals(p1, p2);
     }
 }
