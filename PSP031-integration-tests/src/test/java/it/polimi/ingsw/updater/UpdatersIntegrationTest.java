@@ -41,7 +41,8 @@ public class UpdatersIntegrationTest {
 
         final var serverGameToSerialize = new CompletableFuture<Game>();
 
-        try (Closeable ignored = bindServerController.apply(new ServerController() {
+        final ServerController serverController;
+        try (Closeable ignored = bindServerController.apply(serverController = new ServerController() {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
@@ -91,6 +92,7 @@ public class UpdatersIntegrationTest {
                     "joinedPlayers",
                     List.of(serverLobby.joinedPlayers().get().get(0), // Our own player should already be in there 
                             new LobbyPlayer("player2"), new LobbyPlayer("player3"), new LobbyPlayer("player4")),
+                    serverController,
                     serverLobby.joinedPlayers(),
                     lobbyView.joinedPlayers());
 
@@ -100,6 +102,7 @@ public class UpdatersIntegrationTest {
                 ensurePropertyUpdated(
                         serverLobbyPlayer.getNick() + ".ready",
                         true,
+                        serverController,
                         serverLobbyPlayer.ready(),
                         clientLobbyPlayer.ready());
             }
@@ -122,12 +125,14 @@ public class UpdatersIntegrationTest {
                     "currentTurn",
                     serverGame.getPlayers().get(0),
                     clientGame.getPlayers().get(0),
+                    serverController,
                     serverGame.currentTurn(),
                     clientGame.currentTurn());
             ensurePropertyUpdated(
                     "firstFinisher",
                     serverGame.getPlayers().get(0),
                     clientGame.getPlayers().get(0),
+                    serverController,
                     serverGame.firstFinisher(),
                     clientGame.firstFinisher());
 
@@ -139,6 +144,7 @@ public class UpdatersIntegrationTest {
                     ensurePropertyUpdated(
                             serverPlayer.getNick() + "ShelfTile" + tile.row() + "x" + tile.col(),
                             new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                            serverController,
                             serverPlayer.getShelfie().tile(tile.row(), tile.col()),
                             clientPlayer.getShelfie().tile(tile.row(), tile.col()));
             }
@@ -147,6 +153,7 @@ public class UpdatersIntegrationTest {
                 ensurePropertyUpdated(
                         "board" + tile.row() + "x" + tile.col(),
                         new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                        serverController,
                         serverGame.getBoard().tile(tile.row(), tile.col()),
                         clientGame.getBoard().tile(tile.row(), tile.col()));
 
@@ -158,6 +165,7 @@ public class UpdatersIntegrationTest {
                         "commonGoal",
                         List.of(serverGame.getPlayers().get(0)),
                         List.of(clientGame.getPlayers().get(0)),
+                        serverController,
                         serverCommonGoal.achieved(),
                         clientCommonGoal.achieved());
             }
@@ -166,6 +174,7 @@ public class UpdatersIntegrationTest {
 
     public static <T> void ensurePropertyUpdated(String name,
                                                  T value,
+                                                 ServerController serverController,
                                                  Property<? extends T> serverProperty,
                                                  Provider<? extends T> clientProvider)
             throws ExecutionException, InterruptedException {
@@ -174,7 +183,7 @@ public class UpdatersIntegrationTest {
                 clientProvider.get(),
                 "Starting value of property " + name);
 
-        ensurePropertyUpdated(name, value, value, serverProperty, clientProvider);
+        ensurePropertyUpdated(name, value, value, serverController, serverProperty, clientProvider);
 
         assertEquals(
                 serverProperty.get(),
@@ -186,6 +195,7 @@ public class UpdatersIntegrationTest {
     public static <S, C> void ensurePropertyUpdated(String name,
                                                     S serverValue,
                                                     C clientValue,
+                                                    ServerController serverController,
                                                     Property<? extends S> serverProperty,
                                                     Provider<? extends C> clientProvider)
             throws ExecutionException, InterruptedException {
@@ -194,7 +204,7 @@ public class UpdatersIntegrationTest {
         final Consumer<C> observer;
         clientProvider.registerObserver(observer = received::complete);
 
-        ((Property<S>) serverProperty).set(serverValue);
+        serverController.runOnOnlyLobbyLocks(() -> ((Property<S>) serverProperty).set(serverValue));
         assertEquals(
                 serverValue,
                 serverProperty.get(),

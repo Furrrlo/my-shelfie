@@ -94,6 +94,18 @@ public class ServerController {
             lobbyAndController.controller().runOnLocks(runnable);
     }
 
+    @VisibleForTesting
+    public void runOnOnlyLobbyLocks(Runnable runnable) {
+        if (lobbies.size() != 1)
+            throw new AssertionError("This method is supposed to be used for testing when there's only 1 lobby");
+
+        var lobbyAndController = lobbies.get(0);
+        if (lobbyAndController == null)
+            runnable.run();
+        else
+            lobbyAndController.controller().runOnLocks(runnable);
+    }
+
     public <T> T supplyOnLocks(String nick, Supplier<T> callable) {
         final var lobbyAndController = getLobbyFor(nick);
         if (lobbyAndController == null)

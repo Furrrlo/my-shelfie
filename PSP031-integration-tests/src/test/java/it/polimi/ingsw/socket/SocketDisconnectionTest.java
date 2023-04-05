@@ -91,7 +91,8 @@ public class SocketDisconnectionTest {
         final ServerSocket serverSocket = new ServerSocket(0);
         choosenPort.set(serverSocket.getLocalPort());
 
-        try (var ignored = new SocketConnectionServerController(new ServerController() {
+        final ServerController serverController;
+        try (var ignored = new SocketConnectionServerController(serverController = new ServerController() {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
@@ -194,6 +195,7 @@ public class SocketDisconnectionTest {
                     ensurePropertyUpdated(
                             serverPlayer.getNick() + "ShelfTile" + tile.row() + "x" + tile.col(),
                             new Tile(Color.values()[rnd.nextInt(Color.values().length)]),
+                            serverController,
                             serverPlayer.getShelfie().tile(tile.row(), tile.col()),
                             clientPlayer.getShelfie().tile(tile.row(), tile.col()));
             }
