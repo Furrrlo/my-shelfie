@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +22,7 @@ class SocketManagerImplTest {
              var mgrIs = new ObjectInputStream(pipe2)) {
 
             double seed = Math.random();
-            try (final var mgr = new SocketManagerImpl<>("test", executor, mgrIs, mgrOs)) {
+            try (final var mgr = new SocketManagerImpl<>("test", executor, mgrIs, mgrOs, 1, TimeUnit.SECONDS)) {
                 testOos.writeObject(new SimpleSeqPacket(new TestPacketReq(seed), 10));
                 Thread.sleep(2000);
 
@@ -43,7 +44,7 @@ class SocketManagerImplTest {
              var ignored = new ObjectOutputStream(new PipedOutputStream(pipe2));
              var mgrIs = new ObjectInputStream(pipe2)) {
 
-            try (final var mgr = new SocketManagerImpl<>("test", executor, mgrIs, mgrOs)) {
+            try (final var mgr = new SocketManagerImpl<>("test", executor, mgrIs, mgrOs, 1, TimeUnit.SECONDS)) {
                 mgr.close();
                 mgr.close();
                 mgr.close();
@@ -62,7 +63,7 @@ class SocketManagerImplTest {
              var ignored = new ObjectOutputStream(new PipedOutputStream(pipe2));
              var mgrIs = new ObjectInputStream(pipe2)) {
 
-            final var mgr = new SocketManagerImpl<>("test", executor, mgrIs, mgrOs);
+            final var mgr = new SocketManagerImpl<>("test", executor, mgrIs, mgrOs, 1, TimeUnit.SECONDS);
             mgr.close();
             assertAll(
                     () -> {

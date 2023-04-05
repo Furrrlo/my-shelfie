@@ -22,6 +22,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final @Nullable Socket socket;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
+    /** Maximum time to wait for a receive operation in {@link #defaultRecvTimeoutUnit}, or -1 to wait indefinitely */
+    private final long defaultRecvTimeout;
+    private final TimeUnit defaultRecvTimeoutUnit;
     private final BlockingDeque<QueuedOutput> outPacketQueue = new LinkedBlockingDeque<>();
     private final NBlockingQueue<SeqPacket> inPacketQueue = new NBlockingQueue<>();
 
@@ -35,25 +38,48 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     record QueuedOutput(SeqPacket packet, CompletableFuture<Void> future) {
     }
 
-    public SocketManagerImpl(String name, ExecutorService executor, Socket socket) throws IOException {
-        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream());
+    public SocketManagerImpl(String name,
+                             ExecutorService executor,
+                             Socket socket)
+            throws IOException {
+        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream(), -1, TimeUnit.MILLISECONDS);
+    }
+
+    public SocketManagerImpl(String name,
+                             ExecutorService executor,
+                             Socket socket,
+                             long defaultRecvTimeout,
+                             TimeUnit defaultRecvTimeoutUnit)
+            throws IOException {
+        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream(), defaultRecvTimeout,
+                defaultRecvTimeoutUnit);
     }
 
     @VisibleForTesting
-    SocketManagerImpl(String name, ExecutorService executor, InputStream is, OutputStream os) throws IOException {
-        this(name, executor, null, is, os);
+    SocketManagerImpl(String name,
+                      ExecutorService executor,
+                      InputStream is,
+                      OutputStream os,
+                      long defaultRecvTimeout,
+                      TimeUnit defaultRecvTimeoutUnit)
+            throws IOException {
+        this(name, executor, null, is, os, defaultRecvTimeout, defaultRecvTimeoutUnit);
     }
 
     private SocketManagerImpl(String name,
                               ExecutorService executor,
                               @Nullable Socket socket,
                               InputStream is,
-                              OutputStream os)
+                              OutputStream os,
+                              long defaultRecvTimeout,
+                              TimeUnit defaultRecvTimeoutUnit)
             throws IOException {
         this.socket = socket;
         this.name = name;
         this.oos = os instanceof ObjectOutputStream oos ? oos : new ObjectOutputStream(os);
         this.ois = is instanceof ObjectInputStream ois ? ois : new ObjectInputStream(is);
+        this.defaultRecvTimeout = defaultRecvTimeout;
+        this.defaultRecvTimeoutUnit = defaultRecvTimeoutUnit;
 
         recvTask = executor.submit(this::readLoop);
         sendTask = executor.submit(this::writeLoop);
@@ -156,10 +182,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         return hasSent;
     }
 
-    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException {
+    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException, TimeoutException {
         ensureOpen();
         // TODO: this will wait indefinitely when the socket closes, is there any way to fail this?
-        return inPacketQueue.takeFirstMatching(filter);
+        return defaultRecvTimeout == -1
+                ? inPacketQueue.takeFirstMatching(filter, defaultRecvTimeout, defaultRecvTimeoutUnit)
+                : inPacketQueue.takeFirstMatching(filter);
     }
 
     private <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> doSendAndWaitResponse(SeqPacket p, Class<R> replyType)
@@ -176,6 +204,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 throw new IOException("Failed to send packet " + p, e);
 
             throw new RuntimeException("Failed to send packet " + p, e);
+        } catch (TimeoutException e) {
+            throw new IOException("Timeout expired while waiting for response packet " + replyType +
+                    " after sending " + p, e);
         }
     }
 
@@ -198,6 +229,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             return new PacketReplyContextImpl<>(doReceive(packet -> type.isInstance(packet.packet())));
         } catch (InterruptedException e) {
             throw new RuntimeException("Failed to receive packet " + type, e);
+        } catch (TimeoutException e) {
+            throw new IOException("Timeout expired while waiting to receive packet " + type, e);
         }
     }
 

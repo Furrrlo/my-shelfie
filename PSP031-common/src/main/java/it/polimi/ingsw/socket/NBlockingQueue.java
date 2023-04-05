@@ -6,6 +6,8 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
@@ -81,11 +83,30 @@ public class NBlockingQueue<E> {
      * @throws InterruptedException if interrupted while waiting
      */
     public E takeFirstMatching(Predicate<E> toConsume) throws InterruptedException {
-        return takeFirstMatching(toConsume, null);
+        try {
+            return takeFirstMatching(toConsume, null, -1, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            throw new AssertionError("There should be no timeout when -1 is passed", e);
+        }
     }
 
+    public E takeFirstMatching(Predicate<E> toConsume, long timeout, TimeUnit unit)
+            throws InterruptedException, TimeoutException {
+        return takeFirstMatching(toConsume, null, timeout, unit);
+    }
+
+    /**
+     * @param timeout time before a {@link TimeoutException} is thrown, using the given {@code unit}.
+     *        If -1, no timeout is used and TimeoutException is never thrown
+     * @param unit time unit for {@code timeout}
+     * @throws TimeoutException if timeout is not -1 and has elapsed
+     */
     @VisibleForTesting
-    E takeFirstMatching(Predicate<E> toConsume, @Nullable Runnable signalRegistered) throws InterruptedException {
+    E takeFirstMatching(Predicate<E> toConsume,
+                        @Nullable Runnable signalRegistered,
+                        long timeout,
+                        TimeUnit unit)
+            throws InterruptedException, TimeoutException {
         var newNode = new Node();
         // Fight to get added as tail
         // Note that, because of the impl, there is no way for the tail to remove itself
@@ -104,6 +125,8 @@ public class NBlockingQueue<E> {
             signalRegistered.run();
 
         // Consuming cycle
+        var timeoutMillis = timeout == -1 ? unit.toMillis(timeout) : -1;
+        var startTimeMillis = System.currentTimeMillis();
         outer: for (;;) {
             // The head can't have done = true, so prev != head is implicit
             while (prev.done /* && prev != head */) {
@@ -131,7 +154,19 @@ public class NBlockingQueue<E> {
             }
 
             while (true) {
-                var candidate = prev.processed.take();
+                var elapsedMillis = System.currentTimeMillis() - startTimeMillis;
+                if (timeoutMillis != -1 && elapsedMillis >= timeoutMillis)
+                    throw new TimeoutException("Timeout expired");
+
+                final E candidate;
+                if (timeoutMillis == -1) {
+                    candidate = prev.processed.take();
+                } else {
+                    candidate = prev.processed.poll(elapsedMillis, TimeUnit.MILLISECONDS);
+                    if (candidate == null)
+                        throw new TimeoutException("Timeout expired");
+                }
+
                 // Prev queue just switched to done, let's return to the previous loop
                 if (candidate == signalDone)
                     continue outer;

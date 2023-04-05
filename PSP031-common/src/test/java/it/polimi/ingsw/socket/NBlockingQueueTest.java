@@ -94,8 +94,12 @@ class NBlockingQueueTest {
                 var promise = CompletableFuture.supplyAsync(
                         () -> {
                             try {
-                                return queue.takeFirstMatching(o -> o == obj, hasRegistered::countDown);
-                            } catch (InterruptedException e) {
+                                return queue.takeFirstMatching(
+                                        o -> o == obj,
+                                        hasRegistered::countDown,
+                                        -1,
+                                        TimeUnit.MILLISECONDS);
+                            } catch (InterruptedException | TimeoutException e) {
                                 throw new RuntimeException(e);
                             }
                         },
