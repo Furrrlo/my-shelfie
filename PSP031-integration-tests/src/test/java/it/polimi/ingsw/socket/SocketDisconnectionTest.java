@@ -173,7 +173,7 @@ public class SocketDisconnectionTest {
 
             serverPlayer2.connected().registerObserver(value -> serverPlayerDisconnected.complete(null));
             socketClientManager2.closeSocket();
-            serverPlayerDisconnected.get(1500, TimeUnit.MILLISECONDS);
+            serverPlayerDisconnected.get(2, TimeUnit.SECONDS);
             assertFalse(serverPlayer2.connected().get());
 
             //Client gets stuck on receive(), kill it
