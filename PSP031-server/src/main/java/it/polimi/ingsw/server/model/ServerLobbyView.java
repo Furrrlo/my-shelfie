@@ -22,7 +22,7 @@ public interface ServerLobbyView {
     Provider<? extends @Nullable ServerGameAndController<? extends ServerGameView>> game();
 
     default boolean hasGameStarted() {
-        return game().get() == null;
+        return game().get() != null;
     }
 
     default boolean canOnePlayerJoin() {
