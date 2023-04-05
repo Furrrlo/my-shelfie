@@ -46,26 +46,26 @@ public class Shelfie implements ShelfieView {
                 if (col == 0)
                     msg.append(row + 1).append(" ");
                 if (this.tile(row, col).get() == null) {
-                    msg.append("***");
+                    msg.append("| |");
                 } else {
                     Color color = Objects.requireNonNull(this.tile(row, col).get()).getColor();
                     if (color.equals(Color.BLUE))
-                        msg.append(ConsoleColors.CYAN).append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append("***")
+                        msg.append(ConsoleColors.CYAN).append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append("   ")
                                 .append(ConsoleColors.RESET);
                     if (color.equals(Color.GREEN))
-                        msg.append(ConsoleColors.GREEN).append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append("***")
+                        msg.append(ConsoleColors.GREEN).append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append("   ")
                                 .append(ConsoleColors.RESET);
                     if (color.equals(Color.ORANGE))
-                        msg.append(ConsoleColors.YELLOW_BRIGHT).append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT).append("***")
+                        msg.append(ConsoleColors.YELLOW_BRIGHT).append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT).append("   ")
                                 .append(ConsoleColors.RESET);
                     if (color.equals(Color.PINK))
-                        msg.append(ConsoleColors.PURPLE).append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append("***")
+                        msg.append(ConsoleColors.PURPLE).append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append("   ")
                                 .append(ConsoleColors.RESET);
                     if (color.equals(Color.YELLOW))
-                        msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append("***")
+                        msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append("   ")
                                 .append(ConsoleColors.RESET);
                     if (color.equals(Color.LIGHTBLUE))
-                        msg.append(ConsoleColors.BLUE).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append("***")
+                        msg.append(ConsoleColors.BLUE).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append("   ")
                                 .append(ConsoleColors.RESET);
                 }
             }
