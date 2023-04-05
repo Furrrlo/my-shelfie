@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClientSocketManagerImpl
@@ -21,7 +22,32 @@ public class ClientSocketManagerImpl
     private final ExecutorService executor;
 
     public ClientSocketManagerImpl(Socket socket) throws IOException {
-        this(Executors.newFixedThreadPool(2, new ThreadFactory() {
+        this(createDefaultExecutor(), socket);
+    }
+
+    public ClientSocketManagerImpl(Socket socket,
+                                   long defaultRecvTimeout,
+                                   TimeUnit defaultRecvTimeoutUnit)
+            throws IOException {
+        this(createDefaultExecutor(), socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
+    }
+
+    private ClientSocketManagerImpl(ExecutorService executor, Socket socket) throws IOException {
+        super("Client", executor, socket);
+        this.executor = executor;
+    }
+
+    private ClientSocketManagerImpl(ExecutorService executor,
+                                    Socket socket,
+                                    long defaultRecvTimeout,
+                                    TimeUnit defaultRecvTimeoutUnit)
+            throws IOException {
+        super("Client", executor, socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
+        this.executor = executor;
+    }
+
+    private static ExecutorService createDefaultExecutor() {
+        return Executors.newFixedThreadPool(2, new ThreadFactory() {
 
             private final AtomicInteger threadNum = new AtomicInteger();
 
@@ -31,12 +57,7 @@ public class ClientSocketManagerImpl
                 th.setName("ClientSocketManagerImpl-thread-" + threadNum.getAndIncrement());
                 return th;
             }
-        }), socket);
-    }
-
-    private ClientSocketManagerImpl(ExecutorService executor, Socket socket) throws IOException {
-        super("Client", executor, socket);
-        this.executor = executor;
+        });
     }
 
     @Override

@@ -23,15 +23,24 @@ public class SocketConnectionServerController implements Closeable {
     private final ServerController controller;
     private final ExecutorService threadPool;
     private final ServerSocket socketServer;
+
+    /** Maximum time to wait for a receive operation in {@link #defaultRecvTimeoutUnit}, or -1 to wait indefinitely */
+    private final long defaultRecvTimeout;
+    private final TimeUnit defaultRecvTimeoutUnit;
+
     private final Future<?> acceptConnectionsTask;
     private final Set<PlayerConnection> connections = ConcurrentHashMap.newKeySet();
 
     public SocketConnectionServerController(ServerController controller, int port) throws IOException {
-        this(controller, new ServerSocket(port));
+        this(controller, new ServerSocket(port), -1, TimeUnit.MILLISECONDS);
     }
 
     @VisibleForTesting
-    public SocketConnectionServerController(ServerController controller, ServerSocket serverSocket) throws IOException {
+    public SocketConnectionServerController(ServerController controller,
+                                            ServerSocket serverSocket,
+                                            long defaultRecvTimeout,
+                                            TimeUnit defaultRecvTimeoutUnit)
+            throws IOException {
         this.controller = controller;
         this.threadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
             private final AtomicInteger threadNum = new AtomicInteger();
@@ -44,6 +53,8 @@ public class SocketConnectionServerController implements Closeable {
             }
         });
         this.socketServer = serverSocket;
+        this.defaultRecvTimeout = defaultRecvTimeout;
+        this.defaultRecvTimeoutUnit = defaultRecvTimeoutUnit;
         this.acceptConnectionsTask = threadPool.submit(this::acceptConnectionsLoop);
     }
 
@@ -54,7 +65,9 @@ public class SocketConnectionServerController implements Closeable {
                 System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
                 threadPool.submit(() -> {
                     try {
-                        doJoin(new ServerSocketManagerImpl(threadPool, socket));
+                        doJoin(defaultRecvTimeout == -1
+                                ? new ServerSocketManagerImpl(threadPool, socket)
+                                : new ServerSocketManagerImpl(threadPool, socket, defaultRecvTimeout, defaultRecvTimeoutUnit));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

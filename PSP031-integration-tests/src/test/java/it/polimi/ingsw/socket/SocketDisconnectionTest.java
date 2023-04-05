@@ -63,9 +63,10 @@ public class SocketDisconnectionTest {
                 serverJoined.complete(null);
                 return lobby;
             }
-        }, serverSocket)) {
+        }, serverSocket, 1, TimeUnit.SECONDS)) {
             var socketClientManager = new SocketClientNetManager(
-                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
+                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                    1, TimeUnit.SECONDS);
             LobbyView lobbyView = socketClientManager.joinGame(nick).lobby();
             var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
             serverJoined.get(500, TimeUnit.MILLISECONDS);
@@ -114,19 +115,22 @@ public class SocketDisconnectionTest {
                     serverAllJoined.complete(null);
                 return lobby;
             }
-        }, serverSocket)) {
+        }, serverSocket, 1, TimeUnit.SECONDS)) {
 
             //Connect 3 client
             var socketClientManager = new SocketClientNetManager(
-                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
+                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                    1, TimeUnit.SECONDS);
             LobbyView lobbyView = socketClientManager.joinGame("test_1").lobby();
 
             var socketClientManager2 = new SocketClientNetManager(
-                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
+                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                    1, TimeUnit.SECONDS);
             LobbyView lobbyView2 = socketClientManager2.joinGame("test_2").lobby();
 
             var socketClientManager3 = new SocketClientNetManager(
-                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
+                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                    1, TimeUnit.SECONDS);
             LobbyView lobbyView3 = socketClientManager3.joinGame("test_3").lobby();
 
             var serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
@@ -174,7 +178,8 @@ public class SocketDisconnectionTest {
 
             //Restart player test_2 creating a new client
             socketClientManager2 = new SocketClientNetManager(
-                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
+                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                    1, TimeUnit.SECONDS);
             LobbyView lobbyView2_new = socketClientManager2.joinGame("test_2").lobby();
             final var gamePromise2 = new CompletableFuture<GameAndController<?>>();
             lobbyView2_new.game().registerObserver(gamePromise2::complete);

@@ -14,16 +14,29 @@ import java.net.Socket;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class SocketClientNetManager implements ClientNetManager {
     private final ExecutorService threadPool;
     private final InetSocketAddress serverAddress;
-    private @Nullable ClientSocketManager socketManager;
 
+    /** Maximum time to wait for a receive operation in {@link #defaultRecvTimeoutUnit}, or -1 to wait indefinitely */
+    private final long defaultRecvTimeout;
+    private final TimeUnit defaultRecvTimeoutUnit;
+
+    private @Nullable ClientSocketManager socketManager;
     private @Nullable Socket socket;
 
     public SocketClientNetManager(InetSocketAddress serverAddress) {
+        this(serverAddress, -1, TimeUnit.MILLISECONDS);
+    }
+
+    public SocketClientNetManager(InetSocketAddress serverAddress,
+                                  long defaultRecvTimeout,
+                                  TimeUnit defaultRecvTimeoutUnit) {
         this.serverAddress = serverAddress;
+        this.defaultRecvTimeout = defaultRecvTimeout;
+        this.defaultRecvTimeoutUnit = defaultRecvTimeoutUnit;
         this.threadPool = Executors.newFixedThreadPool(2, r -> {
             var th = new Thread(r);
             th.setName("ClientUpdater-thread");
@@ -35,7 +48,9 @@ public class SocketClientNetManager implements ClientNetManager {
     public LobbyAndController<Lobby> joinGame(String nick) throws IOException {
         if (socketManager == null) {
             socket = new Socket(serverAddress.getAddress(), serverAddress.getPort());
-            socketManager = new ClientSocketManagerImpl(socket);
+            socketManager = defaultRecvTimeout == -1
+                    ? new ClientSocketManagerImpl(socket)
+                    : new ClientSocketManagerImpl(socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
             socketManager.setNick(nick);
             System.out.println("Connected to : " + serverAddress);
         }

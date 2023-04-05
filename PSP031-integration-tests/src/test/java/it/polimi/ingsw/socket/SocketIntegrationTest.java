@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SocketIntegrationTest {
@@ -21,14 +22,15 @@ public class SocketIntegrationTest {
                     try {
                         final ServerSocket serverSocket = new ServerSocket(0);
                         choosenPort.set(serverSocket.getLocalPort());
-                        return new SocketConnectionServerController(serverController, serverSocket);
+                        return new SocketConnectionServerController(serverController, serverSocket, 1, TimeUnit.SECONDS);
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                     }
                 },
                 () -> {
                     try {
-                        return new SocketClientNetManager(new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
+                        return new SocketClientNetManager(new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                                1, TimeUnit.SECONDS);
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to create SocketClientNetManager", e);
                     }
@@ -43,14 +45,15 @@ public class SocketIntegrationTest {
                     try {
                         final ServerSocket serverSocket = new ServerSocket(0);
                         choosenPort.set(serverSocket.getLocalPort());
-                        return new SocketConnectionServerController(serverController, serverSocket);
+                        return new SocketConnectionServerController(serverController, serverSocket, 1, TimeUnit.SECONDS);
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                     }
                 },
                 () -> {
                     try {
-                        return new SocketClientNetManager(new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()));
+                        return new SocketClientNetManager(new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                                1, TimeUnit.SECONDS);
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to create SocketClientNetManager", e);
                     }
