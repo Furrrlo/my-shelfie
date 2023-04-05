@@ -73,7 +73,7 @@ public class SocketDisconnectionTest {
             assertSame(1, serverLobby.joinedPlayers().get().size());
             serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null));
             socketClientManager.closeSocket();
-            serverPlayerRemoved.get(1500, TimeUnit.MILLISECONDS);
+            serverPlayerRemoved.get(10, TimeUnit.SECONDS);
             assertSame(0, serverLobby.joinedPlayers().get().size());
         }
     }
@@ -173,7 +173,7 @@ public class SocketDisconnectionTest {
 
             serverPlayer2.connected().registerObserver(value -> serverPlayerDisconnected.complete(null));
             socketClientManager2.closeSocket();
-            serverPlayerDisconnected.get(2, TimeUnit.SECONDS);
+            serverPlayerDisconnected.get(10, TimeUnit.SECONDS);
             assertFalse(serverPlayer2.connected().get());
 
             //Client gets stuck on receive(), kill it

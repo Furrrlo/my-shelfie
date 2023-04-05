@@ -47,8 +47,8 @@ public class ServerController {
         this.heartbeatTask = scheduledExecutorService.scheduleAtFixedRate(
                 this::detectDisconnectedPlayers,
                 0,
-                1000,
-                TimeUnit.MILLISECONDS);
+                5,
+                TimeUnit.SECONDS);
     }
 
     private void detectDisconnectedPlayers() {
