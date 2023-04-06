@@ -211,9 +211,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         if (res instanceof SeqPacket pkt)
             return pkt;
         // We got an exception
-        if (res instanceof RuntimeException ex)
+        if (res instanceof RuntimeException ex) {
+            ex.addSuppressed(new Exception("Called from here"));
             throw ex;
-        if (res instanceof Error ex)
+        }
+        if (res instanceof Error ex) {
+            ex.addSuppressed(new Exception("Called from here"));
             throw ex;
         }
         if (res instanceof InterruptedIOException ex) {
