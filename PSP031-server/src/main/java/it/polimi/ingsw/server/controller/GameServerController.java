@@ -15,7 +15,7 @@ public class GameServerController {
         this.game = game;
     }
 
-    public void disconnectPlayer(String nick, Throwable cause) {
+    public void onDisconnectPlayer(String nick, Throwable cause) {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
             game.getPlayers().stream()

@@ -245,7 +245,7 @@ public class ServerController {
                                 lobbyUpdater,
                                 gameControllerFactory);
                 } catch (DisconnectedException ex) {
-                    disconnectPlayer(nick, ex);
+                    onDisconnectPlayer(nick, ex);
                     throw new IllegalStateException("Player disconnected during handshake process");
                 }
 
@@ -313,11 +313,11 @@ public class ServerController {
                         .collect(Collectors.toList()))));
     }
 
-    public void disconnectPlayer(String nick, Throwable cause) {
+    public void onDisconnectPlayer(String nick, Throwable cause) {
         heartbeats.remove(nick);
 
         final var lobbyAndController = getLobbyFor(nick);
         if (lobbyAndController != null)
-            lobbyAndController.controller().disconnectPlayer(nick, cause);
+            lobbyAndController.controller().onDisconnectPlayer(nick, cause);
     }
 }
