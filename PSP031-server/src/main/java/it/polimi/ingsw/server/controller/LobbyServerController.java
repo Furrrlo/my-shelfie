@@ -29,7 +29,6 @@ public class LobbyServerController {
                     .filter(p -> p.getNick().equals(nick))
                     .findFirst()
                     .orElse(null);
-            // TODO: what do we do with the player?
 
             var game = lobbyCloseable.obj().game().get();
             if (game != null) {

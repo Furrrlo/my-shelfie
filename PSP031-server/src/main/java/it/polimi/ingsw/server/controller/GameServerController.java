@@ -18,15 +18,10 @@ public class GameServerController {
     public void disconnectPlayer(String nick, Throwable cause) {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
-            ServerPlayer serverPlayer = game.getPlayers().stream()
+            game.getPlayers().stream()
                     .filter(p -> p.getNick().equals(nick))
                     .findFirst()
-                    .orElse(null);
-
-            if (serverPlayer != null) {
-                // TODO: set serverPlayer as not connected
-                serverPlayer.connected().set(false);
-            }
+                    .ifPresent(serverPlayer -> serverPlayer.connected().set(false));
         }
     }
 
