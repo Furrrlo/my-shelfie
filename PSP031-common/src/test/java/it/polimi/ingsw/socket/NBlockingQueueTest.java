@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -134,37 +133,38 @@ class NBlockingQueueTest {
     }
 
     @Test
-    void stressTestConcurrency() throws Throwable {
-        final var threadNum = 1000;
-        final var executorService = Executors.newFixedThreadPool(threadNum);
+    void testConsumerInterruption() throws Throwable {
+        final var executorService = Executors.newSingleThreadExecutor();
 
         final NBlockingQueue<Object> queue = new NBlockingQueue<>();
         try {
-            var promises = new ArrayList<CompletableFuture<Void>>();
+            var registeredThread = new CompletableFuture<Thread>();
+            var promise = CompletableFuture.supplyAsync(
+                    () -> assertThrows(
+                            InterruptedException.class,
+                            () -> queue.takeFirstMatching(
+                                    (o, res) -> res.consume(),
+                                    () -> registeredThread.complete(Thread.currentThread()),
+                                    -1,
+                                    TimeUnit.MILLISECONDS)),
+                    executorService);
 
-            final var toSupply = new ArrayList<>(); // Exact objects that the consumers want, in order
-            for (int i = 0; i < threadNum; i++) {
-                Object obj = new Object();
-                toSupply.add(obj);
-                promises.add(CompletableFuture.runAsync(
-                        () -> {
-                            try {
-                                assertSame(obj,
-                                        queue.takeFirstMatching((o, res) -> o == obj ? res.consume() : res.skip()));
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        },
-                        executorService));
-            }
+            var consumerTh = registeredThread.get(1000, TimeUnit.MILLISECONDS);
+            // Assert that the consumer gets interrupted correctly
+            consumerTh.interrupt();
+            promise.get(500, TimeUnit.MILLISECONDS);
 
-            final var rnd = new Random();
-            while (!toSupply.isEmpty())
-                queue.add(toSupply.remove(rnd.nextInt(toSupply.size())));
-
-            CompletableFuture
-                    .allOf(promises.toArray(CompletableFuture[]::new))
-                    .get(10000, TimeUnit.MILLISECONDS);
+            var toReceive = new Object();
+            var workingPromise = CompletableFuture.supplyAsync(
+                    () -> assertDoesNotThrow(() -> queue.takeFirstMatching(
+                            (o, res) -> o == toReceive ? res.consume() : res.skip(),
+                            -1,
+                            TimeUnit.MILLISECONDS)),
+                    executorService);
+            // Assert that the queue works correctly after having interrupted someone
+            queue.add(new Object());
+            queue.add(toReceive);
+            assertSame(toReceive, workingPromise.get(500, TimeUnit.MILLISECONDS));
         } finally {
             executorService.shutdown();
         }

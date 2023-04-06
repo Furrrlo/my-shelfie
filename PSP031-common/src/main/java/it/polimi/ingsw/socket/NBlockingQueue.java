@@ -126,69 +126,70 @@ public class NBlockingQueue<E> {
             signalRegistered.run();
 
         // Consuming cycle
-        var timeoutMillis = timeout != -1 ? unit.toMillis(timeout) : -1;
-        var startTimeMillis = System.currentTimeMillis();
-        outer: for (;;) {
-            // The head can't have done = true, so prev != head is implicit
-            while (prev.done /* && prev != head */) {
-                // The previous node is done, process all its enqueued stuff
-                // Note: by signaling that it's finished, the previous node won't modify its processed queue anymore.
-                //       We are free to empty it and no additional nodes will be added once we are done
-                E toTransfer;
-                while ((toTransfer = prev.processed.poll()) != null) {
-                    // We already knew that the prev queue was done, we don't care
-                    if (toTransfer == signalDone)
-                        continue;
+        try {
+            var timeoutMillis = timeout != -1 ? unit.toMillis(timeout) : -1;
+            var startTimeMillis = System.currentTimeMillis();
+            outer: for (;;) {
+                // The head can't have done = true, so prev != head is implicit
+                while (prev.done /* && prev != head */) {
+                    // The previous node is done, process all its enqueued stuff
+                    // Note: by signaling that it's finished, the previous node won't modify its processed queue anymore.
+                    //       We are free to empty it and no additional nodes will be added once we are done
+                    E toTransfer;
+                    while ((toTransfer = prev.processed.poll()) != null) {
+                        // We already knew that the prev queue was done, we don't care
+                        if (toTransfer == signalDone)
+                            continue;
 
-                    var processResult = matcher.apply(toTransfer, ProcessResultCtx.INSTANCE);
+                        var processResult = matcher.apply(toTransfer, ProcessResultCtx.INSTANCE);
+                        if (processResult == ProcessResult.CONSUME || processResult == ProcessResult.PEEK) {
+                            // We want to get it but not remove it, so also pass it along
+                            if (processResult == ProcessResult.PEEK)
+                                newNode.addToNext(toTransfer);
+                            return toTransfer;
+                        }
+                        // We don't care about this element, pass it along
+                        newNode.addToNext(toTransfer);
+                    }
+                    // Processed all its stuff, it's done and empty, un-reference it
+                    Node prevPrev;
+                    if ((prevPrev = prev.prev) != null)
+                        prevPrev.next.set(newNode);
+                    newNode.prev = prev = Objects.requireNonNull(prev.prev, "Only head can have prev = null");
+                }
+
+                while (true) {
+                    var elapsedMillis = System.currentTimeMillis() - startTimeMillis;
+                    if (timeoutMillis != -1 && elapsedMillis >= timeoutMillis)
+                        throw new TimeoutException("Timeout expired");
+
+                    final E candidate;
+                    if (timeoutMillis == -1) {
+                        candidate = prev.processed.take();
+                    } else {
+                        candidate = prev.processed.poll(timeoutMillis - elapsedMillis, TimeUnit.MILLISECONDS);
+                        if (candidate == null)
+                            throw new TimeoutException("Timeout expired");
+                    }
+
+                    // Prev queue just switched to done, let's return to the previous loop
+                    if (candidate == signalDone)
+                        continue outer;
+
+                    var processResult = matcher.apply(candidate, ProcessResultCtx.INSTANCE);
                     if (processResult == ProcessResult.CONSUME || processResult == ProcessResult.PEEK) {
                         // We want to get it but not remove it, so also pass it along
                         if (processResult == ProcessResult.PEEK)
-                            newNode.addToNext(toTransfer);
-
-                        newNode.done();
-                        return toTransfer;
+                            newNode.addToNext(candidate);
+                        return candidate;
                     }
                     // We don't care about this element, pass it along
-                    newNode.addToNext(toTransfer);
+                    newNode.addToNext(candidate);
                 }
-                // Processed all its stuff, it's done and empty, un-reference it
-                Node prevPrev;
-                if ((prevPrev = prev.prev) != null)
-                    prevPrev.next.set(newNode);
-                newNode.prev = prev = Objects.requireNonNull(prev.prev, "Only head can have prev = null");
             }
-
-            while (true) {
-                var elapsedMillis = System.currentTimeMillis() - startTimeMillis;
-                if (timeoutMillis != -1 && elapsedMillis >= timeoutMillis)
-                    throw new TimeoutException("Timeout expired");
-
-                final E candidate;
-                if (timeoutMillis == -1) {
-                    candidate = prev.processed.take();
-                } else {
-                    candidate = prev.processed.poll(timeoutMillis - elapsedMillis, TimeUnit.MILLISECONDS);
-                    if (candidate == null)
-                        throw new TimeoutException("Timeout expired");
-                }
-
-                // Prev queue just switched to done, let's return to the previous loop
-                if (candidate == signalDone)
-                    continue outer;
-
-                var processResult = matcher.apply(candidate, ProcessResultCtx.INSTANCE);
-                if (processResult == ProcessResult.CONSUME || processResult == ProcessResult.PEEK) {
-                    // We want to get it but not remove it, so also pass it along
-                    if (processResult == ProcessResult.PEEK)
-                        newNode.addToNext(candidate);
-
-                    newNode.done();
-                    return candidate;
-                }
-                // We don't care about this element, pass it along
-                newNode.addToNext(candidate);
-            }
+        } finally {
+            // Whatever happens, we need to signal that we are done
+            newNode.done();
         }
     }
 
