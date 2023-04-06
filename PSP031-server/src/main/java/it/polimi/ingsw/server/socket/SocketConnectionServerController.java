@@ -106,42 +106,46 @@ public class SocketConnectionServerController implements Closeable {
         final var connection = new PlayerConnection(controller, socketManager, nick);
         final var heartbeatHandler = new SocketHeartbeatHandler(socketManager);
         connections.add(connection);
-        controller.joinGame(
-                nick,
-                clock -> {
-                    try {
-                        heartbeatHandler.sendHeartbeat(Instant.now(clock));
-                    } catch (DisconnectedException e) {
-                        connection.disconnectPlayer(e);
-                    }
-                },
-                connection,
-                new SocketLobbyServerUpdaterFactory(socketManager, rec),
-                lobbyController -> {
-                    //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Shoud we stop it?
-                    var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
-                    connection.lobbyControllerTask = CompletableFuture.runAsync(socketController, threadPool)
-                            .handle((__, ex) -> {
-                                if (ex == null)
-                                    return __;
+        try {
+            controller.joinGame(
+                    nick,
+                    clock -> {
+                        try {
+                            heartbeatHandler.sendHeartbeat(Instant.now(clock));
+                        } catch (DisconnectedException e) {
+                            connection.disconnectPlayer(e);
+                        }
+                    },
+                    connection,
+                    new SocketLobbyServerUpdaterFactory(socketManager, rec),
+                    lobbyController -> {
+                        //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Shoud we stop it?
+                        var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
+                        connection.lobbyControllerTask = CompletableFuture.runAsync(socketController, threadPool)
+                                .handle((__, ex) -> {
+                                    if (ex == null)
+                                        return __;
 
-                                connection.disconnectPlayer(ex);
-                                return __;
-                            });
-                    return socketController;
-                },
-                (serverPlayer, game) -> {
-                    var socketController = new SocketServerGameController(socketManager, serverPlayer, game);
-                    connection.gameControllerTask = CompletableFuture.runAsync(socketController, threadPool)
-                            .handle((__, ex) -> {
-                                if (ex == null)
+                                    connection.disconnectPlayer(ex);
                                     return __;
+                                });
+                        return socketController;
+                    },
+                    (serverPlayer, game) -> {
+                        var socketController = new SocketServerGameController(socketManager, serverPlayer, game);
+                        connection.gameControllerTask = CompletableFuture.runAsync(socketController, threadPool)
+                                .handle((__, ex) -> {
+                                    if (ex == null)
+                                        return __;
 
-                                connection.disconnectPlayer(ex);
-                                return __;
-                            });
-                    return socketController;
-                });
+                                    connection.disconnectPlayer(ex);
+                                    return __;
+                                });
+                        return socketController;
+                    });
+        } catch (DisconnectedException e) {
+            connection.disconnectPlayer(e);
+        }
     }
 
     private class PlayerConnection extends BaseServerConnection {

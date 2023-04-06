@@ -57,7 +57,8 @@ public class UpdatersIntegrationTest {
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Function<LobbyServerController, LobbyController> lobbyControllerFactory,
-                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
+                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
+                    throws DisconnectedException {
                 final LobbyUpdaterFactory wrappedFactory = lobby -> new DelegatingLobbyUpdater(
                         lobbyUpdaterFactory.create(lobby)) {
                     @Override

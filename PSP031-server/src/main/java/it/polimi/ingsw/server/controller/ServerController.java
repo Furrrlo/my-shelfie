@@ -161,7 +161,8 @@ public class ServerController {
                               PlayerObservableTracker observableTracker,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
                               Function<LobbyServerController, LobbyController> lobbyControllerFactory,
-                              BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
+                              BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
+            throws DisconnectedException {
         heartbeats.put(nick, heartbeatHandler);
 
         do {
@@ -245,8 +246,7 @@ public class ServerController {
                                 lobbyUpdater,
                                 gameControllerFactory);
                 } catch (DisconnectedException ex) {
-                    onDisconnectPlayer(nick, ex);
-                    throw new IllegalStateException("Player disconnected during handshake process");
+                    throw new DisconnectedException("Player disconnected during handshake process", ex);
                 }
 
                 return lobby;

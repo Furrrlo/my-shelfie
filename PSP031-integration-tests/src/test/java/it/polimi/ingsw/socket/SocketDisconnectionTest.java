@@ -1,5 +1,6 @@
 package it.polimi.ingsw.socket;
 
+import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.GameController;
@@ -55,7 +56,8 @@ public class SocketDisconnectionTest {
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Function<LobbyServerController, LobbyController> lobbyControllerFactory,
-                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
+                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
+                    throws DisconnectedException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
                         lobbyControllerFactory,
                         gameControllerFactory);
@@ -106,7 +108,8 @@ public class SocketDisconnectionTest {
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Function<LobbyServerController, LobbyController> lobbyControllerFactory,
-                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory) {
+                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
+                    throws DisconnectedException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
                         lobbyControllerFactory,
                         gameControllerFactory);
