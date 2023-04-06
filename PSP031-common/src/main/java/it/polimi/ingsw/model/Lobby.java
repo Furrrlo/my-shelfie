@@ -55,13 +55,13 @@ public class Lobby implements LobbyView {
         if (!(o instanceof Lobby lobby))
             return false;
         return requiredPlayers == lobby.requiredPlayers &&
-                joinedPlayers.equals(lobby.joinedPlayers) &&
-                game.equals(lobby.game);
+                joinedPlayers.get().equals(lobby.joinedPlayers.get()) &&
+                Objects.equals(game.get(), lobby.game.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requiredPlayers, joinedPlayers, game);
+        return Objects.hash(requiredPlayers, joinedPlayers.get(), game.get());
     }
 
     @Override

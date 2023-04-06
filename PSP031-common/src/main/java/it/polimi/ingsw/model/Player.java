@@ -29,9 +29,8 @@ public class Player implements PlayerView {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof Player))
+        if (!(o instanceof Player player))
             return false;
-        Player player = (Player) o;
         return nick.equals(player.nick) && shelfie.equals(player.shelfie);
     }
 

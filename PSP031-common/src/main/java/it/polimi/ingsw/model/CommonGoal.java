@@ -36,12 +36,12 @@ public class CommonGoal implements CommonGoalView {
             return true;
         if (!(o instanceof CommonGoal that))
             return false;
-        return type == that.type && achieved.equals(that.achieved);
+        return type == that.type && achieved.get().equals(that.achieved.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, achieved);
+        return Objects.hash(type, achieved.get());
     }
 
     @Override

@@ -59,12 +59,15 @@ public class ServerPlayer implements ServerPlayerView {
             return true;
         if (!(o instanceof ServerPlayer that))
             return false;
-        return nick.equals(that.nick) && shelfie.equals(that.shelfie) && personalGoal.equals(that.personalGoal);
+        return nick.equals(that.nick) &&
+                shelfie.equals(that.shelfie) &&
+                personalGoal.equals(that.personalGoal) &&
+                connected.get().equals(that.connected.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nick, shelfie, personalGoal);
+        return Objects.hash(nick, shelfie, personalGoal, connected.get());
     }
 
     @Override
@@ -73,6 +76,8 @@ public class ServerPlayer implements ServerPlayerView {
                 "nick='" + nick + '\'' +
                 ", shelfie=" + shelfie +
                 ", personalGoal=" + personalGoal +
+                ", connected=" + connected +
+                ", score=" + score +
                 '}';
     }
 }

@@ -93,14 +93,14 @@ public class ServerGame implements ServerGameView {
                 board.equals(that.board) &&
                 bag.equals(that.bag) &&
                 players.equals(that.players) &&
-                currentTurn.equals(that.currentTurn) &&
+                currentTurn.get().equals(that.currentTurn.get()) &&
                 commonGoal.equals(that.commonGoal) &&
-                firstFinisher.equals(that.firstFinisher);
+                Objects.equals(firstFinisher.get(), that.firstFinisher.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameID, board, bag, players, currentTurn, commonGoal, firstFinisher);
+        return Objects.hash(gameID, board, bag, players, currentTurn.get(), commonGoal, firstFinisher.get());
     }
 
     @Override

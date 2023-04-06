@@ -46,13 +46,13 @@ public class ServerLobby implements ServerLobbyView {
         if (!(o instanceof ServerLobby that))
             return false;
         return requiredPlayers == that.requiredPlayers &&
-                joinedPlayers.equals(that.joinedPlayers) &&
-                game.equals(that.game);
+                joinedPlayers.get().equals(that.joinedPlayers.get()) &&
+                Objects.equals(game.get(), that.game.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requiredPlayers, joinedPlayers, game);
+        return Objects.hash(requiredPlayers, joinedPlayers.get(), game.get());
     }
 
     @Override

@@ -77,15 +77,15 @@ public class Game implements GameView {
         return gameID == game.gameID &&
                 board.equals(game.board) &&
                 players.equals(game.players) &&
-                currentTurn.equals(game.currentTurn) &&
+                currentTurn.get().equals(game.currentTurn.get()) &&
                 personalGoal.equals(game.personalGoal) &&
                 commonGoal.equals(game.commonGoal) &&
-                firstFinisher.equals(game.firstFinisher);
+                Objects.equals(firstFinisher.get(), game.firstFinisher.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameID, board, players, currentTurn, personalGoal, commonGoal, firstFinisher);
+        return Objects.hash(gameID, board, players, currentTurn.get(), personalGoal, commonGoal, firstFinisher.get());
     }
 
     @Override

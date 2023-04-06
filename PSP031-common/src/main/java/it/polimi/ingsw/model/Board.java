@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -59,14 +60,20 @@ public class Board implements BoardView {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof Board board1))
+        if (!(o instanceof Board that))
             return false;
-        return Arrays.deepEquals(board, board1.board);
+        return IntStream.range(0, getRows()).boxed()
+                .allMatch(row -> IntStream.range(0, getCols()).boxed()
+                        .allMatch(col -> Objects.equals(board[row][col].get(), that.board[row][col].get())));
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(board);
+        return Arrays.stream(board)
+                .mapToInt(row -> Arrays.stream(row)
+                        .mapToInt(tile -> Objects.hashCode(tile.get()))
+                        .reduce(1, (a, b) -> 31 * a + b))
+                .reduce(1, (a, b) -> 31 * a + b);
     }
 
     @Override

@@ -105,14 +105,20 @@ public class Shelfie implements ShelfieView {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof Shelfie shelfie1))
+        if (!(o instanceof Shelfie that))
             return false;
-        return Arrays.deepEquals(shelfie, shelfie1.shelfie);
+        return IntStream.range(0, ROWS).boxed()
+                .allMatch(row -> IntStream.range(0, COLUMNS).boxed()
+                        .allMatch(col -> Objects.equals(shelfie[row][col].get(), that.shelfie[row][col].get())));
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(shelfie);
+        return Arrays.stream(shelfie)
+                .mapToInt(row -> Arrays.stream(row)
+                        .mapToInt(tile -> Objects.hashCode(tile.get()))
+                        .reduce(1, (a, b) -> 31 * a + b))
+                .reduce(1, (a, b) -> 31 * a + b);
     }
 
     @Override

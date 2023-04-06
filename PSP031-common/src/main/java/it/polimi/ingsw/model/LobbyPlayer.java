@@ -32,12 +32,12 @@ public final class LobbyPlayer implements LobbyPlayerView {
         if (o == null || getClass() != o.getClass())
             return false;
         LobbyPlayer that = (LobbyPlayer) o;
-        return nick.equals(that.nick) && ready.equals(that.ready);
+        return nick.equals(that.nick) && ready.get().equals(that.ready.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nick, ready);
+        return Objects.hash(nick, ready.get());
     }
 
     @Override
