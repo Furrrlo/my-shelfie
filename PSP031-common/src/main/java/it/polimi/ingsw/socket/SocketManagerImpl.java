@@ -182,7 +182,14 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         return hasSent;
     }
 
-    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException, TimeoutException {
+    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException {
+        ensureOpen();
+        // TODO: this will wait indefinitely when the socket closes, is there any way to fail this?
+        return inPacketQueue.takeFirstMatching(filter);
+    }
+
+    private SeqPacket doReceiveWithTimeout(Predicate<SeqPacket> filter)
+            throws InterruptedException, IOException, TimeoutException {
         ensureOpen();
         // TODO: this will wait indefinitely when the socket closes, is there any way to fail this?
         return defaultRecvTimeout == -1
@@ -196,7 +203,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             final long seqN = p.seqN();
             doSend(p).get();
             log("Waiting for  " + replyType + "...");
-            return new PacketReplyContextImpl<>(doReceive(packet -> replyType.isInstance(packet.packet()) &&
+            return new PacketReplyContextImpl<>(doReceiveWithTimeout(packet -> replyType.isInstance(packet.packet()) &&
                     packet instanceof SeqAckPacket ack &&
                     ack.seqAck() == seqN));
         } catch (InterruptedException | ExecutionException e) {
@@ -229,8 +236,6 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             return new PacketReplyContextImpl<>(doReceive(packet -> type.isInstance(packet.packet())));
         } catch (InterruptedException e) {
             throw new RuntimeException("Failed to receive packet " + type, e);
-        } catch (TimeoutException e) {
-            throw new IOException("Timeout expired while waiting to receive packet " + type, e);
         }
     }
 
