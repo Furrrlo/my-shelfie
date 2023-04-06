@@ -177,7 +177,7 @@ public class SocketDisconnectionTest {
             assertFalse(serverPlayer2.connected().get());
 
             //Client gets stuck on receive(), kill it
-            socketClientManager2.kill();
+            //socketClientManager2.kill();
 
             //Restart player test_2 creating a new client
             socketClientManager2 = new SocketClientNetManager(
