@@ -15,7 +15,7 @@ public interface GameUpdater {
 
     void updateCurrentTurn(String nick) throws DisconnectedException;
 
-    void updateFirstFinisher(String nick) throws DisconnectedException;
+    void updateFirstFinisher(@Nullable String nick) throws DisconnectedException;
 
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws DisconnectedException;
 }

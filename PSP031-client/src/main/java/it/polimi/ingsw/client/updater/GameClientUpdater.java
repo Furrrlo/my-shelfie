@@ -47,8 +47,9 @@ public abstract class GameClientUpdater implements GameUpdater {
     }
 
     @Override
-    public void updateFirstFinisher(String nick) {
-        game.firstFinisher().set(findPlayerBy(nick));
+    @SuppressWarnings("NullAway") // NullAway doesn't handle generics correctly
+    public void updateFirstFinisher(@Nullable String nick) {
+        game.firstFinisher().set(nick == null ? null : findPlayerBy(nick));
     }
 
     @Override

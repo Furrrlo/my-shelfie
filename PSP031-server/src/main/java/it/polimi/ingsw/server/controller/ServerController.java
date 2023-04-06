@@ -299,7 +299,8 @@ public class ServerController {
                                 tileAndCoords.col(),
                                 tile))));
         observableTracker.registerObserver(game.currentTurn(), p -> gameUpdater.updateCurrentTurn(p.getNick()));
-        observableTracker.registerObserver(game.firstFinisher(), p -> gameUpdater.updateFirstFinisher(p.getNick()));
+        observableTracker.registerObserver(game.firstFinisher(),
+                p -> gameUpdater.updateFirstFinisher(p == null ? null : p.getNick()));
         game.getCommonGoals().forEach(goal -> observableTracker.registerObserver(
                 goal.achieved(),
                 players -> gameUpdater.updateAchievedCommonGoal(goal.getType(), players.stream()

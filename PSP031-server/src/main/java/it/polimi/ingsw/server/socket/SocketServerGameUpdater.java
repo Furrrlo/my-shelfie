@@ -45,7 +45,7 @@ public class SocketServerGameUpdater implements GameUpdater {
     }
 
     @Override
-    public void updateFirstFinisher(String nick) throws DisconnectedException {
+    public void updateFirstFinisher(@Nullable String nick) throws DisconnectedException {
         try {
             socketManager.send(new UpdateFirstFinisherPacket(nick));
         } catch (IOException e) {

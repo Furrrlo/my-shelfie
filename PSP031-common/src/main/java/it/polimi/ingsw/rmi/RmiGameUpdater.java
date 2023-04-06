@@ -19,7 +19,7 @@ public interface RmiGameUpdater extends Remote {
 
     void updateCurrentTurn(String nick) throws RemoteException;
 
-    void updateFirstFinisher(String nick) throws RemoteException;
+    void updateFirstFinisher(@Nullable String nick) throws RemoteException;
 
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws RemoteException;
 
@@ -47,7 +47,7 @@ public interface RmiGameUpdater extends Remote {
         }
 
         @Override
-        public void updateFirstFinisher(String nick) throws DisconnectedException {
+        public void updateFirstFinisher(@Nullable String nick) throws DisconnectedException {
             adapt(() -> updater.updateFirstFinisher(nick));
         }
 
