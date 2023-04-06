@@ -21,10 +21,13 @@ public interface PersonalGoalView extends Serializable {
     Tile get(int r, int c);
 
     @Nullable
-    Tile[][] colorToTiles(@Nullable Color[][] tiles);
-
-    @Nullable
     Tile[][] getPersonalGoal();
+
+    void printPersonalGoal();
+
+    void printPersonalGoalOnShelfie(Shelfie shelfie);
+
+    boolean achievedPersonalGoal(Shelfie shelfie);
 
     Stream<TileAndCoords<@Nullable Tile>> tiles();
 }

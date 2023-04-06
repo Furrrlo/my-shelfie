@@ -16,7 +16,10 @@ class PersonalGoalTest {
     @Test
     void equals1() {
         PersonalGoal p1 = new PersonalGoal(0);
+        p1.printPersonalGoal();
         PersonalGoal p2 = new PersonalGoal(0);
+        p2.printPersonalGoal();
         assertEquals(p1, p2);
     }
+
 }

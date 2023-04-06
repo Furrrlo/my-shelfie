@@ -73,6 +73,18 @@ public class Shelfie implements ShelfieView {
         }
     }
 
+    public boolean isOverlapping(Shelfie that) {
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLUMNS; c++) {
+                if (this.shelfie[r][c].get() != null && that.shelfie[r][c].get() != null &&
+                        !this.shelfie[r][c].get().getColor().equals(that.shelfie[r][c].get().getColor()))
+                    return false;
+
+            }
+        }
+        return true;
+    }
+
     @Override
     public Property<@Nullable Tile> tile(int r, int c) {
         return shelfie[r][c];

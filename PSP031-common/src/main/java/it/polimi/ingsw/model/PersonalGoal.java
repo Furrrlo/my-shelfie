@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 public class PersonalGoal implements PersonalGoalView {
 
     private final @Nullable Tile[][] personalGoal;
+    private final int index;
 
     public static List<Color[][]> personalGoals = List.of(new Color[][] {
             //@formatter:off
@@ -130,10 +131,37 @@ public class PersonalGoal implements PersonalGoalView {
                 throw new IllegalArgumentException("Provided shelf combination has the wrong column size at row " + row);
         }
         this.personalGoal = personalGoal;
+        this.index = -1;
     }
 
     public PersonalGoal(int index) {
         this.personalGoal = colorToTiles(personalGoals.get(index));
+        this.index = index;
+    }
+
+    @Override
+    public void printPersonalGoal() {
+        Shelfie shelfie = new Shelfie(personalGoals.get(index));
+        System.out.println("PERSONAL GOAL");
+        shelfie.printColoredShelfie();
+    }
+
+    @Override
+    public boolean achievedPersonalGoal(Shelfie shelfie) {
+        return shelfie.isOverlapping(new Shelfie(personalGoals.get(this.index)));
+    }
+
+    @Override
+    public void printPersonalGoalOnShelfie(Shelfie shelfie) {
+        if (achievedPersonalGoal(shelfie)) {
+            int count = 0;
+            int[][] checked = new int[ROWS][COLUMNS];
+            for (int r = 0; r < ROWS; r++)
+                for (int c = 0; c < COLUMNS; c++)
+                    if (this.get(r, c) != null)
+                        checked[r][c] = count + 1;
+            Type.SIX_COUPLES.printCommonGoal(shelfie, checked, "Congratulation you achieved PERSONAL GOAL");
+        }
     }
 
     @Override
@@ -142,7 +170,6 @@ public class PersonalGoal implements PersonalGoalView {
         return personalGoal;
     }
 
-    @Override
     @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
     public @Nullable Tile[][] colorToTiles(@Nullable Color[][] tiles) {
         return Arrays.stream(tiles)
