@@ -56,7 +56,7 @@ public class ServerGame implements ServerGameView {
 
     @Override
     public @UnmodifiableView List<Tile> getBagView() {
-        return bag;
+        return bagView;
     }
 
     public List<Tile> getBag() {
