@@ -25,6 +25,7 @@ public class Shelfie implements ShelfieView {
         }
     }
 
+    /** returns a shelfie from a matrix of Color passed as parameter */
     @VisibleForTesting
     @SuppressWarnings("unchecked")
     public Shelfie(@Nullable Color[][] tiles) {
@@ -36,6 +37,7 @@ public class Shelfie implements ShelfieView {
                 .toArray(Property[][]::new);
     }
 
+    /** prints colored shelfie */
     @VisibleForTesting
     public void printColoredShelfie() {
         for (int row = 0; row < ROWS; row++) {
@@ -73,13 +75,16 @@ public class Shelfie implements ShelfieView {
         }
     }
 
+    /**
+     * returns true if all the tiles of the shelfie calling the method overlaps with equal not null tiles of the
+     * shelfie (that) passed as a parameter
+     */
     public boolean isOverlapping(Shelfie that) {
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLUMNS; c++) {
-                if (this.shelfie[r][c].get() != null && that.shelfie[r][c].get() != null &&
-                        !this.shelfie[r][c].get().getColor().equals(that.shelfie[r][c].get().getColor()))
+                if (this.shelfie[r][c].get() != null &&
+                        !Objects.equals(this.shelfie[r][c].get(), that.shelfie[r][c].get()))
                     return false;
-
             }
         }
         return true;

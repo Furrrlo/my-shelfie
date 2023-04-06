@@ -12,6 +12,7 @@ public class PersonalGoal implements PersonalGoalView {
     private final @Nullable Tile[][] personalGoal;
     private final int index;
 
+    /** Immutable list containing all possible personal goals assignable to players */
     public static List<Color[][]> personalGoals = List.of(new Color[][] {
             //@formatter:off
             new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
@@ -134,34 +135,49 @@ public class PersonalGoal implements PersonalGoalView {
         this.index = -1;
     }
 
+    /**
+     * generate a personalGoal corresponding to the element in the specified position of the immutable list personalGoals
+     * that contains all possible cases of personal Goals assignable to players
+     * 
+     * @param index : specifies the index of the personalGoals list from which to extract the personalGoal
+     */
     public PersonalGoal(int index) {
         this.personalGoal = colorToTiles(personalGoals.get(index));
         this.index = index;
     }
 
+    /** prints the shelfie corresponding to the personal goal whose calling the method */
     @Override
     public void printPersonalGoal() {
-        Shelfie shelfie = new Shelfie(personalGoals.get(index));
-        System.out.println("PERSONAL GOAL");
+        Shelfie shelfie = new Shelfie(personalGoals.get(this.index));
+        System.out.println("PERSONAL GOAL : " + this.index);
         shelfie.printColoredShelfie();
     }
 
+    /** returns true if the shelfie passed as a parameter corresponds to the tiles of the commonGoal */
     @Override
     public boolean achievedPersonalGoal(Shelfie shelfie) {
-        return shelfie.isOverlapping(new Shelfie(personalGoals.get(this.index)));
+        if (new Shelfie(personalGoals.get(this.index)).isOverlapping(shelfie)) {
+            this.printPersonalGoalOnShelfie(shelfie);
+            return true;
+        } else
+            return false;
     }
 
+    /**
+     * prints the Shelfie passed as parameter marking with progressive number the tiles that corresponds to the personal goal
+     */
     @Override
     public void printPersonalGoalOnShelfie(Shelfie shelfie) {
-        if (achievedPersonalGoal(shelfie)) {
-            int count = 0;
-            int[][] checked = new int[ROWS][COLUMNS];
-            for (int r = 0; r < ROWS; r++)
-                for (int c = 0; c < COLUMNS; c++)
-                    if (this.get(r, c) != null)
-                        checked[r][c] = count + 1;
-            Type.SIX_COUPLES.printCommonGoal(shelfie, checked, "Congratulation you achieved PERSONAL GOAL");
-        }
+        int count = 0;
+        int[][] checked = new int[ROWS][COLUMNS];
+        for (int r = 0; r < ROWS; r++)
+            for (int c = 0; c < COLUMNS; c++)
+                if (this.get(r, c) != null) {
+                    count++;
+                    checked[r][c] = count;
+                }
+        Type.SIX_COUPLES.printCommonGoal(shelfie, checked, "Congratulation you achieved PERSONAL GOAL");
     }
 
     @Override
@@ -170,6 +186,7 @@ public class PersonalGoal implements PersonalGoalView {
         return personalGoal;
     }
 
+    /** returns a matrix of Tile[][] from a given matrix of Color[][] passed as parameter */
     @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
     public @Nullable Tile[][] colorToTiles(@Nullable Color[][] tiles) {
         return Arrays.stream(tiles)
