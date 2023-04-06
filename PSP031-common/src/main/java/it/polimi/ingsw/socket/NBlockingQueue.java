@@ -125,7 +125,7 @@ public class NBlockingQueue<E> {
             signalRegistered.run();
 
         // Consuming cycle
-        var timeoutMillis = timeout == -1 ? unit.toMillis(timeout) : -1;
+        var timeoutMillis = timeout != -1 ? unit.toMillis(timeout) : -1;
         var startTimeMillis = System.currentTimeMillis();
         outer: for (;;) {
             // The head can't have done = true, so prev != head is implicit
@@ -162,7 +162,7 @@ public class NBlockingQueue<E> {
                 if (timeoutMillis == -1) {
                     candidate = prev.processed.take();
                 } else {
-                    candidate = prev.processed.poll(elapsedMillis, TimeUnit.MILLISECONDS);
+                    candidate = prev.processed.poll(timeoutMillis - elapsedMillis, TimeUnit.MILLISECONDS);
                     if (candidate == null)
                         throw new TimeoutException("Timeout expired");
                 }

@@ -186,8 +186,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         ensureOpen();
         // TODO: this will wait indefinitely when the socket closes, is there any way to fail this?
         return defaultRecvTimeout == -1
-                ? inPacketQueue.takeFirstMatching(filter, defaultRecvTimeout, defaultRecvTimeoutUnit)
-                : inPacketQueue.takeFirstMatching(filter);
+                ? inPacketQueue.takeFirstMatching(filter)
+                : inPacketQueue.takeFirstMatching(filter, defaultRecvTimeout, defaultRecvTimeoutUnit);
     }
 
     private <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> doSendAndWaitResponse(SeqPacket p, Class<R> replyType)
