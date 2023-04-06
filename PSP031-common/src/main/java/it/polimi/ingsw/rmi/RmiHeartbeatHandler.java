@@ -6,6 +6,7 @@ import it.polimi.ingsw.HeartbeatHandler;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.time.Instant;
+import java.util.function.Consumer;
 
 public interface RmiHeartbeatHandler extends Remote {
 
@@ -14,14 +15,20 @@ public interface RmiHeartbeatHandler extends Remote {
     class Adapter extends RmiAdapter implements HeartbeatHandler {
 
         private final RmiHeartbeatHandler handler;
+        private final Consumer<Throwable> pingFailed;
 
-        public Adapter(RmiHeartbeatHandler handler) {
+        public Adapter(RmiHeartbeatHandler handler, Consumer<Throwable> pingFailed) {
             this.handler = handler;
+            this.pingFailed = pingFailed;
         }
 
         @Override
-        public Instant sendHeartbeat(Instant serverTime) throws DisconnectedException {
-            return adapt(() -> handler.sendHeartbeat(serverTime));
+        public void sendHeartbeat(Instant serverTime) {
+            try {
+                adapt(() -> handler.sendHeartbeat(serverTime));
+            } catch (DisconnectedException e) {
+                pingFailed.accept(e);
+            }
         }
     }
 }

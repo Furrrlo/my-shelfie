@@ -15,7 +15,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,18 +51,11 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                          RmiHeartbeatHandler handler,
                          RmiLobbyUpdaterFactory updaterFactory) {
         var connection = new PlayerConnection(controller, nick);
-        final var heartbeatHandler = new RmiHeartbeatHandler.Adapter(handler);
         connections.add(connection);
         try {
             controller.joinGame(
                     nick,
-                    clock -> {
-                        try {
-                            heartbeatHandler.sendHeartbeat(Instant.now(clock));
-                        } catch (DisconnectedException e) {
-                            connection.disconnectPlayer(e);
-                        }
-                    },
+                    new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer),
                     connection,
                     new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
                     controller -> {

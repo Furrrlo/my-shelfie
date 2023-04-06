@@ -3,6 +3,7 @@ package it.polimi.ingsw.updater;
 import it.polimi.ingsw.DelegatingLobbyUpdater;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
@@ -12,7 +13,6 @@ import it.polimi.ingsw.server.model.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
-import java.time.Clock;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -53,7 +53,7 @@ public class UpdatersIntegrationTest {
 
             @Override
             public LobbyView joinGame(String nick,
-                                      Consumer<Clock> heartbeatHandler,
+                                      HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Function<LobbyServerController, LobbyController> lobbyControllerFactory,

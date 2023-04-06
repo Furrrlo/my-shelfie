@@ -13,7 +13,6 @@ import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,18 +103,11 @@ public class SocketConnectionServerController implements Closeable {
         socketManager.setNick(nick);
 
         final var connection = new PlayerConnection(controller, socketManager, nick);
-        final var heartbeatHandler = new SocketHeartbeatHandler(socketManager);
         connections.add(connection);
         try {
             controller.joinGame(
                     nick,
-                    clock -> {
-                        try {
-                            heartbeatHandler.sendHeartbeat(Instant.now(clock));
-                        } catch (DisconnectedException e) {
-                            connection.disconnectPlayer(e);
-                        }
-                    },
+                    new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer),
                     connection,
                     new SocketLobbyServerUpdaterFactory(socketManager, rec),
                     lobbyController -> {

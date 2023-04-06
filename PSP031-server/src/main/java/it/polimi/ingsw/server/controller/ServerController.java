@@ -2,6 +2,7 @@ package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
@@ -32,7 +34,7 @@ public class ServerController {
     private final Clock clock;
     private final ScheduledFuture<?> heartbeatTask;
 
-    private final ConcurrentMap<String, Consumer<Clock>> heartbeats = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, HeartbeatHandler> heartbeats = new ConcurrentHashMap<>();
 
     private final Lock lobbiesLock = new ReentrantLock();
     private final Set<ServerLobbyAndController<ServerLobby>> lobbies = ConcurrentHashMap.newKeySet();
@@ -55,7 +57,7 @@ public class ServerController {
     }
 
     private void detectDisconnectedPlayers() {
-        heartbeats.forEach((nick, heartbeatHandler) -> heartbeatHandler.accept(clock));
+        heartbeats.forEach((nick, heartbeatHandler) -> heartbeatHandler.sendHeartbeat(Instant.now(clock)));
     }
 
     @VisibleForTesting
@@ -157,7 +159,7 @@ public class ServerController {
     }
 
     public LobbyView joinGame(String nick,
-                              Consumer<Clock> heartbeatHandler,
+                              HeartbeatHandler heartbeatHandler,
                               PlayerObservableTracker observableTracker,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
                               Function<LobbyServerController, LobbyController> lobbyControllerFactory,

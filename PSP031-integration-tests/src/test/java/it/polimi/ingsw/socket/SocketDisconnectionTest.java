@@ -2,6 +2,7 @@ package it.polimi.ingsw.socket;
 
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
@@ -16,13 +17,11 @@ import org.junit.jupiter.api.Test;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.time.Clock;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static it.polimi.ingsw.updater.UpdatersIntegrationTest.ensurePropertyUpdated;
@@ -52,7 +51,7 @@ public class SocketDisconnectionTest {
 
             @Override
             public LobbyView joinGame(String nick,
-                                      Consumer<Clock> heartbeatHandler,
+                                      HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Function<LobbyServerController, LobbyController> lobbyControllerFactory,
@@ -104,7 +103,7 @@ public class SocketDisconnectionTest {
 
             @Override
             public LobbyView joinGame(String nick,
-                                      Consumer<Clock> heartbeatHandler,
+                                      HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       Function<LobbyServerController, LobbyController> lobbyControllerFactory,
