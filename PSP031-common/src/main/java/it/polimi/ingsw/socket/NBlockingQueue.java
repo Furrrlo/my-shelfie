@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 /**
@@ -82,17 +83,17 @@ public class NBlockingQueue<E> {
      * @return the first element which matches the given predicate
      * @throws InterruptedException if interrupted while waiting
      */
-    public E takeFirstMatching(Predicate<E> toConsume) throws InterruptedException {
+    public E takeFirstMatching(Matcher<E> matcher) throws InterruptedException {
         try {
-            return takeFirstMatching(toConsume, null, -1, TimeUnit.MILLISECONDS);
+            return takeFirstMatching(matcher, null, -1, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             throw new AssertionError("There should be no timeout when -1 is passed", e);
         }
     }
 
-    public E takeFirstMatching(Predicate<E> toConsume, long timeout, TimeUnit unit)
+    public E takeFirstMatching(Matcher<E> matcher, long timeout, TimeUnit unit)
             throws InterruptedException, TimeoutException {
-        return takeFirstMatching(toConsume, null, timeout, unit);
+        return takeFirstMatching(matcher, null, timeout, unit);
     }
 
     /**
@@ -102,7 +103,7 @@ public class NBlockingQueue<E> {
      * @throws TimeoutException if timeout is not -1 and has elapsed
      */
     @VisibleForTesting
-    E takeFirstMatching(Predicate<E> toConsume,
+    E takeFirstMatching(Matcher<E> matcher,
                         @Nullable Runnable signalRegistered,
                         long timeout,
                         TimeUnit unit)
@@ -139,7 +140,12 @@ public class NBlockingQueue<E> {
                     if (toTransfer == signalDone)
                         continue;
 
-                    if (toConsume.test(toTransfer)) {
+                    var processResult = matcher.apply(toTransfer, ProcessResultCtx.INSTANCE);
+                    if (processResult == ProcessResult.CONSUME || processResult == ProcessResult.PEEK) {
+                        // We want to get it but not remove it, so also pass it along
+                        if (processResult == ProcessResult.PEEK)
+                            newNode.addToNext(toTransfer);
+
                         newNode.done();
                         return toTransfer;
                     }
@@ -171,7 +177,12 @@ public class NBlockingQueue<E> {
                 if (candidate == signalDone)
                     continue outer;
 
-                if (toConsume.test(candidate)) {
+                var processResult = matcher.apply(candidate, ProcessResultCtx.INSTANCE);
+                if (processResult == ProcessResult.CONSUME || processResult == ProcessResult.PEEK) {
+                    // We want to get it but not remove it, so also pass it along
+                    if (processResult == ProcessResult.PEEK)
+                        newNode.addToNext(candidate);
+
                     newNode.done();
                     return candidate;
                 }
@@ -191,5 +202,34 @@ public class NBlockingQueue<E> {
             curr = next;
         }
         return sb.toString();
+    }
+
+    public interface Matcher<E> extends BiFunction<E, ProcessResultCtx, ProcessResult> {
+    }
+
+    enum ProcessResult {
+        PEEK,
+        CONSUME,
+        SKIP
+    }
+
+    public static class ProcessResultCtx {
+
+        private static final ProcessResultCtx INSTANCE = new ProcessResultCtx();
+
+        private ProcessResultCtx() {
+        }
+
+        public ProcessResult peek() {
+            return ProcessResult.PEEK;
+        }
+
+        public ProcessResult consume() {
+            return ProcessResult.CONSUME;
+        }
+
+        public ProcessResult skip() {
+            return ProcessResult.SKIP;
+        }
     }
 }

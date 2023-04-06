@@ -95,7 +95,7 @@ class NBlockingQueueTest {
                         () -> {
                             try {
                                 return queue.takeFirstMatching(
-                                        o -> o == obj,
+                                        (o, res) -> o == obj ? res.consume() : res.skip(),
                                         hasRegistered::countDown,
                                         -1,
                                         TimeUnit.MILLISECONDS);
@@ -149,7 +149,8 @@ class NBlockingQueueTest {
                 promises.add(CompletableFuture.runAsync(
                         () -> {
                             try {
-                                assertSame(obj, queue.takeFirstMatching(o -> o == obj));
+                                assertSame(obj,
+                                        queue.takeFirstMatching((o, res) -> o == obj ? res.consume() : res.skip()));
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }

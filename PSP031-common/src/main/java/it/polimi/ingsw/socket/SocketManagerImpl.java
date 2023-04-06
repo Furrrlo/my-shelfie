@@ -26,7 +26,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final long defaultRecvTimeout;
     private final TimeUnit defaultRecvTimeoutUnit;
     private final BlockingDeque<QueuedOutput> outPacketQueue = new LinkedBlockingDeque<>();
-    private final NBlockingQueue<SeqPacket> inPacketQueue = new NBlockingQueue<>();
+    private final NBlockingQueue<Object> inPacketQueue = new NBlockingQueue<>();
 
     private final Future<?> recvTask;
     private final Future<?> sendTask;
@@ -139,6 +139,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             } catch (IOException ignored) {
                 // Ignore
             }
+        } finally {
+            // Signal to everybody who is waiting that the socket got closed
+            inPacketQueue.add(new IOException(CLOSE_EX_MSG));
         }
     }
 
@@ -182,19 +185,49 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         return hasSent;
     }
 
-    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException {
+    private SeqPacket doReceive(Predicate<SeqPacket> filter, long timeout, TimeUnit timeoutUnit)
+            throws InterruptedException, IOException, TimeoutException {
         ensureOpen();
-        // TODO: this will wait indefinitely when the socket closes, is there any way to fail this?
-        return inPacketQueue.takeFirstMatching(filter);
+
+        final NBlockingQueue.Matcher<Object> cond = (obj, res) -> {
+            // We should be the only ones getting this packet, consume it
+            if (obj instanceof SeqPacket pkt && filter.test(pkt))
+                return res.consume();
+            // Exceptions are not specific to us, but to the whole receive thread, so
+            // we shouldn't be consuming it, as everybody has to get it
+            if (obj instanceof Throwable)
+                return res.peek();
+
+            return res.skip();
+        };
+        var res = timeout == -1
+                ? inPacketQueue.takeFirstMatching(cond)
+                : inPacketQueue.takeFirstMatching(cond, timeout, timeoutUnit);
+        // Correct result
+        if (res instanceof SeqPacket pkt)
+            return pkt;
+        // We got an exception
+        if (res instanceof RuntimeException ex)
+            throw ex;
+        if (res instanceof Error ex)
+            throw ex;
+        if (res instanceof Throwable t)
+            throw new IOException("Failed to receive packet", t);
+
+        throw new AssertionError("Unexpected result from queue " + res);
+    }
+
+    private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException {
+        try {
+            return doReceive(filter, -1, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException ex) {
+            throw new AssertionError("Timeout expired where there should be no timeout", ex);
+        }
     }
 
     private SeqPacket doReceiveWithTimeout(Predicate<SeqPacket> filter)
             throws InterruptedException, IOException, TimeoutException {
-        ensureOpen();
-        // TODO: this will wait indefinitely when the socket closes, is there any way to fail this?
-        return defaultRecvTimeout == -1
-                ? inPacketQueue.takeFirstMatching(filter)
-                : inPacketQueue.takeFirstMatching(filter, defaultRecvTimeout, defaultRecvTimeoutUnit);
+        return doReceive(filter, defaultRecvTimeout, defaultRecvTimeoutUnit);
     }
 
     private <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> doSendAndWaitResponse(SeqPacket p, Class<R> replyType)
