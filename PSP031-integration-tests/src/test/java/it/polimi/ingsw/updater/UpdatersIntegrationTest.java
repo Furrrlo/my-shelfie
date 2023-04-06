@@ -112,11 +112,10 @@ public class UpdatersIntegrationTest {
             lobbyView.game().registerObserver(gamePromise::complete);
 
             final ServerGame serverGame;
-            final LockProtected<ServerGame> lockedServerGame;
             try (var ignored1 = lockedServerLobby.use()) {
-                serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
-                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
-                        new GameServerController(lockedServerGame)));
+                serverLobby.game().set(new ServerGameAndController<>(
+                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get()),
+                        new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock()))));
             }
 
             final var clientGame = gamePromise.get().game();

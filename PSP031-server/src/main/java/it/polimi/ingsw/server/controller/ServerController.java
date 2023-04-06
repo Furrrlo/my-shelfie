@@ -117,10 +117,14 @@ public class ServerController {
 
     public void runOnLocks(String nick, Runnable runnable) {
         final var lobbyAndController = getLobbyFor(nick);
-        if (lobbyAndController == null)
+        if (lobbyAndController == null) {
             runnable.run();
-        else
-            lobbyAndController.controller().runOnLocks(runnable);
+            return;
+        }
+
+        try (var ignored = lobbyAndController.lobby().use()) {
+            runnable.run();
+        }
     }
 
     @VisibleForTesting
@@ -132,10 +136,14 @@ public class ServerController {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("This method is supposed to be used for testing " +
                         "when there's only 1 lobby"));
-        if (lobbyAndController == null)
+        if (lobbyAndController == null) {
             runnable.run();
-        else
-            lobbyAndController.controller().runOnLocks(runnable);
+            return;
+        }
+
+        try (var ignored = lobbyAndController.lobby().use()) {
+            runnable.run();
+        }
     }
 
     public <T> T supplyOnLocks(String nick, Supplier<T> callable) {
@@ -143,7 +151,9 @@ public class ServerController {
         if (lobbyAndController == null)
             return callable.get();
 
-        return lobbyAndController.controller().supplyOnLocks(callable);
+        try (var ignored = lobbyAndController.lobby().use()) {
+            return callable.get();
+        }
     }
 
     public LobbyView joinGame(String nick,
@@ -181,10 +191,8 @@ public class ServerController {
                 }
 
                 final var currGameAndController = serverLobby.game().get();
-                final var currGameLocked = currGameAndController != null ? currGameAndController.game() : null;
-                try (var currGameCloseable = LockProtected.useNullable(currGameLocked)) {
-                    var currGame = currGameCloseable.obj();
-
+                final var currGame = currGameAndController != null ? currGameAndController.game() : null;
+                try {
                     // Doesn't need to be concurrent as it will only be called inside the lobby lock
                     final var playersRegisteredObservers = new HashMap<LobbyPlayer, Consumer<?>>();
                     for (LobbyPlayer player : serverLobby.joinedPlayers().get())
@@ -206,17 +214,14 @@ public class ServerController {
                         playersRegisteredObservers.entrySet().removeIf(e -> !newLobbyPlayers.contains(e.getKey()));
                     });
                     observableTracker.registerObserver(serverLobby.game(), game -> {
-                        if (game != null) {
-                            try (var gameCloseable = game.game().use()) {
-                                updateGameForPlayer(
-                                        nick,
-                                        gameCloseable.obj(),
-                                        game.controller(),
-                                        observableTracker,
-                                        lobbyUpdater,
-                                        gameControllerFactory);
-                            }
-                        }
+                        if (game != null)
+                            updateGameForPlayer(
+                                    nick,
+                                    game.game(),
+                                    game.controller(),
+                                    observableTracker,
+                                    lobbyUpdater,
+                                    gameControllerFactory);
                     });
 
                     // Add the player after registering the listeners, 

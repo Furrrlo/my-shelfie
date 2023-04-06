@@ -61,14 +61,13 @@ public class ControllersIntegrationTest {
 
             final var makeMovePromise = new CompletableFuture<Arguments>();
 
-            final LockProtected<ServerGame> lockedServerGame;
             final ServerGame serverGame;
             final var lockedServerLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
             try (var lobbyCloseable = lockedServerLobby.use()) {
                 var serverLobby = lobbyCloseable.obj();
-                serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
-                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
-                        new GameServerController(lockedServerGame) {
+                serverLobby.game().set(new ServerGameAndController<>(
+                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get()),
+                        new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock())) {
                             @Override
                             public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
                                 makeMovePromise.complete(Arguments.of(player, selected, shelfCol));

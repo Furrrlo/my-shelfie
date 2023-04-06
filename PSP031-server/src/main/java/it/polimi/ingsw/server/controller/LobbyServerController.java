@@ -10,7 +10,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LobbyServerController {
@@ -21,28 +20,6 @@ public class LobbyServerController {
 
     public LobbyServerController(LockProtected<ServerLobby> lockedLobby) {
         this.lockedLobby = lockedLobby;
-    }
-
-    public void runOnLocks(Runnable runnable) {
-        try (var lobbyCloseable = lockedLobby.use()) {
-            var lobby = lobbyCloseable.obj();
-            var gameAndController = lobby.game().get();
-            if (gameAndController == null)
-                runnable.run();
-            else
-                gameAndController.controller().runOnLocks(runnable);
-        }
-    }
-
-    public <T> T supplyOnLocks(Supplier<T> callable) {
-        try (var lobbyCloseable = lockedLobby.use()) {
-            var lobby = lobbyCloseable.obj();
-            var gameAndController = lobby.game().get();
-            if (gameAndController == null)
-                return callable.get();
-
-            return gameAndController.controller().supplyOnLocks(callable);
-        }
     }
 
     public void disconnectPlayer(String nick, Throwable cause) {

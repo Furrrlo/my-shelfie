@@ -5,7 +5,6 @@ import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerPlayer;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 @SuppressWarnings({ "FieldCanBeLocal", "unused" })
 public class GameServerController {
@@ -14,20 +13,6 @@ public class GameServerController {
 
     public GameServerController(LockProtected<ServerGame> game) {
         this.game = game;
-    }
-
-    public void runOnLocks(Runnable runnable) {
-        try (var gameCloseable = game.use()) {
-            var game = gameCloseable.obj();
-            runnable.run();
-        }
-    }
-
-    public <T> T supplyOnLocks(Supplier<T> callable) {
-        try (var gameCloseable = game.use()) {
-            var game = gameCloseable.obj();
-            return callable.get();
-        }
     }
 
     public void disconnectPlayer(String nick, Throwable cause) {

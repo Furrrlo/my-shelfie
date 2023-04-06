@@ -143,12 +143,11 @@ public class SocketDisconnectionTest {
             //Start game
             //Players should be "ready" before starting a game, but we don't care in this test
             final ServerGame serverGame;
-            final LockProtected<ServerGame> lockedServerGame;
             try (var lobbyCloseable = lockedServerLobby.use()) {
                 var serverLobby = lobbyCloseable.obj();
-                serverLobby.game().set(new ServerGameAndController<>(lockedServerGame = new LockProtected<>(
-                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get())),
-                        new GameServerController(lockedServerGame)));
+                serverLobby.game().set(new ServerGameAndController<>(
+                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get()),
+                        new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock()))));
             }
 
             final var client2Game = gamePromise.get(500, TimeUnit.MILLISECONDS).game();
