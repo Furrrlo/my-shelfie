@@ -31,7 +31,6 @@ class SocketClientHeartbeatHandler implements Runnable {
     public void run() {
         try {
             do {
-                //TODO: if socket is closed this will wait indefinitely and the client can't handle disconnection
                 var pingCtx = socketManager.receive(HeartbeatPing.class);
                 var now = Instant.now(clock);
                 ping.set(Duration.between(pingCtx.getPacket().serverTime(), now));
