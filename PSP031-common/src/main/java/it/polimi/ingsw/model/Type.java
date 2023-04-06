@@ -12,7 +12,7 @@ public enum Type implements Serializable {
             int[][] checked = new int[ROWS][COLUMNS];
             int count = numCouples(shelfie, checked);
             if (count >= 6)
-                printCommonGoal(shelfie, checked, "SIX COUPLES");
+                printCommonGoal(shelfie, checked, "Congratulation you placed SIX COUPLES");
             return count >= 6;
         }
 
@@ -53,7 +53,7 @@ public enum Type implements Serializable {
                     Objects.requireNonNull(shelfie.tile(ROWS - 1, 0).get()).equals(shelfie.tile(ROWS - 1, COLUMNS - 1).get());
             if (achieved) {
                 checked[0][0] = checked[ROWS - 1][0] = checked[0][COLUMNS - 1] = checked[ROWS - 1][COLUMNS - 1] = 1;
-                printCommonGoal(shelfie, checked, "ALL CORNERS");
+                printCommonGoal(shelfie, checked, "Congratulation ALL CORNERS are equal");
             }
             return achieved;
         }
@@ -76,7 +76,7 @@ public enum Type implements Serializable {
             }
             boolean achieved = count >= 4;
             if (achieved)
-                printCommonGoal(shelfie, checked, "FOUR QUADRIPLETS");
+                printCommonGoal(shelfie, checked, "Congratulation you made FOUR QUADRIPLETS");
             return achieved;
         }
 
@@ -160,7 +160,7 @@ public enum Type implements Serializable {
             int[][] checked = new int[ROWS][COLUMNS];
             boolean achieved = numSquares(shelfie, checked) >= 2;
             if (achieved)
-                printCommonGoal(shelfie, checked, "TWO SQUARES");
+                printCommonGoal(shelfie, checked, "Congratulation you made TWO SQUARES");
             return achieved;
         }
     },
@@ -198,7 +198,7 @@ public enum Type implements Serializable {
             }
             boolean achieved = (count >= 3);
             if (achieved)
-                printCommonGoal(shelfie, checked, "THREE COLUMNS");
+                printCommonGoal(shelfie, checked, "Congratulation yoy made THREE COLUMNS with less than three colors ");
             return achieved;
         }
     },
@@ -232,7 +232,7 @@ public enum Type implements Serializable {
                     achieved = true;
             }
             if (achieved)
-                printCommonGoal(shelfie, checked, "EIGHT EQUAL TILES");
+                printCommonGoal(shelfie, checked, "Congratulation you placed EIGHT EQUAL TILES");
             return achieved;
         }
     },
@@ -272,7 +272,7 @@ public enum Type implements Serializable {
                 }
             }
             if (achieved)
-                printCommonGoal(shelfie, checked, "DIAGONAL");
+                printCommonGoal(shelfie, checked, "Congratulation you made a DIAGONAL of equal tiles");
             return achieved;
         }
     },
@@ -304,7 +304,7 @@ public enum Type implements Serializable {
                     count++;
             }
             if (count >= 4)
-                printCommonGoal(shelfie, checked, "FOUR ROWS");
+                printCommonGoal(shelfie, checked, "Congratulation you made FOUR ROWS with less than three colors");
             return count >= 4;
         }
     },
@@ -335,7 +335,7 @@ public enum Type implements Serializable {
                     count++;
             }
             if (count >= 2)
-                printCommonGoal(shelfie, checked, "TWO ALL DIFFERENT COLUMNS");
+                printCommonGoal(shelfie, checked, "Congratulation you made TWO ALL DIFFERENT COLUMNS");
             return count >= 2;
         }
     },
@@ -365,7 +365,7 @@ public enum Type implements Serializable {
                     count++;
             }
             if (count >= 2)
-                printCommonGoal(shelfie, checked, "TWO ALL DIFFERENT ROWS");
+                printCommonGoal(shelfie, checked, "Congratulation you made TWO ALL DIFFERENT ROWS");
             return count >= 2;
         }
     },
@@ -396,7 +396,7 @@ public enum Type implements Serializable {
             int[][] checked = new int[ROWS][COLUMNS];
             boolean achieved = checkForCross(shelfie, checked);
             if (achieved)
-                printCommonGoal(shelfie, checked, "CROSS");
+                printCommonGoal(shelfie, checked, "Congratulation you made a CROSS");
             return achieved;
         }
     },
@@ -439,7 +439,7 @@ public enum Type implements Serializable {
             int[][] checked = new int[ROWS][COLUMNS];
             boolean achieved = checkForTriangle(shelfie, checked);
             if (achieved)
-                printCommonGoal(shelfie, checked, "TRIANGLE");
+                printCommonGoal(shelfie, checked, "Congratulation you completed a TRIANGLE");
             return achieved;
         }
     };
@@ -450,7 +450,7 @@ public enum Type implements Serializable {
     public abstract boolean checkCommonGoal(Shelfie shelfie);
 
     public void printCommonGoal(Shelfie shelfie, int[][] checked, String s) {
-        System.out.println("Congratulation you achieved : " + s + " common goal");
+        System.out.println(s);
         for (int row = 0; row < ROWS; row++) {
             StringBuilder msg = new StringBuilder();
             if (row == 0) {
