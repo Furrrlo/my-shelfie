@@ -127,10 +127,15 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             } while (!Thread.currentThread().isInterrupted());
         } catch (InterruptedIOException | ClosedByInterruptException e) {
             // Go on, interruption is expected
+            // Signal to everybody who is waiting that the reading thread was interrupted
+            inPacketQueue.add(new InterruptedIOException());
         } catch (IOException e) {
             // If the interruption flag was set, we got interrupted by close, so it's expected
-            if (Thread.currentThread().isInterrupted())
+            if (Thread.currentThread().isInterrupted()) {
+                // Signal to everybody who is waiting that the reading thread was interrupted
+                inPacketQueue.add(new InterruptedIOException());
                 return;
+            }
 
             log("Failed to read packet, closing...");
             e.printStackTrace();
@@ -139,7 +144,6 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             } catch (IOException ignored) {
                 // Ignore
             }
-        } finally {
             // Signal to everybody who is waiting that the socket got closed
             inPacketQueue.add(new IOException(CLOSE_EX_MSG));
         }
@@ -211,6 +215,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             throw ex;
         if (res instanceof Error ex)
             throw ex;
+        }
+        if (res instanceof InterruptedIOException ex) {
+            var newEx = new InterruptedIOException();
+            ex.addSuppressed(ex);
+            throw newEx;
+        }
         if (res instanceof Throwable t)
             throw new IOException("Failed to receive packet", t);
 
