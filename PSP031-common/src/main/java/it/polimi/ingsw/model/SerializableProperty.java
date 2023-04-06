@@ -6,7 +6,8 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class SerializableProperty<T> implements Property<T>, Serializable {
@@ -62,20 +63,6 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
     @Override
     public void unregisterObserver(Consumer<? super T> o) {
         observers.remove(o);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof SerializableProperty<?> that))
-            return false;
-        return Objects.equals(val, that.val);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(val);
     }
 
     @Override

@@ -51,7 +51,7 @@ class SerializablePropertyTest {
             deserialized = (SerializableProperty<?>) ois.readObject();
         }
 
-        assertEquals(property, deserialized);
+        assertEquals(property.get(), deserialized.get());
         assertNotNull(deserialized.getObservers());
         assertTrue(deserialized.getObservers().isEmpty());
         assertDoesNotThrow(() -> deserialized.registerObserver(v -> System.out.println("other random observer")));
