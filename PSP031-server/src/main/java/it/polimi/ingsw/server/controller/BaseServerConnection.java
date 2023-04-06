@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public abstract class BaseServerConnection implements PlayerObservableTracker, Closeable {
 
     protected final ServerController controller;
-    private final ConcurrentMap<IdentityProvider, Set<Consumer<?>>> observablesToObservers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Provider<?>, Set<Consumer<?>>> observablesToObservers = new ConcurrentHashMap<>();
 
     protected final String nick;
 
@@ -41,7 +41,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     public <T> Consumer<T> registerObserver(Provider<T> toObserve, PlayerObservableTracker.ThrowingConsumer<T> observer) {
         return controller.supplyOnLocks(nick, () -> {
             final var observers = observablesToObservers
-                    .computeIfAbsent(new IdentityProvider(toObserve), v -> ConcurrentHashMap.newKeySet());
+                    .computeIfAbsent(toObserve, v -> ConcurrentHashMap.newKeySet());
             Consumer<T> throwingObserver = t -> {
                 try {
                     observer.accept(t);
@@ -58,19 +58,6 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     @SuppressWarnings({ "unchecked", "rawtypes" })
     protected void unregisterObservers() {
         controller.runOnLocks(nick, () -> observablesToObservers.forEach((provider, observers) -> observers
-                .forEach(o -> ((Provider) provider.provider()).unregisterObserver(o))));
-    }
-
-    private record IdentityProvider(Provider<?> provider) {
-
-        @Override
-        public boolean equals(Object o) {
-            return this == o;
-        }
-
-        @Override
-        public int hashCode() {
-            return System.identityHashCode(provider);
-        }
+                .forEach(o -> ((Provider) provider).unregisterObserver(o))));
     }
 }
