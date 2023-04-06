@@ -1,9 +1,13 @@
 package it.polimi.ingsw.model;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
-import static it.polimi.ingsw.model.ShelfieView.*;
+import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
+import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
 public enum Type implements Serializable {
     SIX_COUPLES {
@@ -93,33 +97,31 @@ public enum Type implements Serializable {
             do {
                 prevSize = indexes.size();
                 for (int i = 0; i < indexes.size(); i++) {
-                    if (indexes.get(i).r < ROWS - 1
-                            && Objects.equals(shelfie.tile(indexes.get(i).r + 1, indexes.get(i).c),
-                                    shelfie.tile(indexes.get(i).r, indexes.get(i).c))
-                            && !indexes.contains(new Index(indexes.get(i).r + 1, indexes.get(i).c))) {
-                        indexes.add(new Index(indexes.get(i).r + 1, indexes.get(i).c));
-                        checked[indexes.get(i).r + 1][indexes.get(i).c] = marker;
+                    Index curr = indexes.get(i);
+                    Tile currTile = shelfie.tile(curr.r, curr.c).get();
+                    if (curr.r < ROWS - 1
+                            && Objects.equals(shelfie.tile(curr.r + 1, curr.c).get(), currTile)
+                            && !indexes.contains(new Index(curr.r + 1, curr.c))) {
+                        indexes.add(new Index(curr.r + 1, curr.c));
+                        checked[curr.r + 1][curr.c] = marker;
                     }
-                    if (indexes.get(i).c < COLUMNS - 1
-                            && Objects.equals(shelfie.tile(indexes.get(i).r, indexes.get(i).c + 1),
-                                    shelfie.tile(indexes.get(i).r, indexes.get(i).c))
-                            && !indexes.contains(new Index(indexes.get(i).r, indexes.get(i).c + 1))) {
-                        indexes.add(new Index(indexes.get(i).r, indexes.get(i).c + 1));
-                        checked[indexes.get(i).r][indexes.get(i).c + 1] = marker;
+                    if (curr.c < COLUMNS - 1
+                            && Objects.equals(shelfie.tile(curr.r, curr.c + 1).get(), currTile)
+                            && !indexes.contains(new Index(curr.r, curr.c + 1))) {
+                        indexes.add(new Index(curr.r, curr.c + 1));
+                        checked[curr.r][curr.c + 1] = marker;
                     }
-                    if (indexes.get(i).r > 0
-                            && shelfie.tile(indexes.get(i).r - 1, indexes.get(i).c) == shelfie.tile(indexes.get(i).r,
-                                    indexes.get(i).c)
-                            && !indexes.contains(new Index(indexes.get(i).r - 1, indexes.get(i).c))) {
-                        indexes.add(new Index(indexes.get(i).r - 1, indexes.get(i).c));
-                        checked[indexes.get(i).r - 1][indexes.get(i).c] = marker;
+                    if (curr.r > 0
+                            && shelfie.tile(curr.r - 1, curr.c) == shelfie.tile(curr.r, curr.c)
+                            && !indexes.contains(new Index(curr.r - 1, curr.c))) {
+                        indexes.add(new Index(curr.r - 1, curr.c));
+                        checked[curr.r - 1][curr.c] = marker;
                     }
-                    if (indexes.get(i).c > 0
-                            && Objects.equals(shelfie.tile(indexes.get(i).r, indexes.get(i).c - 1),
-                                    shelfie.tile(indexes.get(i).r, indexes.get(i).c))
-                            && !indexes.contains(new Index(indexes.get(i).r, indexes.get(i).c - 1))) {
-                        indexes.add(new Index(indexes.get(i).r, indexes.get(i).c - 1));
-                        checked[indexes.get(i).r][indexes.get(i).c - 1] = marker;
+                    if (curr.c > 0
+                            && Objects.equals(shelfie.tile(curr.r, curr.c - 1).get(), currTile)
+                            && !indexes.contains(new Index(curr.r, curr.c - 1))) {
+                        indexes.add(new Index(curr.r, curr.c - 1));
+                        checked[curr.r][curr.c - 1] = marker;
                     }
                 }
             } while (indexes.size() > prevSize);
@@ -375,10 +377,10 @@ public enum Type implements Serializable {
             for (int r = 0; r < ROWS - 2; r++) {
                 for (int c = 0; c < COLUMNS - 2; c++) {
                     if (shelfie.tile(r, c).get() != null &&
-                            shelfie.tile(r, c).equals(shelfie.tile(r + 2, c)) &&
-                            shelfie.tile(r, c).equals(shelfie.tile(r, c + 2)) &&
-                            shelfie.tile(r, c).equals(shelfie.tile(r + 1, c + 1)) &&
-                            shelfie.tile(r, c).equals(shelfie.tile(r + 2, c + 2))) {
+                            shelfie.tile(r, c).get().equals(shelfie.tile(r + 2, c).get()) &&
+                            shelfie.tile(r, c).get().equals(shelfie.tile(r, c + 2).get()) &&
+                            shelfie.tile(r, c).get().equals(shelfie.tile(r + 1, c + 1).get()) &&
+                            shelfie.tile(r, c).get().equals(shelfie.tile(r + 2, c + 2).get())) {
                         count++;
                         checked[r][c] = count;
                         checked[r + 2][c] = count;
