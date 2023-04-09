@@ -1,5 +1,6 @@
 package it.polimi.ingsw.server.controller;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -21,6 +22,7 @@ public class LockProtected<T> {
         }
     };
 
+    @MustBeClosed
     @SuppressWarnings("unchecked")
     public static <T> LockCloseable<@Nullable T> useNullable(@Nullable LockProtected<T> lock) {
         return lock == null ? (LockCloseable<T>) NULL_LOCK_CLOSEABLE : lock.use();
@@ -54,6 +56,7 @@ public class LockProtected<T> {
         return lock;
     }
 
+    @MustBeClosed
     public LockCloseable<T> use() {
         lock.lock();
         return lockCloseable;
