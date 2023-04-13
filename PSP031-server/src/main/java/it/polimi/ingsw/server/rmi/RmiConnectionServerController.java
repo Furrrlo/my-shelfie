@@ -17,6 +17,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RmiConnectionServerController implements RmiConnectionController, Closeable {
 
@@ -107,6 +108,8 @@ public class RmiConnectionServerController implements RmiConnectionController, C
         volatile @Nullable Remote lobbyControllerRemote;
         volatile @Nullable Remote gameControllerRemote;
 
+        private final AtomicBoolean unexported = new AtomicBoolean();
+
         public PlayerConnection(ServerController controller, String nick) {
             super(controller, nick);
         }
@@ -114,12 +117,15 @@ public class RmiConnectionServerController implements RmiConnectionController, C
         @Override
         public void close() throws IOException {
             try {
-                var lobbyControllerRemote = this.lobbyControllerRemote;
-                if (lobbyControllerRemote != null)
-                    UnicastRemoteObject.unexportObject(lobbyControllerRemote, true);
-                var gameControllerRemote = this.gameControllerRemote;
-                if (gameControllerRemote != null)
-                    UnicastRemoteObject.unexportObject(gameControllerRemote, true);
+                // Un-exporting multiple times throws exceptions
+                if (!unexported.getAndSet(true)) {
+                    var lobbyControllerRemote = this.lobbyControllerRemote;
+                    if (lobbyControllerRemote != null)
+                        UnicastRemoteObject.unexportObject(lobbyControllerRemote, true);
+                    var gameControllerRemote = this.gameControllerRemote;
+                    if (gameControllerRemote != null)
+                        UnicastRemoteObject.unexportObject(gameControllerRemote, true);
+                }
             } finally {
                 connections.remove(this);
             }
