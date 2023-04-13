@@ -1,10 +1,17 @@
 package it.polimi.ingsw.server;
 
-import it.polimi.ingsw.CommonObject;
+import it.polimi.ingsw.server.controller.ServerController;
+import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
+import it.polimi.ingsw.server.socket.SocketConnectionServerController;
+
+import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) {
-        System.out.println("Hello world " + new CommonObject());
+    @SuppressWarnings("resource")
+    public static void main(String[] args) throws IOException {
+        final var controller = new ServerController();
+        RmiConnectionServerController.bind(controller);
+        new SocketConnectionServerController(controller, 1234);
     }
 }
