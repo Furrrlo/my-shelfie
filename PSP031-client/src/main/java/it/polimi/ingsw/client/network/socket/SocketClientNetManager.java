@@ -45,6 +45,16 @@ public class SocketClientNetManager implements ClientNetManager {
     }
 
     @Override
+    public String getHost() {
+        return serverAddress.getHostName();
+    }
+
+    @Override
+    public int getPort() {
+        return serverAddress.getPort();
+    }
+
+    @Override
     public LobbyAndController<Lobby> joinGame(String nick) throws IOException {
         if (socketManager == null) {
             socket = new Socket(serverAddress.getAddress(), serverAddress.getPort());

@@ -36,6 +36,16 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
     }
 
     @Override
+    public String getHost() {
+        return host == null ? "localhost" : host;
+    }
+
+    @Override
+    public int getPort() {
+        return port;
+    }
+
+    @Override
     public LobbyAndController<Lobby> joinGame(String nick) throws RemoteException, NotBoundException {
         if (server == null) {
             final Registry registry = LocateRegistry.getRegistry(host, port);
