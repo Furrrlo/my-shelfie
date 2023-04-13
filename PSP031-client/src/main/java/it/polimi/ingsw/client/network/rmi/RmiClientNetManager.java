@@ -15,16 +15,22 @@ import java.util.Objects;
 
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
 
+    private final @Nullable String host;
     private final int port;
     private final String remoteName;
     private @Nullable RmiConnectionController server;
 
     public RmiClientNetManager() {
-        this(Registry.REGISTRY_PORT, RmiConnectionController.REMOTE_NAME);
+        this(null, Registry.REGISTRY_PORT);
+    }
+
+    public RmiClientNetManager(@Nullable String host, int port) {
+        this(host, port, RmiConnectionController.REMOTE_NAME);
     }
 
     @VisibleForTesting
-    public RmiClientNetManager(int port, String remoteName) {
+    public RmiClientNetManager(@Nullable String host, int port, String remoteName) {
+        this.host = host;
         this.port = port;
         this.remoteName = remoteName;
     }
@@ -32,7 +38,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
     @Override
     public LobbyAndController<Lobby> joinGame(String nick) throws RemoteException, NotBoundException {
         if (server == null) {
-            final Registry registry = LocateRegistry.getRegistry(port);
+            final Registry registry = LocateRegistry.getRegistry(host, port);
             server = (RmiConnectionController) registry.lookup(remoteName);
         }
 

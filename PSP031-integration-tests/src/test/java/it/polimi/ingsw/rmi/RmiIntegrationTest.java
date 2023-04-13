@@ -26,7 +26,7 @@ public class RmiIntegrationTest {
                         throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
                     }
                 },
-                () -> new RmiClientNetManager(rmiServerSocketFactory.getFirstCapturedPort(), remoteName));
+                () -> new RmiClientNetManager(null, rmiServerSocketFactory.getFirstCapturedPort(), remoteName));
     }
 
     @Test
@@ -44,6 +44,6 @@ public class RmiIntegrationTest {
                         throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
                     }
                 },
-                () -> new RmiClientNetManager(rmiServerSocketFactory.getFirstCapturedPort(), remoteName));
+                () -> new RmiClientNetManager(null, rmiServerSocketFactory.getFirstCapturedPort(), remoteName));
     }
 }
