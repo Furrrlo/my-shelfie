@@ -11,11 +11,11 @@ public class Main {
     @SuppressWarnings("resource")
     public static void main(String[] args) throws IOException {
         System.out.println("Starting server");
-        //System.setProperty("java.rmi.server.useLocalHostname", "true");
 
-        //TODO: without this clients try to connect to the wrong network (192.168.56.1, virtualbox net) (?????)
-        // IP address of this server if is not the same of the clients
-        System.setProperty("java.rmi.server.hostname", "192.168.178.10");
+        //If the server has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
+        //@see https://bugs.openjdk.org/browse/JDK-8042232
+        //To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<server address> or uncomment the following line.
+        //System.setProperty("java.rmi.server.hostname", "<server address>");
         System.setProperty("sun.rmi.transport.connectionTimeout", "7000");
         System.setProperty("sun.rmi.transport.tcp.readTimeout", "7000");
         System.setProperty("sun.rmi.transport.tcp.responseTimeout", "500");

@@ -18,10 +18,10 @@ import java.util.function.Consumer;
 public class TuiMain {
 
     public static void main(String[] args) {
-        //TODO: without this the server tries to connect to the wrong network (192.168.56.1, virtualbox net) (?????)
-        // IP address of this client if is not the same of the server
-        System.setProperty("java.rmi.server.hostname", "192.168.178.10");
-        //        System.setProperty("java.rmi.server.useLocalHostname", "true");
+        //If the client has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
+        //@see https://bugs.openjdk.org/browse/JDK-8042232
+        // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
+        //System.setProperty("java.rmi.server.hostname", "<client address>");
 
         new TuiRenderer(
                 System.out,
@@ -112,6 +112,7 @@ public class TuiMain {
                                 promptLobby(renderer, netManager, lobbyAndController.lobby(), lobbyAndController.controller()));
                     } catch (Exception ex) {
                         // TODO: logging
+                        ex.printStackTrace();
                         return ctx.invalid("Failed to connect to the server");
                     }
                 });
