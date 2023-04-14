@@ -23,6 +23,8 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     }
 
     public void disconnectPlayer(Throwable cause) {
+        System.err.println("Disconnecting " + nick);
+        cause.printStackTrace();
         controller.runOnLocks(nick, () -> {
             unregisterObservers();
             controller.onDisconnectPlayer(nick, cause);

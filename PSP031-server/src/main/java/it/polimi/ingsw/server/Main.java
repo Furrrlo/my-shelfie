@@ -12,6 +12,9 @@ public class Main {
     public static void main(String[] args) throws IOException {
         final var controller = new ServerController();
         RmiConnectionServerController.bind(controller);
+
+        //Socket timeout is set in SocketConnectionServerController#acceptConnectionsLoop() with setSoTimeout
         new SocketConnectionServerController(controller, 1234);
+        //new SocketConnectionServerController(serverController, 1234, 1, TimeUnit.SECONDS);
     }
 }

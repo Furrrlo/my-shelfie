@@ -34,6 +34,14 @@ public class SocketConnectionServerController implements Closeable {
         this(controller, new ServerSocket(port), -1, TimeUnit.MILLISECONDS);
     }
 
+    public SocketConnectionServerController(ServerController controller,
+                                            int port,
+                                            long defaultRecvTimeout,
+                                            TimeUnit defaultRecvTimeoutUnit)
+            throws IOException {
+        this(controller, new ServerSocket(port), defaultRecvTimeout, defaultRecvTimeoutUnit);
+    }
+
     @VisibleForTesting
     public SocketConnectionServerController(ServerController controller,
                                             ServerSocket serverSocket,
@@ -61,6 +69,7 @@ public class SocketConnectionServerController implements Closeable {
         try {
             do {
                 final Socket socket = socketServer.accept();
+                socket.setSoTimeout(7000);
                 System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
                 threadPool.submit(() -> {
                     try {
@@ -111,7 +120,7 @@ public class SocketConnectionServerController implements Closeable {
                     connection,
                     new SocketLobbyServerUpdaterFactory(socketManager, rec),
                     lobbyController -> {
-                        //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Shoud we stop it?
+                        //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Should we stop it?
                         var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
                         connection.lobbyControllerTask = CompletableFuture.runAsync(socketController, threadPool)
                                 .handle((__, ex) -> {

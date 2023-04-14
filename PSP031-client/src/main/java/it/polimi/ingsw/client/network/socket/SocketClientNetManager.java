@@ -34,9 +34,18 @@ public class SocketClientNetManager implements ClientNetManager {
     public SocketClientNetManager(InetSocketAddress serverAddress,
                                   long defaultRecvTimeout,
                                   TimeUnit defaultRecvTimeoutUnit) {
+        this(serverAddress, defaultRecvTimeout, defaultRecvTimeoutUnit, null);
+    }
+
+    @VisibleForTesting
+    public SocketClientNetManager(InetSocketAddress serverAddress,
+                                  long defaultRecvTimeout,
+                                  TimeUnit defaultRecvTimeoutUnit,
+                                  @Nullable Socket socket) {
         this.serverAddress = serverAddress;
         this.defaultRecvTimeout = defaultRecvTimeout;
         this.defaultRecvTimeoutUnit = defaultRecvTimeoutUnit;
+        this.socket = socket;
         this.threadPool = Executors.newFixedThreadPool(2, r -> {
             var th = new Thread(r);
             th.setName("ClientUpdater-thread");
@@ -57,7 +66,11 @@ public class SocketClientNetManager implements ClientNetManager {
     @Override
     public LobbyAndController<Lobby> joinGame(String nick) throws IOException {
         if (socketManager == null) {
-            socket = new Socket(serverAddress.getAddress(), serverAddress.getPort());
+            if (socket == null)
+                socket = new Socket(serverAddress.getAddress(), serverAddress.getPort());
+            else
+                socket.connect(serverAddress);
+            socket.setSoTimeout(22000);
             socketManager = defaultRecvTimeout == -1
                     ? new ClientSocketManagerImpl(socket)
                     : new ClientSocketManagerImpl(socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
@@ -94,12 +107,6 @@ public class SocketClientNetManager implements ClientNetManager {
                     });
             return new LobbyAndController<>(lobby, new SocketLobbyController(socketManager));
         }
-    }
-
-    @VisibleForTesting
-    @SuppressWarnings("NullAway")
-    public void closeSocket() throws IOException {
-        socket.close();
     }
 
     @VisibleForTesting
