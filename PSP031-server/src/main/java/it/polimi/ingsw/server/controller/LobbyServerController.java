@@ -1,10 +1,7 @@
 package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.model.*;
-import it.polimi.ingsw.server.model.ServerCommonGoal;
-import it.polimi.ingsw.server.model.ServerGame;
-import it.polimi.ingsw.server.model.ServerLobby;
-import it.polimi.ingsw.server.model.ServerPlayer;
+import it.polimi.ingsw.server.model.*;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -47,16 +44,23 @@ public class LobbyServerController {
 
     public void ready(String nick, boolean ready) {
         try (var use = lockedLobby.use()) {
-            LobbyPlayer lobbyPlayer = use.obj().joinedPlayers().get().stream()
+            List<LobbyPlayer> lobbyPlayers = use.obj().joinedPlayers().get();
+            LobbyPlayer lobbyPlayer = lobbyPlayers.stream()
                     .filter(p -> p.getNick().equals(nick))
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("Somehow missing the player " + nick));
             lobbyPlayer.ready().set(ready);
+            if (lobbyPlayers.size() > 1 && lobbyPlayers.stream().allMatch(p -> p.ready().get())) {
+                final ServerGame game = createGame(0, lobbyPlayers);
+                use.obj().game().set(new ServerGameAndController<>(game,
+                        new GameServerController(new LockProtected<>(game, lockedLobby.getLock()))));
+            }
         }
     }
 
     @VisibleForTesting
     public static ServerGame createGame(int gameId, List<LobbyPlayer> lobbyPlayers) {
+        System.out.println("game started");
         final var firstFinisher = SerializableProperty.<ServerPlayer> nullableProperty(null);
         // TODO: extract 2 common goals randomly
         final List<ServerCommonGoal> commonGoals = List.of(
