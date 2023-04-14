@@ -1,0 +1,46 @@
+@startuml
+actor       Bob                        as client
+participant SocketGameClientUpdater    as clientGameUpdater
+participant SocketGameClientController as clientGameController
+participant ClientSocketManager        as clientSocketManager
+participant ServerSocketManager        as serverSocketManager
+participant SocketServerGameUpdater    as serverGameUpdater
+entity      Server                     as server
+
+note across: During init
+clientGameUpdater -> clientSocketManager ++ : receive(GameUpdaterPacket.class)
+
+... ...
+note across: Alice completes a common objective
+
+note right of server
+    Here the server broadcasts the
+    change to everyone, not just Bob
+end note
+
+serverGameUpdater <- server ++ : updateAchievedCommonGoal(Type.ALL_CORNERS, List.of(oldPlayers, "Alice"))
+serverSocketManager <- serverGameUpdater ++ : send(new UpdateAchievedCommonGoalPacket(Type.ALL_CORNERS, List.of(oldPlayers, "Alice")))
+clientSocketManager <-- serverSocketManager : UpdateAchievedCommonGoalPacket(Type.ALL_CORNERS, List.of(oldPlayers, "Alice"))
+clientGameUpdater <- clientSocketManager --++ : returns UpdateAchievedCommonGoalPacket(Type.ALL_CORNERS, List.of(oldPlayers, "Alice"))
+note over clientGameUpdater
+Finds actual CommonGoal and Player
+instances from the given identifiers
+end note
+client o<-- clientGameUpdater : receives CommonGoal update via listener
+clientGameUpdater -> clientSocketManager --++ : ack()
+clientSocketManager --> serverSocketManager -- : ack
+clientGameUpdater -> clientSocketManager ++ : receive(GameUpdaterPacket.class)
+serverSocketManager -> serverGameUpdater -- : returns
+serverGameUpdater -> server -- : returns
+
+serverGameUpdater <- server ++ : updatePlayerScore("Alice", score: 10)
+serverSocketManager <- serverGameUpdater ++ : send(new UpdatePlayerScorePacket("Alice", score: 10))
+clientSocketManager <-- serverSocketManager : UpdatePlayerScorePacket("Alice", score: 10)
+clientGameUpdater <- clientSocketManager --++ : returns UpdatePlayerScorePacket("Alice", score: 10)
+client o<-- clientGameUpdater : receives score update via listener
+clientGameUpdater -> clientSocketManager --++ : ack()
+clientSocketManager --> serverSocketManager -- : ack
+serverSocketManager -> serverGameUpdater -- : returns
+serverGameUpdater -> server -- : returns
+
+@enduml
