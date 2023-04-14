@@ -7,10 +7,15 @@ import it.polimi.ingsw.rmi.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMISocketFactory;
 import java.util.Objects;
 
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
@@ -30,9 +35,42 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
 
     @VisibleForTesting
     public RmiClientNetManager(@Nullable String host, int port, String remoteName) {
-        this.host = host;
+        this(host, port, remoteName, new RMISocketFactory() {
+            @Override
+            public Socket createSocket(String host, int port) throws IOException {
+                //This is needed to set a connection timeout, in order to detect client disconnections
+                System.out.println("Creating new client socket for RMI. Remote IP " + host + ":" + port);
+                Socket s = new Socket() {
+                    @Override
+                    public synchronized void close() throws IOException {
+                        System.out.println("closing client socket");
+                        super.close();
+                    }
+                };
+                s.connect(new InetSocketAddress(host, port), 500);
+                return s;
+            }
+
+            @Override
+            public ServerSocket createServerSocket(int port) throws IOException {
+                System.out.println("Creating new ServerSocket for RMI...");
+                return new ServerSocket(port);
+            }
+        });
+    }
+
+    @VisibleForTesting
+    public RmiClientNetManager(@Nullable String host, int port, String remoteName, RMISocketFactory socketFactory) {
         this.port = port;
         this.remoteName = remoteName;
+        this.host = host;
+        try {
+            RMISocketFactory.setSocketFactory(socketFactory);
+        } catch (IOException e) {
+            //should not happen
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override

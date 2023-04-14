@@ -18,6 +18,11 @@ import java.util.function.Consumer;
 public class TuiMain {
 
     public static void main(String[] args) {
+        //TODO: without this the server tries to connect to the wrong network (192.168.56.1, virtualbox net) (?????)
+        // IP address of this client if is not the same of the server
+        System.setProperty("java.rmi.server.hostname", "192.168.178.10");
+        //        System.setProperty("java.rmi.server.useLocalHostname", "true");
+
         new TuiRenderer(
                 System.out,
                 System.in,

@@ -9,11 +9,15 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +40,33 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                                                      ServerController controller)
             throws RemoteException {
         RmiConnectionServerController rmiController;
+        try {
+            RMISocketFactory.setSocketFactory(new RMISocketFactory() {
+                @Override
+                public Socket createSocket(String host, int port) throws IOException {
+                    //This is needed to set a connection timeout, in order to detect client disconnections
+                    System.out.println("Creating new socket for RMI. Remote IP " + host + ":" + port);
+                    Socket s = new Socket() {
+                        @Override
+                        public synchronized void close() throws IOException {
+                            System.out.println("closing socket");
+                            super.close();
+                        }
+                    };
+                    s.connect(new InetSocketAddress(host, port), 500);
+                    return s;
+                }
+
+                @Override
+                public ServerSocket createServerSocket(int port) throws IOException {
+                    System.out.println("Creating new ServerSocket for RMI...");
+                    return new ServerSocket(port);
+                }
+            });
+        } catch (IOException e) {
+            //should not happen
+            throw new RuntimeException(e);
+        }
         registry.rebind(remoteName, UnicastRemoteObjects
                 .export(rmiController = new RmiConnectionServerController(controller, registry, remoteName), 0));
         return rmiController;
