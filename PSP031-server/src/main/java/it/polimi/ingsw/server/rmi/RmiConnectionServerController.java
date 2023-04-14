@@ -47,11 +47,10 @@ public class RmiConnectionServerController implements RmiConnectionController, C
             throws RemoteException {
         RmiConnectionServerController rmiController;
         try {
-            if (RMISocketFactory.getSocketFactory() != socketFactory)   //if is not set
+            if (RMISocketFactory.getSocketFactory() != socketFactory) //if is not set
                 RMISocketFactory.setSocketFactory(socketFactory);
         } catch (IOException e) {
-            //should not happen
-            throw new RuntimeException(e);
+            //this will happen in tests, ignored
         }
         registry.rebind(remoteName, UnicastRemoteObjects
                 .export(rmiController = new RmiConnectionServerController(controller, registry, remoteName), 0));

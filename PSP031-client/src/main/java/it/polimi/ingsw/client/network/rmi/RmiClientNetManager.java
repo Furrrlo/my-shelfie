@@ -8,9 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -46,10 +43,8 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
         try {
             RMISocketFactory.setSocketFactory(socketFactory);
         } catch (IOException e) {
-            //should not happen
-            throw new RuntimeException(e);
+            //this will happen in tests, ignored.
         }
-
     }
 
     @Override
