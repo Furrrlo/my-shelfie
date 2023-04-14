@@ -221,7 +221,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
         if (res instanceof InterruptedIOException ex) {
             var newEx = new InterruptedIOException();
-            ex.addSuppressed(ex);
+            newEx.addSuppressed(ex);
             throw newEx;
         }
         if (res instanceof Throwable t)
