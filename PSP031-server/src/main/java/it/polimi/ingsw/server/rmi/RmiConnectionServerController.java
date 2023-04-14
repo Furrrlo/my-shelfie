@@ -9,9 +9,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -39,30 +36,19 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                                                      String remoteName,
                                                      ServerController controller)
             throws RemoteException {
+        return bind(registry, remoteName, controller, new RMITimeoutSocketFactory());
+    }
+
+    @VisibleForTesting
+    public static RmiConnectionServerController bind(Registry registry,
+                                                     String remoteName,
+                                                     ServerController controller,
+                                                     RMISocketFactory socketFactory)
+            throws RemoteException {
         RmiConnectionServerController rmiController;
         try {
-            RMISocketFactory.setSocketFactory(new RMISocketFactory() {
-                @Override
-                public Socket createSocket(String host, int port) throws IOException {
-                    //This is needed to set a connection timeout, in order to detect client disconnections
-                    System.out.println("Creating new socket for RMI. Remote IP " + host + ":" + port);
-                    Socket s = new Socket() {
-                        @Override
-                        public synchronized void close() throws IOException {
-                            System.out.println("closing socket");
-                            super.close();
-                        }
-                    };
-                    s.connect(new InetSocketAddress(host, port), 500);
-                    return s;
-                }
-
-                @Override
-                public ServerSocket createServerSocket(int port) throws IOException {
-                    System.out.println("Creating new ServerSocket for RMI...");
-                    return new ServerSocket(port);
-                }
-            });
+            if (RMISocketFactory.getSocketFactory() != socketFactory)   //if is not set
+                RMISocketFactory.setSocketFactory(socketFactory);
         } catch (IOException e) {
             //should not happen
             throw new RuntimeException(e);
