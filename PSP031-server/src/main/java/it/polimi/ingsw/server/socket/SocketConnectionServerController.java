@@ -69,7 +69,7 @@ public class SocketConnectionServerController implements Closeable {
         try {
             do {
                 final Socket socket = socketServer.accept();
-                socket.setSoTimeout(7000);
+                //socket.setSoTimeout(7000);
                 System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
                 threadPool.submit(() -> {
                     try {

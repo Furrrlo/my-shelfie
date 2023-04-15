@@ -5,6 +5,7 @@ import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -23,8 +24,7 @@ public class Main {
         final var controller = new ServerController();
         RmiConnectionServerController.bind(controller);
 
-        //Socket timeout is set in SocketConnectionServerController#acceptConnectionsLoop() with setSoTimeout
-        new SocketConnectionServerController(controller, 1234);
-        //new SocketConnectionServerController(serverController, 1234, 1, TimeUnit.SECONDS);
+        //new SocketConnectionServerController(controller, 1234);
+        new SocketConnectionServerController(controller, 1234, 1, TimeUnit.SECONDS);
     }
 }
