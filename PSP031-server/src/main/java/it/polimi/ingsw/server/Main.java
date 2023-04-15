@@ -19,7 +19,7 @@ public class Main {
         //System.setProperty("java.rmi.server.hostname", "<server address>");
         System.setProperty("sun.rmi.transport.connectionTimeout", "7000");
         System.setProperty("sun.rmi.transport.tcp.readTimeout", "7000");
-        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "500");
+        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "2000");
 
         final var controller = new ServerController();
         RmiConnectionServerController.bind(controller);
