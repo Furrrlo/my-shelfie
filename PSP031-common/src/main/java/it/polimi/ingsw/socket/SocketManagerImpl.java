@@ -128,12 +128,16 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         } catch (InterruptedIOException | ClosedByInterruptException e) {
             // Go on, interruption is expected
             // Signal to everybody who is waiting that the reading thread was interrupted
-            inPacketQueue.add(new InterruptedIOException());
+            var ex = new InterruptedIOException();
+            ex.addSuppressed(e);
+            inPacketQueue.add(ex);
         } catch (IOException e) {
             // If the interruption flag was set, we got interrupted by close, so it's expected
             if (Thread.currentThread().isInterrupted()) {
                 // Signal to everybody who is waiting that the reading thread was interrupted
-                inPacketQueue.add(new InterruptedIOException());
+                var ex = new InterruptedIOException();
+                ex.addSuppressed(e);
+                inPacketQueue.add(ex);
                 return;
             }
 
