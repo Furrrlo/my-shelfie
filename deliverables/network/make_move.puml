@@ -1,0 +1,55 @@
+@startuml
+actor       Bob                        as client
+participant SocketGameClientUpdater    as clientGameUpdater
+participant SocketGameClientController as clientGameController
+participant ClientSocketManager        as clientSocketManager
+participant ServerSocketManager        as serverSocketManager
+participant SocketServerGameController as serverGameController
+participant SocketServerGameUpdater    as serverGameUpdater
+entity      Server                     as server
+
+note across: During init
+clientGameUpdater -> clientSocketManager ++ : receive(GameUpdaterPacket.class)
+serverSocketManager  <- serverGameController ++ : receive(MakeMovePacket.class)
+
+... After a while ...
+note across: Bob decides to make move
+
+client -> clientGameController ++ : makeMove(List.of(new BoardCoord(5, 5), shelfCol: 3)
+clientGameController -> clientSocketManager ++ : send(new MakeMovePacket(coords, shelfCol))
+clientSocketManager --> serverSocketManager : MakeMovePacket(coords, shelfCol)
+serverGameController <- serverSocketManager --++ : MakeMovePacket(coords, shelfCol)
+serverGameController -> server : makeMove(coords, shelfCol)
+
+note right of server
+    Here the server broadcasts the
+    change to everyone, not just Bob
+end note
+serverGameUpdater <- server ++ : updateBoardTile(row: 5, col: 5, tile: null)
+serverSocketManager <- serverGameUpdater ++ : send(new UpdateBoardTilePacket(row: 5, col: 5, tile: null))
+clientSocketManager <-- serverSocketManager : UpdateBoardTilePacket(row: 5, col: 5, tile: null)
+clientGameUpdater <- clientSocketManager --++ : returns UpdateBoardTilePacket(row: 5, col: 5, tile: null)
+client o<-- clientGameUpdater : receives board update via listener
+clientGameUpdater -> clientSocketManager --++ : ack()
+clientSocketManager --> serverSocketManager -- : ack
+clientGameUpdater -> clientSocketManager ++ : receive(GameUpdaterPacket.class)
+serverSocketManager -> serverGameUpdater -- : returns
+serverGameUpdater -> server -- : returns
+
+serverGameUpdater <- server ++ : updatePlayerShelfieTile("Bob", row: 0, col: 3, Tile(Color.GREEN))
+serverSocketManager <- serverGameUpdater ++ : send(new UpdatePlayerShelfieTilePacket("Bob", row: 0, col: 3, Tile(Color.GREEN)))
+clientSocketManager <-- serverSocketManager : UpdatePlayerShelfieTilePacket("Bob", row: 0, col: 3, Tile(Color.GREEN))
+clientGameUpdater <- clientSocketManager --++ : returns UpdatePlayerShelfieTilePacket("Bob", row: 0, col: 3, Tile(Color.GREEN))
+client o<-- clientGameUpdater : receives shelfie update via listener
+clientGameUpdater -> clientSocketManager --++ : ack()
+clientSocketManager --> serverSocketManager -- : ack
+serverSocketManager -> serverGameUpdater -- : returns
+serverGameUpdater -> server -- : returns
+
+serverGameController <- server : returns
+serverGameController -> serverSocketManager --++ : ack()
+clientSocketManager <-- serverSocketManager -- : ack
+clientGameController <- clientSocketManager -- : returns
+client <- clientGameController -- : returns
+
+@enduml
