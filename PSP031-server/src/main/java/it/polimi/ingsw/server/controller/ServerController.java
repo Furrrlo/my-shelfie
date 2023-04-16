@@ -264,10 +264,17 @@ public class ServerController {
                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
             throws DisconnectedException {
 
-        final Map<String, Player> clientPlayers = game.getPlayers().stream()
+        final Map<String, Game.PlayerFactory> clientPlayers = game.getPlayers().stream()
                 .collect(Collectors.toMap(
                         ServerPlayer::getNick,
-                        p -> new Player(p.getNick(), p.getShelfie())));
+                        p -> (isStartingPlayer, isCurrentTurnFactory, isFirstFinisherFactory) -> new Player(
+                                p.getNick(),
+                                p.getShelfie(),
+                                isStartingPlayer,
+                                p.connected().get(),
+                                isCurrentTurnFactory,
+                                isFirstFinisherFactory,
+                                p.score().get())));
         final ServerPlayer thePlayer = game.getPlayers().stream()
                 .filter(p -> p.getNick().equals(nick))
                 .findFirst()
@@ -284,13 +291,20 @@ public class ServerController {
                         game.getPlayers().stream()
                                 .map(p -> clientPlayers.get(p.getNick()))
                                 .toList(),
+                        game.getPlayers().indexOf(thePlayer),
+                        game.getPlayers().indexOf(game.getStartingPlayer()),
                         game.getPlayers().indexOf(game.currentTurn().get()),
-                        game.getCommonGoals().stream()
-                                .map(goal -> new CommonGoal(
-                                        goal.getType(),
-                                        goal.achieved().get().stream()
-                                                .map(p -> clientPlayers.get(p.getNick()))
-                                                .toList()))
+                        players -> game.getCommonGoals().stream().map(goal -> new CommonGoal(
+                                goal.getType(),
+                                goal.achieved().get().stream()
+                                        .map(achievedPlayer -> players.stream()
+                                                .filter(p -> p.getNick().equals(achievedPlayer.getNick()))
+                                                .findFirst()
+                                                .orElseThrow(() -> new IllegalStateException("" +
+                                                        "Missing player " + achievedPlayer + " which has supposedly " +
+                                                        "achieved a common goal" +
+                                                        "(found players: " + players + ")")))
+                                        .toList()))
                                 .toList(),
                         thePlayer.getPersonalGoal(),
                         game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get())),

@@ -33,6 +33,9 @@ public interface ServerGameView {
     @Unmodifiable
     List<? extends ServerPlayerView> getPlayers();
 
+    /** Returns the player who has started his turn first */
+    ServerPlayerView getStartingPlayer();
+
     /**
      * @return player whose now playing
      */

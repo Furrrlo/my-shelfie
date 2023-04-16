@@ -143,6 +143,28 @@ public class UpdatersIntegrationTest {
                 final var serverPlayer = serverGame.getPlayers().get(i);
                 final var clientPlayer = clientGame.getPlayers().get(i);
 
+                // TODO:
+                // ensurePropertyUpdated(
+                //         serverPlayer.getNick() + ".connected",
+                //         true,
+                //         serverController,
+                //         serverPlayer.connected(),
+                //         clientPlayer.connected());
+                ensurePropertyUpdated(
+                        serverPlayer.getNick() + ".isCurrentTurn",
+                        serverPlayer,
+                        true,
+                        serverController,
+                        serverGame.currentTurn(),
+                        clientPlayer.isCurrentTurn());
+                ensurePropertyUpdated(
+                        serverPlayer.getNick() + ".isFirstFinisher",
+                        serverPlayer,
+                        true,
+                        serverController,
+                        serverGame.firstFinisher(),
+                        clientPlayer.isFirstFinisher());
+
                 for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
                     ensurePropertyUpdated(
                             serverPlayer.getNick() + "ShelfTile" + tile.row() + "x" + tile.col(),

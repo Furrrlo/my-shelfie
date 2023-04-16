@@ -20,6 +20,7 @@ public class ServerGame implements ServerGameView {
     private final List<Tile> bag;
     private final @UnmodifiableView List<Tile> bagView;
     private final @Unmodifiable List<ServerPlayer> players;
+    private final ServerPlayer startingPlayer;
     private final Property<ServerPlayer> currentTurn;
     private final @Unmodifiable List<ServerCommonGoal> commonGoal;
     private final Property<@Nullable ServerPlayer> firstFinisher;
@@ -31,7 +32,7 @@ public class ServerGame implements ServerGameView {
                       Board board,
                       List<Tile> bag,
                       List<ServerPlayer> players,
-                      int currentTurnPlayerIdx,
+                      int startingPlayerIdx,
                       List<ServerCommonGoal> commonGoal,
                       Property<@Nullable ServerPlayer> firstFinisher) {
         this.gameID = gameID;
@@ -39,7 +40,8 @@ public class ServerGame implements ServerGameView {
         this.bag = new ArrayList<>(bag);
         this.bagView = Collections.unmodifiableList(this.bag);
         this.players = List.copyOf(players);
-        this.currentTurn = new SerializableProperty<>(players.get(currentTurnPlayerIdx));
+        this.startingPlayer = players.get(startingPlayerIdx);
+        this.currentTurn = new SerializableProperty<>(players.get(startingPlayerIdx));
         this.commonGoal = List.copyOf(commonGoal);
         this.firstFinisher = firstFinisher;
     }
@@ -66,6 +68,11 @@ public class ServerGame implements ServerGameView {
     @Override
     public @Unmodifiable List<ServerPlayer> getPlayers() {
         return players;
+    }
+
+    @Override
+    public ServerPlayer getStartingPlayer() {
+        return startingPlayer;
     }
 
     @Override

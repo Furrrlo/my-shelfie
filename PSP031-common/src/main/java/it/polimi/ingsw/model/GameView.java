@@ -18,6 +18,12 @@ public interface GameView extends Serializable {
     @Unmodifiable
     List<? extends PlayerView> getPlayers();
 
+    /** Returns this client's player */
+    PlayerView thePlayer();
+
+    /** Returns the player who has started his turn first */
+    PlayerView getStartingPlayer();
+
     /** Return player whose now playing */
     Provider<? extends PlayerView> currentTurn();
 
