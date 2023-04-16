@@ -119,7 +119,7 @@ public class UpdatersIntegrationTest {
                         new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock()))));
             }
 
-            final var clientGame = gamePromise.get().game();
+            final var clientGame = gamePromise.get(500, TimeUnit.MILLISECONDS).game();
             assertEquals(
                     serverGameToSerialize.get(500, TimeUnit.MILLISECONDS),
                     clientGame);
