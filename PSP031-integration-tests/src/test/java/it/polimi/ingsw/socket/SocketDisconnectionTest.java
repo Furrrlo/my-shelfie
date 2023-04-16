@@ -2,6 +2,7 @@ package it.polimi.ingsw.socket;
 
 import it.polimi.ingsw.DisconnectionIntegrationTest;
 import it.polimi.ingsw.ImproperShutdownSocket;
+import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
 import org.junit.jupiter.api.function.ThrowingConsumer;
@@ -84,6 +85,7 @@ public class SocketDisconnectionTest {
         final AtomicInteger choosenPort = new AtomicInteger();
         final AtomicReference<Socket> socket = new AtomicReference<>();
         try {
+            Supplier<ClientNetManager> defaultSocketSupplier;
             DisconnectionIntegrationTest.doTestDisconnection_clientCloseInLobby(
                     serverController -> {
                         try {
@@ -107,7 +109,7 @@ public class SocketDisconnectionTest {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
                         }
                     },
-                    () -> {
+                    defaultSocketSupplier = () -> {
                         try {
                             return new SocketClientNetManager(
                                     new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
@@ -116,15 +118,7 @@ public class SocketDisconnectionTest {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
                         }
                     },
-                    () -> {
-                        try {
-                            return new SocketClientNetManager(
-                                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                    1, TimeUnit.SECONDS);
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to create SocketClientNetManager", e);
-                        }
-                    },
+                    defaultSocketSupplier,
                     () -> Objects.requireNonNull(socket.get()).close());
         } finally {
             if (socket.get() != null)
@@ -141,6 +135,7 @@ public class SocketDisconnectionTest {
         final AtomicInteger chosenPort = new AtomicInteger();
         final AtomicReference<Socket> socket = new AtomicReference<>();
         try {
+            Supplier<ClientNetManager> defaultSocketSupplier;
             DisconnectionIntegrationTest.testSocketDisconnection_clientCloseInGame(
                     serverController -> {
                         try {
@@ -153,7 +148,7 @@ public class SocketDisconnectionTest {
                             throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                         }
                     },
-                    () -> {
+                    defaultSocketSupplier = () -> {
                         try {
                             return new SocketClientNetManager(
                                     new InetSocketAddress(InetAddress.getLocalHost(), chosenPort.get()),
@@ -173,25 +168,9 @@ public class SocketDisconnectionTest {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
                         }
                     },
-                    () -> {
-                        try {
-                            return new SocketClientNetManager(
-                                    new InetSocketAddress(InetAddress.getLocalHost(), chosenPort.get()),
-                                    1, TimeUnit.SECONDS);
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to create SocketClientNetManager", e);
-                        }
-                    },
+                    defaultSocketSupplier,
                     () -> Objects.requireNonNull(socket.get()).close(),
-                    () -> {
-                        try {
-                            return new SocketClientNetManager(
-                                    new InetSocketAddress(InetAddress.getLocalHost(), chosenPort.get()),
-                                    1, TimeUnit.SECONDS);
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to create SocketClientNetManager", e);
-                        }
-                    });
+                    defaultSocketSupplier);
         } finally {
             if (socket.get() != null)
                 cleanup.accept(socket.get());
