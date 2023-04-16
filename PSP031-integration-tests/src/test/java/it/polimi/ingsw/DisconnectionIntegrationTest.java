@@ -36,7 +36,7 @@ public class DisconnectionIntegrationTest {
         final var serverJoined = new CompletableFuture<Void>();
         final var serverPlayerRemoved = new CompletableFuture<Void>();
 
-        try (var ignored = bindServerController.apply(new ServerController() {
+        try (var ignored = bindServerController.apply(new ServerController(5, TimeUnit.SECONDS) {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
@@ -86,7 +86,7 @@ public class DisconnectionIntegrationTest {
         final var serverJoined = new CountDownLatch(3);
         final var serverPlayerRemoved = new CompletableFuture<Void>();
 
-        try (var ignored = bindServerController.apply(new ServerController() {
+        try (var ignored = bindServerController.apply(new ServerController(5, TimeUnit.SECONDS) {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
@@ -153,7 +153,7 @@ public class DisconnectionIntegrationTest {
         final var serverPlayerDisconnected = new CompletableFuture<Void>();
         final ServerController serverController;
 
-        try (var ignored = bindServerController.apply(serverController = new ServerController() {
+        try (var ignored = bindServerController.apply(serverController = new ServerController(5, TimeUnit.SECONDS) {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);

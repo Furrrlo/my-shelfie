@@ -20,9 +20,9 @@ public class SocketClientNetManager implements ClientNetManager {
     private final ExecutorService threadPool;
     private final InetSocketAddress serverAddress;
 
-    /** Maximum time to wait for a receive operation in {@link #defaultRecvTimeoutUnit}, or -1 to wait indefinitely */
-    private final long defaultRecvTimeout;
-    private final TimeUnit defaultRecvTimeoutUnit;
+    /** Maximum time to wait for a receive operation in {@link #defaultResponseTimeoutUnit}, or -1 to wait indefinitely */
+    private final long defaultResponseTimeout;
+    private final TimeUnit defaultResponseTimeoutUnit;
 
     private @Nullable ClientSocketManager socketManager;
     private @Nullable Socket socket;
@@ -32,19 +32,19 @@ public class SocketClientNetManager implements ClientNetManager {
     }
 
     public SocketClientNetManager(InetSocketAddress serverAddress,
-                                  long defaultRecvTimeout,
-                                  TimeUnit defaultRecvTimeoutUnit) {
-        this(serverAddress, defaultRecvTimeout, defaultRecvTimeoutUnit, null);
+                                  long defaultResponseTimeout,
+                                  TimeUnit defaultResponseTimeoutUnit) {
+        this(serverAddress, defaultResponseTimeout, defaultResponseTimeoutUnit, null);
     }
 
     @VisibleForTesting
     public SocketClientNetManager(InetSocketAddress serverAddress,
-                                  long defaultRecvTimeout,
-                                  TimeUnit defaultRecvTimeoutUnit,
+                                  long defaultResponseTimeout,
+                                  TimeUnit defaultResponseTimeoutUnit,
                                   @Nullable Socket socket) {
         this.serverAddress = serverAddress;
-        this.defaultRecvTimeout = defaultRecvTimeout;
-        this.defaultRecvTimeoutUnit = defaultRecvTimeoutUnit;
+        this.defaultResponseTimeout = defaultResponseTimeout;
+        this.defaultResponseTimeoutUnit = defaultResponseTimeoutUnit;
         this.socket = socket;
         this.threadPool = Executors.newFixedThreadPool(2, r -> {
             var th = new Thread(r);
@@ -71,9 +71,9 @@ public class SocketClientNetManager implements ClientNetManager {
             else
                 socket.connect(serverAddress);
             socket.setSoTimeout(22000);
-            socketManager = defaultRecvTimeout == -1
+            socketManager = defaultResponseTimeout == -1
                     ? new ClientSocketManagerImpl(socket)
-                    : new ClientSocketManagerImpl(socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
+                    : new ClientSocketManagerImpl(socket, defaultResponseTimeout, defaultResponseTimeoutUnit);
             socketManager.setNick(nick);
             System.out.println("Connected to : " + serverAddress);
         }

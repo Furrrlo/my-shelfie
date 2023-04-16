@@ -23,31 +23,41 @@ public class SocketConnectionServerController implements Closeable {
     private final ExecutorService threadPool;
     private final ServerSocket socketServer;
 
-    /** Maximum time to wait for a receive operation in {@link #defaultRecvTimeoutUnit}, or -1 to wait indefinitely */
-    private final long defaultRecvTimeout;
-    private final TimeUnit defaultRecvTimeoutUnit;
+    /**
+     * Maximum time to wait without any input before considering a socket dead in {@link #readTimeoutUnit},
+     * or -1 to wait indefinitely
+     */
+    private final long readTimeout;
+    private final TimeUnit readTimeoutUnit;
+
+    /** Maximum time to wait for a response in {@link #responseTimeoutUnit}, or -1 to wait indefinitely */
+    private final long responseTimeout;
+    private final TimeUnit responseTimeoutUnit;
 
     private final Future<?> acceptConnectionsTask;
     private final Set<PlayerConnection> connections = ConcurrentHashMap.newKeySet();
 
     public SocketConnectionServerController(ServerController controller, int port) throws IOException {
-        this(controller, new ServerSocket(port), -1, TimeUnit.MILLISECONDS);
+        this(controller, new ServerSocket(port), -1, TimeUnit.MILLISECONDS, -1, TimeUnit.MILLISECONDS);
     }
 
     public SocketConnectionServerController(ServerController controller,
                                             int port,
-                                            long defaultRecvTimeout,
-                                            TimeUnit defaultRecvTimeoutUnit)
+                                            long readTimeout,
+                                            TimeUnit readTimeoutUnit,
+                                            long responseTimeout,
+                                            TimeUnit responseTimeoutUnit)
             throws IOException {
-        this(controller, new ServerSocket(port), defaultRecvTimeout, defaultRecvTimeoutUnit);
+        this(controller, new ServerSocket(port), readTimeout, readTimeoutUnit, responseTimeout, responseTimeoutUnit);
     }
 
     @VisibleForTesting
     public SocketConnectionServerController(ServerController controller,
                                             ServerSocket serverSocket,
-                                            long defaultRecvTimeout,
-                                            TimeUnit defaultRecvTimeoutUnit)
-            throws IOException {
+                                            long readTimeout,
+                                            TimeUnit readTimeoutUnit,
+                                            long responseTimeout,
+                                            TimeUnit responseTimeoutUnit) {
         this.controller = controller;
         this.threadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
             private final AtomicInteger threadNum = new AtomicInteger();
@@ -60,8 +70,10 @@ public class SocketConnectionServerController implements Closeable {
             }
         });
         this.socketServer = serverSocket;
-        this.defaultRecvTimeout = defaultRecvTimeout;
-        this.defaultRecvTimeoutUnit = defaultRecvTimeoutUnit;
+        this.readTimeout = readTimeout;
+        this.readTimeoutUnit = readTimeoutUnit;
+        this.responseTimeout = responseTimeout;
+        this.responseTimeoutUnit = responseTimeoutUnit;
         this.acceptConnectionsTask = threadPool.submit(this::acceptConnectionsLoop);
     }
 
@@ -69,13 +81,14 @@ public class SocketConnectionServerController implements Closeable {
         try {
             do {
                 final Socket socket = socketServer.accept();
-                //socket.setSoTimeout(7000);
+                if (readTimeout != -1)
+                    socket.setSoTimeout((int) readTimeoutUnit.toMillis(readTimeout));
                 System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
                 threadPool.submit(() -> {
                     try {
-                        doJoin(defaultRecvTimeout == -1
+                        doJoin(responseTimeout == -1
                                 ? new ServerSocketManagerImpl(threadPool, socket)
-                                : new ServerSocketManagerImpl(threadPool, socket, defaultRecvTimeout, defaultRecvTimeoutUnit));
+                                : new ServerSocketManagerImpl(threadPool, socket, responseTimeout, responseTimeoutUnit));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

@@ -26,10 +26,10 @@ public class ClientSocketManagerImpl
     }
 
     public ClientSocketManagerImpl(Socket socket,
-                                   long defaultRecvTimeout,
-                                   TimeUnit defaultRecvTimeoutUnit)
+                                   long defaultResponseTimeout,
+                                   TimeUnit defaultResponseTimeoutUnit)
             throws IOException {
-        this(createDefaultExecutor(), socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
+        this(createDefaultExecutor(), socket, defaultResponseTimeout, defaultResponseTimeoutUnit);
     }
 
     private ClientSocketManagerImpl(ExecutorService executor, Socket socket) throws IOException {
@@ -39,10 +39,10 @@ public class ClientSocketManagerImpl
 
     private ClientSocketManagerImpl(ExecutorService executor,
                                     Socket socket,
-                                    long defaultRecvTimeout,
-                                    TimeUnit defaultRecvTimeoutUnit)
+                                    long defaultResponseTimeout,
+                                    TimeUnit defaultResponseTimeoutUnit)
             throws IOException {
-        super("Client", executor, socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
+        super("Client", executor, socket, defaultResponseTimeout, defaultResponseTimeoutUnit);
         this.executor = executor;
     }
 

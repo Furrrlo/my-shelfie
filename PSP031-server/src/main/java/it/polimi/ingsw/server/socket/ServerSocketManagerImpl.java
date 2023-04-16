@@ -21,9 +21,9 @@ public class ServerSocketManagerImpl
 
     public ServerSocketManagerImpl(ExecutorService executor,
                                    Socket socket,
-                                   long defaultRecvTimeout,
-                                   TimeUnit defaultRecvTimeoutUnit)
+                                   long defaultResponseTimeout,
+                                   TimeUnit defaultResponseTimeoutUnit)
             throws IOException {
-        super("Server", executor, socket, defaultRecvTimeout, defaultRecvTimeoutUnit);
+        super("Server", executor, socket, defaultResponseTimeout, defaultResponseTimeoutUnit);
     }
 }

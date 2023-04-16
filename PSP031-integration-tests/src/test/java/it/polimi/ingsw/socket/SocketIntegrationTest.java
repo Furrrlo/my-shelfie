@@ -22,7 +22,9 @@ public class SocketIntegrationTest {
                     try {
                         final ServerSocket serverSocket = new ServerSocket(0);
                         choosenPort.set(serverSocket.getLocalPort());
-                        return new SocketConnectionServerController(serverController, serverSocket, 1, TimeUnit.SECONDS);
+                        return new SocketConnectionServerController(serverController, serverSocket,
+                                -1, TimeUnit.MILLISECONDS,
+                                1, TimeUnit.SECONDS);
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                     }
@@ -45,7 +47,9 @@ public class SocketIntegrationTest {
                     try {
                         final ServerSocket serverSocket = new ServerSocket(0);
                         choosenPort.set(serverSocket.getLocalPort());
-                        return new SocketConnectionServerController(serverController, serverSocket, 1, TimeUnit.SECONDS);
+                        return new SocketConnectionServerController(serverController, serverSocket,
+                                -1, TimeUnit.MILLISECONDS,
+                                1, TimeUnit.SECONDS);
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                     }

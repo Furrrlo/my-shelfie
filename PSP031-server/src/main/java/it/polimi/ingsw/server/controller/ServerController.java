@@ -39,21 +39,22 @@ public class ServerController {
     private final Lock lobbiesLock = new ReentrantLock();
     private final Set<ServerLobbyAndController<ServerLobby>> lobbies = ConcurrentHashMap.newKeySet();
 
-    public ServerController() {
-        this(Clock.systemUTC(), Executors.newSingleThreadScheduledExecutor(r -> {
+    public ServerController(long pingInterval, TimeUnit pingIntervalUnit) {
+        this(Clock.systemUTC(), pingInterval, pingIntervalUnit, Executors.newSingleThreadScheduledExecutor(r -> {
             var t = new Thread(r);
             t.setName("ServerController-heartbeat-thread");
             return t;
         }));
     }
 
-    public ServerController(Clock clock, ScheduledExecutorService scheduledExecutorService) {
+    public ServerController(Clock clock,
+                            long pingInterval,
+                            TimeUnit pingIntervalUnit,
+                            ScheduledExecutorService scheduledExecutorService) {
         this.clock = clock;
         this.heartbeatTask = scheduledExecutorService.scheduleAtFixedRate(
                 this::detectDisconnectedPlayers,
-                0,
-                5,
-                TimeUnit.SECONDS);
+                0, pingInterval, pingIntervalUnit);
     }
 
     private void detectDisconnectedPlayers() {

@@ -31,7 +31,7 @@ public class ControllersIntegrationTest {
         var readyPromise = new CompletableFuture<Arguments>();
 
         final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
-        try (Closeable ignored = bindServerController.apply(new ServerController() {
+        try (Closeable ignored = bindServerController.apply(new ServerController(5, TimeUnit.SECONDS) {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {

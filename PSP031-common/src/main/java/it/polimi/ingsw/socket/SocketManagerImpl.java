@@ -22,9 +22,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final @Nullable Socket socket;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
-    /** Maximum time to wait for a receive operation in {@link #defaultRecvTimeoutUnit}, or -1 to wait indefinitely */
-    private final long defaultRecvTimeout;
-    private final TimeUnit defaultRecvTimeoutUnit;
+    /** Maximum time to wait for a response in {@link #defaultResponseTimeoutUnit}, or -1 to wait indefinitely */
+    private final long defaultResponseTimeout;
+    private final TimeUnit defaultResponseTimeoutUnit;
     private final BlockingDeque<QueuedOutput> outPacketQueue = new LinkedBlockingDeque<>();
     private final NBlockingQueue<Object> inPacketQueue = new NBlockingQueue<>();
 
@@ -48,11 +48,11 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     public SocketManagerImpl(String name,
                              ExecutorService executor,
                              Socket socket,
-                             long defaultRecvTimeout,
-                             TimeUnit defaultRecvTimeoutUnit)
+                             long defaultResponseTimeout,
+                             TimeUnit defaultResponseTimeoutUnit)
             throws IOException {
-        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream(), defaultRecvTimeout,
-                defaultRecvTimeoutUnit);
+        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream(), defaultResponseTimeout,
+                defaultResponseTimeoutUnit);
     }
 
     @VisibleForTesting
@@ -60,10 +60,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                       ExecutorService executor,
                       InputStream is,
                       OutputStream os,
-                      long defaultRecvTimeout,
-                      TimeUnit defaultRecvTimeoutUnit)
+                      long defaultResponseTimeout,
+                      TimeUnit defaultResponseTimeoutUnit)
             throws IOException {
-        this(name, executor, null, is, os, defaultRecvTimeout, defaultRecvTimeoutUnit);
+        this(name, executor, null, is, os, defaultResponseTimeout, defaultResponseTimeoutUnit);
     }
 
     private SocketManagerImpl(String name,
@@ -71,15 +71,15 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                               @Nullable Socket socket,
                               InputStream is,
                               OutputStream os,
-                              long defaultRecvTimeout,
-                              TimeUnit defaultRecvTimeoutUnit)
+                              long defaultResponseTimeout,
+                              TimeUnit defaultResponseTimeoutUnit)
             throws IOException {
         this.socket = socket;
         this.name = name;
         this.oos = os instanceof ObjectOutputStream oos ? oos : new ObjectOutputStream(os);
         this.ois = is instanceof ObjectInputStream ois ? ois : new ObjectInputStream(is);
-        this.defaultRecvTimeout = defaultRecvTimeout;
-        this.defaultRecvTimeoutUnit = defaultRecvTimeoutUnit;
+        this.defaultResponseTimeout = defaultResponseTimeout;
+        this.defaultResponseTimeoutUnit = defaultResponseTimeoutUnit;
 
         recvTask = executor.submit(this::readLoop);
         sendTask = executor.submit(this::writeLoop);
@@ -244,7 +244,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     private SeqPacket doReceiveWithTimeout(Predicate<SeqPacket> filter)
             throws InterruptedException, IOException, TimeoutException {
-        return doReceive(filter, defaultRecvTimeout, defaultRecvTimeoutUnit);
+        return doReceive(filter, defaultResponseTimeout, defaultResponseTimeoutUnit);
     }
 
     private <R extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R> doSendAndWaitResponse(SeqPacket p, Class<R> replyType)
