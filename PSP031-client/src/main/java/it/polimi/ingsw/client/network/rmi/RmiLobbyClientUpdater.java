@@ -14,10 +14,13 @@ import java.rmi.RemoteException;
 
 class RmiLobbyClientUpdater extends LobbyClientUpdater implements RmiLobbyUpdater {
 
+    private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
     private final LobbyAndController<Lobby> lobbyAndController;
 
-    public RmiLobbyClientUpdater(LobbyAndController<Lobby> lobbyAndController) {
+    public RmiLobbyClientUpdater(UnicastRemoteObjects.Exporter unicastRemoteObjects,
+                                 LobbyAndController<Lobby> lobbyAndController) {
         super(lobbyAndController.lobby());
+        this.unicastRemoteObjects = unicastRemoteObjects;
         this.lobbyAndController = lobbyAndController;
     }
 
@@ -28,7 +31,7 @@ class RmiLobbyClientUpdater extends LobbyClientUpdater implements RmiLobbyUpdate
     @Override
     protected GameUpdater createGameUpdater(GameAndController<Game> gameAndController) {
         try {
-            return new RmiGameUpdater.Adapter(UnicastRemoteObjects.export(
+            return new RmiGameUpdater.Adapter(unicastRemoteObjects.export(
                     new RmiGameClientUpdater(gameAndController.game()), 0));
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpectedly failed to export RmiGameClientUpdater", e);

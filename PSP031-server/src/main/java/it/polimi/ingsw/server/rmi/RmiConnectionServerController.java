@@ -14,10 +14,12 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMISocketFactory;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RmiConnectionServerController implements RmiConnectionController, Closeable {
@@ -25,6 +27,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
     private final ServerController controller;
     private final Registry registry;
     private final String remoteName;
+    private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
     private final Set<PlayerConnection> connections = ConcurrentHashMap.newKeySet();
 
     public static RmiConnectionServerController bind(ServerController controller) throws RemoteException {
@@ -36,31 +39,33 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                                                      String remoteName,
                                                      ServerController controller)
             throws RemoteException {
-        return bind(registry, remoteName, controller, new RMITimeoutSocketFactory());
+        return bind(registry, remoteName, controller,
+                new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS),
+                null);
     }
 
     @VisibleForTesting
     public static RmiConnectionServerController bind(Registry registry,
                                                      String remoteName,
                                                      ServerController controller,
-                                                     RMISocketFactory socketFactory)
+                                                     @Nullable RMIClientSocketFactory csf,
+                                                     @Nullable RMIServerSocketFactory ssf)
             throws RemoteException {
         RmiConnectionServerController rmiController;
-        try {
-            if (RMISocketFactory.getSocketFactory() != socketFactory) //if is not set
-                RMISocketFactory.setSocketFactory(socketFactory);
-        } catch (IOException e) {
-            //this will happen in tests, ignored
-        }
-        registry.rebind(remoteName, UnicastRemoteObjects
-                .export(rmiController = new RmiConnectionServerController(controller, registry, remoteName), 0));
+        final var exporter = UnicastRemoteObjects.createExporter(csf, ssf);
+        registry.rebind(remoteName, exporter
+                .export(rmiController = new RmiConnectionServerController(controller, registry, remoteName, exporter), 0));
         return rmiController;
     }
 
-    private RmiConnectionServerController(ServerController controller, Registry registry, String remoteName) {
+    private RmiConnectionServerController(ServerController controller,
+                                          Registry registry,
+                                          String remoteName,
+                                          UnicastRemoteObjects.Exporter unicastRemoteObjects) {
         this.controller = controller;
         this.registry = registry;
         this.remoteName = remoteName;
+        this.unicastRemoteObjects = unicastRemoteObjects;
     }
 
     @Override
@@ -79,7 +84,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                         try {
                             var lobbyController = new RmiLobbyServerController(nick, controller);
                             connection.lobbyControllerRemote = lobbyController;
-                            return new RmiLobbyController.Adapter(UnicastRemoteObjects.export(lobbyController, 0));
+                            return new RmiLobbyController.Adapter(unicastRemoteObjects.export(lobbyController, 0));
                         } catch (RemoteException e) {
                             throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                         }
@@ -88,7 +93,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                         try {
                             var gameController = new RmiGameServerController(player, game);
                             connection.gameControllerRemote = gameController;
-                            return new RmiGameController.Adapter(UnicastRemoteObjects.export(gameController, 0));
+                            return new RmiGameController.Adapter(unicastRemoteObjects.export(gameController, 0));
                         } catch (RemoteException e) {
                             throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                         }

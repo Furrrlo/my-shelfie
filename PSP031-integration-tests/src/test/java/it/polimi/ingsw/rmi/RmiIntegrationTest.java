@@ -4,27 +4,12 @@ import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.controller.ControllersIntegrationTest;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.updater.UpdatersIntegrationTest;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.server.RMISocketFactory;
 
 public class RmiIntegrationTest {
-    static @Nullable RMITimeoutSocketFactory rmiServerSocketFactory = null;
-
-    @BeforeAll
-    static void beforeAll() {
-        rmiServerSocketFactory = new RMITimeoutSocketFactory();
-        try {
-            RMISocketFactory.setSocketFactory(rmiServerSocketFactory);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Test
     void testRmiUpdaters() throws Exception {

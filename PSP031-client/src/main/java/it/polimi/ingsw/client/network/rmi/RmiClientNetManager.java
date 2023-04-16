@@ -7,19 +7,21 @@ import it.polimi.ingsw.rmi.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMISocketFactory;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
 
     private final @Nullable String host;
     private final int port;
     private final String remoteName;
+    private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
     private @Nullable RmiConnectionController server;
 
     public RmiClientNetManager() {
@@ -32,19 +34,20 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
 
     @VisibleForTesting
     public RmiClientNetManager(@Nullable String host, int port, String remoteName) {
-        this(host, port, remoteName, new RMITimeoutSocketFactory());
+        this(host, port, remoteName,
+                new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS),
+                null);
     }
 
-    @VisibleForTesting
-    public RmiClientNetManager(@Nullable String host, int port, String remoteName, RMISocketFactory socketFactory) {
+    private RmiClientNetManager(@Nullable String host,
+                                int port,
+                                String remoteName,
+                                @Nullable RMIClientSocketFactory csf,
+                                @Nullable RMIServerSocketFactory ssf) {
         this.port = port;
         this.remoteName = remoteName;
         this.host = host;
-        try {
-            RMISocketFactory.setSocketFactory(socketFactory);
-        } catch (IOException e) {
-            //this will happen in tests, ignored.
-        }
+        this.unicastRemoteObjects = UnicastRemoteObjects.createExporter(csf, ssf);
     }
 
     @Override
@@ -64,16 +67,22 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
             server = (RmiConnectionController) registry.lookup(remoteName);
         }
 
-        final InterceptingFactory updaterFactory = new InterceptingFactory();
+        final InterceptingFactory updaterFactory = new InterceptingFactory(unicastRemoteObjects);
         server.joinGame(
                 nick,
-                UnicastRemoteObjects.export(new RmiHeartbeatClientHandler(), 0),
-                UnicastRemoteObjects.export(updaterFactory, 0));
+                unicastRemoteObjects.export(new RmiHeartbeatClientHandler(), 0),
+                unicastRemoteObjects.export(updaterFactory, 0));
         return updaterFactory.getUpdater().getLobbyAndController();
     }
 
     private static class InterceptingFactory implements RmiLobbyUpdaterFactory {
+
+        private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
         private @Nullable RmiLobbyClientUpdater updater;
+
+        public InterceptingFactory(UnicastRemoteObjects.Exporter unicastRemoteObjects) {
+            this.unicastRemoteObjects = unicastRemoteObjects;
+        }
 
         public RmiLobbyClientUpdater getUpdater() {
             return Objects.requireNonNull(
@@ -88,8 +97,8 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
                 throw new UnsupportedOperationException("Expected ConnectionServerController to invoke " +
                         "GameCreationStateUpdaterFactory exactly once, was 2+");
 
-            updater = new RmiLobbyClientUpdater(lobby);
-            return UnicastRemoteObjects.export(updater, 0);
+            updater = new RmiLobbyClientUpdater(unicastRemoteObjects, lobby);
+            return unicastRemoteObjects.export(updater, 0);
         }
     }
 }
