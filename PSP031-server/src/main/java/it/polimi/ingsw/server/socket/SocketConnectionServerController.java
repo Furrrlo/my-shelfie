@@ -15,7 +15,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Set;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SocketConnectionServerController implements Closeable {
 
@@ -59,16 +58,9 @@ public class SocketConnectionServerController implements Closeable {
                                             long responseTimeout,
                                             TimeUnit responseTimeoutUnit) {
         this.controller = controller;
-        this.threadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
-            private final AtomicInteger threadNum = new AtomicInteger();
-
-            @Override
-            public Thread newThread(Runnable r) {
-                var t = new Thread(r);
-                t.setName("SocketConnectionServerController-socket-thread-" + threadNum.getAndIncrement());
-                return t;
-            }
-        });
+        this.threadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
+                .name("SocketConnectionServerController-socket-thread-", 0)
+                .factory());
         this.socketServer = serverSocket;
         this.readTimeout = readTimeout;
         this.readTimeoutUnit = readTimeoutUnit;
