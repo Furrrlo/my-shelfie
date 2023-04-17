@@ -42,9 +42,7 @@ public class ImproperShutdownSocket extends Socket {
             try {
                 readLock.lockInterruptibly();
             } catch (InterruptedException e) {
-                final var newEx = new ClosedByInterruptException();
-                newEx.addSuppressed(e);
-                throw newEx;
+                throw (IOException) new ClosedByInterruptException().initCause(e);
             }
 
             try {
@@ -59,9 +57,7 @@ public class ImproperShutdownSocket extends Socket {
             try {
                 readLock.lockInterruptibly();
             } catch (InterruptedException e) {
-                final var newEx = new ClosedByInterruptException();
-                newEx.addSuppressed(e);
-                throw newEx;
+                throw (IOException) new ClosedByInterruptException().initCause(e);
             }
 
             try {
@@ -76,9 +72,7 @@ public class ImproperShutdownSocket extends Socket {
             try {
                 readLock.lockInterruptibly();
             } catch (InterruptedException e) {
-                final var newEx = new ClosedByInterruptException();
-                newEx.addSuppressed(e);
-                throw newEx;
+                throw (IOException) new ClosedByInterruptException().initCause(e);
             }
 
             try {
