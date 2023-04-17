@@ -31,7 +31,7 @@ public class ControllersIntegrationTest {
         var readyPromise = new CompletableFuture<Arguments>();
 
         final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
-        try (Closeable ignored = bindServerController.apply(new ServerController(5, TimeUnit.SECONDS) {
+        try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
@@ -46,7 +46,7 @@ public class ControllersIntegrationTest {
                             }
                         });
             }
-        })) {
+        }; Closeable ignored = bindServerController.apply(serverController)) {
 
             var lobbyAndController = clientNetManagerFactory.get().joinGame(nick);
             LobbyController lobbyController = lobbyAndController.controller();

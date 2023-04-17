@@ -41,8 +41,7 @@ public class UpdatersIntegrationTest {
 
         final var serverGameToSerialize = new CompletableFuture<Game>();
 
-        final ServerController serverController;
-        try (Closeable ignored = bindServerController.apply(serverController = new ServerController(5, TimeUnit.SECONDS) {
+        try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
@@ -74,7 +73,7 @@ public class UpdatersIntegrationTest {
                 serverLobbyToSerialize.complete(lobby);
                 return lobby;
             }
-        })) {
+        }; Closeable ignored = bindServerController.apply(serverController)) {
 
             LobbyView lobbyView = clientNetManagerFactory.get().joinGame(nick).lobby();
             assertEquals(

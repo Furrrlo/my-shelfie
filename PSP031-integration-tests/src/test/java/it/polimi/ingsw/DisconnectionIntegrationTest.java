@@ -36,7 +36,7 @@ public class DisconnectionIntegrationTest {
         final var serverJoined = new CompletableFuture<Void>();
         final var serverPlayerRemoved = new CompletableFuture<Void>();
 
-        try (var ignored = bindServerController.apply(new ServerController(5, TimeUnit.SECONDS) {
+        try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
@@ -59,7 +59,7 @@ public class DisconnectionIntegrationTest {
                 serverJoined.complete(null);
                 return lobby;
             }
-        })) {
+        }; var ignored = bindServerController.apply(serverController)) {
             ClientNetManager clientNetManager = clientNetManagerFactory.get();
             LobbyView lobbyView = clientNetManager.joinGame(nick).lobby();
             ServerLobby serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
@@ -86,7 +86,7 @@ public class DisconnectionIntegrationTest {
         final var serverJoined = new CountDownLatch(3);
         final var serverPlayerRemoved = new CompletableFuture<Void>();
 
-        try (var ignored = bindServerController.apply(new ServerController(5, TimeUnit.SECONDS) {
+        try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
@@ -110,7 +110,7 @@ public class DisconnectionIntegrationTest {
                 serverJoined.countDown();
                 return lobby;
             }
-        })) {
+        }; var ignored = bindServerController.apply(serverController)) {
             ClientNetManager clientManager1 = clientNetManagerFactory1.get();
             LobbyView lobbyView = clientManager1.joinGame(testNickname).lobby();
 
@@ -151,9 +151,8 @@ public class DisconnectionIntegrationTest {
         final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
         final var serverAllJoined = new CompletableFuture<Void>();
         final var serverPlayerDisconnected = new CompletableFuture<Void>();
-        final ServerController serverController;
 
-        try (var ignored = bindServerController.apply(serverController = new ServerController(5, TimeUnit.SECONDS) {
+        try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
                 final var lockedLobby = super.getOrCreateLobby(nick);
@@ -176,7 +175,7 @@ public class DisconnectionIntegrationTest {
                     serverAllJoined.complete(null);
                 return lobby;
             }
-        })) {
+        }; var ignored = bindServerController.apply(serverController)) {
 
             //Connect 3 client
             LobbyView lobbyView = clientNetManagerFactory1.get().joinGame("test_1").lobby();

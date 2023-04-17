@@ -17,6 +17,7 @@ import it.polimi.ingsw.updater.LobbyUpdaterFactory;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.io.Closeable;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
@@ -29,7 +30,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ServerController {
+public class ServerController implements Closeable {
 
     private final Clock clock;
     private final ScheduledFuture<?> heartbeatTask;
@@ -57,6 +58,12 @@ public class ServerController {
             t.setName("ServerController-heartbeat-scheduler-thread");
             return t;
         }).scheduleAtFixedRate(this::detectDisconnectedPlayers, 0, pingInterval, pingIntervalUnit);
+    }
+
+    @Override
+    public void close() {
+        heartbeatTask.cancel(true);
+        heartbeatThreadPool.shutdown();
     }
 
     private void detectDisconnectedPlayers() {
