@@ -4,6 +4,7 @@ import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.socket.packets.JoinGamePacket;
+import it.polimi.ingsw.utils.ThreadPools;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -36,7 +37,8 @@ public class SocketConnectionServerController implements Closeable {
     private final Future<?> acceptConnectionsTask;
     private final Set<PlayerConnection> connections = ConcurrentHashMap.newKeySet();
 
-    public SocketConnectionServerController(ServerController controller, int port) throws IOException {
+    public SocketConnectionServerController(ServerController controller, int port)
+            throws IOException {
         this(controller, new ServerSocket(port), -1, TimeUnit.MILLISECONDS, -1, TimeUnit.MILLISECONDS);
     }
 
@@ -59,14 +61,15 @@ public class SocketConnectionServerController implements Closeable {
                                             TimeUnit responseTimeoutUnit) {
         this.controller = controller;
         this.threadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
-                .name("SocketConnectionServerController-socket-thread-", 0)
+                .name("SocketConnectionServerController-thread-", 0)
                 .factory());
         this.socketServer = serverSocket;
         this.readTimeout = readTimeout;
         this.readTimeoutUnit = readTimeoutUnit;
         this.responseTimeout = responseTimeout;
         this.responseTimeoutUnit = responseTimeoutUnit;
-        this.acceptConnectionsTask = threadPool.submit(this::acceptConnectionsLoop);
+        this.acceptConnectionsTask = threadPool.submit(
+                ThreadPools.giveNameToTask("SocketConnectionServerController-accept-thread", this::acceptConnectionsLoop));
     }
 
     private void acceptConnectionsLoop() {
@@ -76,7 +79,7 @@ public class SocketConnectionServerController implements Closeable {
                 if (readTimeout != -1)
                     socket.setSoTimeout((int) readTimeoutUnit.toMillis(readTimeout));
                 System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
-                threadPool.submit(() -> {
+                threadPool.submit(ThreadPools.giveNameToTask(n -> n + "[doJoin]", () -> {
                     try {
                         doJoin(responseTimeout == -1
                                 ? new ServerSocketManagerImpl(threadPool, socket)
@@ -84,7 +87,7 @@ public class SocketConnectionServerController implements Closeable {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                });
+                }));
             } while (!Thread.interrupted());
         } catch (InterruptedIOException ignored) {
             // Thread was interrupted to stop, normal control flow
@@ -127,7 +130,9 @@ public class SocketConnectionServerController implements Closeable {
                     lobbyController -> {
                         //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Should we stop it?
                         var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
-                        connection.lobbyControllerTask = CompletableFuture.runAsync(socketController, threadPool)
+                        connection.lobbyControllerTask = CompletableFuture
+                                .runAsync(ThreadPools.giveNameToTask(n -> n + "[" + nick + ":lobbyController]",
+                                        socketController), threadPool)
                                 .handle((__, ex) -> {
                                     if (ex == null)
                                         return __;
@@ -139,7 +144,9 @@ public class SocketConnectionServerController implements Closeable {
                     },
                     (serverPlayer, game) -> {
                         var socketController = new SocketServerGameController(socketManager, serverPlayer, game);
-                        connection.gameControllerTask = CompletableFuture.runAsync(socketController, threadPool)
+                        connection.gameControllerTask = CompletableFuture
+                                .runAsync(ThreadPools.giveNameToTask(n -> n + "[" + nick + ":gameController]",
+                                        socketController), threadPool)
                                 .handle((__, ex) -> {
                                     if (ex == null)
                                         return __;

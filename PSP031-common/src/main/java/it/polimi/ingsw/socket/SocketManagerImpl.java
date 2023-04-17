@@ -2,6 +2,7 @@ package it.polimi.ingsw.socket;
 
 import it.polimi.ingsw.socket.packets.AckPacket;
 import it.polimi.ingsw.socket.packets.Packet;
+import it.polimi.ingsw.utils.ThreadPools;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -81,8 +82,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         this.defaultResponseTimeout = defaultResponseTimeout;
         this.defaultResponseTimeoutUnit = defaultResponseTimeoutUnit;
 
-        recvTask = executor.submit(this::readLoop);
-        sendTask = executor.submit(this::writeLoop);
+        recvTask = executor.submit(ThreadPools.giveNameToTask(n -> n + "[socket-recv]", this::readLoop));
+        sendTask = executor.submit(ThreadPools.giveNameToTask(n -> n + "[socket-send]", this::writeLoop));
     }
 
     @Override
