@@ -41,24 +41,22 @@ public class ServerController {
     private final Set<ServerLobbyAndController<ServerLobby>> lobbies = ConcurrentHashMap.newKeySet();
 
     public ServerController(long pingInterval, TimeUnit pingIntervalUnit) {
-        this(Clock.systemUTC(), pingInterval, pingIntervalUnit, Executors.newSingleThreadScheduledExecutor(r -> {
-            var t = new Thread(r);
-            t.setName("ServerController-heartbeat-thread");
-            return t;
-        }));
+        this(Clock.systemUTC(), pingInterval, pingIntervalUnit);
     }
 
+    @SuppressWarnings("resource")
     public ServerController(Clock clock,
                             long pingInterval,
-                            TimeUnit pingIntervalUnit,
-                            ScheduledExecutorService scheduledExecutorService) {
+                            TimeUnit pingIntervalUnit) {
         this.clock = clock;
         this.heartbeatThreadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
                 .name("ServerController-heartbeat-thread-", 0)
                 .factory());
-        this.heartbeatTask = scheduledExecutorService.scheduleAtFixedRate(
-                this::detectDisconnectedPlayers,
-                0, pingInterval, pingIntervalUnit);
+        this.heartbeatTask = Executors.newSingleThreadScheduledExecutor(r -> {
+            var t = new Thread(r);
+            t.setName("ServerController-heartbeat-scheduler-thread");
+            return t;
+        }).scheduleAtFixedRate(this::detectDisconnectedPlayers, 0, pingInterval, pingIntervalUnit);
     }
 
     private void detectDisconnectedPlayers() {
