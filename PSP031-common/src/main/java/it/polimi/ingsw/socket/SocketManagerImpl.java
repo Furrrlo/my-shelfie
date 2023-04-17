@@ -8,6 +8,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -126,13 +127,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 log("Received packet: " + p);
                 inPacketQueue.add(p);
             } while (!Thread.currentThread().isInterrupted());
-        } catch (InterruptedIOException | ClosedByInterruptException e) {
-            // Go on, interruption is expected
-            // Signal to everybody who is waiting that the reading thread was interrupted
-            inPacketQueue.add(new InterruptedIOException().initCause(e));
         } catch (IOException e) {
-            // If the interruption flag was set, we got interrupted by close, so it's expected
-            if (Thread.currentThread().isInterrupted()) {
+            final boolean isTimeout = e instanceof SocketTimeoutException;
+
+            // If it's an interrupted exception or the interruption flag was set
+            if (!isTimeout && (e instanceof InterruptedIOException || e instanceof ClosedByInterruptException
+                    || Thread.currentThread().isInterrupted())) {
                 // Signal to everybody who is waiting that the reading thread was interrupted
                 inPacketQueue.add(new InterruptedIOException().initCause(e));
                 return;
