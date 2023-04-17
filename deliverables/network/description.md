@@ -19,9 +19,9 @@ If the player was already in a game and was disconnected, the server return the 
 
 ## Make move
 When a player make a move, a packet with a list of tiles and the column of the shelfie is sent.
-The server sent to all players two packet to update board and shelfie.
+Then the server sends to all players two packet to update board and shelfie.
 
-If it is not the turn of the player who made the move, He is probably playing with a modded client, so we disconnect him. 
+If it is not the turn of the player who made the move, he is probably playing with a modded client, so we disconnect him. 
 
 ## Common objective completion
 There is no difference between the client of the player who completed the goal and the others.
