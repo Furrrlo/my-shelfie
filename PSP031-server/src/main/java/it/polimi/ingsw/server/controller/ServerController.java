@@ -33,6 +33,7 @@ public class ServerController {
 
     private final Clock clock;
     private final ScheduledFuture<?> heartbeatTask;
+    private final ExecutorService heartbeatThreadPool;
 
     private final ConcurrentMap<String, HeartbeatHandler> heartbeats = new ConcurrentHashMap<>();
 
@@ -52,13 +53,18 @@ public class ServerController {
                             TimeUnit pingIntervalUnit,
                             ScheduledExecutorService scheduledExecutorService) {
         this.clock = clock;
+        this.heartbeatThreadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
+                .name("ServerController-heartbeat-thread-", 0)
+                .factory());
         this.heartbeatTask = scheduledExecutorService.scheduleAtFixedRate(
                 this::detectDisconnectedPlayers,
                 0, pingInterval, pingIntervalUnit);
     }
 
     private void detectDisconnectedPlayers() {
-        heartbeats.forEach((nick, heartbeatHandler) -> heartbeatHandler.sendHeartbeat(Instant.now(clock)));
+        heartbeats.forEach(
+                (nick, heartbeatHandler) -> heartbeatThreadPool
+                        .submit(() -> heartbeatHandler.sendHeartbeat(Instant.now(clock))));
     }
 
     @VisibleForTesting
