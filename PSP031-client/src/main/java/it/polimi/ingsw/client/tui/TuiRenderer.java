@@ -63,43 +63,49 @@ class TuiRenderer implements Closeable {
                 Prompt currPrompt = promptStack.peek();
 
                 String errorMsg = "";
-                if (evt instanceof SetSceneEvent sceneEvent) {
-                    scene = sceneEvent.scene();
-                } else if (evt instanceof SetPromptEvent promptEvent) {
-                    // Replace the current prompt with the new one
-                    promptStack.clear();
-                    promptStack.push(currPrompt = promptEvent.prompt());
-                } else if (evt instanceof InputEvent input) {
-                    Prompt.Result res;
-                    if (input.in().equalsIgnoreCase("B") &&
-                            currPrompt != null &&
-                            currPrompt.getParent() != null) {
-                        // Back, pop the last
-                        promptStack.pop();
-                        currPrompt = promptStack.peek();
-                    } else if (currPrompt == null) {
-                        // Not back, not a valid number, no prompt or not a valid choice
-                        errorMsg = "Invalid input " + input.in();
-                    } else if ((res = currPrompt.handleChoice(this, input.in())).type() == ChoicePrompt.ResultType.INVALID) {
-                        // Invalid choice
-                        var invalidResult = (Prompt.InvalidResult) res;
-                        errorMsg = invalidResult.errorMsg() == null ? "Invalid input " + input.in() : invalidResult.errorMsg();
-                    } else if (res.type() == ChoicePrompt.ResultType.PROMPT) {
+                switch (evt) {
+                    case RenderEvent ignored -> {
+                    }
+                    case SetSceneEvent sceneEvent -> scene = sceneEvent.scene();
+                    case SetPromptEvent promptEvent -> {
                         // Replace the current prompt with the new one
-                        var promptResult = (Prompt.PromptResult) res;
                         promptStack.clear();
-                        promptStack.push(currPrompt = promptResult.prompt());
-                        errorMsg = promptResult.errorMsg() == null ? errorMsg : promptResult.errorMsg();
-                    } else if (res.type() == ChoicePrompt.ResultType.SUBPROMPT) {
-                        // Add a new subprompt
-                        var promptResult = (Prompt.PromptResult) res;
-                        promptStack.push(currPrompt = promptResult.prompt());
-                        errorMsg = promptResult.errorMsg() == null ? errorMsg : promptResult.errorMsg();
-                    } else /* if(res.type() == Prompt.ResultType.DONE) */ {
-                        // Delete all until we get to the parent
-                        while (promptStack.size() > 1)
+                        promptStack.push(currPrompt = promptEvent.prompt());
+                    }
+                    case InputEvent input -> {
+                        Prompt.Result res;
+                        if (input.in().equalsIgnoreCase("B") &&
+                                currPrompt != null &&
+                                currPrompt.getParent() != null) {
+                            // Back, pop the last
                             promptStack.pop();
-                        currPrompt = promptStack.peek();
+                            currPrompt = promptStack.peek();
+                        } else if (currPrompt == null) {
+                            // Not back, not a valid number, no prompt or not a valid choice
+                            errorMsg = "Invalid input " + input.in();
+                        } else if ((res = currPrompt.handleChoice(this, input.in()))
+                                .type() == ChoicePrompt.ResultType.INVALID) {
+                            // Invalid choice
+                            var invalidResult = (Prompt.InvalidResult) res;
+                            errorMsg = invalidResult.errorMsg() == null ? "Invalid input " + input.in()
+                                    : invalidResult.errorMsg();
+                        } else if (res.type() == ChoicePrompt.ResultType.PROMPT) {
+                            // Replace the current prompt with the new one
+                            var promptResult = (Prompt.PromptResult) res;
+                            promptStack.clear();
+                            promptStack.push(currPrompt = promptResult.prompt());
+                            errorMsg = promptResult.errorMsg() == null ? errorMsg : promptResult.errorMsg();
+                        } else if (res.type() == ChoicePrompt.ResultType.SUBPROMPT) {
+                            // Add a new subprompt
+                            var promptResult = (Prompt.PromptResult) res;
+                            promptStack.push(currPrompt = promptResult.prompt());
+                            errorMsg = promptResult.errorMsg() == null ? errorMsg : promptResult.errorMsg();
+                        } else /* if(res.type() == Prompt.ResultType.DONE) */ {
+                            // Delete all until we get to the parent
+                            while (promptStack.size() > 1)
+                                promptStack.pop();
+                            currPrompt = promptStack.peek();
+                        }
                     }
                 }
 

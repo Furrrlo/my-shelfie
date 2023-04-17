@@ -23,19 +23,17 @@ public class SocketGameClientUpdater extends GameClientUpdater implements Runnab
         try {
             do {
                 try (var ctx = socketManager.receive(GameUpdaterPacket.class)) {
-                    final GameUpdaterPacket p = ctx.getPacket();
-                    if (p instanceof final UpdateBoardTilePacket packet) {
-                        updateBoardTile(packet.row(), packet.col(), packet.tile());
-                    } else if (p instanceof final UpdatePlayerShelfieTilePacket packet) {
-                        updatePlayerShelfieTile(packet.nick(), packet.row(), packet.col(), packet.tile());
-                    } else if (p instanceof final UpdateCurrentTurnPacket packet) {
-                        updateCurrentTurn(packet.nick());
-                    } else if (p instanceof final UpdateFirstFinisherPacket packet) {
-                        updateFirstFinisher(packet.nick());
-                    } else if (p instanceof final UpdateAchievedCommonGoalPacket packet) {
-                        updateAchievedCommonGoal(packet.commonGoalType(), packet.playersAchieved());
-                    } else {
-                        throw new IOException("Received unexpected packet " + p);
+                    switch (ctx.getPacket()) {
+                        case UpdateBoardTilePacket packet ->
+                            updateBoardTile(packet.row(), packet.col(), packet.tile());
+                        case UpdatePlayerShelfieTilePacket packet ->
+                            updatePlayerShelfieTile(packet.nick(), packet.row(), packet.col(), packet.tile());
+                        case UpdateCurrentTurnPacket packet ->
+                            updateCurrentTurn(packet.nick());
+                        case UpdateFirstFinisherPacket packet ->
+                            updateFirstFinisher(packet.nick());
+                        case UpdateAchievedCommonGoalPacket packet ->
+                            updateAchievedCommonGoal(packet.commonGoalType(), packet.playersAchieved());
                     }
                 }
             } while (!Thread.interrupted());

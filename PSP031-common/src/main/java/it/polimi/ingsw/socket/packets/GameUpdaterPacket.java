@@ -1,4 +1,9 @@
 package it.polimi.ingsw.socket.packets;
 
-public interface GameUpdaterPacket extends S2CPacket {
+public sealed interface GameUpdaterPacket extends S2CPacket permits
+                                          UpdateAchievedCommonGoalPacket,
+                                          UpdateBoardTilePacket,
+                                          UpdateCurrentTurnPacket,
+                                          UpdateFirstFinisherPacket,
+                                          UpdatePlayerShelfieTilePacket {
 }

@@ -30,17 +30,14 @@ public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supp
         try {
             do {
                 try (var ctx = socketManager.receive(LobbyUpdaterPacket.class)) {
-                    final LobbyUpdaterPacket p = ctx.getPacket();
-                    if (p instanceof UpdateJoinedPlayerPacket packet) {
-                        updateJoinedPlayers(packet.players());
-                    } else if (p instanceof UpdatePlayerReadyPacket packet) {
-                        updatePlayerReady(packet.nick(), packet.ready());
-                    } else if (p instanceof CreateGamePacket packet) {
-                        return (SocketGameClientUpdater) updateGame(new GameAndController<>(
-                                packet.game(),
-                                new SocketGameClientController(socketManager)));
-                    } else {
-                        throw new IOException("Received unexpected packet " + p);
+                    switch (ctx.getPacket()) {
+                        case UpdateJoinedPlayerPacket packet -> updateJoinedPlayers(packet.players());
+                        case UpdatePlayerReadyPacket packet -> updatePlayerReady(packet.nick(), packet.ready());
+                        case CreateGamePacket packet -> {
+                            return (SocketGameClientUpdater) updateGame(new GameAndController<>(
+                                    packet.game(),
+                                    new SocketGameClientController(socketManager)));
+                        }
                     }
                 }
             } while (!Thread.interrupted());
