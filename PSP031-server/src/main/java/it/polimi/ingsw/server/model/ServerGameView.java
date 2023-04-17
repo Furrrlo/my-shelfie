@@ -11,44 +11,30 @@ import java.util.List;
 
 public interface ServerGameView {
 
-    /**
-     * @return game ID
-     */
+    /** Returns the game ID */
     int getGameID();
 
-    /**
-     * @return playing board
-     */
+    /** Returns the playing board */
     BoardView getBoard();
 
-    /**
-     * @return list tiles in the bag
-     */
+    /** Returns the list tiles in the bag */
     @UnmodifiableView
     List<Tile> getBagView();
 
-    /**
-     * @return list of players
-     */
+    /** Returns the list of players */
     @Unmodifiable
     List<? extends ServerPlayerView> getPlayers();
 
     /** Returns the player who has started his turn first */
     ServerPlayerView getStartingPlayer();
 
-    /**
-     * @return player whose now playing
-     */
+    /** Returns the player whose now playing */
     Provider<? extends ServerPlayerView> currentTurn();
 
-    /**
-     * @return list of common goals of the game
-     */
+    /** Returns the list of common goals of the game */
     @Unmodifiable
     List<? extends ServerCommonGoalView> getCommonGoals();
 
-    /**
-     * @return first player compleating his shelfie
-     */
+    /** Return first player completing his shelfie */
     Provider<? extends @Nullable ServerPlayerView> firstFinisher();
 }

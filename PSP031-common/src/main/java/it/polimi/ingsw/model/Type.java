@@ -447,7 +447,7 @@ public enum Type implements Serializable {
     };
 
     /**
-     * @return true if the common goal of given type is achieved
+     * Returns true if the common goal of given type is achieved
      **/
     public abstract boolean checkCommonGoal(Shelfie shelfie);
 

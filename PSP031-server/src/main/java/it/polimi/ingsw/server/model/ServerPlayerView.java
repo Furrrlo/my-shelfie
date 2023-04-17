@@ -6,22 +6,18 @@ import it.polimi.ingsw.model.ShelfieView;
 
 public interface ServerPlayerView {
 
-    /**
-     * @return player's nick
-     */
+    /** Returns the player's nick */
     String getNick();
 
-    /**
-     * @return shelfie as matrix of tiles
-     */
+    /** Return the shelfie as matrix of tiles */
     ShelfieView getShelfie();
 
-    /**
-     * @return personal goal
-     */
+    /** Returns personal goal */
     PersonalGoal getPersonalGoal();
 
+    /** Returns true if the player is connected */
     Provider<Boolean> connected();
 
+    /** Returns the player current score */
     Provider<Integer> score();
 }

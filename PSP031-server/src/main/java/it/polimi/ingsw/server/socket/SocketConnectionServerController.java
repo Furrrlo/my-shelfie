@@ -72,6 +72,7 @@ public class SocketConnectionServerController implements Closeable {
                 ThreadPools.giveNameToTask("SocketConnectionServerController-accept-thread", this::acceptConnectionsLoop));
     }
 
+    @SuppressWarnings("FutureReturnValueIgnored") // We don't need to keep track of it as we shut down everything together
     private void acceptConnectionsLoop() {
         try {
             do {
