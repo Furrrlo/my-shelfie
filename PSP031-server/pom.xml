@@ -23,4 +23,22 @@
             <artifactId>PSP031-common</artifactId>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>run-server</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>it.polimi.ingsw.server.Main</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
