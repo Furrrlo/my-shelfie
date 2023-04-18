@@ -1,6 +1,7 @@
 # Project for the course "software engineering" at Politecnico di Milano, academic year 2022/2023
 
-See specs [here](docs/Requisiti.pdf)
+See specs [here](docs/Requisiti.pdf) and the rules 
+([ita](docs/MyShelfie_Rulebook_ITA.pdf) and [eng](docs/MyShelfie_Rulebook_ENG.pdf))
 
 For documentation regarding the architecture see the [deliverables folder](deliverables)
 
