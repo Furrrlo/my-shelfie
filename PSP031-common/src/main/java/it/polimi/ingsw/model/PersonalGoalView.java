@@ -20,9 +20,6 @@ public interface PersonalGoalView extends Serializable {
     @Nullable
     Tile get(int r, int c);
 
-    @Nullable
-    Tile[][] getPersonalGoal();
-
     void printPersonalGoal();
 
     void printPersonalGoalOnShelfie(Shelfie shelfie);

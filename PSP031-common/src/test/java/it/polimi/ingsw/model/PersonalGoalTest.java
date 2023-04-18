@@ -88,10 +88,4 @@ class PersonalGoalTest {
         });
         assertFalse(p2.achievedPersonalGoal(shelfie));
     }
-
-    @Test
-    void getPersonalGoal() {
-        PersonalGoal p1 = new PersonalGoal(1);
-        p1.getPersonalGoal();
-    }
 }

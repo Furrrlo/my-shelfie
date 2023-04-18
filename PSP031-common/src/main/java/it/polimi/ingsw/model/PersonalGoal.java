@@ -13,7 +13,7 @@ public class PersonalGoal implements PersonalGoalView {
     private final int index;
 
     /** Immutable list containing all possible personal goals assignable to players */
-    public static List<Color[][]> personalGoals = List.of(new Color[][] {
+    public static final List<PersonalGoal> PERSONAL_GOALS = List.of(new PersonalGoal(0, new Color[][] {
             //@formatter:off
             new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
@@ -22,7 +22,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , null           , null           , null           , Color.GREEN    },
             new Color[]{Color.PINK     , null           , Color.BLUE     , null           , null           },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(1, new Color[][] {
             //@formatter:off
             new Color[]{null           , null           , null           , null           , Color.BLUE     },
             new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
@@ -31,7 +31,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , Color.PINK     , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
             //@formatter:on 
-    }, new Color[][] {
+    }), new PersonalGoal(2, new Color[][] {
             //@formatter:off
             new Color[]{Color.YELLOW   , null           , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
@@ -40,7 +40,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{Color.BLUE     , null           , null           , Color.ORANGE   , null           }, 
             new Color[]{null           , null           , null           , null           , null           },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(3, new Color[][] {
         //@formatter:off
         new Color[]{null           , null           , null           , null           , null           },
                 new Color[]{null           , Color.YELLOW   , Color.GREEN    , null           , null           },
@@ -49,7 +49,7 @@ public class PersonalGoal implements PersonalGoalView {
                 new Color[]{null           , null           , null           , null           , null           },
                 new Color[]{null           , null           , null           , null           , Color.ORANGE   },
         //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(4, new Color[][] {
             //@formatter:off
             new Color[]{Color.ORANGE   , null           , null           , Color.GREEN    , null           },
             new Color[]{null           , null           , null           , null           , Color.PINK     },
@@ -58,7 +58,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , Color.LIGHTBLUE, null           , null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(5, new Color[][] {
             //@formatter:off
             new Color[]{Color.PINK     , null           , null           , null           , null           },
             new Color[]{null           , Color.ORANGE   , null           , Color.BLUE     , null           },
@@ -67,7 +67,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , null           , null           , null           , null           },
             new Color[]{null           , null           , Color.LIGHTBLUE, null           , Color.GREEN    },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(6, new Color[][] {
             //@formatter:off
             new Color[]{null           , null           , Color.YELLOW   , null           , null           },
             new Color[]{null           , null           , null           , null           , Color.ORANGE   },
@@ -76,7 +76,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , null           , null           , Color.BLUE     , null           },
             new Color[]{Color.GREEN    , null           , null           , null           , null           },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(7, new Color[][] {
             //@formatter:off
             new Color[]{null           , null           , null           , Color.ORANGE   , null           },
             new Color[]{null           , null           , null           , Color.YELLOW   , null           },
@@ -85,7 +85,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , Color.GREEN    , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , Color.BLUE     },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(8, new Color[][] {
             //@formatter:off
             new Color[]{Color.BLUE     , null           , null           , null           , null           },
             new Color[]{null           , Color.LIGHTBLUE, null           , null           , Color.PINK     },
@@ -94,7 +94,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , null           , null           , null           , null           },
             new Color[]{null           , null           , Color.ORANGE   , null           , null           },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(9, new Color[][] {
             //@formatter:off
             new Color[]{null           , null           , null           , Color.PINK     , null           },
             new Color[]{null           , Color.BLUE     , null           , null           , null           },
@@ -103,7 +103,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , Color.ORANGE   , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , Color.LIGHTBLUE},
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(10, new Color[][] {
             //@formatter:off
             new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
             new Color[]{null           , null           , null           , null           , Color.GREEN    },
@@ -112,7 +112,7 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , Color.YELLOW   , null           , null           , null           },
             new Color[]{null           , null           , Color.PINK     , null           , null           },
             //@formatter:on
-    }, new Color[][] {
+    }), new PersonalGoal(11, new Color[][] {
             //@formatter:off
             new Color[]{Color.GREEN    , null           , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , Color.ORANGE   },
@@ -121,10 +121,25 @@ public class PersonalGoal implements PersonalGoalView {
             new Color[]{null           , Color.PINK     , null           , null           , null           },
             new Color[]{null           , null           , Color.YELLOW   , null           , null           },
             //@formatter:on
-    });
+    }));
+
+    private PersonalGoal(int index, @Nullable Color[][] personalGoal) {
+        this(index, colorToTiles(personalGoal));
+    }
+
+    /** returns a matrix of Tile[][] from a given matrix of Color[][] passed as parameter */
+    @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
+    private static @Nullable Tile[][] colorToTiles(@Nullable Color[][] tiles) {
+        return Arrays.stream(tiles)
+                .map(row -> Arrays.stream(row)
+                        .map(color -> color == null ? null
+                                : new Tile(color))
+                        .toArray(Tile[]::new))
+                .toArray(Tile[][]::new);
+    }
 
     @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
-    public PersonalGoal(@Nullable Tile[][] personalGoal) {
+    private PersonalGoal(int index, @Nullable Tile[][] personalGoal) {
         if (personalGoal.length != ROWS)
             throw new IllegalArgumentException("Provided shelf combination has the wrong row size");
         for (int row = 0; row < personalGoal.length; row++) {
@@ -132,7 +147,7 @@ public class PersonalGoal implements PersonalGoalView {
                 throw new IllegalArgumentException("Provided shelf combination has the wrong column size at row " + row);
         }
         this.personalGoal = personalGoal;
-        this.index = -1;
+        this.index = index;
     }
 
     /**
@@ -142,14 +157,13 @@ public class PersonalGoal implements PersonalGoalView {
      * @param index : specifies the index of the personalGoals list from which to extract the personalGoal
      */
     public PersonalGoal(int index) {
-        this.personalGoal = colorToTiles(personalGoals.get(index));
-        this.index = index;
+        this(index, PERSONAL_GOALS.get(index).personalGoal);
     }
 
     /** prints the shelfie corresponding to the personal goal whose calling the method */
     @Override
     public void printPersonalGoal() {
-        Shelfie shelfie = new Shelfie(personalGoals.get(this.index));
+        Shelfie shelfie = new Shelfie(PERSONAL_GOALS.get(this.index).personalGoal);
         System.out.println("PERSONAL GOAL : " + this.index);
         shelfie.printColoredShelfie();
     }
@@ -157,7 +171,7 @@ public class PersonalGoal implements PersonalGoalView {
     /** returns true if the shelfie passed as a parameter corresponds to the tiles of the commonGoal */
     @Override
     public boolean achievedPersonalGoal(Shelfie shelfie) {
-        if (new Shelfie(personalGoals.get(this.index)).isOverlapping(shelfie)) {
+        if (new Shelfie(PERSONAL_GOALS.get(this.index).personalGoal).isOverlapping(shelfie)) {
             this.printPersonalGoalOnShelfie(shelfie);
             return true;
         } else
@@ -178,23 +192,6 @@ public class PersonalGoal implements PersonalGoalView {
                     checked[r][c] = count;
                 }
         Type.SIX_COUPLES.printCommonGoal(shelfie, checked, "Congratulation you achieved PERSONAL GOAL");
-    }
-
-    @Override
-    @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
-    public @Nullable Tile[][] getPersonalGoal() {
-        return personalGoal;
-    }
-
-    /** returns a matrix of Tile[][] from a given matrix of Color[][] passed as parameter */
-    @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
-    public @Nullable Tile[][] colorToTiles(@Nullable Color[][] tiles) {
-        return Arrays.stream(tiles)
-                .map(row -> Arrays.stream(row)
-                        .map(color -> color == null ? null
-                                : new Tile(color))
-                        .toArray(Tile[]::new))
-                .toArray(Tile[][]::new);
     }
 
     @Override

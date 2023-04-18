@@ -75,7 +75,7 @@ public class LobbyServerController {
                         .map(n -> new ServerPlayer(
                                 n.getNick(),
                                 // TODO: extract personal goal randomly
-                                new PersonalGoal(new Tile[6][5]),
+                                new PersonalGoal(1),
                                 p -> new ScoreProvider(p, commonGoals, firstFinisher)))
                         .collect(Collectors.toList()),
                 players.size() - 1, // TODO: choose who starts randomly
