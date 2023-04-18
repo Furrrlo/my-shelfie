@@ -9,6 +9,7 @@ import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.ConsoleColors;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
+import org.fusesource.jansi.AnsiConsole;
 
 import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
@@ -22,9 +23,9 @@ public class TuiMain {
         //@see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
         //System.setProperty("java.rmi.server.hostname", "<client address>");
-
+        AnsiConsole.systemInstall();
         new TuiRenderer(
-                System.out,
+                AnsiConsole.out(),
                 System.in,
                 new ChoicePrompt(
                         "Which network protocol do you want to use?",
