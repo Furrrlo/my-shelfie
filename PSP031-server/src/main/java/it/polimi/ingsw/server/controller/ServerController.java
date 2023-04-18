@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class ServerController implements Closeable {
 
     private final Clock clock;
-    private final ScheduledFuture<?> heartbeatTask;
+    private final ScheduledExecutorService heartbeatExecutor;
     private final ExecutorService heartbeatThreadPool;
 
     private final ConcurrentMap<String, HeartbeatHandler> heartbeats = new ConcurrentHashMap<>();
@@ -45,7 +45,6 @@ public class ServerController implements Closeable {
         this(Clock.systemUTC(), pingInterval, pingIntervalUnit);
     }
 
-    @SuppressWarnings("resource")
     public ServerController(Clock clock,
                             long pingInterval,
                             TimeUnit pingIntervalUnit) {
@@ -53,16 +52,17 @@ public class ServerController implements Closeable {
         this.heartbeatThreadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
                 .name("ServerController-heartbeat-thread-", 0)
                 .factory());
-        this.heartbeatTask = Executors.newSingleThreadScheduledExecutor(r -> {
-            var t = new Thread(r);
-            t.setName("ServerController-heartbeat-scheduler-thread");
-            return t;
-        }).scheduleAtFixedRate(this::detectDisconnectedPlayers, 0, pingInterval, pingIntervalUnit);
+        this.heartbeatExecutor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+                .name("ServerController-heartbeat-scheduler-thread")
+                .factory());
+        this.heartbeatExecutor.scheduleAtFixedRate(
+                this::detectDisconnectedPlayers,
+                0, pingInterval, pingIntervalUnit);
     }
 
     @Override
     public void close() {
-        heartbeatTask.cancel(true);
+        heartbeatExecutor.shutdown();
         heartbeatThreadPool.shutdown();
     }
 
