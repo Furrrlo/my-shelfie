@@ -42,6 +42,7 @@ public class Main {
 
             System.out.println("Press enter to exit");
             System.in.read();
+            System.out.println("Stopping...");
         }
     }
 }
