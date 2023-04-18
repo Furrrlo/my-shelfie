@@ -224,7 +224,7 @@ public class PersonalGoal implements PersonalGoalView {
     @Override
     public String toString() {
         return "PersonalGoal{" +
-                "personalGoal=" + Arrays.toString(personalGoal) +
+                "personalGoal=" + Arrays.deepToString(personalGoal) +
                 '}';
     }
 }

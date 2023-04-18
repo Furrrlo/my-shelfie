@@ -136,7 +136,7 @@ public class Shelfie implements ShelfieView {
     @Override
     public String toString() {
         return "Shelfie{" +
-                "shelfie=" + Arrays.toString(shelfie) +
+                "shelfie=" + Arrays.deepToString(shelfie) +
                 '}';
     }
 }

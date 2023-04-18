@@ -43,4 +43,12 @@ class MappedProvider<P, T> implements Provider<T>, Serializable {
     private static <P, T, T1> SerializableFunction<P, T1> concat(Function<P, T> before, Function<T, T1> after) {
         return t -> after.apply(before.apply(t));
     }
+
+    @Override
+    public String toString() {
+        return "MappedProvider{" +
+                "mapper=" + mapper +
+                ", registeredObservers=" + registeredObservers +
+                '}';
+    }
 }

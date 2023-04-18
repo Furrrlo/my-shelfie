@@ -81,7 +81,7 @@ public class Board implements BoardView {
     @Override
     public String toString() {
         return "Board{" +
-                "board=" + Arrays.toString(board) +
+                "board=" + Arrays.deepToString(board) +
                 ", invalidTile=" + invalidTile +
                 '}';
     }
