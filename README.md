@@ -13,6 +13,7 @@ See [here](CODE_STYLE.md)
 Execute the compile lifecycle and specify either the `run-server` or `run-client` profile
 
 ```shell
+mvn compile -Prun-client
 mvn compile -Prun-server
 ```
 
@@ -25,8 +26,14 @@ mvn package
 ```
 
 The built jars can be found in `PSP031-client/target` and `PSP031-server/target`.
-To run either of them:
+To run the client:
 
 ```shell
-java --enable-preview -jar PSP031-client-1.0-SNAPSHOT.jar
+java -jar PSP031-client-1.0-SNAPSHOT.jar
+```
+
+To run the server (it requires preview features):
+
+```shell
+java --enable-preview -jar PSP031-server-1.0-SNAPSHOT.jar
 ```

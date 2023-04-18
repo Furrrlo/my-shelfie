@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClientSocketManagerImpl
         extends SocketManagerImpl<S2CPacket, S2CAckPacket, C2SAckPacket, C2SPacket>
@@ -44,9 +46,17 @@ public class ClientSocketManagerImpl
     }
 
     private static ExecutorService createDefaultExecutor() {
-        return Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
-                .name("ClientSocketManagerImpl-socket-thread-", 0)
-                .factory());
+        return Executors.newFixedThreadPool(2, new ThreadFactory() {
+
+            private final AtomicInteger threadNum = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                var th = new Thread(r);
+                th.setName("ClientSocketManagerImpl-thread-" + threadNum.getAndIncrement());
+                return th;
+            }
+        });
     }
 
     @Override
