@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.List;
+
+import it.polimi.ingsw.BoardCoord;
 
 /**
  * @implNote Java Serialization automatically takes care of keeping multiple references to a single object
@@ -29,7 +32,7 @@ public class Board implements BoardView {
     }
 
     private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers) {
-        return new Tile[20][20]; // TODO: generate based on number of players
+        return new Tile[9][9]; // TODO: generate based on number of players
     }
 
     @Override
@@ -82,5 +85,68 @@ public class Board implements BoardView {
                 "board=" + Arrays.toString(board) +
                 ", invalidTile=" + invalidTile +
                 '}';
+    }
+
+    public boolean checkBoardCoord(List<BoardCoord> selected) throws IndexOutOfBoundsException{
+       // TODO: insert excpetions
+        for (BoardCoord coord:selected)  {
+           if (!hasFreeSide(coord.row(), coord.col())) {
+            return false;                 
+                }
+            if (tile(coord.row(),coord.col()).get()==null){
+                return false;
+            }
+        }
+    
+        if (selected.size()==1){
+            return true;
+            }
+        if (selected.size()==2){
+            return hasCommonSide(selected.get(0).row(),selected.get(0).col(),selected.get(1).row(), selected.get(1).col());
+            }
+        if (selected.size()==3){
+            return hasCommonSide(selected.get(0).row(), selected.get(0).col(), selected.get(1).row(), selected.get(1).col(),selected.get(2).row(), selected.get(2).col());
+            }
+        return true;
+
+    }
+
+    public boolean hasFreeSide(int row, int col){
+        if (Objects.equals(tile(row+1,col),invalidTile )){
+            return true;
+        }
+        if (Objects.equals(tile(row-1,col),invalidTile )){
+            return true;
+        }
+        if (Objects.equals(tile(row,col+1),invalidTile )){
+            return true;
+        }
+        if (Objects.equals(tile(row,col-1),invalidTile )){
+            return true;
+        }
+        return false;
+
+    }
+
+    public boolean hasCommonSide(int row0, int col0, int row1, int col1){
+        if (row0==row1 && (col1==col0+1 || col1==col0-1)){
+            return true;
+        }
+        if (col0==col1 && (row1==row0+1 || row1==row0-1)){
+            return true;
+        } 
+
+       return false;
+
+    }
+
+    public boolean hasCommonSide(int row0, int col0, int row1, int col1, int row2, int col2){
+        if (row0==row1 && row1==row2 || col0==col1 && col1==col2){
+            return  hasCommonSide(row0, col0, row1, col1) && hasCommonSide(row1, col1, row2, col2) ||
+                    hasCommonSide(row0, col0, row2, col2) && hasCommonSide(row1, col1, row2, col2) ||
+                    hasCommonSide(row1, col1, row0, col0) && hasCommonSide(row0, col0, row2, col2); 
+        }
+        return false;
+
     }
 }

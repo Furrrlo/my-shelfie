@@ -25,10 +25,12 @@ public class GameServerController {
         }
     }
 
-    public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
+    public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) throws IllegalArgumentException  {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
-            // TODO:
+            
+                
+            
         }
     }
 }
