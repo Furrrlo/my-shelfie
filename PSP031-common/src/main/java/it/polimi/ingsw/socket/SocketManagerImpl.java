@@ -186,7 +186,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         final CompletableFuture<Void> hasSent = new CompletableFuture<>();
         log("Sending " + toSend + "...");
         outPacketQueue.add(new QueuedOutput(toSend, hasSent));
-        System.out.println(outPacketQueue.size());
+        log(String.valueOf(outPacketQueue.size()));
         return hasSent;
     }
 
