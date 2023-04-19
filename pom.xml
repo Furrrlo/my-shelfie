@@ -200,6 +200,11 @@
                 </executions>
                 <configuration>
                     <propertyName>jacocoArgLine</propertyName>
+                    <excludes>
+                        <exclude>org/checkerframework/framework/qual/**/*</exclude>
+                        <exclude>it/polimi/ingsw/client/tui/**/*</exclude>
+                        <exclude>it/polimi/ingsw/server/Main.*</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
