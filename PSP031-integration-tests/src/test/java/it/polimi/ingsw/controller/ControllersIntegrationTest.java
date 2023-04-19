@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.Arguments;
 
 import java.io.Closeable;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -66,7 +67,7 @@ public class ControllersIntegrationTest {
             try (var lobbyCloseable = lockedServerLobby.use()) {
                 var serverLobby = lobbyCloseable.obj();
                 serverLobby.game().set(new ServerGameAndController<>(
-                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get()),
+                        serverGame = LobbyServerController.createGame(0, new Random(), serverLobby.joinedPlayers().get()),
                         new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock())) {
                             @Override
                             public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {

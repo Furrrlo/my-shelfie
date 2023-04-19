@@ -114,7 +114,7 @@ public class UpdatersIntegrationTest {
             final ServerGame serverGame;
             try (var ignored1 = lockedServerLobby.use()) {
                 serverLobby.game().set(new ServerGameAndController<>(
-                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get()),
+                        serverGame = LobbyServerController.createGame(0, new Random(), serverLobby.joinedPlayers().get()),
                         new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock()))));
             }
 

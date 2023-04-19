@@ -7,6 +7,8 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
 public class LobbyServerController {
@@ -51,7 +53,7 @@ public class LobbyServerController {
                     .orElseThrow(() -> new IllegalStateException("Somehow missing the player " + nick));
             lobbyPlayer.ready().set(ready);
             if (lobbyPlayers.size() > 1 && lobbyPlayers.stream().allMatch(p -> p.ready().get())) {
-                final ServerGame game = createGame(0, lobbyPlayers);
+                final ServerGame game = createGame(0, new Random(), lobbyPlayers);
                 use.obj().game().set(new ServerGameAndController<>(game,
                         new GameServerController(new LockProtected<>(game, lockedLobby.getLock()))));
             }
@@ -59,7 +61,9 @@ public class LobbyServerController {
     }
 
     @VisibleForTesting
-    public static ServerGame createGame(int gameId, List<LobbyPlayer> lobbyPlayers) {
+    public static ServerGame createGame(int gameId,
+                                        RandomGenerator random,
+                                        List<LobbyPlayer> lobbyPlayers) {
         System.out.println("game started");
         final var firstFinisher = SerializableProperty.<ServerPlayer> nullableProperty(null);
         // TODO: extract 2 common goals randomly
