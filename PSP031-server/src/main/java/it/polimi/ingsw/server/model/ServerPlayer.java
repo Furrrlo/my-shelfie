@@ -62,12 +62,13 @@ public class ServerPlayer implements ServerPlayerView {
         return nick.equals(that.nick) &&
                 shelfie.equals(that.shelfie) &&
                 personalGoal.equals(that.personalGoal) &&
-                connected.get().equals(that.connected.get());
+                connected.get().equals(that.connected.get()) &&
+                score.get().equals(that.score.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nick, shelfie, personalGoal, connected.get());
+        return Objects.hash(nick, shelfie, personalGoal, connected.get(), score.get());
     }
 
     @Override

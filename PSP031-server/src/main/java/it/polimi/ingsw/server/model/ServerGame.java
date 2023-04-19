@@ -99,15 +99,16 @@ public class ServerGame implements ServerGameView {
         return gameID == that.gameID &&
                 board.equals(that.board) &&
                 bag.equals(that.bag) &&
-                players.equals(that.players) &&
+                startingPlayer.equals(that.startingPlayer) &&
                 currentTurn.get().equals(that.currentTurn.get()) &&
                 commonGoal.equals(that.commonGoal) &&
-                Objects.equals(firstFinisher.get(), that.firstFinisher.get());
+                Objects.equals(firstFinisher.get(), that.firstFinisher.get()) &&
+                players.equals(that.players);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameID, board, bag, players, currentTurn.get(), commonGoal, firstFinisher.get());
+        return Objects.hash(gameID, board, bag, players, startingPlayer, currentTurn.get(), commonGoal, firstFinisher.get());
     }
 
     @Override
@@ -117,6 +118,7 @@ public class ServerGame implements ServerGameView {
                 ", board=" + board +
                 ", bag=" + bag +
                 ", players=" + players +
+                ", startingPlayer=" + startingPlayer +
                 ", currentTurn=" + currentTurn +
                 ", commonGoal=" + commonGoal +
                 ", firstFinisher=" + firstFinisher +
