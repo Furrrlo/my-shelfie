@@ -42,6 +42,16 @@ public abstract class GameClientUpdater implements GameUpdater {
     }
 
     @Override
+    public void updatePlayerConnected(String nick, boolean connected) {
+        findPlayerBy(nick).connected().set(connected);
+    }
+
+    @Override
+    public void updatePlayerScore(String nick, int score) {
+        findPlayerBy(nick).score().set(score);
+    }
+
+    @Override
     public void updateCurrentTurn(String nick) {
         game.currentTurn().set(findPlayerBy(nick));
     }

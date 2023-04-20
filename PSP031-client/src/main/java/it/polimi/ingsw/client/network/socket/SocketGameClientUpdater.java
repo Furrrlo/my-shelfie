@@ -34,6 +34,10 @@ public class SocketGameClientUpdater extends GameClientUpdater implements Runnab
                             updateFirstFinisher(packet.nick());
                         case UpdateAchievedCommonGoalPacket packet ->
                             updateAchievedCommonGoal(packet.commonGoalType(), packet.playersAchieved());
+                        case UpdatePlayerConnectedPacket packet ->
+                            updatePlayerConnected(packet.nick(), packet.connected());
+                        case UpdatePlayerScorePacket packet ->
+                            updatePlayerScore(packet.nick(), packet.score());
                     }
                 }
             } while (!Thread.interrupted());

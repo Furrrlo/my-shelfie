@@ -17,6 +17,10 @@ public interface RmiGameUpdater extends Remote {
 
     void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) throws RemoteException;
 
+    void updatePlayerConnected(String nick, boolean connected) throws RemoteException;
+
+    void updatePlayerScore(String nick, int score) throws RemoteException;
+
     void updateCurrentTurn(String nick) throws RemoteException;
 
     void updateFirstFinisher(@Nullable String nick) throws RemoteException;
@@ -39,6 +43,16 @@ public interface RmiGameUpdater extends Remote {
         @Override
         public void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) throws DisconnectedException {
             adapt(() -> updater.updatePlayerShelfieTile(nick, row, col, tile));
+        }
+
+        @Override
+        public void updatePlayerConnected(String nick, boolean connected) throws DisconnectedException {
+            adapt(() -> updater.updatePlayerConnected(nick, connected));
+        }
+
+        @Override
+        public void updatePlayerScore(String nick, int score) throws DisconnectedException {
+            adapt(() -> updater.updatePlayerScore(nick, score));
         }
 
         @Override

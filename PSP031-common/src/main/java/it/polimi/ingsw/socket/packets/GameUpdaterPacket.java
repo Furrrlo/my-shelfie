@@ -5,5 +5,7 @@ public sealed interface GameUpdaterPacket extends S2CPacket permits
                                           UpdateBoardTilePacket,
                                           UpdateCurrentTurnPacket,
                                           UpdateFirstFinisherPacket,
-                                          UpdatePlayerShelfieTilePacket {
+                                          UpdatePlayerShelfieTilePacket,
+                                          UpdatePlayerConnectedPacket,
+                                          UpdatePlayerScorePacket {
 }

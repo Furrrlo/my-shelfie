@@ -46,7 +46,7 @@ public class Player implements PlayerView {
     }
 
     @Override
-    public Provider<Boolean> connected() {
+    public Property<Boolean> connected() {
         return connected;
     }
 
@@ -61,7 +61,7 @@ public class Player implements PlayerView {
     }
 
     @Override
-    public Provider<Integer> score() {
+    public Property<Integer> score() {
         return score;
     }
 

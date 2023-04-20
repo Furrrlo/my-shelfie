@@ -325,13 +325,17 @@ public class ServerController implements Closeable {
         // Register all listeners to the game model
         game.getBoard().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),
                 tile -> gameUpdater.updateBoardTile(tileAndCoords.row(), tileAndCoords.col(), tile)));
-        game.getPlayers().forEach(p -> p.getShelfie().tiles()
-                .forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),
-                        tile -> gameUpdater.updatePlayerShelfieTile(
-                                p.getNick(),
-                                tileAndCoords.row(),
-                                tileAndCoords.col(),
-                                tile))));
+        game.getPlayers().forEach(p -> {
+            observableTracker.registerObserver(p.connected(),
+                    connected -> gameUpdater.updatePlayerConnected(p.getNick(), connected));
+            observableTracker.registerObserver(p.score(), score -> gameUpdater.updatePlayerScore(p.getNick(), score));
+            p.getShelfie().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),
+                    tile -> gameUpdater.updatePlayerShelfieTile(
+                            p.getNick(),
+                            tileAndCoords.row(),
+                            tileAndCoords.col(),
+                            tile)));
+        });
         observableTracker.registerObserver(game.currentTurn(), p -> gameUpdater.updateCurrentTurn(p.getNick()));
         observableTracker.registerObserver(game.firstFinisher(),
                 p -> gameUpdater.updateFirstFinisher(p == null ? null : p.getNick()));

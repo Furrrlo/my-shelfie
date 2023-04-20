@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UpdatersIntegrationTest {
 
+    @SuppressWarnings("NullAway")
     public static void doTestUpdaters(Function<ServerController, Closeable> bindServerController,
                                       Supplier<ClientNetManager> clientNetManagerFactory)
             throws Exception {
@@ -142,13 +143,12 @@ public class UpdatersIntegrationTest {
                 final var serverPlayer = serverGame.getPlayers().get(i);
                 final var clientPlayer = clientGame.getPlayers().get(i);
 
-                // TODO:
-                // ensurePropertyUpdated(
-                //         serverPlayer.getNick() + ".connected",
-                //         true,
-                //         serverController,
-                //         serverPlayer.connected(),
-                //         clientPlayer.connected());
+                ensurePropertyUpdated(
+                        serverPlayer.getNick() + ".connected",
+                        true,
+                        serverController,
+                        serverPlayer.connected(),
+                        clientPlayer.connected());
                 ensurePropertyUpdated(
                         serverPlayer.getNick() + ".isCurrentTurn",
                         serverPlayer,
@@ -163,6 +163,15 @@ public class UpdatersIntegrationTest {
                         serverController,
                         serverGame.firstFinisher(),
                         clientPlayer.isFirstFinisher());
+                // Force a score update by resetting and then setting the player as firstFinisher
+                serverController.runOnOnlyLobbyLocks(() -> setFirstFinisherToNull(serverGame.firstFinisher()));
+                ensurePropertyUpdated(
+                        serverPlayer.getNick() + ".score",
+                        serverPlayer,
+                        clientPlayer.score().get() + 1,
+                        serverController,
+                        serverGame.firstFinisher(),
+                        clientPlayer.score());
 
                 for (var tile : (Iterable<TileAndCoords<Property<@Nullable Tile>>>) serverPlayer.getShelfie().tiles()::iterator)
                     ensurePropertyUpdated(
@@ -194,6 +203,11 @@ public class UpdatersIntegrationTest {
                         clientCommonGoal.achieved());
             }
         }
+    }
+
+    @SuppressWarnings("NullAway") // NullAway doesn't handle generics correctly
+    private static void setFirstFinisherToNull(Property<@Nullable ServerPlayer> firstFinisher) {
+        firstFinisher.set(null);
     }
 
     public static <T> void ensurePropertyUpdated(String name,

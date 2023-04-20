@@ -13,6 +13,10 @@ public interface GameUpdater {
 
     void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) throws DisconnectedException;
 
+    void updatePlayerConnected(String nick, boolean connected) throws DisconnectedException;
+
+    void updatePlayerScore(String nick, int score) throws DisconnectedException;
+
     void updateCurrentTurn(String nick) throws DisconnectedException;
 
     void updateFirstFinisher(@Nullable String nick) throws DisconnectedException;

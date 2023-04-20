@@ -36,6 +36,24 @@ public class SocketServerGameUpdater implements GameUpdater {
     }
 
     @Override
+    public void updatePlayerConnected(String nick, boolean connected) throws DisconnectedException {
+        try {
+            socketManager.send(new UpdatePlayerConnectedPacket(nick, connected));
+        } catch (IOException e) {
+            throw new DisconnectedException(e);
+        }
+    }
+
+    @Override
+    public void updatePlayerScore(String nick, int score) throws DisconnectedException {
+        try {
+            socketManager.send(new UpdatePlayerScorePacket(nick, score));
+        } catch (IOException e) {
+            throw new DisconnectedException(e);
+        }
+    }
+
+    @Override
     public void updateCurrentTurn(String nick) throws DisconnectedException {
         try {
             socketManager.send(new UpdateCurrentTurnPacket(nick));
