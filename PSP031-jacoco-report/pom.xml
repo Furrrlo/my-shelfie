@@ -58,4 +58,60 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>detailed-coverage</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>detailed-coverage</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>report-aggregate-model</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate-model</outputDirectory>
+                                    <includes>
+                                        <include>it/polimi/ingsw/model/**/*</include>
+                                        <include>it/polimi/ingsw/server/model/**/*</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report-aggregate-controller</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate-controller</outputDirectory>
+                                    <includes>
+                                        <include>it/polimi/ingsw/controller/**/*</include>
+                                        <include>it/polimi/ingsw/updater/**/*</include>
+                                        <include>it/polimi/ingsw/rmi/**/*</include>
+                                        <include>it/polimi/ingsw/socket/**/*</include>
+                                        <include>it/polimi/ingsw/client/network/**/*</include>
+                                        <include>it/polimi/ingsw/server/controller/**/*</include>
+                                        <include>it/polimi/ingsw/server/rmi/**/*</include>
+                                        <include>it/polimi/ingsw/server/socket/**/*</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
