@@ -1,9 +1,17 @@
 # Project for the course "software engineering" at Politecnico di Milano, academic year 2022/2023
 
-See specs [here](docs/Requisiti.pdf) and the rules 
+See specs [here](docs/Requisiti.pdf) and the rules
 ([ita](docs/MyShelfie_Rulebook_ITA.pdf) and [eng](docs/MyShelfie_Rulebook_ENG.pdf))
 
 For documentation regarding the architecture see the [deliverables folder](deliverables)
+
+## Coverage
+
+|            |                                                                    Instructions                                                                    |                                                                          Branches                                                                           |
+|------------|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| Model      |   [![coverage](../badges/jacoco-model.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)    |   [![branch coverage](../badges/branches-model.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)    |
+| Controller | [![coverage](../badges/jacoco-controller.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml) | [![branch coverage](../badges/branches-controller.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml) |
+| Overall    |  [![coverage](../badges/jacoco-overall.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)   |  [![branch coverage](../badges/branches-overall.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)   |
 
 ## Code Style
 
