@@ -75,14 +75,52 @@ jobs:
             git push
           fi
 
-      - name: Add Coverage Job Summary
+      - name: Generate Coverage Summary
+        id: jacoco-summary
+        env:
+          JACOCO_MODEL_COVERAGE: ${{ steps.jacoco-model.outputs.coverage }}
+          JACOCO_MODEL_BRANCHES: ${{ steps.jacoco-model.outputs.branches }}
+          JACOCO_CONTROLLER_COVERAGE: ${{ steps.jacoco-controller.outputs.coverage }}
+          JACOCO_CONTROLLER_BRANCHES: ${{ steps.jacoco-controller.outputs.branches }}
+          JACOCO_OVERALL_COVERAGE: ${{ steps.jacoco-overall.outputs.coverage }}
+          JACOCO_OVERALL_BRANCHES: ${{ steps.jacoco-overall.outputs.branches }}
         run: |
-          echo   "# JaCoCo Coverage Report" >> $GITHUB_STEP_SUMMARY
-          echo   "|            | Instructions | Branches |" >> $GITHUB_STEP_SUMMARY
-          echo   "|------------|:------------:|---------:|" >> $GITHUB_STEP_SUMMARY
-          printf "| Model      | %0.2f%%      | %0.2f%%  |\n" "${{ steps.jacoco-model.outputs.coverage }}" "${{ steps.jacoco-model.outputs.branches }}" >> $GITHUB_STEP_SUMMARY
-          printf "| Controller | %0.2f%%      | %0.2f%%  |\n" "${{ steps.jacoco-controller.outputs.coverage }}" "${{ steps.jacoco-controller.outputs.branches }}" >> $GITHUB_STEP_SUMMARY
-          printf "| Overall    | %0.2f%%      | %0.2f%%  |\n" "${{ steps.jacoco-overall.outputs.coverage }}" "${{ steps.jacoco-overall.outputs.branches }}" >> $GITHUB_STEP_SUMMARY
+          JACOCO_SUMMARY=$(cat <<EOF
+          ## JaCoCo Coverage Report
+          |            | Instructions | Branches |
+          |------------|:------------:|---------:|
+          $(printf "| Model      | %.2f%%      | %.2f%%  |\n" "$(echo "100 * $JACOCO_MODEL_COVERAGE"      | bc)" "$(echo "100 * $JACOCO_MODEL_BRANCHES"      | bc)")
+          $(printf "| Controller | %.2f%%      | %.2f%%  |\n" "$(echo "100 * $JACOCO_CONTROLLER_COVERAGE" | bc)" "$(echo "100 * $JACOCO_CONTROLLER_BRANCHES" | bc)")
+          $(printf "| Overall    | %.2f%%      | %.2f%%  |\n" "$(echo "100 * $JACOCO_OVERALL_COVERAGE"    | bc)" "$(echo "100 * $JACOCO_OVERALL_BRANCHES"    | bc)")
+          EOF
+          )
+          
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "summary<<$EOF" >> $GITHUB_OUTPUT
+          echo "$JACOCO_SUMMARY" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+          
+          JACOCO_SUMMARY="${JACOCO_SUMMARY//$'\n'/'\n'}"
+          echo "escaped-summary<<$EOF" >> $GITHUB_OUTPUT
+          echo "$JACOCO_SUMMARY" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+      - name: Add Coverage Job Summary
+        env:
+          JACOCO_SUMMARY: ${{ steps.jacoco-summary.outputs.summary }}
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          $JACOCO_SUMMARY
+          EOF
+
+      - name: Add Coverage Check Run
+        uses: LouisBrunner/checks-action@v1.6.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: Coverage
+          conclusion: success
+          output: >
+            {"summary":"${{ steps.jacoco-summary.outputs.escaped-summary }}"}
 
       - name: Publish Test Report
         uses: EnricoMi/publish-unit-test-result-action@v2
