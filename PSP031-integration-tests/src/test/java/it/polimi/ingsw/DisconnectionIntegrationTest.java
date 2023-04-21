@@ -221,7 +221,7 @@ public class DisconnectionIntegrationTest {
             final var serverPlayer2 = serverGame.getPlayers().stream()
                     .filter(p -> p.getNick().equals("test_2"))
                     .findFirst()
-                    .get();
+                    .orElseThrow();
 
             serverPlayer2.connected().registerObserver(value -> serverPlayerDisconnected.complete(null));
             disconnect.execute();

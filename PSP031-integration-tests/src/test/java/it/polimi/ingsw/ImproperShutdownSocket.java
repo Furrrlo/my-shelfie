@@ -23,12 +23,17 @@ public class ImproperShutdownSocket extends Socket {
 
     @Override
     public synchronized void close() {
+        System.out.println("closing...");
+        if (discardOutput) //Already closed
+            return;
         readLock.lock();
+        System.out.println("locked");
         discardOutput = true;
     }
 
     public synchronized void actuallyClose() throws IOException {
         super.close();
+        System.out.println("Actually closed");
     }
 
     private class BlockableInputStream extends FilterInputStream {

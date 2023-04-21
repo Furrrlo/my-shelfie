@@ -39,11 +39,12 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
                 null);
     }
 
-    private RmiClientNetManager(@Nullable String host,
-                                int port,
-                                String remoteName,
-                                @Nullable RMIClientSocketFactory csf,
-                                @Nullable RMIServerSocketFactory ssf) {
+    @VisibleForTesting
+    public RmiClientNetManager(@Nullable String host,
+                               int port,
+                               String remoteName,
+                               @Nullable RMIClientSocketFactory csf,
+                               @Nullable RMIServerSocketFactory ssf) {
         this.port = port;
         this.remoteName = remoteName;
         this.host = host;
