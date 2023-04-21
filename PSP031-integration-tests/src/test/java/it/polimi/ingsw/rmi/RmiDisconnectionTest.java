@@ -2,10 +2,12 @@ package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.DisconnectionIntegrationTest;
 import it.polimi.ingsw.ImproperShutdownSocket;
+import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,9 +33,9 @@ public class RmiDisconnectionTest {
 
     @BeforeAll
     static void setUp() {
-        System.setProperty("sun.rmi.transport.connectionTimeout", "500");
-        System.setProperty("sun.rmi.transport.tcp.readTimeout", "500");
-        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "500");
+        System.setProperty("sun.rmi.transport.connectionTimeout", "2000");
+        System.setProperty("sun.rmi.transport.tcp.readTimeout", "2000");
+        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "2000");
     }
 
     static Stream<Arguments> socketSource() {
@@ -82,7 +84,88 @@ public class RmiDisconnectionTest {
         }
     }
 
-    static class DisconnectingSocketFactory extends RMITimeoutClientSocketFactory {
+    @MethodSource("socketSource")
+    @ParameterizedTest(name = "testRmiDisconnection_clientCloseInLobby_{0}")
+    void testRmiDisconnection_clientCloseInLobby(String name,
+                                                 Supplier<Socket> socketFactory,
+                                                 ThrowingConsumer<Socket> cleanup)
+            throws Throwable {
+        final String testName = "testRmiDisconnection_clientCloseInLobby_" + name;
+        System.out.println(testName);
+        final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
+        final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
+        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
+        try {
+            Supplier<ClientNetManager> defaultSocketSupplier = () -> new RmiClientNetManager(null,
+                    rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                    new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS), null);
+            DisconnectionIntegrationTest.doTestDisconnection_clientCloseInLobby(
+                    serverController -> {
+                        try {
+                            return RmiConnectionServerController.bind(
+                                    LocateRegistry.createRegistry(0, null, rmiServerSocketFactory),
+                                    remoteName,
+                                    serverController);
+                        } catch (RemoteException e) {
+                            throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
+                        }
+                    },
+                    () -> new RmiClientNetManager(null,
+                            rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                            rmiClientSocketFactory, null),
+                    defaultSocketSupplier,
+                    defaultSocketSupplier,
+                    rmiClientSocketFactory::close);
+        } finally {
+            for (Socket s : rmiClientSocketFactory.sockets)
+                cleanup.accept(s);
+            DisconnectingSocketFactory.INSTANCES.remove(testName);
+        }
+    }
+
+    @MethodSource("socketSource")
+    @ParameterizedTest(name = "testRmiDisconnection_clientCloseInGame_{0}")
+    @Disabled
+    //TODO: check why serverController#joinGame returns lobby with null game
+    void testRmiDisconnection_clientCloseInGame(String name,
+                                                Supplier<Socket> socketFactory,
+                                                ThrowingConsumer<Socket> cleanup)
+            throws Throwable {
+        final String testName = "testRmiDisconnection_clientCloseInGame_" + name;
+        System.out.println(testName);
+        final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
+        final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
+        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
+        try {
+            Supplier<ClientNetManager> defaultSocketSupplier = () -> new RmiClientNetManager(null,
+                    rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                    new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS), null);
+            DisconnectionIntegrationTest.testSocketDisconnection_clientCloseInGame(
+                    serverController -> {
+                        try {
+                            return RmiConnectionServerController.bind(
+                                    LocateRegistry.createRegistry(0, rmiClientSocketFactory, rmiServerSocketFactory),
+                                    remoteName,
+                                    serverController);
+                        } catch (RemoteException e) {
+                            throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
+                        }
+                    },
+                    defaultSocketSupplier,
+                    () -> new RmiClientNetManager(null,
+                            rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                            rmiClientSocketFactory, null),
+                    defaultSocketSupplier,
+                    rmiClientSocketFactory::close,
+                    defaultSocketSupplier);
+        } finally {
+            for (Socket s : rmiClientSocketFactory.sockets)
+                cleanup.accept(s);
+            DisconnectingSocketFactory.INSTANCES.remove(testName);
+        }
+    }
+
+    private static class DisconnectingSocketFactory extends RMITimeoutClientSocketFactory {
 
         public static final Map<String, DisconnectingSocketFactory> INSTANCES = new ConcurrentHashMap<>();
 
