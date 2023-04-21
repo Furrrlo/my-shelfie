@@ -31,6 +31,7 @@ public class Main {
         System.setProperty("sun.rmi.transport.connectionTimeout", "7000");
         System.setProperty("sun.rmi.transport.tcp.readTimeout", String.valueOf(readTimeoutMillis));
         System.setProperty("sun.rmi.transport.tcp.responseTimeout", String.valueOf(responseTimeoutMillis));
+        System.setProperty("sun.rmi.transport.tcp.handshakeTimeout", String.valueOf(responseTimeoutMillis));
 
         try (final var controller = new ServerController(pingIntervalMillis, TimeUnit.MILLISECONDS);
              final var ignored1 = RmiConnectionServerController.bind(controller);

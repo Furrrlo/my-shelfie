@@ -36,6 +36,7 @@ public class RmiDisconnectionTest {
         System.setProperty("sun.rmi.transport.connectionTimeout", "2000");
         System.setProperty("sun.rmi.transport.tcp.readTimeout", "2000");
         System.setProperty("sun.rmi.transport.tcp.responseTimeout", "2000");
+        System.setProperty("sun.rmi.transport.tcp.handshakeTimeout", "2000");
     }
 
     static Stream<Arguments> socketSource() {
