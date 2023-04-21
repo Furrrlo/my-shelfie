@@ -2,8 +2,10 @@ package it.polimi.ingsw;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class ImproperShutdownSocket extends Socket {
 
@@ -41,14 +43,23 @@ public class ImproperShutdownSocket extends Socket {
             super(in);
         }
 
-        @Override
-        public int read() throws IOException {
+        private void acquireSemaphore() throws IOException {
             try {
-                readSemaphore.acquire();
+                var soTimeout = getSoTimeout();
+                if(soTimeout <= 0) {
+                    readSemaphore.acquire();
+                } else {
+                    if(!readSemaphore.tryAcquire(soTimeout, TimeUnit.MILLISECONDS))
+                        throw new SocketTimeoutException();
+                }
             } catch (InterruptedException e) {
                 throw (IOException) new ClosedByInterruptException().initCause(e);
             }
+        }
 
+        @Override
+        public int read() throws IOException {
+            acquireSemaphore();
             try {
                 return super.read();
             } finally {
@@ -58,12 +69,7 @@ public class ImproperShutdownSocket extends Socket {
 
         @Override
         public int read(byte[] b) throws IOException {
-            try {
-                readSemaphore.acquire();
-            } catch (InterruptedException e) {
-                throw (IOException) new ClosedByInterruptException().initCause(e);
-            }
-
+            acquireSemaphore();
             try {
                 return super.read(b);
             } finally {
@@ -73,12 +79,7 @@ public class ImproperShutdownSocket extends Socket {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            try {
-                readSemaphore.acquire();
-            } catch (InterruptedException e) {
-                throw (IOException) new ClosedByInterruptException().initCause(e);
-            }
-
+            acquireSemaphore();
             try {
                 return super.read(b, off, len);
             } finally {
