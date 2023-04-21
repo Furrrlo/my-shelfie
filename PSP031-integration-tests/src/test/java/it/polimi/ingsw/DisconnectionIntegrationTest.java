@@ -66,7 +66,8 @@ public class DisconnectionIntegrationTest {
             serverJoined.get(500, TimeUnit.MILLISECONDS);
 
             assertSame(1, serverLobby.joinedPlayers().get().size());
-            serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null));
+            serverController.runOnOnlyLobbyLocks(
+                    () -> serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null)));
             close.execute();
             serverPlayerRemoved.get(10, TimeUnit.SECONDS);
             assertSame(0, serverLobby.joinedPlayers().get().size());
@@ -126,7 +127,8 @@ public class DisconnectionIntegrationTest {
 
             assertSame(3, serverLobby.joinedPlayers().get().size());
 
-            serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null));
+            serverController.runOnOnlyLobbyLocks(
+                    () -> serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null)));
             disconnect.execute();
 
             serverPlayerRemoved.get(10, TimeUnit.SECONDS);
@@ -223,7 +225,8 @@ public class DisconnectionIntegrationTest {
                     .findFirst()
                     .orElseThrow();
 
-            serverPlayer2.connected().registerObserver(value -> serverPlayerDisconnected.complete(null));
+            serverController.runOnOnlyLobbyLocks(
+                    () -> serverPlayer2.connected().registerObserver(value -> serverPlayerDisconnected.complete(null)));
             disconnect.execute();
             serverPlayerDisconnected.get(10, TimeUnit.SECONDS);
             assertFalse(serverPlayer2.connected().get());
