@@ -46,10 +46,10 @@ public class ImproperShutdownSocket extends Socket {
         private void acquireSemaphore() throws IOException {
             try {
                 var soTimeout = getSoTimeout();
-                if(soTimeout <= 0) {
+                if (soTimeout <= 0) {
                     readSemaphore.acquire();
                 } else {
-                    if(!readSemaphore.tryAcquire(soTimeout, TimeUnit.MILLISECONDS))
+                    if (!readSemaphore.tryAcquire(soTimeout, TimeUnit.MILLISECONDS))
                         throw new SocketTimeoutException();
                 }
             } catch (InterruptedException e) {
