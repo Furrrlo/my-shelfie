@@ -3,12 +3,11 @@ package it.polimi.ingsw;
 import java.io.*;
 import java.net.Socket;
 import java.nio.channels.ClosedByInterruptException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 
 public class ImproperShutdownSocket extends Socket {
 
-    private final Lock readLock = new ReentrantLock();
+    private final Semaphore readSemaphore = new Semaphore(Integer.MAX_VALUE);
     private volatile boolean discardOutput;
 
     @Override
@@ -26,7 +25,7 @@ public class ImproperShutdownSocket extends Socket {
         System.out.println("closing...");
         if (discardOutput) //Already closed
             return;
-        readLock.lock();
+        readSemaphore.drainPermits();
         System.out.println("locked");
         discardOutput = true;
     }
@@ -45,7 +44,7 @@ public class ImproperShutdownSocket extends Socket {
         @Override
         public int read() throws IOException {
             try {
-                readLock.lockInterruptibly();
+                readSemaphore.acquire();
             } catch (InterruptedException e) {
                 throw (IOException) new ClosedByInterruptException().initCause(e);
             }
@@ -53,14 +52,14 @@ public class ImproperShutdownSocket extends Socket {
             try {
                 return super.read();
             } finally {
-                readLock.unlock();
+                readSemaphore.release();
             }
         }
 
         @Override
         public int read(byte[] b) throws IOException {
             try {
-                readLock.lockInterruptibly();
+                readSemaphore.acquire();
             } catch (InterruptedException e) {
                 throw (IOException) new ClosedByInterruptException().initCause(e);
             }
@@ -68,14 +67,14 @@ public class ImproperShutdownSocket extends Socket {
             try {
                 return super.read(b);
             } finally {
-                readLock.unlock();
+                readSemaphore.release();
             }
         }
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
             try {
-                readLock.lockInterruptibly();
+                readSemaphore.acquire();
             } catch (InterruptedException e) {
                 throw (IOException) new ClosedByInterruptException().initCause(e);
             }
@@ -83,7 +82,7 @@ public class ImproperShutdownSocket extends Socket {
             try {
                 return super.read(b, off, len);
             } finally {
-                readLock.unlock();
+                readSemaphore.release();
             }
         }
 
