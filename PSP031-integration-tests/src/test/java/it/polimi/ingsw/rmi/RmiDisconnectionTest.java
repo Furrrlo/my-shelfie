@@ -7,7 +7,6 @@ import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,10 +32,10 @@ public class RmiDisconnectionTest {
 
     @BeforeAll
     static void setUp() {
-        System.setProperty("sun.rmi.transport.connectionTimeout", "2000");
-        System.setProperty("sun.rmi.transport.tcp.readTimeout", "2000");
-        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "2000");
-        System.setProperty("sun.rmi.transport.tcp.handshakeTimeout", "2000");
+        System.setProperty("sun.rmi.transport.connectionTimeout", "1000");
+        System.setProperty("sun.rmi.transport.tcp.readTimeout", "1000");
+        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "1000");
+        System.setProperty("sun.rmi.transport.tcp.handshakeTimeout", "1000");
     }
 
     static Stream<Arguments> socketSource() {
@@ -126,8 +125,6 @@ public class RmiDisconnectionTest {
 
     @MethodSource("socketSource")
     @ParameterizedTest(name = "testRmiDisconnection_clientCloseInGame_{0}")
-    @Disabled
-    //TODO: check why serverController#joinGame returns lobby with null game
     void testRmiDisconnection_clientCloseInGame(String name,
                                                 Supplier<Socket> socketFactory,
                                                 ThrowingConsumer<Socket> cleanup)
@@ -141,7 +138,7 @@ public class RmiDisconnectionTest {
             Supplier<ClientNetManager> defaultSocketSupplier = () -> new RmiClientNetManager(null,
                     rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
                     new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS), null);
-            DisconnectionIntegrationTest.testSocketDisconnection_clientCloseInGame(
+            DisconnectionIntegrationTest.doTestDisconnection_clientCloseInGame(
                     serverController -> {
                         try {
                             return RmiConnectionServerController.bind(

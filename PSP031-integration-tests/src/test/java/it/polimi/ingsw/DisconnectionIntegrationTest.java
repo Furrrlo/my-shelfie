@@ -140,12 +140,12 @@ public class DisconnectionIntegrationTest {
 
     }
 
-    public static void testSocketDisconnection_clientCloseInGame(Function<ServerController, Closeable> bindServerController,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory1,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory2,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory3,
-                                                                 Executable disconnect,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory2New)
+    public static void doTestDisconnection_clientCloseInGame(Function<ServerController, Closeable> bindServerController,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory1,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory2,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory3,
+                                                             Executable disconnect,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory2New)
             throws Throwable {
         final var rnd = new Random();
 
@@ -239,6 +239,12 @@ public class DisconnectionIntegrationTest {
             LobbyView lobbyView2_new = socketClientManager2.joinGame("test_2").lobby();
             final var gamePromise2 = new CompletableFuture<GameAndController<?>>();
             lobbyView2_new.game().registerObserver(gamePromise2::complete);
+
+            //Workaround to made it work with rmi:
+            // with rmi joinGame returns a lobby with already a game
+            // with sockets the game is added with a subsequent packet.
+            if (lobbyView2_new.game().get() != null)
+                gamePromise2.complete(lobbyView2_new.game().get());
 
             final var newClient2Game = gamePromise2.get(500, TimeUnit.MILLISECONDS).game();
 
