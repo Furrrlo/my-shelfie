@@ -2,6 +2,7 @@ package it.polimi.ingsw.model;
 
 public class ConsoleColors {
     /** to use with : System.out.println(ConsoleColors.RED + "RED COLORED" + ConsoleColors.RESET + " NORMAL"); */
+    //if you use colors with RGB scheme, it becomes GRB ( remeber !!! )
     // Reset
     public static final String RESET = "\033[0m"; // Text Reset
 
@@ -10,7 +11,11 @@ public class ConsoleColors {
     public static final String RED = "\033[0;31m"; // RED
     public static final String GREEN = "\033[0;32m"; // GREEN
     public static final String YELLOW = "\033[0;33m"; // YELLOW
-    public static final String ORANGE = "\033[38;2;255;127;0m"; //ORANGE 
+    public static final String ORANGE = "\033[38;2;255;127;0m"; //ORANGE
+    public static final String BROWN_DARK = "\033[38;102;51;1;0m"; //DARK BROWN
+    public static final String GREEN_DARK = "\033[38;1;102;1;0m"; //DARK GREEN
+    public static final String BROWN = "\033[38;153;76;1;0m"; // BROWN
+    public static final String BROWN_LIGHT = "\033[38;204;102;1;0m"; //BRIGHT BROWN
     public static final String BLUE = "\033[0;34m"; // BLUE
     public static final String PURPLE = "\033[0;35m"; // PURPLE
     public static final String CYAN = "\033[0;36m"; // CYAN
@@ -40,8 +45,11 @@ public class ConsoleColors {
     public static final String BLACK_BACKGROUND = "\033[40m"; // BLACK
     public static final String RED_BACKGROUND = "\033[41m"; // RED
     public static final String GREEN_BACKGROUND = "\033[42m"; // GREEN
+    public static final String GREEN_DARK_BACKGROUND = "\033[48;2;2;102;0m"; //DARK GREEN 0 102 0
     public static final String YELLOW_BACKGROUND = "\033[43m"; // YELLOW
-    public static final String ORANGE_BACKGROUND = "\033[48;2;204;102;0m"; //ORANGE
+    public static final String ORANGE_BACKGROUND = "\033[48;2;204;102;0m"; //ORANGE 204 102 2
+    public static final String BROWN_BACKGROUND = "\033[48;2;154;76;0m"; // BROWN   154 76 2
+    public static final String BROWN_DARK_BACKGROUND = "\033[48;2;102;50;0m"; //DARK BROWN 102 50 2
 
     public static final String BLUE_BACKGROUND = "\033[44m"; // BLUE
     public static final String PURPLE_BACKGROUND = "\033[45m"; // PURPLE
@@ -53,6 +61,7 @@ public class ConsoleColors {
     public static final String RED_BRIGHT = "\033[0;91m"; // RED
     public static final String GREEN_BRIGHT = "\033[0;92m"; // GREEN
     public static final String YELLOW_BRIGHT = "\033[0;93m"; // YELLOW
+
     public static final String BLUE_BRIGHT = "\033[0;94m"; // BLUE
     public static final String PURPLE_BRIGHT = "\033[0;95m"; // PURPLE
     public static final String CYAN_BRIGHT = "\033[0;96m"; // CYAN
@@ -74,6 +83,7 @@ public class ConsoleColors {
     public static final String GREEN_BACKGROUND_BRIGHT = "\033[0;102m";// GREEN
     public static final String YELLOW_BACKGROUND_BRIGHT = "\033[0;103m";// YELLOW
     public static final String ORANGE_BACKGROUND_BRIGHT = "\033[48;2;255;127;0m"; //ORANGE
+    public static final String BROWN_BACKGROUND_BRIGHT = "\033[48;204;102;2;1m"; //BRIGHT BROWN
     public static final String BLUE_BACKGROUND_BRIGHT = "\033[0;104m";// BLUE
     public static final String PURPLE_BACKGROUND_BRIGHT = "\033[0;105m"; // PURPLE
     public static final String CYAN_BACKGROUND_BRIGHT = "\033[0;106m"; // CYAN
