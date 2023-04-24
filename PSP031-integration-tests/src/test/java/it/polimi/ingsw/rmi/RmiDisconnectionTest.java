@@ -169,13 +169,15 @@ public class RmiDisconnectionTest {
 
         private final String testName;
 
+        private transient final Supplier<Socket> socketFactory;
         private transient final AtomicBoolean closed = new AtomicBoolean(false);
         private transient final Set<Socket> sockets = ConcurrentHashMap.newKeySet();
 
         private DisconnectingSocketFactory(String testName, Supplier<Socket> socketFactory, long connectTimeout,
                                            TimeUnit connectTimeoutUnit) {
-            super(socketFactory, connectTimeout, connectTimeoutUnit);
+            super(connectTimeout, connectTimeoutUnit);
             this.testName = testName;
+            this.socketFactory = socketFactory;
 
             if (INSTANCES.putIfAbsent(testName, this) != null)
                 throw new IllegalStateException("Initialized DisconnectingSocketFactory multiple times for test " + testName);
@@ -198,6 +200,11 @@ public class RmiDisconnectionTest {
                 System.out.println("Returning closed socket");
             }
             return socket;
+        }
+
+        @Override
+        protected Socket doCreateNonConnectedSocket() {
+            return socketFactory.get();
         }
 
         public void close() {
