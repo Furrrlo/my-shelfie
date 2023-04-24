@@ -6,7 +6,6 @@ import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
-import it.polimi.ingsw.model.ConsoleColors;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
 import org.fusesource.jansi.AnsiConsole;

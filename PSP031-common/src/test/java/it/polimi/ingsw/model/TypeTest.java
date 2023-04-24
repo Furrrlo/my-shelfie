@@ -2,7 +2,8 @@ package it.polimi.ingsw.model;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TypeTest {
 
@@ -595,7 +596,6 @@ class TypeTest {
                 new Color[] { null           , null           , null           , null           , null            },
                 //@formatter:on
         };
-        new Shelfie(matrix).printColoredShelfie();
         assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
     }
 
@@ -611,7 +611,6 @@ class TypeTest {
                 new Color[] { Color.YELLOW   , null           , null           , null           , null              },
                 //@formatter:on
         };
-        new Shelfie(matrix).printColoredShelfie();
         assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
     }
 
@@ -627,7 +626,6 @@ class TypeTest {
                 new Color[] { null           , null           , null           , null           , null            },
                 //@formatter:on
         };
-        new Shelfie(matrix).printColoredShelfie();
         assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
     }
 
@@ -643,7 +641,6 @@ class TypeTest {
                 new Color[] { null          , null           , null           , null           , Color.GREEN     },
                 //@formatter:on
         };
-        new Shelfie(matrix).printColoredShelfie();
         assertTrue(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
     }
 
@@ -659,7 +656,6 @@ class TypeTest {
                 new Color[] { null           , null           , null           , null           , null            },
                 //@formatter:on
         };
-        new Shelfie(matrix).printColoredShelfie();
         assertFalse(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
     }
 
@@ -675,22 +671,6 @@ class TypeTest {
                 new Color[] { null          , null           , null           , null           , Color.GREEN     },
                 //@formatter:on
         };
-        new Shelfie(matrix).printColoredShelfie();
         assertFalse(Type.TRIANGLE.checkCommonGoal(new Shelfie(matrix)));
-    }
-
-    @Test
-    void printColoredShelfie() {
-        Color[][] matrix = {
-                //@formatter:off
-                new Color[] { Color.LIGHTBLUE, Color.YELLOW, Color.LIGHTBLUE, Color.GREEN , Color.GREEN     },
-                new Color[] { Color.PINK     , Color.GREEN , Color.PINK     , Color.YELLOW, Color.ORANGE    },
-                new Color[] { Color.GREEN    , Color.GREEN , Color.YELLOW   , Color.GREEN , Color.GREEN     },
-                new Color[] { Color.BLUE     , Color.GREEN , Color.ORANGE   , Color.BLUE  , Color.BLUE      },
-                new Color[] { Color.LIGHTBLUE, Color.PINK  , Color.GREEN    , Color.ORANGE, Color.LIGHTBLUE },
-                new Color[] { Color.LIGHTBLUE, Color.PINK  , Color.YELLOW   , Color.BLUE  , Color.LIGHTBLUE }
-                //@formatter:on
-        };
-        new Shelfie(matrix).printColoredShelfie();
     }
 }

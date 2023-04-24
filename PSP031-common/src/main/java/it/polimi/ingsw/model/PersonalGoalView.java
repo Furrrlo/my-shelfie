@@ -10,6 +10,8 @@ public interface PersonalGoalView extends Serializable {
     int ROWS = Shelfie.ROWS;
     int COLUMNS = Shelfie.COLUMNS;
 
+    int getIndex();
+
     /**
      * Returns the tile in position r & c
      * 
@@ -19,10 +21,6 @@ public interface PersonalGoalView extends Serializable {
      */
     @Nullable
     Tile get(int r, int c);
-
-    void printPersonalGoal();
-
-    void printPersonalGoalOnShelfie(Shelfie shelfie);
 
     boolean achievedPersonalGoal(Shelfie shelfie);
 

@@ -14,10 +14,7 @@ public enum Type implements Serializable {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int[][] checked = new int[ROWS][COLUMNS];
-            int count = numCouples(shelfie, checked);
-            if (count >= 6)
-                printCommonGoal(shelfie, checked, "Congratulation you placed SIX COUPLES");
-            return count >= 6;
+            return numCouples(shelfie, checked) >= 6;
         }
 
         /**
@@ -50,16 +47,10 @@ public enum Type implements Serializable {
     ALL_CORNERS {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
-            int[][] checked = new int[ROWS][COLUMNS];
-            boolean achieved = shelfie.tile(0, 0).get() != null &&
+            return shelfie.tile(0, 0).get() != null &&
                     Objects.equals(shelfie.tile(0, 0).get(), shelfie.tile(0, COLUMNS - 1).get()) &&
                     Objects.requireNonNull(shelfie.tile(0, COLUMNS - 1).get()).equals(shelfie.tile(ROWS - 1, 0).get()) &&
                     Objects.requireNonNull(shelfie.tile(ROWS - 1, 0).get()).equals(shelfie.tile(ROWS - 1, COLUMNS - 1).get());
-            if (achieved) {
-                checked[0][0] = checked[ROWS - 1][0] = checked[0][COLUMNS - 1] = checked[ROWS - 1][COLUMNS - 1] = 1;
-                printCommonGoal(shelfie, checked, "Congratulation ALL CORNERS are equal");
-            }
-            return achieved;
         }
     },
     FOUR_QUADRIPLETS {
@@ -78,10 +69,7 @@ public enum Type implements Serializable {
                     }
                 }
             }
-            boolean achieved = count >= 4;
-            if (achieved)
-                printCommonGoal(shelfie, checked, "Congratulation you made FOUR QUADRIPLETS");
-            return achieved;
+            return count >= 4;
         }
 
         /**
@@ -160,10 +148,7 @@ public enum Type implements Serializable {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int[][] checked = new int[ROWS][COLUMNS];
-            boolean achieved = numSquares(shelfie, checked) >= 2;
-            if (achieved)
-                printCommonGoal(shelfie, checked, "Congratulation you made TWO SQUARES");
-            return achieved;
+            return numSquares(shelfie, checked) >= 2;
         }
     },
     THREE_COLUMNS {
@@ -198,10 +183,7 @@ public enum Type implements Serializable {
                 if (numColorsForColumn(shelfie, c, checked, count + 1) <= 3)
                     count++;
             }
-            boolean achieved = (count >= 3);
-            if (achieved)
-                printCommonGoal(shelfie, checked, "Congratulation yoy made THREE COLUMNS with less than three colors ");
-            return achieved;
+            return (count >= 3);
         }
     },
     EIGHT_EQUAL_TILES {
@@ -233,8 +215,6 @@ public enum Type implements Serializable {
                 if (equalColoredTiles(shelfie, checked, c) >= 8)
                     achieved = true;
             }
-            if (achieved)
-                printCommonGoal(shelfie, checked, "Congratulation you placed EIGHT EQUAL TILES");
             return achieved;
         }
     },
@@ -273,8 +253,6 @@ public enum Type implements Serializable {
                     achieved = checkDiagonal(shelfie, checked, r, c);
                 }
             }
-            if (achieved)
-                printCommonGoal(shelfie, checked, "Congratulation you made a DIAGONAL of equal tiles");
             return achieved;
         }
     },
@@ -305,8 +283,6 @@ public enum Type implements Serializable {
                 if (numColorsForRow(shelfie, checked, count + 1, r) <= 3)
                     count++;
             }
-            if (count >= 4)
-                printCommonGoal(shelfie, checked, "Congratulation you made FOUR ROWS with less than three colors");
             return count >= 4;
         }
     },
@@ -336,8 +312,6 @@ public enum Type implements Serializable {
                 if (numColorsForColumn(shelfie, checked, count + 1, c) == ROWS)
                     count++;
             }
-            if (count >= 2)
-                printCommonGoal(shelfie, checked, "Congratulation you made TWO ALL DIFFERENT COLUMNS");
             return count >= 2;
         }
     },
@@ -366,8 +340,6 @@ public enum Type implements Serializable {
                 if (numColorsForRow(shelfie, checked, count + 1, r) == COLUMNS)
                     count++;
             }
-            if (count >= 2)
-                printCommonGoal(shelfie, checked, "Congratulation you made TWO ALL DIFFERENT ROWS");
             return count >= 2;
         }
     },
@@ -396,10 +368,7 @@ public enum Type implements Serializable {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int[][] checked = new int[ROWS][COLUMNS];
-            boolean achieved = checkForCross(shelfie, checked);
-            if (achieved)
-                printCommonGoal(shelfie, checked, "Congratulation you made a CROSS");
-            return achieved;
+            return checkForCross(shelfie, checked);
         }
     },
     TRIANGLE {
@@ -439,10 +408,7 @@ public enum Type implements Serializable {
         @Override
         public boolean checkCommonGoal(Shelfie shelfie) {
             int[][] checked = new int[ROWS][COLUMNS];
-            boolean achieved = checkForTriangle(shelfie, checked);
-            if (achieved)
-                printCommonGoal(shelfie, checked, "Congratulation you completed a TRIANGLE");
-            return achieved;
+            return checkForTriangle(shelfie, checked);
         }
     };
 
@@ -450,63 +416,4 @@ public enum Type implements Serializable {
      * Returns true if the common goal of given type is achieved
      **/
     public abstract boolean checkCommonGoal(Shelfie shelfie);
-
-    public void printCommonGoal(Shelfie shelfie, int[][] checked, String s) {
-        System.out.println(s);
-        for (int row = 0; row < ROWS; row++) {
-            StringBuilder msg = new StringBuilder();
-            if (row == 0) {
-                msg.append("   1  2  3  4  5 \n");
-            }
-            for (int col = 0; col < COLUMNS; col++) {
-                if (col == 0)
-                    msg.append(row + 1).append(" ");
-                if (shelfie.tile(row, col).get() == null) {
-                    msg.append("| |");
-                } else {
-                    Color color = Objects.requireNonNull(shelfie.tile(row, col).get()).getColor();
-                    if (checked[row][col] < 1) {
-                        if (color.equals(Color.BLUE))
-                            msg.append(ConsoleColors.BLUE_BACKGROUND).append("   ").append(ConsoleColors.RESET);
-                        if (color.equals(Color.GREEN))
-                            msg.append(ConsoleColors.GREEN_BACKGROUND).append("   ").append(ConsoleColors.RESET);
-                        if (color.equals(Color.ORANGE))
-                            msg.append(ConsoleColors.ORANGE_BACKGROUND).append("   ").append(ConsoleColors.RESET);
-                        if (color.equals(Color.PINK))
-                            msg.append(ConsoleColors.PURPLE_BACKGROUND).append("   ").append(ConsoleColors.RESET);
-                        if (color.equals(Color.YELLOW))
-                            msg.append(ConsoleColors.YELLOW_BACKGROUND).append("   ").append(ConsoleColors.RESET);
-                        if (color.equals(Color.LIGHTBLUE))
-                            msg.append(ConsoleColors.CYAN_BACKGROUND).append("   ").append(ConsoleColors.RESET);
-                    } else {
-                        if (color.equals(Color.BLUE))
-                            msg.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
-                                    .append(checked[row][col]).append(" ")
-                                    .append(ConsoleColors.RESET);
-                        if (color.equals(Color.GREEN))
-                            msg.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
-                                    .append(checked[row][col]).append(" ")
-                                    .append(ConsoleColors.RESET);
-                        if (color.equals(Color.ORANGE))
-                            msg.append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
-                                    .append(checked[row][col]).append(" ")
-                                    .append(ConsoleColors.RESET);
-                        if (color.equals(Color.PINK))
-                            msg.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
-                                    .append(checked[row][col]).append(" ")
-                                    .append(ConsoleColors.RESET);
-                        if (color.equals(Color.YELLOW))
-                            msg.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
-                                    .append(checked[row][col]).append(" ")
-                                    .append(ConsoleColors.RESET);
-                        if (color.equals(Color.LIGHTBLUE))
-                            msg.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append(ConsoleColors.BLACK_BOLD).append(" ")
-                                    .append(checked[row][col]).append(" ")
-                                    .append(ConsoleColors.RESET);
-                    }
-                }
-            }
-            System.out.println(msg);
-        }
-    }
 }

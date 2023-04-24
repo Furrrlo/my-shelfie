@@ -1,4 +1,4 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.client.tui;
 
 public class ConsoleColors {
     /** to use with : System.out.println(ConsoleColors.RED + "RED COLORED" + ConsoleColors.RESET + " NORMAL"); */
