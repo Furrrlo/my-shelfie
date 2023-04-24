@@ -136,7 +136,7 @@ public class SocketDisconnectionTest {
         final AtomicReference<Socket> socket = new AtomicReference<>();
         try {
             Supplier<ClientNetManager> defaultSocketSupplier;
-            DisconnectionIntegrationTest.testSocketDisconnection_clientCloseInGame(
+            DisconnectionIntegrationTest.doTestDisconnection_clientCloseInGame(
                     serverController -> {
                         try {
                             final ServerSocket serverSocket = new ServerSocket(0);

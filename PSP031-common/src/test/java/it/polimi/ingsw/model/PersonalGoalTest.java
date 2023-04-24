@@ -15,9 +15,7 @@ class PersonalGoalTest {
     @Test
     void equals1() {
         PersonalGoal p1 = new PersonalGoal(0);
-        p1.printPersonalGoal();
         PersonalGoal p2 = new PersonalGoal(0);
-        p2.printPersonalGoal();
         assertEquals(p1, p2);
     }
 
@@ -34,7 +32,6 @@ class PersonalGoalTest {
                 new Color[]{Color.PINK     , null           , Color.BLUE     , null           , null           },
                 //@formatter:on
         });
-        p0.printPersonalGoalOnShelfie(shelfie);
         assertTrue(p0.achievedPersonalGoal(shelfie));
     }
 
@@ -51,7 +48,6 @@ class PersonalGoalTest {
                 new Color[]{Color.PINK     , null           , Color.BLUE     , null           , null           },
                 //@formatter:on
         });
-        p0.printPersonalGoalOnShelfie(shelfie);
         assertFalse(p0.achievedPersonalGoal(shelfie));
     }
 
@@ -68,8 +64,6 @@ class PersonalGoalTest {
                 new Color[]{Color.GREEN    , null           , null           , null           , null           },
                 //@formatter:on
         });
-        p1.printPersonalGoal();
-        shelfie.printColoredShelfie();
         assertTrue(p1.achievedPersonalGoal(shelfie));
     }
 

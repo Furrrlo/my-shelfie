@@ -3,7 +3,8 @@ package it.polimi.ingsw.server.socket;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
-import it.polimi.ingsw.socket.packets.JoinGamePacket;
+import it.polimi.ingsw.socket.SocketManager;
+import it.polimi.ingsw.socket.packets.*;
 import it.polimi.ingsw.utils.ThreadPools;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -14,8 +15,10 @@ import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SocketConnectionServerController implements Closeable {
 
@@ -115,19 +118,27 @@ public class SocketConnectionServerController implements Closeable {
     }
 
     private void doJoin(ServerSocketManager socketManager) throws IOException {
-        final var rec = socketManager.receive(JoinGamePacket.class);
-        final var nick = rec.getPacket().nick();
+        final var joinCtx = socketManager.receive(JoinGamePacket.class);
+        final var nick = joinCtx.getPacket().nick();
         System.out.println("[Server] " + nick + " is joining...");
         socketManager.setNick(nick);
 
         final var connection = new PlayerConnection(controller, socketManager, nick);
         connections.add(connection);
         try {
+            var lobbyCtx = new AtomicReference<SocketManager.PacketReplyContext<C2SAckPacket, S2CAckPacket, LobbyReceivedPacket>>();
             controller.joinGame(
                     nick,
                     new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer),
                     connection,
-                    new SocketLobbyServerUpdaterFactory(socketManager, rec),
+                    l -> {
+                        try {
+                            lobbyCtx.set(joinCtx.reply(new LobbyPacket(l.lobby()), LobbyReceivedPacket.class));
+                            return new SocketLobbyServerUpdater(socketManager);
+                        } catch (IOException e) {
+                            throw new DisconnectedException(e);
+                        }
+                    },
                     lobbyController -> {
                         //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Should we stop it?
                         var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
@@ -157,7 +168,8 @@ public class SocketConnectionServerController implements Closeable {
                                 });
                         return socketController;
                     });
-        } catch (DisconnectedException e) {
+            Objects.requireNonNull(lobbyCtx.get(), "Lobby was somehow not sent to the player").ack();
+        } catch (Throwable e) {
             connection.disconnectPlayer(e);
         }
     }

@@ -6,7 +6,6 @@ import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.controller.*;
 import it.polimi.ingsw.server.model.*;
@@ -56,7 +55,7 @@ public class UpdatersIntegrationTest {
                                       HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                                      LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 final LobbyUpdaterFactory wrappedFactory = lobby -> new DelegatingLobbyUpdater(

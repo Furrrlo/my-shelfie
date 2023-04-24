@@ -2,7 +2,6 @@ package it.polimi.ingsw;
 
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.controller.*;
 import it.polimi.ingsw.server.model.*;
@@ -49,7 +48,7 @@ public class DisconnectionIntegrationTest {
                                       HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                                      LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 System.out.println("joining");
@@ -102,7 +101,7 @@ public class DisconnectionIntegrationTest {
                                       HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                                      LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
@@ -140,12 +139,12 @@ public class DisconnectionIntegrationTest {
 
     }
 
-    public static void testSocketDisconnection_clientCloseInGame(Function<ServerController, Closeable> bindServerController,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory1,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory2,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory3,
-                                                                 Executable disconnect,
-                                                                 Supplier<ClientNetManager> clientNetManagerFactory2New)
+    public static void doTestDisconnection_clientCloseInGame(Function<ServerController, Closeable> bindServerController,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory1,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory2,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory3,
+                                                             Executable disconnect,
+                                                             Supplier<ClientNetManager> clientNetManagerFactory2New)
             throws Throwable {
         final var rnd = new Random();
 
@@ -167,7 +166,7 @@ public class DisconnectionIntegrationTest {
                                       HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                                      LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
@@ -237,10 +236,10 @@ public class DisconnectionIntegrationTest {
             //Restart player test_2 creating a new client
             socketClientManager2 = clientNetManagerFactory2New.get();
             LobbyView lobbyView2_new = socketClientManager2.joinGame("test_2").lobby();
-            final var gamePromise2 = new CompletableFuture<GameAndController<?>>();
-            lobbyView2_new.game().registerObserver(gamePromise2::complete);
 
-            final var newClient2Game = gamePromise2.get(500, TimeUnit.MILLISECONDS).game();
+            final var newClient2GameAndController = lobbyView2_new.game().get();
+            assertNotNull(newClient2GameAndController);
+            final var newClient2Game = newClient2GameAndController.game();
 
             assertTrue(serverPlayer2.connected().get());
 

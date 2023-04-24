@@ -1,6 +1,5 @@
 package it.polimi.ingsw.client.tui;
 
-import it.polimi.ingsw.model.ConsoleColors;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;

@@ -5,7 +5,6 @@ import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.HeartbeatHandler;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerLobby;
@@ -26,7 +25,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -175,7 +173,7 @@ public class ServerController implements Closeable {
                               HeartbeatHandler heartbeatHandler,
                               PlayerObservableTracker observableTracker,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
-                              Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                              LobbyControllerFactory lobbyControllerFactory,
                               BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
             throws DisconnectedException {
         heartbeats.put(nick, heartbeatHandler);
@@ -196,12 +194,12 @@ public class ServerController implements Closeable {
                 if (!joinedPlayersNicks.contains(nick) && !serverLobby.canOnePlayerJoin())
                     continue; // If we fail the test, let's just retry and search a new one
 
-                final Lobby lobby = new Lobby(serverLobby.getRequiredPlayers(), serverLobby.joinedPlayers().get());
-
+                final LobbyAndController<Lobby> lobbyAndController;
                 final LobbyUpdater lobbyUpdater;
                 try {
-                    lobbyUpdater = lobbyUpdaterFactory.create(new LobbyAndController<>(lobby,
-                            lobbyControllerFactory.apply(serverLobbyAndController.controller())));
+                    lobbyUpdater = lobbyUpdaterFactory.create(lobbyAndController = new LobbyAndController<>(
+                            new Lobby(serverLobby.getRequiredPlayers(), serverLobby.joinedPlayers().get()),
+                            lobbyControllerFactory.create(serverLobbyAndController.controller())));
                 } catch (DisconnectedException e) {
                     throw new IllegalStateException("Player disconnected during handshake process");
                 }
@@ -264,7 +262,7 @@ public class ServerController implements Closeable {
                     throw new DisconnectedException("Player disconnected during handshake process", ex);
                 }
 
-                return lobby;
+                return lobbyAndController.lobby();
             }
         } while (true);
     }

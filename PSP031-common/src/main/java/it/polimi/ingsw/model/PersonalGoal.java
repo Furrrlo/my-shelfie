@@ -160,38 +160,15 @@ public class PersonalGoal implements PersonalGoalView {
         this(index, PERSONAL_GOALS.get(index).personalGoal);
     }
 
-    /** prints the shelfie corresponding to the personal goal whose calling the method */
-    @Override
-    public void printPersonalGoal() {
-        Shelfie shelfie = new Shelfie(PERSONAL_GOALS.get(this.index).personalGoal);
-        System.out.println("PERSONAL GOAL : " + this.index);
-        shelfie.printColoredShelfie();
-    }
-
     /** returns true if the shelfie passed as a parameter corresponds to the tiles of the commonGoal */
     @Override
     public boolean achievedPersonalGoal(Shelfie shelfie) {
-        if (new Shelfie(PERSONAL_GOALS.get(this.index).personalGoal).isOverlapping(shelfie)) {
-            this.printPersonalGoalOnShelfie(shelfie);
-            return true;
-        } else
-            return false;
+        return new Shelfie(PERSONAL_GOALS.get(this.index).personalGoal).isOverlapping(shelfie);
     }
 
-    /**
-     * prints the Shelfie passed as parameter marking with progressive number the tiles that corresponds to the personal goal
-     */
     @Override
-    public void printPersonalGoalOnShelfie(Shelfie shelfie) {
-        int count = 0;
-        int[][] checked = new int[ROWS][COLUMNS];
-        for (int r = 0; r < ROWS; r++)
-            for (int c = 0; c < COLUMNS; c++)
-                if (this.get(r, c) != null) {
-                    count++;
-                    checked[r][c] = count;
-                }
-        Type.SIX_COUPLES.printCommonGoal(shelfie, checked, "Congratulation you achieved PERSONAL GOAL");
+    public int getIndex() {
+        return index;
     }
 
     @Override
