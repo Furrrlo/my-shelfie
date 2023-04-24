@@ -44,14 +44,18 @@ public class ConsoleColors {
     // Background
     public static final String BLACK_BACKGROUND = "\033[40m"; // BLACK
     public static final String RED_BACKGROUND = "\033[41m"; // RED
+    public static final String RED_VERY_DARK_BACKGROUND = "\033[48;2;102;2;0m"; // RED VERY DARK
+    public static final String RED_DARK_BACKGROUND = "\033[48;2;204;2;0m"; // RED DARK
     public static final String GREEN_BACKGROUND = "\033[42m"; // GREEN
     public static final String GREEN_DARK_BACKGROUND = "\033[48;2;2;102;0m"; //DARK GREEN 0 102 0
     public static final String YELLOW_BACKGROUND = "\033[43m"; // YELLOW
+    public static final String YELLOW_LIGHT_BACKGROUND = "\033[48;204;254;228;0m"; // YELLOW LIGHT
     public static final String ORANGE_BACKGROUND = "\033[48;2;204;102;0m"; //ORANGE 204 102 2
     public static final String BROWN_BACKGROUND = "\033[48;2;154;76;0m"; // BROWN   154 76 2
     public static final String BROWN_DARK_BACKGROUND = "\033[48;2;102;50;0m"; //DARK BROWN 102 50 2
 
     public static final String BLUE_BACKGROUND = "\033[44m"; // BLUE
+    public static final String PINK_BACKGROUND = "\033[48;2;255;222;0m"; // PINK
     public static final String PURPLE_BACKGROUND = "\033[45m"; // PURPLE
     public static final String CYAN_BACKGROUND = "\033[46m"; // CYAN
     public static final String WHITE_BACKGROUND = "\033[47m"; // WHITE
@@ -83,7 +87,7 @@ public class ConsoleColors {
     public static final String GREEN_BACKGROUND_BRIGHT = "\033[0;102m";// GREEN
     public static final String YELLOW_BACKGROUND_BRIGHT = "\033[0;103m";// YELLOW
     public static final String ORANGE_BACKGROUND_BRIGHT = "\033[48;2;255;127;0m"; //ORANGE
-    public static final String BROWN_BACKGROUND_BRIGHT = "\033[48;204;102;2;1m"; //BRIGHT BROWN
+    public static final String BROWN_BACKGROUND_BRIGHT = "\033[48;2;204;102;1m"; //BRIGHT BROWN
     public static final String BLUE_BACKGROUND_BRIGHT = "\033[0;104m";// BLUE
     public static final String PURPLE_BACKGROUND_BRIGHT = "\033[0;105m"; // PURPLE
     public static final String CYAN_BACKGROUND_BRIGHT = "\033[0;106m"; // CYAN
