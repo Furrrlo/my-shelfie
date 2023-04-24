@@ -5,6 +5,7 @@ import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.socket.packets.JoinGamePacket;
 import it.polimi.ingsw.socket.packets.LobbyPacket;
+import it.polimi.ingsw.socket.packets.LobbyReceivedPacket;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -105,6 +106,7 @@ public class SocketClientNetManager implements ClientNetManager {
                         ex.printStackTrace();
                         return null;
                     });
+            lobbyCtx.reply(new LobbyReceivedPacket());
             return new LobbyAndController<>(lobby, new SocketLobbyController(socketManager));
         }
     }
