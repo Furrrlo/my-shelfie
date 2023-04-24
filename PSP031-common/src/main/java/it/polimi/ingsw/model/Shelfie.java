@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.List;
+
+import it.polimi.ingsw.BoardCoord;
 
 public class Shelfie implements ShelfieView {
 
@@ -100,5 +103,33 @@ public class Shelfie implements ShelfieView {
         return "Shelfie{" +
                 "shelfie=" + Arrays.deepToString(shelfie) +
                 '}';
+    }
+
+    public int getColumnFreeSpace(int col){
+        int freeSpace = 0;
+        for(int r = 0; r < ROWS; r++){
+                if(shelfie[r][col].get() == null){
+                    freeSpace++;
+                }
+        }
+        return freeSpace;
+    }
+
+    public boolean checkColumnSpace(int shelfCol, int selected){        
+             
+        return selected<=getColumnFreeSpace(shelfCol);
+
+    }
+
+    public void placeTiles(List <Property<Tile>> selectedTiles, int shelfCol){
+        //place tiles in the selected column from the bottom and first free space
+        for (Property<Tile> tile : selectedTiles) {
+            for(int r = 0; r < ROWS; r++){
+                if(shelfie[r][shelfCol].get() == null){
+                    shelfie[r][shelfCol].set(tile.get());
+                    break;
+                }
+            }
+        }
     }
 }
