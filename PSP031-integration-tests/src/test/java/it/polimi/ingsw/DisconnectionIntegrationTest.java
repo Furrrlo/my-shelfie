@@ -2,7 +2,6 @@ package it.polimi.ingsw;
 
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.controller.*;
 import it.polimi.ingsw.server.model.*;
@@ -49,7 +48,7 @@ public class DisconnectionIntegrationTest {
                                       HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                                      LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 System.out.println("joining");
@@ -102,7 +101,7 @@ public class DisconnectionIntegrationTest {
                                       HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                                      LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
@@ -167,7 +166,7 @@ public class DisconnectionIntegrationTest {
                                       HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
-                                      Function<LobbyServerController, LobbyController> lobbyControllerFactory,
+                                      LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
