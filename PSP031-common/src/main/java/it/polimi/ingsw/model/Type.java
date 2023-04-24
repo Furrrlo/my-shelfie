@@ -270,8 +270,7 @@ public enum Type implements Serializable {
                     count.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());
             }
             if (count.size() < 4)
-                for (int c = 0; c < COLUMNS; c++)
-                    checked[r][c] = marker;
+                Arrays.fill(checked[r], marker);
             return count.size();
         }
 
@@ -327,8 +326,7 @@ public enum Type implements Serializable {
                     count.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());
             }
             if (count.size() == 5)
-                for (int c = 0; c < COLUMNS; c++)
-                    checked[r][c] = marker;
+                Arrays.fill(checked[r], marker);
             return count.size();
         }
 
@@ -348,11 +346,12 @@ public enum Type implements Serializable {
             int count = 0;
             for (int r = 0; r < ROWS - 2; r++) {
                 for (int c = 0; c < COLUMNS - 2; c++) {
-                    if (shelfie.tile(r, c).get() != null &&
-                            shelfie.tile(r, c).get().equals(shelfie.tile(r + 2, c).get()) &&
-                            shelfie.tile(r, c).get().equals(shelfie.tile(r, c + 2).get()) &&
-                            shelfie.tile(r, c).get().equals(shelfie.tile(r + 1, c + 1).get()) &&
-                            shelfie.tile(r, c).get().equals(shelfie.tile(r + 2, c + 2).get())) {
+                    Tile tile = shelfie.tile(r, c).get();
+                    if (tile != null &&
+                            tile.equals(shelfie.tile(r + 2, c).get()) &&
+                            tile.equals(shelfie.tile(r, c + 2).get()) &&
+                            tile.equals(shelfie.tile(r + 1, c + 1).get()) &&
+                            tile.equals(shelfie.tile(r + 2, c + 2).get())) {
                         count++;
                         checked[r][c] = count;
                         checked[r + 2][c] = count;
