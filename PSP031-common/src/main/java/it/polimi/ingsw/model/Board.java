@@ -86,8 +86,33 @@ public class Board implements BoardView {
                 '}';
     }
 
-    public boolean checkBoardCoord(List<BoardCoord> selected) throws IndexOutOfBoundsException {
-        // TODO: insert excpetions
+    public void placeTile(int row, int col, Tile tile) {
+        board[row][col] = new SerializableProperty<>(tile);
+        //TODO: check if it's right
+    }
+
+    public void removeTile(int row, int col) {
+        board[row][col] = null;
+    }
+
+    public void refillBoard(){
+        //TODO: implement
+    }
+
+    public boolean isEmpty(){
+        for (int i = 0; i < getRows(); i++) {
+            for (int j = 0; j < getCols(); j++) {
+                if (board[i][j] != null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+ 
+    //TODO: test everything!!
+    public boolean checkBoardCoord(List<BoardCoord> selected) {
+    
         for (BoardCoord coord : selected) {
             if (!hasFreeSide(coord.row(), coord.col())) {
                 return false;
@@ -149,4 +174,5 @@ public class Board implements BoardView {
         return false;
 
     }
+
 }
