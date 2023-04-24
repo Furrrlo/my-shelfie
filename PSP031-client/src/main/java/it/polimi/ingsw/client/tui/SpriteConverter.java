@@ -53,6 +53,8 @@ public class SpriteConverter {
                 ss.append(ConsoleColors.PINK_BACKGROUND).append("   ");
             if (s.charAt(i) == 'J') // should be brown bright but not working
                 ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("   ");
+            if (s.charAt(i) == 'X') // should be brown bright but not working
+                ss.append(ConsoleColors.PINK_BACKGROUND).append("   ");
             if (s.charAt(i) == ' ')
                 ss.append(ConsoleColors.RESET).append("\n");
         }
@@ -63,6 +65,7 @@ public class SpriteConverter {
 
     public static void main(String[] args) {
         SpriteConverter sc = new SpriteConverter();
+        //CAT 
         sc.SpriteStringConverter("""
                 GGGGGGGGGGGGGGGGGGGGGGGG
                  GGGGGGGGGGGGGBBGGGBBGGGG
@@ -88,32 +91,140 @@ public class SpriteConverter {
                  GGWWGGGGGWWGGWWGGGGGWWGG
                  GGGGGGGGGGGGGGGGGGGGGGGG
                  GGGGGGGGGGGGGGGGGGGGGGGG
-                """);
+                 """);
+        //TREE 
         sc.SpriteStringConverter("""
                 CCCCCCCCCCCCCCCCCCCCCCCC
-                CCCCCCCCCCCCCGGGGGGGCCCC
-                CCCCCCCCCCCGGGGGEEEGGCCC
-                CCCCCCCCCCEFEFEEEEEGGCCC
-                CCCCCCCCEEEEFEEEEFEGGGCC
-                CCCCCCCEEFEEFEFEEEEEEGCC
-                CCCCEEEEFEEEFEFHEEEEEGCC
-                CCCFEEEGEFEIEEFEHEEEEGCC
-                CCFFFFFEEEEEFHEEHEEEECCC
-                CCCFFFEEFEFFFHHHEEICCCCC
-                CCCCCFFFGCCCCHHHHCCCCCCC
-                CCCCCCCCCCCCCIHCCCCCCCCC
-                CCCCCCCCCCCCIIHCCCCCCCCC
-                CCCCCCCCCCCCCIHCCCCCCCCC
-                CCCCCCCCCCCCIIHCCCCCCCCC
-                CCCCCCIHCCCCIHIHHICCCCCC
-                CCCCCHHHIIHIHHHIHHICCCCC
-                CBBBBBBBBBBBBBBBBBBBBBCC
-                CCBAAAAWWWWWWWWWWWWWBCCC
-                CCBBAAAAAAAAAAAAAAABBCCC
-                CCCBAAAAAAAWWWWWWWWBCCCC
-                CCCBABBBBBBBBBBBBBWBCCCC
-                CCCBBBCCCCCCCCCCCBBBCCCC
-                CCCCCCCCCCCCCCCCCCCCCCCC
+                 CCCCCCCCCCCCCGGGGGGGCCCC
+                 CCCCCCCCCCCGGGGGEEEGGCCC
+                 CCCCCCCCCCEFEFEEEEEGGCCC
+                 CCCCCCCCEEEEFEEEEFEGGGCC
+                 CCCCCCCEEFEEFEFEEEEEEGCC
+                 CCCCEEEEFEEEFEFHEEEEEGCC
+                 CCCFEEEGEFEIEEFEHEEEEGCC
+                 CCFFFFFEEEEEFHEEHEEEECCC
+                 CCCFFFEEFEFFFHHHEEICCCCC
+                 CCCCCFFFGCCCCHHHHCCCCCCC
+                 CCCCCCCCCCCCCIHCCCCCCCCC
+                 CCCCCCCCCCCCIIHCCCCCCCCC
+                 CCCCCCCCCCCCCIHCCCCCCCCC
+                 CCCCCCCCCCCCIIHCCCCCCCCC
+                 CCCCCCIHCCCCIHIHHICCCCCC
+                 CCCCCHHHIIHIHHHIHHICCCCC
+                 CBBBBBBBBBBBBBBBBBBBBBCC
+                 CCBAAAAWWWWWWWWWWWWWBCCC
+                 CCBBAAAAAAAAAAAAAAABBCCC
+                 CCCBAAAAAAAWWWWWWWWBCCCC
+                 CCCBABBBBBBBBBBBBBWBCCCC
+                 CCCBBBCCCCCCCCCCCBBBCCCC
+                 CCCCCCCCCCCCCCCCCCCCCCCC
                 """);
+        //BOOK
+        sc.SpriteStringConverter("""
+                MMMMMMMMMMMMMMMMMMMMMMMM
+                 MMMMMMMMMMMMMMMMMMMMMMMM
+                 MMMKLKKKKKKKKKKKKKKKKRMM
+                 MMLKLKKKKKKKKKKKKKKKKRMM
+                 MMLKLKKKKKKKKKKKKKKKKRMM
+                 MMLKLKKKKKKKKKKKKKKKKRMM
+                 MMLKLKMMKMKMKMMKMKKMMRMM
+                 MMLKLKMKKMKMKMKKMKKMKRMM
+                 MMLKLKMMKMMMKMMKMKKMMRMM
+                 MMLKLKKMKMKMKMKKMKKMKRMM
+                 MMLKLKMMKMKMKMMKMMKMKRMM
+                 MMLKLKKKKKKKKKKKKKKKKRMM
+                 MMLKLKKKKKKKKKKKKKKKKRMM
+                 MMLKLKKKKKKKKKKKKKKKKRMM
+                 MMLRLRRRRRRRRRRRRRRRRRMM
+                 MMLLLLLLLLLLLLLLLLLLLLMM
+                 MMLWWWWWWWWWWWWWWWWWWLMM
+                 MMLWMMMMRRRRRMMMMMMMMLMM
+                 MMLWMMMMRRRRRMMMMMMMMLMM
+                 MMLWMMMMMMMMMMMMMMMMMLMM
+                 MMLKKKKKKKKKKKKKKKKKKKMM
+                 MMMLLLLLLLLLLLLLLLLLLLMM
+                 MMMMMMMMMMMMMMMMMMMMMMMM
+                 MMMMMMMMMMMMMMMMMMMMMMMM
+                                 """);
+        //TROPHY
+        sc.SpriteStringConverter("""
+                NNNNNNNNNNNNNNNNNNNNNNNN
+                 NNNNNNNNNNNNNNNNNNNNNNNN
+                 NNNNNNNNNNNNNNNNNNNNNNNN
+                 NNNNNSSSSSOOOOQQOONNNNNN
+                 NNNNNNSSSSSSSSSSSNNNNNNN
+                 NNSQQOOSSSOOOOQOOOOQQNNN
+                 NNSQNNSSSSOOOOQOONNSQNNN
+                 NNSQNNSSSSOOOOQOONNSONNN
+                 NNSONNSSSSOOOOQOONNSQNNN
+                 NNSONNSSSSOOOOQOONNSQNNN
+                 NNSONNSSSSOOOOQOONNSONNN
+                 NNSONNSSSSOOOOQOONNSONNN
+                 NNSOOOOSSSOOOOQOOOOOONNN
+                 NNNNNNSSSSOOOOQOONNNNNNN
+                 NNNNNNSSSSOOOOQOONNNNNNN
+                 NNNNNNSSSSOOOOOOONNNNNNN
+                 NNNNNNNSSSSSSSSSNNNNNNNN
+                 NNNNNNNNNNSSSNNNNNNNNNNN
+                 NNNNNNNNNNSOQNNNNNNNNNNN
+                 NNNNNNNNNNSOQNNNNNNNNNNN
+                 NNNNNNNNNSSOOQNNNNNNNNNN
+                 NNNNNNNSSSOOOQOONNNNNNNN
+                 NNNNNSSSSOOOOOQOOONNNNNN
+                 NNNNNNNNNNNNNNNNNNNNNNNN""");
+        //GAME
+        sc.SpriteStringConverter("""
+                OOOOOOOOOOOOOOOOOOOOOOOO
+                 OOOOOOOOOOOOOOJJJJJJJJOO
+                 OOOOOOOOOOOOOJBSSSSSSBHO
+                 OOOOOOOOOOOOOJSSJJJJSSHO
+                 OOOOOOOOOOOOOJSSJSSJSSHO
+                 OOOOOOOOOOOOOJSSSSSJSSHO
+                 OOOOOOOOOOOOOJSSSSJSSSHO
+                 OOOOOOOOOOOOOJUUUSJSSSHO
+                 OOOOOOORRRRROJUUUSSSSSHO
+                 OOOOOORRRRRRRRRUUSJSSBHO
+                 OOOOOOHHHUUBUOTTTHHHHHOO
+                 OOOOOHUHUUUBUUTTTOOOOOOO
+                 OOOOOHUHHUUUHUUTTOOOOOOO
+                 OOOOOHHUUUUHHHHTOOOOOOOO
+                 OOOOOOOUUUUUUUTOOOOOOOOO
+                 OOOTTTTTRTTTRTOOOOOOOOOO
+                 OOTTTTTTTRTTTROOBOOOOOOO
+                 OUUTTTTTTRRRRROOBOOOOOOO
+                 OUUUORRTRRORRORBBOOOOOOO
+                 OOUOBRRRRRRRRRRBBOOOOOOO
+                 OOOBBBRRRRRRRRRBBOOOOOOO
+                 OOBBBRRRRRRROOOOOOOOOOOO
+                 OOBOORRRROOOOOOOOOOOOOOO
+                 OOOOOOOOOOOOOOOOOOOOOOOO
+                """);
+        //FRAME
+        sc.SpriteStringConverter("""
+                TTTTTTTTTTTTTTTTTTTTTTTT
+                 TTTTTTTTTTTTTTTTTTTTTTTT
+                 TTTTTTTTTTTTTTTTTTTTTTTT
+                 TTJJJJJJJJJJJJJJJJJJJTTT
+                 TTJJJJJJJJJJJJJJJJJJJTTT
+                 TTIJJIIIIIIIIIIIIIIJJTTT
+                 TTIJJHIJJJJJJJJJJIIJJTTT
+                 TTIJJHJIIIIIIIIIIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHXXXXXXXXIJIJJTTT
+                 TTIJJHJHHHHHHHHHIJIJJTTT
+                 TTIJJHJJJJJJJJJJJIIJJTTT
+                 TTIJJHHHHHHHHHHHHHIJJTTT
+                 TTJJJJJJJJJJJJJJJJJJJTTT
+                 TTJJJJJJJJJJJJJJJJJJJTTT
+                 TTTTTTTTTTTTTTTTTTTTTTTT
+                 TTTTTTTTTTTTTTTTTTTTTTTT
+                 TTTTTTTTTTTTTTTTTTTTTTTT
+                 """);
     }
 }
