@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -21,6 +22,49 @@ public class Board implements BoardView {
 
     private final Property<@Nullable Tile>[][] board;
     private final Property<Tile> invalidTile;
+    private final static int[][] TWO_PLAYERS_MATRIX =new int[][]{
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,1,1,0,0,0,0},
+            {0,0,0,1,1,1,0,0,0},
+            {0,0,1,1,1,1,1,1,0},
+            {0,1,1,1,1,1,1,1,0},
+            {0,1,1,1,1,1,1,0,0},
+            {0,0,0,1,1,1,0,0,0},
+            {0,0,0,0,1,1,0,0,0},
+            {0,0,0,0,0,0,0,0,0}
+    };
+    private final static int[][] THREE_PLAYERS_MATRIX =new int[][]{
+            {0,0,0,1,0,0,0,0,0},
+            {0,0,0,1,1,0,0,0,0},
+            {0,0,1,1,1,1,1,0,0},
+            {0,0,1,1,1,1,1,1,1},
+            {0,1,1,1,1,1,1,1,0},
+            {1,1,1,1,1,1,1,0,0},
+            {0,0,1,1,1,1,1,0,0},
+            {0,0,0,0,1,1,0,0,0},
+            {0,0,0,0,0,1,0,0,0}
+    };
+    private final static int[][] FOUR_PLAYERS_MATRIX =new int[][]{
+            {0,0,0,1,1,0,0,0,0},
+            {0,0,0,1,1,1,0,0,0},
+            {0,0,1,1,1,1,1,0,0},
+            {0,1,1,1,1,1,1,1,1},
+            {1,1,1,1,1,1,1,1,1},
+            {1,1,1,1,1,1,1,1,0},
+            {0,0,1,1,1,1,1,0,0},
+            {0,0,0,1,1,1,0,0,0},
+            {0,0,0,0,1,1,0,0,0}
+    };
+
+    @Override
+    public int getRows() {
+        return BOARD_ROWS;
+    }
+
+    @Override
+    public int getCols() {
+       return BOARD_COLUMNS;
+    }
 
     @SuppressWarnings("unchecked")
     public Board(int numOfPlayers) {
@@ -34,20 +78,30 @@ public class Board implements BoardView {
     }
 
     private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers, Tile invalidTile) {
-        // TODO: generate based on number of players
-        Tile[][] tiles = new Tile[9][9];
-        tiles[0][0] = invalidTile;
-        return tiles;
+        switch (numOfPlayers) {
+            case 2:
+                return generateBoard(TWO_PLAYERS_MATRIX, invalidTile);
+            case 3:
+                return generateBoard(THREE_PLAYERS_MATRIX, invalidTile);
+            case 4:
+                return generateBoard(FOUR_PLAYERS_MATRIX, invalidTile);
+            default:
+                return null;
+        }
     }
 
-    @Override
-    public int getRows() {
-        return board.length;
-    }
-
-    @Override
-    public int getCols() {
-        return board.length == 0 ? 0 : board[0].length;
+    private static @Nullable Tile[][] generateBoard(int[][] matrix, Tile invalidTile) {
+        Tile[][] board = new Tile[BOARD_ROWS][BOARD_COLUMNS];
+        for (int r = 0; r < BOARD_ROWS; r++) {
+            for (int c = 0; c < BOARD_COLUMNS; c++) {
+                if (matrix[r][c] == 0){
+                    board[r][c]=invalidTile;}
+                else{
+                    board[r][c]=null;
+                }
+            }
+        }
+        return board;
     }
 
     @Override
@@ -101,9 +155,6 @@ public class Board implements BoardView {
         board[row][col] = null;
     }
 
-    public void refillBoard() {
-        //TODO: implement
-    }
 
     public boolean isEmpty() {
         for (int i = 0; i < getRows(); i++) {
@@ -180,5 +231,7 @@ public class Board implements BoardView {
         return false;
 
     }
+
+
 
 }
