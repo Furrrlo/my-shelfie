@@ -47,10 +47,9 @@ public class GameServerController {
 
             //TODO: check if player has finished and shelfie is full
 
-            if (game.getBoard().isEmpty() && game.getBag().size()>0) {
+            if (game.getBoard().isEmpty() && game.getBag().size() > 0) {
                 game.refillBoard();
-            }
-            else if (game.getBoard().isEmpty() && game.getBag().size()==0) {
+            } else if (game.getBoard().isEmpty() && game.getBag().size() == 0) {
                 //TODO: end game
                 //game.endGame();
                 //game.firstFinisher=player;

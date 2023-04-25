@@ -124,23 +124,22 @@ public class ServerGame implements ServerGameView {
                 ", currentTurn=" + currentTurn +
                 ", commonGoal=" + commonGoal +
                 ", firstFinisher=" + firstFinisher +
-        
+
                 '}';
     }
 
-    public void refillBoard(){
+    public void refillBoard() {
         Random random = new Random();
         int temp;
         for (int r = 0; r < BoardView.BOARD_ROWS; r++) {
-            for (int c = 0; c < BoardView.BOARD_COLUMNS && this.bag.size()>0; c++) {
+            for (int c = 0; c < BoardView.BOARD_COLUMNS && this.bag.size() > 0; c++) {
                 if (this.board.tile(r, c) == null) {
                     temp = random.nextInt(this.bag.size());
-                    this.board.placeTile(r,c,this.bag.get(temp));
+                    this.board.placeTile(r, c, this.bag.get(temp));
                     this.bag.remove(temp);
-                   }
+                }
             }
         }
     }
-
 
 }

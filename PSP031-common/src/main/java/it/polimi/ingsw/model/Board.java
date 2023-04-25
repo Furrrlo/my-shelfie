@@ -22,38 +22,38 @@ public class Board implements BoardView {
 
     private final Property<@Nullable Tile>[][] board;
     private final Property<Tile> invalidTile;
-    private final static int[][] TWO_PLAYERS_MATRIX =new int[][]{
-            {0,0,0,0,0,0,0,0,0},
-            {0,0,0,1,1,0,0,0,0},
-            {0,0,0,1,1,1,0,0,0},
-            {0,0,1,1,1,1,1,1,0},
-            {0,1,1,1,1,1,1,1,0},
-            {0,1,1,1,1,1,1,0,0},
-            {0,0,0,1,1,1,0,0,0},
-            {0,0,0,0,1,1,0,0,0},
-            {0,0,0,0,0,0,0,0,0}
+    private final static int[][] TWO_PLAYERS_MATRIX = new int[][] {
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+            { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+            { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
     };
-    private final static int[][] THREE_PLAYERS_MATRIX =new int[][]{
-            {0,0,0,1,0,0,0,0,0},
-            {0,0,0,1,1,0,0,0,0},
-            {0,0,1,1,1,1,1,0,0},
-            {0,0,1,1,1,1,1,1,1},
-            {0,1,1,1,1,1,1,1,0},
-            {1,1,1,1,1,1,1,0,0},
-            {0,0,1,1,1,1,1,0,0},
-            {0,0,0,0,1,1,0,0,0},
-            {0,0,0,0,0,1,0,0,0}
+    private final static int[][] THREE_PLAYERS_MATRIX = new int[][] {
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 1, 1 },
+            { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+            { 1, 1, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 1, 0, 0, 0 }
     };
-    private final static int[][] FOUR_PLAYERS_MATRIX =new int[][]{
-            {0,0,0,1,1,0,0,0,0},
-            {0,0,0,1,1,1,0,0,0},
-            {0,0,1,1,1,1,1,0,0},
-            {0,1,1,1,1,1,1,1,1},
-            {1,1,1,1,1,1,1,1,1},
-            {1,1,1,1,1,1,1,1,0},
-            {0,0,1,1,1,1,1,0,0},
-            {0,0,0,1,1,1,0,0,0},
-            {0,0,0,0,1,1,0,0,0}
+    private final static int[][] FOUR_PLAYERS_MATRIX = new int[][] {
+            { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 1, 1, 0, 0, 0 }
     };
 
     @Override
@@ -63,7 +63,7 @@ public class Board implements BoardView {
 
     @Override
     public int getCols() {
-       return BOARD_COLUMNS;
+        return BOARD_COLUMNS;
     }
 
     @SuppressWarnings("unchecked")
@@ -94,10 +94,10 @@ public class Board implements BoardView {
         Tile[][] board = new Tile[BOARD_ROWS][BOARD_COLUMNS];
         for (int r = 0; r < BOARD_ROWS; r++) {
             for (int c = 0; c < BOARD_COLUMNS; c++) {
-                if (matrix[r][c] == 0){
-                    board[r][c]=invalidTile;}
-                else{
-                    board[r][c]=null;
+                if (matrix[r][c] == 0) {
+                    board[r][c] = invalidTile;
+                } else {
+                    board[r][c] = null;
                 }
             }
         }
@@ -154,7 +154,6 @@ public class Board implements BoardView {
     public void removeTile(int row, int col) {
         board[row][col] = null;
     }
-
 
     public boolean isEmpty() {
         for (int i = 0; i < getRows(); i++) {
@@ -231,7 +230,5 @@ public class Board implements BoardView {
         return false;
 
     }
-
-
 
 }
