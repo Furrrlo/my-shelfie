@@ -95,11 +95,11 @@ public class Board implements BoardView {
         board[row][col] = null;
     }
 
-    public void refillBoard(){
+    public void refillBoard() {
         //TODO: implement
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getCols(); j++) {
                 if (board[i][j] != null) {
@@ -109,10 +109,10 @@ public class Board implements BoardView {
         }
         return true;
     }
- 
+
     //TODO: test everything!!
     public boolean checkBoardCoord(List<BoardCoord> selected) {
-    
+
         for (BoardCoord coord : selected) {
             if (!hasFreeSide(coord.row(), coord.col())) {
                 return false;

@@ -105,27 +105,27 @@ public class Shelfie implements ShelfieView {
                 '}';
     }
 
-    public int getColumnFreeSpace(int col){
+    public int getColumnFreeSpace(int col) {
         int freeSpace = 0;
-        for(int r = 0; r < ROWS; r++){
-                if(shelfie[r][col].get() == null){
-                    freeSpace++;
-                }
+        for (int r = 0; r < ROWS; r++) {
+            if (shelfie[r][col].get() == null) {
+                freeSpace++;
+            }
         }
         return freeSpace;
     }
 
-    public boolean checkColumnSpace(int shelfCol, int selected){        
-             
-        return selected<=getColumnFreeSpace(shelfCol);
+    public boolean checkColumnSpace(int shelfCol, int selected) {
+
+        return selected <= getColumnFreeSpace(shelfCol);
 
     }
 
-    public void placeTiles(List <Property<Tile>> selectedTiles, int shelfCol){
+    public void placeTiles(List<Property<Tile>> selectedTiles, int shelfCol) {
         //place tiles in the selected column from the bottom and first free space
         for (Property<Tile> tile : selectedTiles) {
-            for(int r = 0; r < ROWS; r++){
-                if(shelfie[r][shelfCol].get() == null){
+            for (int r = 0; r < ROWS; r++) {
+                if (shelfie[r][shelfCol].get() == null) {
                     shelfie[r][shelfCol].set(tile.get());
                     break;
                 }

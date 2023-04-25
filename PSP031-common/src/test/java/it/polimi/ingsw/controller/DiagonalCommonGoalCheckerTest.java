@@ -14,11 +14,11 @@ class DiagonalCommonGoalCheckerTest {
     void checkCommonGoal_DIAGONAL_normalTrue() {
         Color[][] matrix = {
                 //@formatter:off
-                new Color[] { Color.ORANGE   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.YELLOW    },
-                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.YELLOW   , Color.PINK     , Color.BLUE      },
-                new Color[] { Color.YELLOW   , Color.ORANGE   , Color.ORANGE   , Color.PINK     , Color.PINK      },
-                new Color[] { Color.YELLOW   , Color.GREEN    , Color.PINK     , Color.ORANGE   , Color.ORANGE    },
-                new Color[] { Color.ORANGE   , Color.LIGHTBLUE, Color.ORANGE   , Color.ORANGE   , Color.ORANGE    },
+                new Color[] { Color.YELLOW, Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.WHITE},
+                new Color[] { Color.WHITE, Color.YELLOW, Color.WHITE, Color.PINK     , Color.BLUE      },
+                new Color[] { Color.WHITE, Color.YELLOW, Color.YELLOW, Color.PINK     , Color.PINK      },
+                new Color[] { Color.WHITE, Color.GREEN    , Color.PINK     , Color.YELLOW, Color.YELLOW},
+                new Color[] { Color.YELLOW, Color.LIGHTBLUE, Color.YELLOW, Color.YELLOW, Color.YELLOW},
                 new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
                 //@formatter:on
         };

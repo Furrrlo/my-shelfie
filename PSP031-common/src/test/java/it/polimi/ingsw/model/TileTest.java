@@ -12,7 +12,7 @@ class TileTest {
 
     @Test
     void getColor1() {
-        assertNotEquals(new Tile(Color.BLUE).getColor(), Color.ORANGE);
+        assertNotEquals(new Tile(Color.BLUE).getColor(), Color.YELLOW);
     }
 
     @Test

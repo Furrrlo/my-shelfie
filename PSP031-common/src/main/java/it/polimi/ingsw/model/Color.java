@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 public enum Color implements Serializable {
     GREEN,
+    WHITE,
     YELLOW,
-    ORANGE,
     BLUE,
     LIGHTBLUE,
     PINK

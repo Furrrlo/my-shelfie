@@ -33,9 +33,9 @@ class TuiGameScene {
                 switch (tile.getColor()) {
                     case BLUE -> msg.append(ConsoleColors.CYAN).append(ConsoleColors.BLUE_BACKGROUND_BRIGHT);
                     case GREEN -> msg.append(ConsoleColors.GREEN).append(ConsoleColors.GREEN_BACKGROUND_BRIGHT);
-                    case ORANGE -> msg.append(ConsoleColors.YELLOW_BRIGHT).append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT);
+                    case YELLOW -> msg.append(ConsoleColors.YELLOW_BRIGHT).append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT);
                     case PINK -> msg.append(ConsoleColors.PURPLE).append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT);
-                    case YELLOW -> msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT);
+                    case WHITE -> msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT);
                     case LIGHTBLUE -> msg.append(ConsoleColors.BLUE).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT);
                 }
                 msg.append("   ").append(ConsoleColors.RESET);
@@ -89,9 +89,9 @@ class TuiGameScene {
                     String consoleColor = switch (color) {
                         case BLUE -> ConsoleColors.BLUE_BACKGROUND;
                         case GREEN -> ConsoleColors.GREEN_BACKGROUND;
-                        case ORANGE -> ConsoleColors.ORANGE_BACKGROUND;
+                        case YELLOW -> ConsoleColors.ORANGE_BACKGROUND;
                         case PINK -> ConsoleColors.PURPLE_BACKGROUND;
-                        case YELLOW -> ConsoleColors.YELLOW_BACKGROUND;
+                        case WHITE -> ConsoleColors.YELLOW_BACKGROUND;
                         case LIGHTBLUE -> ConsoleColors.CYAN_BACKGROUND;
                     };
                     msg.append(consoleColor).append("   ").append(ConsoleColors.RESET);
@@ -99,9 +99,9 @@ class TuiGameScene {
                     String consoleColor = switch (color) {
                         case BLUE -> ConsoleColors.BLUE_BACKGROUND_BRIGHT;
                         case GREEN -> ConsoleColors.GREEN_BACKGROUND_BRIGHT;
-                        case ORANGE -> ConsoleColors.ORANGE_BACKGROUND_BRIGHT;
+                        case YELLOW -> ConsoleColors.ORANGE_BACKGROUND_BRIGHT;
                         case PINK -> ConsoleColors.PURPLE_BACKGROUND_BRIGHT;
-                        case YELLOW -> ConsoleColors.YELLOW_BACKGROUND_BRIGHT;
+                        case WHITE -> ConsoleColors.YELLOW_BACKGROUND_BRIGHT;
                         case LIGHTBLUE -> ConsoleColors.CYAN_BACKGROUND_BRIGHT;
                     };
                     msg.append(consoleColor)

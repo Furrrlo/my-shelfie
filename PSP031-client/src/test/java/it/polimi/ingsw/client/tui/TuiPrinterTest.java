@@ -15,4 +15,9 @@ class TuiPrinterTest {
     void PrintTilePink() {
         TuiPrinter.tuiPrintTile(Color.PINK);
     }
+
+    @Test
+    void PrintTileWhite() {
+        TuiPrinter.tuiPrintTile(Color.WHITE);
+    }
 }

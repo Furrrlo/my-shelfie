@@ -14,12 +14,12 @@ class AllCornersCommonGoalCheckerTest {
     void checkCommonGoal_ALL_CORNERS_normal_true() {
         Color[][] matrix = {
                 //@formatter:off
-                new Color[] { Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.PINK     , Color.PINK      },
-                new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE     , Color.PINK     , Color.BLUE      },
-                new Color[] { Color.BLUE     , Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE      },
-                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.YELLOW   , Color.LIGHTBLUE, Color.ORANGE    },
-                new Color[] { Color.YELLOW   , Color.BLUE     , Color.GREEN    , Color.PINK     , null            },
-                new Color[] { Color.PINK     , Color.ORANGE   , null           , Color.LIGHTBLUE, Color.PINK      }
+                new Color[] { Color.PINK     , Color.WHITE    , Color.LIGHTBLUE, Color.PINK     , Color.PINK      },
+                new Color[] { Color.WHITE    , Color.LIGHTBLUE, Color.BLUE     , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.BLUE     , Color.PINK     , Color.WHITE    , Color.LIGHTBLUE, Color.BLUE      },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.WHITE    , Color.LIGHTBLUE, Color.YELLOW    },
+                new Color[] { Color.WHITE    , Color.BLUE     , Color.GREEN    , Color.PINK     , null            },
+                new Color[] { Color.PINK     , Color.YELLOW   , null           , Color.LIGHTBLUE, Color.PINK      }
                 //@formatter:on
         };
         assertTrue(new AllCornersCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
@@ -44,12 +44,12 @@ class AllCornersCommonGoalCheckerTest {
     void checkCommonGoal_ALL_CORNERS_normal_false() {
         Color[][] matrix = {
                 //@formatter:off
-                new Color[] { Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.PINK     , Color.GREEN     },
-                new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE     , Color.PINK     , Color.BLUE      },
-                new Color[] { Color.BLUE     , Color.PINK     , Color.YELLOW   , Color.LIGHTBLUE, Color.BLUE      },
-                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.YELLOW   , Color.LIGHTBLUE, Color.ORANGE    },
-                new Color[] { Color.YELLOW   , Color.BLUE     , Color.GREEN    , Color.PINK     , null            },
-                new Color[] { Color.PINK     , Color.ORANGE   , null           , Color.LIGHTBLUE, Color.PINK      }
+                new Color[] { Color.PINK     , Color.WHITE    , Color.LIGHTBLUE, Color.PINK     , Color.GREEN     },
+                new Color[] { Color.WHITE    , Color.LIGHTBLUE, Color.BLUE     , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.BLUE     , Color.PINK     , Color.WHITE    , Color.LIGHTBLUE, Color.BLUE      },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.WHITE    , Color.LIGHTBLUE, Color.YELLOW    },
+                new Color[] { Color.WHITE    , Color.BLUE     , Color.GREEN    , Color.PINK     , null            },
+                new Color[] { Color.PINK     , Color.YELLOW   , null           , Color.LIGHTBLUE, Color.PINK      }
                 //@formatter:on
         };
         assertFalse(new AllCornersCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
