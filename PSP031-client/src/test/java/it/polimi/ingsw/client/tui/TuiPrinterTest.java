@@ -20,4 +20,14 @@ class TuiPrinterTest {
     void PrintTileWhite() {
         TuiPrinter.tuiPrintTile(Color.WHITE);
     }
+
+    @Test
+    void PrintTileLightBlue() {
+        TuiPrinter.tuiPrintTile(Color.LIGHTBLUE);
+    }
+
+    @Test
+    void PrintTileYellow() {
+        TuiPrinter.tuiPrintTile(Color.YELLOW);
+    }
 }
