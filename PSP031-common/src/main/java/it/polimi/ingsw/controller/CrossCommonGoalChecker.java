@@ -1,5 +1,6 @@
 package it.polimi.ingsw.controller;
 
+import com.google.errorprone.annotations.Immutable;
 import it.polimi.ingsw.model.CommonGoalChecker;
 import it.polimi.ingsw.model.Shelfie;
 import it.polimi.ingsw.model.Tile;
@@ -7,6 +8,7 @@ import it.polimi.ingsw.model.Tile;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
+@Immutable
 public class CrossCommonGoalChecker implements CommonGoalChecker {
 
     public boolean checkForCross(Shelfie shelfie, int[][] checked) {

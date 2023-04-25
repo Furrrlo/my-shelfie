@@ -1,11 +1,13 @@
 package it.polimi.ingsw.controller;
 
+import com.google.errorprone.annotations.Immutable;
 import it.polimi.ingsw.model.CommonGoalChecker;
 import it.polimi.ingsw.model.Shelfie;
 
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
+@Immutable
 public class TriangleCommonGoalChecker implements CommonGoalChecker {
 
     public boolean checkForTriangle(Shelfie shelfie, int[][] checked) {
