@@ -30,4 +30,9 @@ class TuiPrinterTest {
     void PrintTileYellow() {
         TuiPrinter.tuiPrintTile(Color.YELLOW);
     }
+
+    @Test
+    void PrintTileBlue() {
+        TuiPrinter.tuiPrintTile(Color.BLUE);
+    }
 }
