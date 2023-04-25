@@ -46,8 +46,8 @@ public class TuiPrinter {
             "NNNNNSSSSOOOOOQOOONNNNNN", "NNNNNNNNNNNNNNNNNNNNNNNN");
 
     private static final @Unmodifiable List<String> GAME = List.of("OOOOOOOOOOOOOOOOOOOOOOOO", "OOOOOOOOOOOOOOJJJJJJJJOO",
-            "OOOOOOOOOOOOOJBSSSSSSBHO", "OOOOOOOOOOOOOJSSJJJJSSHO", "OOOOOOOOOOOOOJSSJSSJSSHO", "OOOOOOOOOOOOOJSSSSSJSSHO",
-            "OOOOOOOOOOOOOJSSSSJSSSHO", "OOOOOOOOOOOOOJUUUSJSSSHO", "OOOOOOORRRRROJUUUSSSSSHO", "OOOOOORRRRRRRRRUUSJSSBHO",
+            "OOOOOOOOOOOOOJBSSSSSSBHO", "OOOOOOOOOOOOOJSSQQQQSSHO", "OOOOOOOOOOOOOJSSQSSQSSHO", "OOOOOOOOOOOOOJSSSSSQSSHO",
+            "OOOOOOOOOOOOOJSSSSQSSSHO", "OOOOOOOOOOOOOJUUUSQSSSHO", "OOOOOOORRRRROJUUUSSSSSHO", "OOOOOORRRRRRRRRUUSQSSBHO",
             "OOOOOOHHHUUBUOTTTHHHHHOO", "OOOOOHUHUUUBUUTTTOOOOOOO", "OOOOOHUHHUUUHUUTTOOOOOOO", "OOOOOHHUUUUHHHHTOOOOOOOO",
             "OOOOOOOUUUUUUUTOOOOOOOOO", "OOOTTTTTRTTTRTOOOOOOOOOO", "OOTTTTTTTRTTTROOBOOOOOOO", "OUUTTTTTTRRRRROOBOOOOOOO",
             "OUUUORRTRRORRORBBOOOOOOO", "OOUOBRRRRRRRRRRBBOOOOOOO", "OOOBBBRRRRRRRRRBBOOOOOOO", "OOBBBRRRRRRROOOOOOOOOOOO",
@@ -64,13 +64,20 @@ public class TuiPrinter {
     public static void tuiPrintShelfie(Shelfie shelfie) {
         printShelfieHeader();
         for (int row = 0; row < ROWS; row++) {
+            printMidShelf1();
+            printMidShelf2();
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
                 for (int col = 0; col < COLUMNS; col++) {
+                    if (col == 0)
+                        sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.ORANGE_BACKGROUND)
+                                .append(pxl).append(ConsoleColors.RESET);
                     if (shelfie.tile(row, col).get() != null)
                         sb.append(SpriteLine(i, Objects.requireNonNull(shelfie.tile(row, col).get()).getColor()));
                     else
                         sb.append(EmptyLine());
+                    sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl).append(ConsoleColors.ORANGE_BACKGROUND)
+                            .append(pxl).append(ConsoleColors.RESET);
                 }
                 System.out.println(sb);
             }
@@ -84,6 +91,31 @@ public class TuiPrinter {
 
     public static void printShelfieBottom() {
         //TODO : implement Shelfie bottom with selection number
+    }
+
+    public static void printMidShelf1() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl.repeat(131)).append(ConsoleColors.RESET);
+        System.out.println(sb);
+    }
+
+    public static void printMidShelf2() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(25))
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(25))
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(25))
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(25))
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(25))
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                .append(ConsoleColors.RESET);
+        System.out.println(sb);
     }
 
     public static StringBuilder EmptyLine() {
@@ -154,7 +186,7 @@ public class TuiPrinter {
             if (s.charAt(i) == 'U') // should be pink but not working
                 ss.append(ConsoleColors.PINK_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'J') // should be brown bright but not working
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
+                ss.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'X') // should be brown bright but not working
                 ss.append(ConsoleColors.PINK_BACKGROUND).append(pxl);
         }
