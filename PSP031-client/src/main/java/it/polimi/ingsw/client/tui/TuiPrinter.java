@@ -6,6 +6,10 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Objects;
+
+import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
+import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
 public class TuiPrinter {
     private static final @Unmodifiable List<String> CAT = List.of("GGGGGGGGGGGGGGGGGGGGGGGG", "GGGGGGGGGGGGGBBGGGBBGGGG",
@@ -56,14 +60,91 @@ public class TuiPrinter {
             "TTIJJHHHHHHHHHHHHHIJJTTT", "TTIJJJJJJJJJJJJJJJJJJTTT", "TTIJJJJJJJJJJJJJJJJJJTTT", "TTTTTTTTTTTTTTTTTTTTTTTT",
             "TTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTT");
 
-    public void tuiPrintShelfie(Shelfie shelfie) {
-        //TODO : implementing shelfie print
+    public static void tuiPrintShelfie(Shelfie shelfie) {
+        for (int row = 0; row < ROWS; row++) {
+            for (int i = 0; i < 24; i++) {
+                StringBuilder sb = new StringBuilder();
+                for (int col = 0; col < COLUMNS; col++) {
+                    sb.append(SpriteLine(i, Objects.requireNonNull(shelfie.tile(row, col).get()).getColor()));
+                }
+                System.out.println(sb);
+            }
+        }
     }
 
     @VisibleForTesting
     public static void tuiPrintTile(Color color) {
         for (int i = 0; i < 24; i++)
             tuiPrintSpriteLine(i, color);
+    }
+
+    public static StringBuilder SpriteLine(int index, Color color) {
+        String s = "";
+        if (color.equals(Color.GREEN))
+            s = CAT.get(index);
+        if (color.equals(Color.PINK))
+            s = TREE.get(index);
+        if (color.equals(Color.WHITE))
+            s = BOOK.get(index);
+        if (color.equals(Color.LIGHTBLUE))
+            s = TROPHY.get(index);
+        if (color.equals(Color.YELLOW))
+            s = GAME.get(index);
+        if (color.equals(Color.BLUE))
+            s = FRAME.get(index);
+
+        StringBuilder ss = new StringBuilder();
+        ss.append(ConsoleColors.RESET);
+        for (int i = 0; i < 24; i++) {
+            if (s.charAt(i) == 'B')
+                ss.append(ConsoleColors.BLACK_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'G')
+                ss.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'E')
+                ss.append(ConsoleColors.GREEN_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'F')
+                ss.append(ConsoleColors.GREEN_DARK_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'H')
+                ss.append(ConsoleColors.BROWN_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'I')
+                ss.append(ConsoleColors.BROWN_DARK_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'A')
+                ss.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'P')
+                ss.append(ConsoleColors.PURPLE_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'C')
+                ss.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'R')
+                ss.append(ConsoleColors.RED_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'W')
+                ss.append(ConsoleColors.WHITE_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'D')
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'K')
+                ss.append(ConsoleColors.RED_DARK_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'L')
+                ss.append(ConsoleColors.RED_VERY_DARK_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'M')
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'O')
+                ss.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'N')
+                ss.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'S')
+                ss.append(ConsoleColors.ORANGE_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'Q')
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'T')
+                ss.append(ConsoleColors.BLUE_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'U') // should be pink but not working
+                ss.append(ConsoleColors.PINK_BACKGROUND).append("  ");
+            if (s.charAt(i) == 'J') // should be brown bright but not working
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+            if (s.charAt(i) == 'X') // should be brown bright but not working
+                ss.append(ConsoleColors.PINK_BACKGROUND).append("  ");
+        }
+        ss.append(ConsoleColors.RESET);
+        return ss;
     }
 
     public static void tuiPrintSpriteLine(int index, Color color) {

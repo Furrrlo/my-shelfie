@@ -11,12 +11,12 @@ public class MatrixGenerator {
     int COLUMNS = 5;
     String[] colors = {
             "Color.GREEN",
+            "Color.WHITE",
             "Color.YELLOW",
-            "Color.ORANGE",
             "Color.BLUE",
             "Color.LIGHTBLUE",
             "Color.PINK",
-            "null"
+            //"null"
     };
     String INDENT = "        ";
 
