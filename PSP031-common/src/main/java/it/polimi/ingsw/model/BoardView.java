@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.util.stream.Stream;
 
 public interface BoardView extends Serializable {
+    int BOARD_ROWS = 9;
+    int BOARD_COLUMNS = 9;
 
     int getRows();
 
