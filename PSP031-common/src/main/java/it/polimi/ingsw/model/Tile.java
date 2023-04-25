@@ -14,8 +14,14 @@ public class Tile implements Serializable {
      */
     public Tile(Color color) {
         Random random = new Random();
-        int[] indexes = new int[] { 0, 1, 2, 3 };
+        int[] indexes = new int[] { 0, 1, 2 };
         this.picIndex = indexes[random.nextInt(indexes.length)];
+        this.color = color;
+
+    }
+
+    public Tile(Color color, int picIndex) {
+        this.picIndex = picIndex;
         this.color = color;
 
     }
