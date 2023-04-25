@@ -45,8 +45,15 @@ public class GameServerController {
             //add tiles to shelfie
             player.getShelfie().placeTiles(selectedTiles, shelfCol);
 
-            if (game.getBoard().isEmpty()) {
-                game.getBoard().refillBoard();
+            //TODO: check if player has finished and shelfie is full
+
+            if (game.getBoard().isEmpty() && game.getBag().size()>0) {
+                game.refillBoard();
+            }
+            else if (game.getBoard().isEmpty() && game.getBag().size()==0) {
+                //TODO: end game
+                //game.endGame();
+                //game.firstFinisher=player;
             }
 
         }
