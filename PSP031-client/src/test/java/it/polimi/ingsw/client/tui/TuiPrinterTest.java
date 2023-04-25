@@ -42,7 +42,7 @@ class TuiPrinterTest {
         Shelfie shelfie = new Shelfie(new Color[][] {
                 //@formatter:off
                 new Color[] { Color.LIGHTBLUE, Color.BLUE     , Color.BLUE     , Color.LIGHTBLUE, Color.PINK      },
-                new Color[] { Color.YELLOW   , Color.WHITE    , Color.YELLOW   , Color.BLUE     , Color.BLUE      },
+                new Color[] { null   , Color.WHITE    , Color.YELLOW   , Color.BLUE     , Color.BLUE      },
                 new Color[] { Color.WHITE    , Color.WHITE    , Color.WHITE    , Color.PINK     , Color.YELLOW    },
                 new Color[] { Color.GREEN    , Color.BLUE     , Color.YELLOW   , Color.WHITE    , Color.PINK      },
                 new Color[] { Color.BLUE     , Color.WHITE    , Color.BLUE     , Color.YELLOW   , Color.GREEN     },

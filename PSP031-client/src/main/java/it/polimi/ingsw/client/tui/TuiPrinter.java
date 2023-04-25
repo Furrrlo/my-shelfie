@@ -12,6 +12,7 @@ import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
 public class TuiPrinter {
+    private static final @Unmodifiable String pxl = "  ";
     private static final @Unmodifiable List<String> CAT = List.of("GGGGGGGGGGGGGGGGGGGGGGGG", "GGGGGGGGGGGGGBBGGGBBGGGG",
             "GGGGGBBGGGGGBBPBGBBPBGGG", "GGGGGBBBGGGBAACAAAACAGGG", "GGGGGGBBGGBAAAAAAAAAAAGG", "GGGGGGBBGGBAAAABBBBAAAGG",
             "GGGGBBBBGGBAABDBBBBDBAGG", "GGGBBBBGGGWWABDBBBBDBAWG", "GGGBBGGGGGBAAAAAACAAAAGG", "GGGBBGGGGGWWAAAAWAWAAAWG",
@@ -61,21 +62,35 @@ public class TuiPrinter {
             "TTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTT");
 
     public static void tuiPrintShelfie(Shelfie shelfie) {
+        printShelfieHeader();
         for (int row = 0; row < ROWS; row++) {
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
                 for (int col = 0; col < COLUMNS; col++) {
-                    sb.append(SpriteLine(i, Objects.requireNonNull(shelfie.tile(row, col).get()).getColor()));
+                    if (shelfie.tile(row, col).get() != null)
+                        sb.append(SpriteLine(i, Objects.requireNonNull(shelfie.tile(row, col).get()).getColor()));
+                    else
+                        sb.append(EmptyLine());
                 }
                 System.out.println(sb);
             }
         }
+        printShelfieBottom();
     }
 
-    @VisibleForTesting
-    public static void tuiPrintTile(Color color) {
-        for (int i = 0; i < 24; i++)
-            tuiPrintSpriteLine(i, color);
+    public static void printShelfieHeader() {
+        //TODO : implement Shelfie header with selection number
+    }
+
+    public static void printShelfieBottom() {
+        //TODO : implement Shelfie bottom with selection number
+    }
+
+    public static StringBuilder EmptyLine() {
+        return new StringBuilder().append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl)
+                .append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl)
+                .append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl)
+                .append(pxl);
     }
 
     public static StringBuilder SpriteLine(int index, Color color) {
@@ -97,56 +112,63 @@ public class TuiPrinter {
         ss.append(ConsoleColors.RESET);
         for (int i = 0; i < 24; i++) {
             if (s.charAt(i) == 'B')
-                ss.append(ConsoleColors.BLACK_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.BLACK_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'G')
-                ss.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'E')
-                ss.append(ConsoleColors.GREEN_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.GREEN_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'F')
-                ss.append(ConsoleColors.GREEN_DARK_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.GREEN_DARK_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'H')
-                ss.append(ConsoleColors.BROWN_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.BROWN_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'I')
-                ss.append(ConsoleColors.BROWN_DARK_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'A')
-                ss.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'P')
-                ss.append(ConsoleColors.PURPLE_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.PURPLE_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'C')
-                ss.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'R')
-                ss.append(ConsoleColors.RED_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.RED_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'W')
-                ss.append(ConsoleColors.WHITE_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.WHITE_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'D')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'K')
-                ss.append(ConsoleColors.RED_DARK_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.RED_DARK_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'L')
-                ss.append(ConsoleColors.RED_VERY_DARK_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.RED_VERY_DARK_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'M')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'O')
-                ss.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'N')
-                ss.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'S')
-                ss.append(ConsoleColors.ORANGE_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'Q')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'T')
-                ss.append(ConsoleColors.BLUE_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.BLUE_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'U') // should be pink but not working
-                ss.append(ConsoleColors.PINK_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.PINK_BACKGROUND).append(pxl);
             if (s.charAt(i) == 'J') // should be brown bright but not working
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
+                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
             if (s.charAt(i) == 'X') // should be brown bright but not working
-                ss.append(ConsoleColors.PINK_BACKGROUND).append("  ");
+                ss.append(ConsoleColors.PINK_BACKGROUND).append(pxl);
         }
         ss.append(ConsoleColors.RESET);
         return ss;
     }
 
+    @VisibleForTesting
+    public static void tuiPrintTile(Color color) {
+        for (int i = 0; i < 24; i++)
+            tuiPrintSpriteLine(i, color);
+    }
+
+    @VisibleForTesting
     public static void tuiPrintSpriteLine(int index, Color color) {
         String s = "";
         if (color.equals(Color.GREEN))
