@@ -4,12 +4,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.List;
-
-import it.polimi.ingsw.BoardCoord;
 
 public class Shelfie implements ShelfieView {
 

@@ -30,8 +30,9 @@ public class GameServerController {
     public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) throws IllegalArgumentException {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
-            List <Property<Tile>> selectedTiles = new ArrayList<>();
-            if (!game.getBoard().checkBoardCoord(selected) || !player.getShelfie().checkColumnSpace(shelfCol,selected.size())) {
+            List<Property<Tile>> selectedTiles = new ArrayList<>();
+            if (!game.getBoard().checkBoardCoord(selected)
+                    || !player.getShelfie().checkColumnSpace(shelfCol, selected.size())) {
                 throw new IllegalArgumentException("Invalid move");
             }
 
@@ -39,17 +40,14 @@ public class GameServerController {
             for (BoardCoord coord : selected) {
                 selectedTiles.add(game.getBoard().tile(coord.row(), coord.col()));
                 game.getBoard().removeTile(coord.row(), coord.col());
-                }
-            
+            }
+
             //add tiles to shelfie
             player.getShelfie().placeTiles(selectedTiles, shelfCol);
 
-            if (game.getBoard().isEmpty())
-            {
+            if (game.getBoard().isEmpty()) {
                 game.getBoard().refillBoard();
             }
-
-           
 
         }
     }
