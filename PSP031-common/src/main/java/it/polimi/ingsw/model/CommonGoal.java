@@ -11,10 +11,6 @@ public class CommonGoal implements CommonGoalView {
 
     private final Property<@Unmodifiable List<Player>> achieved;
 
-    public CommonGoal(Type type) {
-        this(type, List.of());
-    }
-
     public CommonGoal(Type type, List<Player> achieved) {
         this.type = type;
         this.achieved = new SerializableProperty<>(List.copyOf(achieved));

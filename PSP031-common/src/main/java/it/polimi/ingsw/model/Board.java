@@ -24,14 +24,20 @@ public class Board implements BoardView {
 
     @SuppressWarnings("unchecked")
     public Board(int numOfPlayers) {
-        this.board = Arrays.stream(generateBasedOnPlayers(numOfPlayers))
-                .map(row -> Arrays.stream(row).map(SerializableProperty::nullableProperty).toArray(Property[]::new))
+        var invalidTile = new Tile(Color.GREEN);
+        this.invalidTile = new SerializableProperty<>(invalidTile);
+        this.board = Arrays.stream(generateBasedOnPlayers(numOfPlayers, invalidTile))
+                .map(row -> Arrays.stream(row)
+                        .map(tile -> tile == invalidTile ? this.invalidTile : SerializableProperty.nullableProperty(tile))
+                        .toArray(Property[]::new))
                 .toArray(Property[][]::new);
-        invalidTile = new SerializableProperty<>(new Tile(Color.GREEN));
     }
 
-    private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers) {
-        return new Tile[9][9]; // TODO: generate based on number of players
+    private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers, Tile invalidTile) {
+        // TODO: generate based on number of players
+        Tile[][] tiles = new Tile[9][9];
+        tiles[0][0] = invalidTile;
+        return tiles;
     }
 
     @Override

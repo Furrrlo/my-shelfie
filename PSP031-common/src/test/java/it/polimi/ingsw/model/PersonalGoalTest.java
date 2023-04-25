@@ -82,4 +82,43 @@ class PersonalGoalTest {
         });
         assertFalse(p2.achievedPersonalGoal(shelfie));
     }
+
+    @Test
+    void tiles() {
+        assertDoesNotThrow(() -> new PersonalGoal(0).tiles().forEach(t -> {
+        }));
+    }
+
+    @Test
+    @SuppressWarnings("EqualsWithItself")
+    void testEquals() {
+        final var personalGoal1 = new PersonalGoal(0);
+        final var personalGoal2 = new PersonalGoal(0);
+
+        assertEquals(personalGoal1, personalGoal1, "Same instance is not the same");
+        assertNotEquals(personalGoal1, new Object(), "Different object should not be equals");
+        assertEquals(personalGoal1, personalGoal2, "Instances with no differences should be equals");
+
+        final var personalGoalDiffIndex = new PersonalGoal(1);
+        assertNotEquals(personalGoal1, personalGoalDiffIndex, "Instances with different tiles should not be equals");
+    }
+
+    @Test
+    void testHashCode() {
+        final var personalGoal1 = new PersonalGoal(0);
+        final var personalGoal2 = new PersonalGoal(0);
+
+        assertEquals(personalGoal1.hashCode(), personalGoal1.hashCode(), "Same instance is not the same");
+        assertEquals(personalGoal1.hashCode(), personalGoal2.hashCode(), "Instances with no differences should be equals");
+
+        final var personalGoalDiffIndex = new PersonalGoal(1);
+        assertNotEquals(personalGoal1.hashCode(), personalGoalDiffIndex.hashCode(),
+                "Instances with different tiles should not be equals");
+    }
+
+    @Test
+    void testToString() {
+        final var personalGoal = new PersonalGoal(1);
+        assertDoesNotThrow(personalGoal::toString);
+    }
 }

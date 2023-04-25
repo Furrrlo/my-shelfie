@@ -123,13 +123,13 @@ public class Game implements GameView {
             return false;
         return gameID == game.gameID &&
                 board.equals(game.board) &&
-                players.equals(game.players) &&
                 thePlayer.equals(game.thePlayer) &&
                 startingPlayer.equals(game.startingPlayer) &&
                 currentTurn.get().equals(game.currentTurn.get()) &&
                 personalGoal.equals(game.personalGoal) &&
                 commonGoal.equals(game.commonGoal) &&
-                Objects.equals(firstFinisher.get(), game.firstFinisher.get());
+                Objects.equals(firstFinisher.get(), game.firstFinisher.get()) &&
+                players.equals(game.players);
     }
 
     @Override

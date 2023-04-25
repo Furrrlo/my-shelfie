@@ -13,13 +13,6 @@ public class Lobby implements LobbyView {
     private final Property<@Unmodifiable List<LobbyPlayer>> joinedPlayers;
     private final Property<@Nullable GameAndController<Game>> game;
 
-    /**
-     * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
-     */
-    public Lobby(int requiredPlayers) {
-        this(requiredPlayers, List.of());
-    }
-
     public Lobby(int requiredPlayers, List<LobbyPlayer> joinedPlayers) {
         this(requiredPlayers, joinedPlayers, null);
     }
