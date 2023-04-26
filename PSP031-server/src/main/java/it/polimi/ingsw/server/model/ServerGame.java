@@ -1,19 +1,11 @@
 package it.polimi.ingsw.server.model;
 
-import it.polimi.ingsw.model.Board;
-import it.polimi.ingsw.model.BoardView;
-import it.polimi.ingsw.model.Property;
-import it.polimi.ingsw.model.SerializableProperty;
-import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class ServerGame implements ServerGameView {
 
@@ -133,13 +125,12 @@ public class ServerGame implements ServerGameView {
         int temp;
         for (int r = 0; r < BoardView.BOARD_ROWS; r++) {
             for (int c = 0; c < BoardView.BOARD_COLUMNS && this.bag.size() > 0; c++) {
-                if (this.board.tile(r, c) == null) {
+                Property<@Nullable Tile> tileProp = this.board.tile(r, c);
+                if (tileProp.get() == null) {
                     temp = random.nextInt(this.bag.size());
-                    this.board.placeTile(r, c, this.bag.get(temp));
-                    this.bag.remove(temp);
+                    tileProp.set(this.bag.remove(temp));
                 }
             }
         }
     }
-
 }

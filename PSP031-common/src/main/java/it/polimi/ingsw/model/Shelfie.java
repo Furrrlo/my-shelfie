@@ -119,12 +119,12 @@ public class Shelfie implements ShelfieView {
 
     }
 
-    public void placeTiles(List<Property<Tile>> selectedTiles, int shelfCol) {
+    public void placeTiles(List<Tile> selectedTiles, int shelfCol) {
         //place tiles in the selected column from the bottom and first free space
-        for (Property<Tile> tile : selectedTiles) {
+        for (Tile tile : selectedTiles) {
             for (int r = 0; r < ROWS; r++) {
                 if (shelfie[r][shelfCol].get() == null) {
-                    shelfie[r][shelfCol].set(tile.get());
+                    shelfie[r][shelfCol].set(tile);
                     break;
                 }
             }

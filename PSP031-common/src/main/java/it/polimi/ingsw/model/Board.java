@@ -117,15 +117,6 @@ public class Board implements BoardView {
                 .map(col -> new TileAndCoords<>(board[row][col], row, col)));
     }
 
-    public void placeTile(int row, int col, Tile tile) {
-        board[row][col] = new SerializableProperty<>(tile);
-        //TODO: check if it's right
-    }
-
-    public void removeTile(int row, int col) {
-        board[row][col] = null;
-    }
-
     public boolean isEmpty() {
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getCols(); j++) {

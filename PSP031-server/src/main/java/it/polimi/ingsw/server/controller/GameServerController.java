@@ -1,12 +1,15 @@
 package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.BoardCoord;
-import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings({ "FieldCanBeLocal", "unused" })
 public class GameServerController {
@@ -30,7 +33,7 @@ public class GameServerController {
     public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) throws IllegalArgumentException {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
-            List<Property<Tile>> selectedTiles = new ArrayList<>();
+            List<Tile> selectedTiles = new ArrayList<>();
             if (!game.getBoard().checkBoardCoord(selected)
                     || !player.getShelfie().checkColumnSpace(shelfCol, selected.size())) {
                 throw new IllegalArgumentException("Invalid move");
@@ -38,8 +41,9 @@ public class GameServerController {
 
             //remove tiles from board
             for (BoardCoord coord : selected) {
-                selectedTiles.add(game.getBoard().tile(coord.row(), coord.col()));
-                game.getBoard().removeTile(coord.row(), coord.col());
+                Property<@Nullable Tile> tileProp = game.getBoard().tile(coord.row(), coord.col());
+                selectedTiles.add(Objects.requireNonNull(tileProp.get(), "Checked tile was invalid"));
+                tileProp.set(null);
             }
 
             //add tiles to shelfie
