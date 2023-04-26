@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <errorprone.version>2.18.0</errorprone.version>
-        <nullaway.version>0.10.9</nullaway.version>
+        <nullaway.version>0.10.10</nullaway.version>
 
         <spotless.version>2.35.0</spotless.version>
         <eclipse-jdt.version>4.27</eclipse-jdt.version>
