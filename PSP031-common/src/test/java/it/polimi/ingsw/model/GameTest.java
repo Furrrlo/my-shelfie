@@ -184,8 +184,8 @@ class GameTest {
                 1,
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
-                new PersonalGoal(0),
-                null);
+                new PersonalGoal(1),
+                0);
         assertNotEquals(game1, gameDiffFirstFinisher, "Instances with different first finisher should not be equals");
     }
 
@@ -368,8 +368,8 @@ class GameTest {
                 1,
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
-                new PersonalGoal(0),
-                null);
+                new PersonalGoal(1),
+                0);
         assertNotEquals(game1.hashCode(), gameDiffFirstFinisher.hashCode(),
                 "Instances with different first finisher should not be equals");
     }
