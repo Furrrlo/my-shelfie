@@ -19,8 +19,6 @@ import java.util.stream.Stream;
  */
 public class Board implements BoardView {
 
-    private final Property<@Nullable Tile>[][] board;
-    private final Property<Tile> invalidTile;
     private final static int[][] TWO_PLAYERS_MATRIX = new int[][] {
             { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
@@ -55,15 +53,8 @@ public class Board implements BoardView {
             { 0, 0, 0, 0, 1, 1, 0, 0, 0 }
     };
 
-    @Override
-    public int getRows() {
-        return BOARD_ROWS;
-    }
-
-    @Override
-    public int getCols() {
-        return BOARD_COLUMNS;
-    }
+    private final Property<@Nullable Tile>[][] board;
+    private final Property<Tile> invalidTile;
 
     @SuppressWarnings({
             "unchecked", // Arrays don't support generics and need unchecked casts
@@ -103,6 +94,16 @@ public class Board implements BoardView {
     }
 
     @Override
+    public int getRows() {
+        return BOARD_ROWS;
+    }
+
+    @Override
+    public int getCols() {
+        return BOARD_COLUMNS;
+    }
+
+    @Override
     public Property<@Nullable Tile> tile(int r, int c) {
         if (board[r][c] == invalidTile)
             throw new IndexOutOfBoundsException("Invalid Position selected");
@@ -114,34 +115,6 @@ public class Board implements BoardView {
         return IntStream.range(0, getRows()).boxed().flatMap(row -> IntStream.range(0, getCols()).boxed()
                 .filter(col -> board[row][col] != invalidTile)
                 .map(col -> new TileAndCoords<>(board[row][col], row, col)));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof Board that))
-            return false;
-        return IntStream.range(0, getRows()).boxed()
-                .allMatch(row -> IntStream.range(0, getCols()).boxed()
-                        .allMatch(col -> Objects.equals(board[row][col].get(), that.board[row][col].get())));
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.stream(board)
-                .mapToInt(row -> Arrays.stream(row)
-                        .mapToInt(tile -> Objects.hashCode(tile.get()))
-                        .reduce(1, (a, b) -> 31 * a + b))
-                .reduce(1, (a, b) -> 31 * a + b);
-    }
-
-    @Override
-    public String toString() {
-        return "Board{" +
-                "board=" + Arrays.deepToString(board) +
-                ", invalidTile=" + invalidTile +
-                '}';
     }
 
     public void placeTile(int row, int col, Tile tile) {
@@ -211,4 +184,31 @@ public class Board implements BoardView {
         return false;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Board that))
+            return false;
+        return IntStream.range(0, getRows()).boxed()
+                .allMatch(row -> IntStream.range(0, getCols()).boxed()
+                        .allMatch(col -> Objects.equals(board[row][col].get(), that.board[row][col].get())));
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.stream(board)
+                .mapToInt(row -> Arrays.stream(row)
+                        .mapToInt(tile -> Objects.hashCode(tile.get()))
+                        .reduce(1, (a, b) -> 31 * a + b))
+                .reduce(1, (a, b) -> 31 * a + b);
+    }
+
+    @Override
+    public String toString() {
+        return "Board{" +
+                "board=" + Arrays.deepToString(board) +
+                ", invalidTile=" + invalidTile +
+                '}';
+    }
 }
