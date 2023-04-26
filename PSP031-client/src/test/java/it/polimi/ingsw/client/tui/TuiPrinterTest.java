@@ -1,10 +1,7 @@
 package it.polimi.ingsw.client.tui;
 
-import it.polimi.ingsw.model.Color;
-import it.polimi.ingsw.model.Shelfie;
+import it.polimi.ingsw.model.*;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TuiPrinterTest {
     @Test
@@ -65,5 +62,11 @@ class TuiPrinterTest {
                 //@formatter:on
         });
         TuiPrinter.tuiPrintShelfie(shelfie);
+    }
+
+    @Test
+    void tuiPrintBoardRandom() {
+        Board board = new Board(4);
+        TuiPrinter.tuiPrintBoard(board);
     }
 }

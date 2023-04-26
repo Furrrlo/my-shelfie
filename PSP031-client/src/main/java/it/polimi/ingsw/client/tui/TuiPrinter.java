@@ -1,11 +1,11 @@
 package it.polimi.ingsw.client.tui;
 
-import it.polimi.ingsw.model.Color;
-import it.polimi.ingsw.model.Shelfie;
+import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Objects;
 
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
@@ -85,6 +85,23 @@ public class TuiPrinter {
         printShelfieBottom();
     }
 
+    public static void tuiPrintBoard(Board board) {
+        for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
+            for (int i = 0; i < 24; i++) {
+                StringBuilder sb = new StringBuilder();
+                for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
+                    if (board.tile(row, col).get() != null && !(board.tile(row, col) == board.getInvalidTile()))
+                        sb.append(SpriteLine(i, Objects.requireNonNull(board.tile(row, col).get()).getColor()));
+                    else if (board.tile(row, col).get() == null)
+                        sb.append(EmptyLine());
+                    else if (board.tile(row, col) == board.getInvalidTile())
+                        sb.append(InvalidTileLine());
+                }
+                System.out.println(sb);
+            }
+        }
+    }
+
     public static void printShelfieHeader() {
         //TODO : implement Shelfie header with selection number
     }
@@ -123,6 +140,10 @@ public class TuiPrinter {
         return new StringBuilder(pxl.repeat(24));
     }
 
+    public static StringBuilder InvalidTileLine() {
+        return new StringBuilder().append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(24)).append(ConsoleColors.RESET);
+    }
+
     public static StringBuilder SpriteLine(int index, Color color) {
         String spriteLine = switch (color) {
             case GREEN -> CAT.get(index);
@@ -148,21 +169,14 @@ public class TuiPrinter {
                 case 'C' -> ConsoleColors.PURPLE_BACKGROUND_BRIGHT;
                 case 'R' -> ConsoleColors.RED_BACKGROUND_BRIGHT;
                 case 'W' -> ConsoleColors.WHITE_BACKGROUND;
-                case 'D' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
+                case 'D', 'Q', 'M' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
                 case 'K' -> ConsoleColors.RED_DARK_BACKGROUND;
                 case 'L' -> ConsoleColors.RED_VERY_DARK_BACKGROUND;
-                case 'M' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
                 case 'O' -> ConsoleColors.YELLOW_BACKGROUND_BRIGHT;
                 case 'N' -> ConsoleColors.CYAN_BACKGROUND_BRIGHT;
-                case 'S' -> ConsoleColors.ORANGE_BACKGROUND;
-                case 'Q' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
+                case 'S', 'J' -> ConsoleColors.ORANGE_BACKGROUND;
                 case 'T' -> ConsoleColors.BLUE_BACKGROUND;
-                // should be pink but not working
-                case 'U' -> ConsoleColors.PINK_BACKGROUND;
-                // should be brown bright but not working
-                case 'J' -> ConsoleColors.ORANGE_BACKGROUND;
-                // should be brown bright but not working
-                case 'X' -> ConsoleColors.PINK_BACKGROUND;
+                case 'U', 'X' -> ConsoleColors.PINK_BACKGROUND;
                 default -> ConsoleColors.RESET;
             };
             ss.append(consoleColor).append(pxl);

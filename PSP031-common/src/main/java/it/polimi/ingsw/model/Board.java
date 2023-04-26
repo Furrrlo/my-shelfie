@@ -93,6 +93,10 @@ public class Board implements BoardView {
         return board;
     }
 
+    public Property<Tile> getInvalidTile() {
+        return invalidTile;
+    }
+
     @Override
     public int getRows() {
         return BOARD_ROWS;
@@ -106,7 +110,8 @@ public class Board implements BoardView {
     @Override
     public Property<@Nullable Tile> tile(int r, int c) {
         if (board[r][c] == invalidTile)
-            throw new IndexOutOfBoundsException("Invalid Position selected");
+            return invalidTile;
+        //throw new IndexOutOfBoundsException("Invalid Position selected");
         return board[r][c];
     }
 
