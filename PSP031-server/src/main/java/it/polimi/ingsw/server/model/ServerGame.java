@@ -85,12 +85,11 @@ public class ServerGame implements ServerGameView {
     }
 
     public void refillBoard() {
-        int[][] validTiles = board.getValidTiles();
         Random random = new Random();
         int temp;
         for (int r = 0; r < BoardView.BOARD_ROWS; r++) {
             for (int c = 0; c < BoardView.BOARD_COLUMNS && this.bag.size() > 0; c++) {
-                if (validTiles[r][c] == 1) {
+                if (board.isValidTile(r, c)) {
                     Property<@Nullable Tile> tileProp = this.board.tile(r, c);
                     if (tileProp.get() == null) {
                         temp = random.nextInt(this.bag.size());

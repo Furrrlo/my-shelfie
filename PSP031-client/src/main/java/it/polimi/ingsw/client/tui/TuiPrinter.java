@@ -87,19 +87,19 @@ public class TuiPrinter {
     }
 
     public static void tuiPrintBoard(Board board) {
-        int[][] validTiles = board.getValidTiles();
         for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
                 for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
-                    if (validTiles[row][col] == 1) {
+                    if (board.isValidTile(row, col)) {
                         Property<@Nullable Tile> tileProp = board.tile(row, col);
                         if (tileProp.get() != null)
                             sb.append(SpriteLine(i, Objects.requireNonNull(tileProp.get()).getColor()));
                         else
                             sb.append(EmptyLine());
-                    } else
+                    } else {
                         sb.append(InvalidTileLine());
+                    }
                 }
                 System.out.println(sb);
             }

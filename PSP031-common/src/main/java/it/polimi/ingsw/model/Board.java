@@ -55,14 +55,12 @@ public class Board implements BoardView {
 
     private final Property<@Nullable Tile>[][] board;
     private final Property<Tile> invalidTile;
-    private final int numOfPlayers;
 
     @SuppressWarnings({
             "unchecked", // Arrays don't support generics and need unchecked casts
             "ReferenceEquality" // It's done on purpose to check for invalid tiles
     })
     public Board(int numOfPlayers) {
-        this.numOfPlayers = numOfPlayers;
         var invalidTile = new Tile(Color.GREEN);
         this.invalidTile = new SerializableProperty<>(invalidTile);
         this.board = Arrays.stream(generateBasedOnPlayers(numOfPlayers, invalidTile))
@@ -104,16 +102,6 @@ public class Board implements BoardView {
     }
 
     @Override
-    public int[][] getValidTiles() {
-        return switch (this.numOfPlayers) {
-            case 2 -> TWO_PLAYERS_MATRIX;
-            case 3 -> THREE_PLAYERS_MATRIX;
-            case 4 -> FOUR_PLAYERS_MATRIX;
-            default -> throw new UnsupportedOperationException("Invalid player number (min: 2, max: 4): " + numOfPlayers);
-        };
-    }
-
-    @Override
     public int getRows() {
         return BOARD_ROWS;
     }
@@ -124,8 +112,13 @@ public class Board implements BoardView {
     }
 
     @Override
+    public boolean isValidTile(int r, int c) {
+        return board[r][c] != invalidTile;
+    }
+
+    @Override
     public Property<@Nullable Tile> tile(int r, int c) {
-        if (board[r][c] == invalidTile)
+        if (!isValidTile(r, c))
             throw new IndexOutOfBoundsException("Invalid Position selected");
         return board[r][c];
     }

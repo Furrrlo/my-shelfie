@@ -15,15 +15,17 @@ public interface BoardView extends Serializable {
 
     int getCols();
 
+    /**
+     * Returns whether the given position can be occupied by a tile and, therefore,
+     * {@link #tile(int, int)} will not throw an exception when invoked
+     * 
+     * @return true if the given pos can be occupied by a tile
+     */
+    boolean isValidTile(int r, int c);
+
     Provider<@Nullable Tile> tile(int r, int c);
 
     Stream<? extends TileAndCoords<? extends Provider<@Nullable Tile>>> tiles();
-
-    /**
-     * returns a int[][] where elements as '1' specifies valid positions for tiles, while elements as '0'
-     * specifies invalid positions for tiles
-     */
-    int[][] getValidTiles();
 
     /**
      * returns true if board is empty
