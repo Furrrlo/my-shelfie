@@ -55,12 +55,14 @@ public class Board implements BoardView {
 
     private final Property<@Nullable Tile>[][] board;
     private final Property<Tile> invalidTile;
+    private final int numOfPlayers;
 
     @SuppressWarnings({
             "unchecked", // Arrays don't support generics and need unchecked casts
             "ReferenceEquality" // It's done on purpose to check for invalid tiles
     })
     public Board(int numOfPlayers) {
+        this.numOfPlayers = numOfPlayers;
         var invalidTile = new Tile(Color.GREEN);
         this.invalidTile = new SerializableProperty<>(invalidTile);
         this.board = Arrays.stream(generateBasedOnPlayers(numOfPlayers, invalidTile))
@@ -70,6 +72,9 @@ public class Board implements BoardView {
                 .toArray(Property[][]::new);
     }
 
+    /**
+     * depending on the number of players calls the method responsible for generating the board
+     */
     private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers, Tile invalidTile) {
         return switch (numOfPlayers) {
             case 2 -> generateBoard(TWO_PLAYERS_MATRIX, invalidTile);
@@ -79,11 +84,16 @@ public class Board implements BoardView {
         };
     }
 
-    private static @Nullable Tile[][] generateBoard(int[][] matrix, Tile invalidTile) {
+    /**
+     * @param validTiles : matrix of type int whose elements represents if a tile is valid(1) or invalid(0)
+     * @param invalidTile : specifies the parameter for setting all the invalid tiles in the board
+     * returns an empty board with invalid tiles positioned as specified in validTiles
+     */
+    private static @Nullable Tile[][] generateBoard(int[][] validTiles, Tile invalidTile) {
         Tile[][] board = new Tile[BOARD_ROWS][BOARD_COLUMNS];
         for (int r = 0; r < BOARD_ROWS; r++) {
             for (int c = 0; c < BOARD_COLUMNS; c++) {
-                if (matrix[r][c] == 0) {
+                if (validTiles[r][c] == 0) {
                     board[r][c] = invalidTile;
                 } else {
                     board[r][c] = null;
@@ -93,8 +103,14 @@ public class Board implements BoardView {
         return board;
     }
 
-    public Property<Tile> getInvalidTile() {
-        return invalidTile;
+    @Override
+    public int[][] getValidTiles() {
+        return switch (this.numOfPlayers) {
+            case 2 -> TWO_PLAYERS_MATRIX;
+            case 3 -> THREE_PLAYERS_MATRIX;
+            case 4 -> FOUR_PLAYERS_MATRIX;
+            default -> throw new UnsupportedOperationException("Invalid player number (min: 2, max: 4): " + numOfPlayers);
+        };
     }
 
     @Override
@@ -110,8 +126,7 @@ public class Board implements BoardView {
     @Override
     public Property<@Nullable Tile> tile(int r, int c) {
         if (board[r][c] == invalidTile)
-            return invalidTile;
-        //throw new IndexOutOfBoundsException("Invalid Position selected");
+            throw new IndexOutOfBoundsException("Invalid Position selected");
         return board[r][c];
     }
 
@@ -122,6 +137,7 @@ public class Board implements BoardView {
                 .map(col -> new TileAndCoords<>(board[row][col], row, col)));
     }
 
+    @Override
     public boolean isEmpty() {
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getCols(); j++) {
@@ -133,6 +149,7 @@ public class Board implements BoardView {
     }
 
     //TODO: test everything!!
+    @Override
     public boolean checkBoardCoord(List<BoardCoord> selected) {
 
         for (BoardCoord coord : selected) {
@@ -155,7 +172,10 @@ public class Board implements BoardView {
 
     }
 
-    public boolean hasFreeSide(int row, int col) {
+    /**
+     * returns true if the board tile in specified position has at least one free side
+     */
+    private boolean hasFreeSide(int row, int col) {
         if (Objects.equals(tile(row + 1, col), invalidTile))
             return true;
         if (Objects.equals(tile(row - 1, col), invalidTile))
@@ -165,13 +185,15 @@ public class Board implements BoardView {
         return Objects.equals(tile(row, col - 1), invalidTile);
     }
 
-    public boolean hasCommonSide(int row0, int col0, int row1, int col1) {
+    /** returns true if the two tiles in the specified positions have one common side */
+    private boolean hasCommonSide(int row0, int col0, int row1, int col1) {
         if (row0 == row1 && (col1 == col0 + 1 || col1 == col0 - 1))
             return true;
         return col0 == col1 && (row1 == row0 + 1 || row1 == row0 - 1);
     }
 
-    public boolean hasCommonSide(int row0, int col0, int row1, int col1, int row2, int col2) {
+    /** returns true if the three tiles in the specified positions are linked between them in a line */
+    private boolean hasCommonSide(int row0, int col0, int row1, int col1, int row2, int col2) {
         if ((row0 == row1 && row1 == row2) || (col0 == col1 && col1 == col2)) {
             return (hasCommonSide(row0, col0, row1, col1) && hasCommonSide(row1, col1, row2, col2)) ||
                     (hasCommonSide(row0, col0, row2, col2) && hasCommonSide(row1, col1, row2, col2)) ||
