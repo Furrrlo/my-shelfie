@@ -57,7 +57,7 @@ public class RmiDisconnectionTest {
                                                       Supplier<Socket> socketFactory,
                                                       ThrowingConsumer<Socket> cleanup)
             throws Throwable {
-        final String testName = "testRmiDisconnection_clientCloseInEmptyLobby_" + name;
+        final String testName = "testRmiDisconnection_clientCloseInEmptyLobby_" + name + "_" + System.currentTimeMillis();
         System.out.println(testName);
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
@@ -90,7 +90,7 @@ public class RmiDisconnectionTest {
                                                  Supplier<Socket> socketFactory,
                                                  ThrowingConsumer<Socket> cleanup)
             throws Throwable {
-        final String testName = "testRmiDisconnection_clientCloseInLobby_" + name;
+        final String testName = "testRmiDisconnection_clientCloseInLobby_" + name + "_" + System.currentTimeMillis();
         System.out.println(testName);
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
@@ -129,7 +129,7 @@ public class RmiDisconnectionTest {
                                                 Supplier<Socket> socketFactory,
                                                 ThrowingConsumer<Socket> cleanup)
             throws Throwable {
-        final String testName = "testRmiDisconnection_clientCloseInGame_" + name;
+        final String testName = "testRmiDisconnection_clientCloseInGame_" + name + "_" + System.currentTimeMillis();
         System.out.println(testName);
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
