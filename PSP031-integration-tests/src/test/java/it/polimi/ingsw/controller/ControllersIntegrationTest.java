@@ -3,6 +3,7 @@ package it.polimi.ingsw.controller;
 import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
+import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.controller.LobbyServerController;
 import it.polimi.ingsw.server.controller.LockProtected;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -66,6 +69,11 @@ public class ControllersIntegrationTest {
             final var lockedServerLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
             try (var lobbyCloseable = lockedServerLobby.use()) {
                 var serverLobby = lobbyCloseable.obj();
+                serverLobby.joinedPlayers().update(l -> {
+                    final var list = new ArrayList<>(l);
+                    list.add(new LobbyPlayer("fake_player"));
+                    return Collections.unmodifiableList(list);
+                });
                 serverLobby.game().set(new ServerGameAndController<>(
                         serverGame = LobbyServerController.createGame(0, new Random(), serverLobby.joinedPlayers().get()),
                         new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock())) {

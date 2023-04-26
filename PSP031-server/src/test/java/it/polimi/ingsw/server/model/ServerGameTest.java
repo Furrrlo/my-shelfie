@@ -19,7 +19,7 @@ class ServerGameTest {
         final var game = LobbyServerController.createGame(
                 0,
                 new Random(),
-                List.of(new LobbyPlayer("example_player")));
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertThrows(
                 UnsupportedOperationException.class,
                 () -> game.getBagView().add(new Tile(Color.BLUE)),
@@ -35,7 +35,7 @@ class ServerGameTest {
         final var game = LobbyServerController.createGame(
                 0,
                 new Random(),
-                List.of(new LobbyPlayer("example_player")));
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertDoesNotThrow(
                 () -> game.getBag().add(new Tile(Color.BLUE)),
                 "Can't add elements to bag");
@@ -49,13 +49,14 @@ class ServerGameTest {
         final var game = LobbyServerController.createGame(
                 0,
                 new Random(),
-                List.of(new LobbyPlayer("example_player")));
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertEquals(game.getBag(), game.getBagView());
         game.getBag().add(new Tile(Color.BLUE));
         assertEquals(game.getBag(), game.getBagView());
     }
 
     @Test
+    @SuppressWarnings("EqualsWithItself")
     void testEquals() {
         final long seed1 = new Random().nextLong();
 
@@ -102,7 +103,7 @@ class ServerGameTest {
         final var gameDiffPlayers = LobbyServerController.createGame(
                 0,
                 new Random(seed1),
-                List.of(new LobbyPlayer("example_player_2")));
+                List.of(new LobbyPlayer("example_player_2"), new LobbyPlayer("example_player_3")));
         assertNotEquals(game1, gameDiffPlayers, "Instances with different players should not be equals");
 
         final var gameDiffTurn = LobbyServerController.createGame(
@@ -169,7 +170,7 @@ class ServerGameTest {
         final var gameDiffPlayers = LobbyServerController.createGame(
                 0,
                 new Random(seed1),
-                List.of(new LobbyPlayer("example_player_2")));
+                List.of(new LobbyPlayer("example_player_2"), new LobbyPlayer("example_player_3")));
         assertNotEquals(game1.hashCode(), gameDiffPlayers.hashCode(), "Instances with different players should not be equals");
 
         final var gameDiffTurn = LobbyServerController.createGame(
@@ -196,7 +197,7 @@ class ServerGameTest {
         final var game = LobbyServerController.createGame(
                 0,
                 new Random(),
-                List.of(new LobbyPlayer("example_player_1")));
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertDoesNotThrow(game::toString);
     }
 }
