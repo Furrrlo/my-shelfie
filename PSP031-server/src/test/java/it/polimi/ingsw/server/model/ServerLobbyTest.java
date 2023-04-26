@@ -7,7 +7,6 @@ import it.polimi.ingsw.server.controller.LockProtected;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +20,7 @@ class ServerLobbyTest {
 
         final ServerGame game;
         lobby.game().set(new ServerGameAndController<>(
-                game = LobbyServerController.createGame(0, new Random(), lobby.joinedPlayers().get()),
+                game = LobbyServerController.createGame(0, lobby.joinedPlayers().get()),
                 new GameServerController(new LockProtected<>(game))));
         assertTrue(lobby.hasGameStarted(), "There a game");
     }
@@ -33,7 +32,7 @@ class ServerLobbyTest {
 
         final ServerGame game;
         lobby.game().set(new ServerGameAndController<>(
-                game = LobbyServerController.createGame(0, new Random(), lobby.joinedPlayers().get()),
+                game = LobbyServerController.createGame(0, lobby.joinedPlayers().get()),
                 new GameServerController(new LockProtected<>(game))));
 
         assertFalse(lobby.canOnePlayerJoin(), "Game is already in progress, player can't join");
@@ -86,7 +85,7 @@ class ServerLobbyTest {
         lobbyDiffGame.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
         final ServerGame game;
         lobbyDiffGame.game().set(new ServerGameAndController<>(
-                game = LobbyServerController.createGame(0, new Random(), lobbyDiffGame.joinedPlayers().get()),
+                game = LobbyServerController.createGame(0, lobbyDiffGame.joinedPlayers().get()),
                 new GameServerController(new LockProtected<>(game))));
         assertNotEquals(lobby1, lobbyDiffGame, "Instances with different games should not be equals");
     }
@@ -117,7 +116,7 @@ class ServerLobbyTest {
         lobbyDiffGame.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
         final ServerGame game;
         lobbyDiffGame.game().set(new ServerGameAndController<>(
-                game = LobbyServerController.createGame(0, new Random(), lobbyDiffGame.joinedPlayers().get()),
+                game = LobbyServerController.createGame(0, lobbyDiffGame.joinedPlayers().get()),
                 new GameServerController(new LockProtected<>(game))));
         assertNotEquals(lobby1.hashCode(), lobbyDiffGame.hashCode(),
                 "Instances with different games should not be equals");

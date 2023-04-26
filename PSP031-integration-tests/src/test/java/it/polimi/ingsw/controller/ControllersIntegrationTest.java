@@ -16,7 +16,6 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -75,7 +74,7 @@ public class ControllersIntegrationTest {
                     return Collections.unmodifiableList(list);
                 });
                 serverLobby.game().set(new ServerGameAndController<>(
-                        serverGame = LobbyServerController.createGame(0, new Random(), serverLobby.joinedPlayers().get()),
+                        serverGame = LobbyServerController.createGame(0, serverLobby.joinedPlayers().get()),
                         new GameServerController(new LockProtected<>(serverGame, lockedServerLobby.getLock())) {
                             @Override
                             public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {

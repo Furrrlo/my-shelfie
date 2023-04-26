@@ -7,7 +7,7 @@ import it.polimi.ingsw.server.controller.LobbyServerController;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGeneratorFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +18,6 @@ class ServerGameTest {
     void bagViewIsUnmodifiable() {
         final var game = LobbyServerController.createGame(
                 0,
-                new Random(),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertThrows(
                 UnsupportedOperationException.class,
@@ -34,7 +33,6 @@ class ServerGameTest {
     void bagIsModifiable() {
         final var game = LobbyServerController.createGame(
                 0,
-                new Random(),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertDoesNotThrow(
                 () -> game.getBag().add(new Tile(Color.BLUE)),
@@ -48,7 +46,6 @@ class ServerGameTest {
     void bagViewIsViewOfBag() {
         final var game = LobbyServerController.createGame(
                 0,
-                new Random(),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertEquals(game.getBag(), game.getBagView());
         game.getBag().add(new Tile(Color.BLUE));
@@ -58,15 +55,16 @@ class ServerGameTest {
     @Test
     @SuppressWarnings("EqualsWithItself")
     void testEquals() {
-        final long seed1 = new Random().nextLong();
+        final var randomFactory = RandomGeneratorFactory.getDefault();
+        final long seed1 = randomFactory.create().nextLong();
 
         final var game1 = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         final var game2 = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
 
         assertEquals(game1, game1, "Same instance is not the same");
@@ -82,33 +80,33 @@ class ServerGameTest {
 
         final var gameDiffId = LobbyServerController.createGame(
                 1,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertNotEquals(game1, gameDiffId, "Instances with different ids should not be equals");
 
         final var gameDiffBoard = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().set(new Tile(Color.BLUE));
         assertNotEquals(game1, gameDiffBoard, "Instances with different boards should not be equals");
 
         final var gameDiffBag = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffBag.getBag().add(new Tile(Color.BLUE));
         assertNotEquals(game1, gameDiffBag, "Instances with different bags should not be equals");
 
         final var gameDiffPlayers = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_2"), new LobbyPlayer("example_player_3")));
         assertNotEquals(game1, gameDiffPlayers, "Instances with different players should not be equals");
 
         final var gameDiffTurn = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffTurn.currentTurn().update(curr -> curr.equals(gameDiffTurn.getPlayers().get(0))
                 ? gameDiffTurn.getPlayers().get(1)
@@ -117,7 +115,7 @@ class ServerGameTest {
 
         final var gameDiffFirstFinisher = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffFirstFinisher.firstFinisher().update(curr -> gameDiffTurn.getPlayers().get(0));
         assertNotEquals(game1, gameDiffFirstFinisher, "Instances with different first finisher should not be equals");
@@ -125,15 +123,16 @@ class ServerGameTest {
 
     @Test
     void testHashCode() {
-        final long seed1 = new Random().nextLong();
+        final var randomFactory = RandomGeneratorFactory.getDefault();
+        final long seed1 = randomFactory.create().nextLong();
 
         final var game1 = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         final var game2 = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
 
         assertEquals(game1, game1, "Same instance is not the same");
@@ -149,33 +148,33 @@ class ServerGameTest {
 
         final var gameDiffId = LobbyServerController.createGame(
                 1,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertNotEquals(game1.hashCode(), gameDiffId.hashCode(), "Instances with different ids should not be equals");
 
         final var gameDiffBoard = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().set(new Tile(Color.BLUE));
         assertNotEquals(game1.hashCode(), gameDiffBoard.hashCode(), "Instances with different boards should not be equals");
 
         final var gameDiffBag = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffBag.getBag().add(new Tile(Color.BLUE));
         assertNotEquals(game1.hashCode(), gameDiffBag.hashCode(), "Instances with different bags should not be equals");
 
         final var gameDiffPlayers = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_2"), new LobbyPlayer("example_player_3")));
         assertNotEquals(game1.hashCode(), gameDiffPlayers.hashCode(), "Instances with different players should not be equals");
 
         final var gameDiffTurn = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffTurn.currentTurn().update(curr -> curr.equals(gameDiffTurn.getPlayers().get(0))
                 ? gameDiffTurn.getPlayers().get(1)
@@ -185,7 +184,7 @@ class ServerGameTest {
 
         final var gameDiffFirstFinisher = LobbyServerController.createGame(
                 0,
-                new Random(seed1),
+                randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffFirstFinisher.firstFinisher().update(curr -> gameDiffTurn.getPlayers().get(0));
         assertNotEquals(game1.hashCode(), gameDiffFirstFinisher.hashCode(),
@@ -196,7 +195,6 @@ class ServerGameTest {
     void testToString() {
         final var game = LobbyServerController.createGame(
                 0,
-                new Random(),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         assertDoesNotThrow(game::toString);
     }
