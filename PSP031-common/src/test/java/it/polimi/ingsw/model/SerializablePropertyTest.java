@@ -32,10 +32,9 @@ class SerializablePropertyTest {
     }
 
     @Test
-    @SuppressWarnings("NullAway") // NullAway doesn't support nullable in generics
     void testNullableSerializableAfterSet() throws IOException, ClassNotFoundException {
         final var property = SerializableProperty.nullableProperty("serialize_me");
-        property.set(null);
+        Property.setNullable(property, null);
         doTestSerializable(property);
     }
 

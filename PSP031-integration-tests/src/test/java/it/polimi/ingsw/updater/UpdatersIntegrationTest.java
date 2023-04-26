@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UpdatersIntegrationTest {
 
-    @SuppressWarnings("NullAway")
     public static void doTestUpdaters(Function<ServerController, Closeable> bindServerController,
                                       Supplier<ClientNetManager> clientNetManagerFactory)
             throws Exception {
@@ -163,7 +162,7 @@ public class UpdatersIntegrationTest {
                         serverGame.firstFinisher(),
                         clientPlayer.isFirstFinisher());
                 // Force a score update by resetting and then setting the player as firstFinisher
-                serverController.runOnOnlyLobbyLocks(() -> setFirstFinisherToNull(serverGame.firstFinisher()));
+                serverController.runOnOnlyLobbyLocks(() -> Property.setNullable(serverGame.firstFinisher(), null));
                 ensurePropertyUpdated(
                         serverPlayer.getNick() + ".score",
                         serverPlayer,
@@ -202,11 +201,6 @@ public class UpdatersIntegrationTest {
                         clientCommonGoal.achieved());
             }
         }
-    }
-
-    @SuppressWarnings("NullAway") // NullAway doesn't handle generics correctly
-    private static void setFirstFinisherToNull(Property<@Nullable ServerPlayer> firstFinisher) {
-        firstFinisher.set(null);
     }
 
     public static <T> void ensurePropertyUpdated(String name,

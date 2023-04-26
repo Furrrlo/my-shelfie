@@ -11,11 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class PropertyProxyTest {
 
     @Test
-    @SuppressWarnings("NullAway") // NullAway doesn't handle generics correctly
     void testProxy() {
         var proxy = new PropertyProxy<@Nullable Object>();
         assertThrows(NullPointerException.class, proxy::get, "Proxy methods should not work without the proxied object");
-        assertThrows(NullPointerException.class, () -> proxy.set(null),
+        assertThrows(NullPointerException.class, () -> Property.setNullable(proxy, null),
                 "Proxy methods should not work without the proxied object");
         assertThrows(NullPointerException.class, () -> proxy.update(v -> null),
                 "Proxy methods should not work without the proxied object");
@@ -34,7 +33,7 @@ class PropertyProxyTest {
         assertEquals(proxied.get(), proxy.get());
         assertTrue(mapped.get());
 
-        assertDoesNotThrow(() -> proxy.set(null));
+        assertDoesNotThrow(() -> Property.setNullable(proxy, null));
         assertEquals(proxied.get(), proxy.get());
         assertFalse(mapped.get());
 

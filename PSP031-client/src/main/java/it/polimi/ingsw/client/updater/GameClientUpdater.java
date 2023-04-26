@@ -30,15 +30,13 @@ public abstract class GameClientUpdater implements GameUpdater {
     }
 
     @Override
-    @SuppressWarnings("NullAway") // NullAway doesn't handle generics correctly
     public void updateBoardTile(int row, int col, @Nullable Tile tile) {
-        game.getBoard().tile(row, col).set(tile);
+        Property.setNullable(game.getBoard().tile(row, col), tile);
     }
 
     @Override
-    @SuppressWarnings("NullAway") // NullAway doesn't handle generics correctly
     public void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) {
-        findPlayerBy(nick).getShelfie().tile(row, col).set(tile);
+        Property.setNullable(findPlayerBy(nick).getShelfie().tile(row, col), tile);
     }
 
     @Override
@@ -57,9 +55,8 @@ public abstract class GameClientUpdater implements GameUpdater {
     }
 
     @Override
-    @SuppressWarnings("NullAway") // NullAway doesn't handle generics correctly
     public void updateFirstFinisher(@Nullable String nick) {
-        game.firstFinisher().set(nick == null ? null : findPlayerBy(nick));
+        Property.setNullable(game.firstFinisher(), nick == null ? null : findPlayerBy(nick));
     }
 
     @Override
