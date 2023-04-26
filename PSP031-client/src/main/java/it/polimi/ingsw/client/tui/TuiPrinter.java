@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
-import java.util.Objects;
 
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
@@ -70,14 +69,15 @@ public class TuiPrinter {
                 StringBuilder sb = new StringBuilder();
                 for (int col = 0; col < COLUMNS; col++) {
                     if (col == 0)
-                        sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.ORANGE_BACKGROUND)
-                                .append(pxl).append(ConsoleColors.RESET);
-                    if (shelfie.tile(row, col).get() != null)
-                        sb.append(SpriteLine(i, Objects.requireNonNull(shelfie.tile(row, col).get()).getColor()));
-                    else
-                        sb.append(EmptyLine());
-                    sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl).append(ConsoleColors.ORANGE_BACKGROUND)
-                            .append(pxl).append(ConsoleColors.RESET);
+                        sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
+                                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                                .append(ConsoleColors.RESET);
+
+                    var tile = shelfie.tile(row, col).get();
+                    sb.append(tile != null ? SpriteLine(i, tile.getColor()) : EmptyLine());
+                    sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl)
+                            .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                            .append(ConsoleColors.RESET);
                 }
                 System.out.println(sb);
             }
@@ -96,7 +96,8 @@ public class TuiPrinter {
     public static void printMidShelf1() {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
-                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl.repeat(131)).append(ConsoleColors.RESET);
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl.repeat(131))
+                .append(ConsoleColors.RESET);
         System.out.println(sb);
     }
 
@@ -119,76 +120,52 @@ public class TuiPrinter {
     }
 
     public static StringBuilder EmptyLine() {
-        return new StringBuilder().append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl)
-                .append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl)
-                .append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl).append(pxl)
-                .append(pxl);
+        return new StringBuilder(pxl.repeat(24));
     }
 
     public static StringBuilder SpriteLine(int index, Color color) {
-        String s = "";
-        if (color.equals(Color.GREEN))
-            s = CAT.get(index);
-        if (color.equals(Color.PINK))
-            s = TREE.get(index);
-        if (color.equals(Color.WHITE))
-            s = BOOK.get(index);
-        if (color.equals(Color.LIGHTBLUE))
-            s = TROPHY.get(index);
-        if (color.equals(Color.YELLOW))
-            s = GAME.get(index);
-        if (color.equals(Color.BLUE))
-            s = FRAME.get(index);
+        String spriteLine = switch (color) {
+            case GREEN -> CAT.get(index);
+            case PINK -> TREE.get(index);
+            case WHITE -> BOOK.get(index);
+            case LIGHTBLUE -> TROPHY.get(index);
+            case YELLOW -> GAME.get(index);
+            case BLUE -> FRAME.get(index);
+        };
 
         StringBuilder ss = new StringBuilder();
         ss.append(ConsoleColors.RESET);
         for (int i = 0; i < 24; i++) {
-            if (s.charAt(i) == 'B')
-                ss.append(ConsoleColors.BLACK_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'G')
-                ss.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'E')
-                ss.append(ConsoleColors.GREEN_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'F')
-                ss.append(ConsoleColors.GREEN_DARK_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'H')
-                ss.append(ConsoleColors.BROWN_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'I')
-                ss.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'A')
-                ss.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'P')
-                ss.append(ConsoleColors.PURPLE_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'C')
-                ss.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'R')
-                ss.append(ConsoleColors.RED_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'W')
-                ss.append(ConsoleColors.WHITE_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'D')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'K')
-                ss.append(ConsoleColors.RED_DARK_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'L')
-                ss.append(ConsoleColors.RED_VERY_DARK_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'M')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'O')
-                ss.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'N')
-                ss.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'S')
-                ss.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'Q')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
-            if (s.charAt(i) == 'T')
-                ss.append(ConsoleColors.BLUE_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'U') // should be pink but not working
-                ss.append(ConsoleColors.PINK_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'J') // should be brown bright but not working
-                ss.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl);
-            if (s.charAt(i) == 'X') // should be brown bright but not working
-                ss.append(ConsoleColors.PINK_BACKGROUND).append(pxl);
+            String consoleColor = switch (spriteLine.charAt(i)) {
+                case 'B' -> ConsoleColors.BLACK_BACKGROUND;
+                case 'G' -> ConsoleColors.GREEN_BACKGROUND_BRIGHT;
+                case 'E' -> ConsoleColors.GREEN_BACKGROUND;
+                case 'F' -> ConsoleColors.GREEN_DARK_BACKGROUND;
+                case 'H' -> ConsoleColors.BROWN_BACKGROUND;
+                case 'I' -> ConsoleColors.BROWN_DARK_BACKGROUND;
+                case 'A' -> ConsoleColors.BLACK_BACKGROUND_BRIGHT;
+                case 'P' -> ConsoleColors.PURPLE_BACKGROUND;
+                case 'C' -> ConsoleColors.PURPLE_BACKGROUND_BRIGHT;
+                case 'R' -> ConsoleColors.RED_BACKGROUND_BRIGHT;
+                case 'W' -> ConsoleColors.WHITE_BACKGROUND;
+                case 'D' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
+                case 'K' -> ConsoleColors.RED_DARK_BACKGROUND;
+                case 'L' -> ConsoleColors.RED_VERY_DARK_BACKGROUND;
+                case 'M' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
+                case 'O' -> ConsoleColors.YELLOW_BACKGROUND_BRIGHT;
+                case 'N' -> ConsoleColors.CYAN_BACKGROUND_BRIGHT;
+                case 'S' -> ConsoleColors.ORANGE_BACKGROUND;
+                case 'Q' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
+                case 'T' -> ConsoleColors.BLUE_BACKGROUND;
+                // should be pink but not working
+                case 'U' -> ConsoleColors.PINK_BACKGROUND;
+                // should be brown bright but not working
+                case 'J' -> ConsoleColors.ORANGE_BACKGROUND;
+                // should be brown bright but not working
+                case 'X' -> ConsoleColors.PINK_BACKGROUND;
+                default -> ConsoleColors.RESET;
+            };
+            ss.append(consoleColor).append(pxl);
         }
         ss.append(ConsoleColors.RESET);
         return ss;
@@ -202,71 +179,6 @@ public class TuiPrinter {
 
     @VisibleForTesting
     public static void tuiPrintSpriteLine(int index, Color color) {
-        String s = "";
-        if (color.equals(Color.GREEN))
-            s = CAT.get(index);
-        if (color.equals(Color.PINK))
-            s = TREE.get(index);
-        if (color.equals(Color.WHITE))
-            s = BOOK.get(index);
-        if (color.equals(Color.LIGHTBLUE))
-            s = TROPHY.get(index);
-        if (color.equals(Color.YELLOW))
-            s = GAME.get(index);
-        if (color.equals(Color.BLUE))
-            s = FRAME.get(index);
-
-        StringBuilder ss = new StringBuilder();
-        ss.append(ConsoleColors.RESET);
-        for (int i = 0; i < 24; i++) {
-            if (s.charAt(i) == 'B')
-                ss.append(ConsoleColors.BLACK_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'G')
-                ss.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'E')
-                ss.append(ConsoleColors.GREEN_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'F')
-                ss.append(ConsoleColors.GREEN_DARK_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'H')
-                ss.append(ConsoleColors.BROWN_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'I')
-                ss.append(ConsoleColors.BROWN_DARK_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'A')
-                ss.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'P')
-                ss.append(ConsoleColors.PURPLE_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'C')
-                ss.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'R')
-                ss.append(ConsoleColors.RED_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'W')
-                ss.append(ConsoleColors.WHITE_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'D')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'K')
-                ss.append(ConsoleColors.RED_DARK_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'L')
-                ss.append(ConsoleColors.RED_VERY_DARK_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'M')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'O')
-                ss.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'N')
-                ss.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'S')
-                ss.append(ConsoleColors.ORANGE_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'Q')
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'T')
-                ss.append(ConsoleColors.BLUE_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'U') // should be pink but not working
-                ss.append(ConsoleColors.PINK_BACKGROUND).append("  ");
-            if (s.charAt(i) == 'J') // should be brown bright but not working
-                ss.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append("  ");
-            if (s.charAt(i) == 'X') // should be brown bright but not working
-                ss.append(ConsoleColors.PINK_BACKGROUND).append("  ");
-        }
-        ss.append(ConsoleColors.RESET);
-        System.out.println(ss);
+        System.out.println(SpriteLine(index, color));
     }
 }
