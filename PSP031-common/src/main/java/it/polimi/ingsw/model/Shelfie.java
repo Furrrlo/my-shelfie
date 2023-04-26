@@ -76,6 +76,32 @@ public class Shelfie implements ShelfieView {
                 .map(col -> new TileAndCoords<>(shelfie[row][col], row, col)));
     }
 
+    public int getColumnFreeSpace(int col) {
+        int freeSpace = 0;
+        for (int r = 0; r < ROWS; r++) {
+            if (shelfie[r][col].get() == null) {
+                freeSpace++;
+            }
+        }
+        return freeSpace;
+    }
+
+    public boolean checkColumnSpace(int shelfCol, int selected) {
+        return selected <= getColumnFreeSpace(shelfCol);
+    }
+
+    public void placeTiles(List<Tile> selectedTiles, int shelfCol) {
+        //place tiles in the selected column from the bottom and first free space
+        for (Tile tile : selectedTiles) {
+            for (int r = 0; r < ROWS; r++) {
+                if (shelfie[r][shelfCol].get() == null) {
+                    shelfie[r][shelfCol].set(tile);
+                    break;
+                }
+            }
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -103,31 +129,4 @@ public class Shelfie implements ShelfieView {
                 '}';
     }
 
-    public int getColumnFreeSpace(int col) {
-        int freeSpace = 0;
-        for (int r = 0; r < ROWS; r++) {
-            if (shelfie[r][col].get() == null) {
-                freeSpace++;
-            }
-        }
-        return freeSpace;
-    }
-
-    public boolean checkColumnSpace(int shelfCol, int selected) {
-
-        return selected <= getColumnFreeSpace(shelfCol);
-
-    }
-
-    public void placeTiles(List<Tile> selectedTiles, int shelfCol) {
-        //place tiles in the selected column from the bottom and first free space
-        for (Tile tile : selectedTiles) {
-            for (int r = 0; r < ROWS; r++) {
-                if (shelfie[r][shelfCol].get() == null) {
-                    shelfie[r][shelfCol].set(tile);
-                    break;
-                }
-            }
-        }
-    }
 }
