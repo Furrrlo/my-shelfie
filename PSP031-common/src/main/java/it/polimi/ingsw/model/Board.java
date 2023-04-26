@@ -85,7 +85,7 @@ public class Board implements BoardView {
             case 4:
                 return generateBoard(FOUR_PLAYERS_MATRIX, invalidTile);
             default:
-                return null;
+                throw new UnsupportedOperationException("Invalid player number (min: 2, max: 4): " + numOfPlayers);
         }
     }
 
