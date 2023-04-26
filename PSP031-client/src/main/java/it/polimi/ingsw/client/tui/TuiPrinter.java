@@ -96,8 +96,10 @@ public class TuiPrinter {
                         Property<@Nullable Tile> tileProp = board.tile(row, col);
                         if (tileProp.get() != null)
                             sb.append(SpriteLine(i, Objects.requireNonNull(tileProp.get()).getColor()));
-                        else sb.append(EmptyLine());
-                    } else sb.append(InvalidTileLine());
+                        else
+                            sb.append(EmptyLine());
+                    } else
+                        sb.append(InvalidTileLine());
                 }
                 System.out.println(sb);
             }
