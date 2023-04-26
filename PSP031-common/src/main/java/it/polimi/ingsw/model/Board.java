@@ -65,7 +65,10 @@ public class Board implements BoardView {
         return BOARD_COLUMNS;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+            "unchecked", // Arrays don't support generics and need unchecked casts
+            "ReferenceEquality" // It's done on purpose to check for invalid tiles
+    })
     public Board(int numOfPlayers) {
         var invalidTile = new Tile(Color.GREEN);
         this.invalidTile = new SerializableProperty<>(invalidTile);
@@ -77,16 +80,12 @@ public class Board implements BoardView {
     }
 
     private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers, Tile invalidTile) {
-        switch (numOfPlayers) {
-            case 2:
-                return generateBoard(TWO_PLAYERS_MATRIX, invalidTile);
-            case 3:
-                return generateBoard(THREE_PLAYERS_MATRIX, invalidTile);
-            case 4:
-                return generateBoard(FOUR_PLAYERS_MATRIX, invalidTile);
-            default:
-                throw new UnsupportedOperationException("Invalid player number (min: 2, max: 4): " + numOfPlayers);
-        }
+        return switch (numOfPlayers) {
+            case 2 -> generateBoard(TWO_PLAYERS_MATRIX, invalidTile);
+            case 3 -> generateBoard(THREE_PLAYERS_MATRIX, invalidTile);
+            case 4 -> generateBoard(FOUR_PLAYERS_MATRIX, invalidTile);
+            default -> throw new UnsupportedOperationException("Invalid player number (min: 2, max: 4): " + numOfPlayers);
+        };
     }
 
     private static @Nullable Tile[][] generateBoard(int[][] matrix, Tile invalidTile) {
@@ -157,9 +156,8 @@ public class Board implements BoardView {
     public boolean isEmpty() {
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getCols(); j++) {
-                if (board[i][j] != null) {
+                if (board[i][j] != null)
                     return false;
-                }
             }
         }
         return true;
@@ -169,65 +167,48 @@ public class Board implements BoardView {
     public boolean checkBoardCoord(List<BoardCoord> selected) {
 
         for (BoardCoord coord : selected) {
-            if (!hasFreeSide(coord.row(), coord.col())) {
+            if (!hasFreeSide(coord.row(), coord.col()))
                 return false;
-            }
-            if (tile(coord.row(), coord.col()).get() == null) {
+            if (tile(coord.row(), coord.col()).get() == null)
                 return false;
-            }
         }
 
-        if (selected.size() == 1) {
+        if (selected.size() == 1)
             return true;
-        }
-        if (selected.size() == 2) {
+        if (selected.size() == 2)
             return hasCommonSide(selected.get(0).row(), selected.get(0).col(), selected.get(1).row(), selected.get(1).col());
-        }
-        if (selected.size() == 3) {
-            return hasCommonSide(selected.get(0).row(), selected.get(0).col(), selected.get(1).row(), selected.get(1).col(),
+        if (selected.size() == 3)
+            return hasCommonSide(
+                    selected.get(0).row(), selected.get(0).col(),
+                    selected.get(1).row(), selected.get(1).col(),
                     selected.get(2).row(), selected.get(2).col());
-        }
         return true;
 
     }
 
     public boolean hasFreeSide(int row, int col) {
-        if (Objects.equals(tile(row + 1, col), invalidTile)) {
+        if (Objects.equals(tile(row + 1, col), invalidTile))
             return true;
-        }
-        if (Objects.equals(tile(row - 1, col), invalidTile)) {
+        if (Objects.equals(tile(row - 1, col), invalidTile))
             return true;
-        }
-        if (Objects.equals(tile(row, col + 1), invalidTile)) {
+        if (Objects.equals(tile(row, col + 1), invalidTile))
             return true;
-        }
-        if (Objects.equals(tile(row, col - 1), invalidTile)) {
-            return true;
-        }
-        return false;
-
+        return Objects.equals(tile(row, col - 1), invalidTile);
     }
 
     public boolean hasCommonSide(int row0, int col0, int row1, int col1) {
-        if (row0 == row1 && (col1 == col0 + 1 || col1 == col0 - 1)) {
+        if (row0 == row1 && (col1 == col0 + 1 || col1 == col0 - 1))
             return true;
-        }
-        if (col0 == col1 && (row1 == row0 + 1 || row1 == row0 - 1)) {
-            return true;
-        }
-
-        return false;
-
+        return col0 == col1 && (row1 == row0 + 1 || row1 == row0 - 1);
     }
 
     public boolean hasCommonSide(int row0, int col0, int row1, int col1, int row2, int col2) {
-        if (row0 == row1 && row1 == row2 || col0 == col1 && col1 == col2) {
-            return hasCommonSide(row0, col0, row1, col1) && hasCommonSide(row1, col1, row2, col2) ||
-                    hasCommonSide(row0, col0, row2, col2) && hasCommonSide(row1, col1, row2, col2) ||
-                    hasCommonSide(row1, col1, row0, col0) && hasCommonSide(row0, col0, row2, col2);
+        if ((row0 == row1 && row1 == row2) || (col0 == col1 && col1 == col2)) {
+            return (hasCommonSide(row0, col0, row1, col1) && hasCommonSide(row1, col1, row2, col2)) ||
+                    (hasCommonSide(row0, col0, row2, col2) && hasCommonSide(row1, col1, row2, col2)) ||
+                    (hasCommonSide(row1, col1, row0, col0) && hasCommonSide(row0, col0, row2, col2));
         }
         return false;
-
     }
 
 }
