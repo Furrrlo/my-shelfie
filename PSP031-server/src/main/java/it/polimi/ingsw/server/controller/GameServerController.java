@@ -43,7 +43,7 @@ public class GameServerController {
             for (BoardCoord coord : selected) {
                 Property<@Nullable Tile> tileProp = game.getBoard().tile(coord.row(), coord.col());
                 selectedTiles.add(Objects.requireNonNull(tileProp.get(), "Checked tile was invalid"));
-                tileProp.set(null);
+                Property.setNullable(tileProp, null);
             }
 
             //add tiles to shelfie
