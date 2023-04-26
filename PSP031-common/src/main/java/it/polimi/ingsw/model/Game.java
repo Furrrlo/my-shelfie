@@ -133,6 +133,7 @@ public class Game implements GameView {
                 Objects.equals(firstFinisher.get(), game.firstFinisher.get()) &&
                 players.equals(game.players);
     }
+
     //TODO : remember to delete refillBoard from Common.Game
     @VisibleForTesting
     public static Board refillBoard(Board board, List<Tile> bag) {
@@ -145,7 +146,7 @@ public class Game implements GameView {
                     Property<@Nullable Tile> tileProp = board.tile(r, c);
                     if (tileProp.get() == null) {
                         temp = random.nextInt(bag.size());
-                        board.tile(r,c).set(bag.get(temp));
+                        board.tile(r, c).set(bag.get(temp));
                         //tileProp.set(bag.remove(temp));
                     }
                 }

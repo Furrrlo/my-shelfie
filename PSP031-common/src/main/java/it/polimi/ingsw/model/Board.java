@@ -87,7 +87,7 @@ public class Board implements BoardView {
     /**
      * @param validTiles : matrix of type int whose elements represents if a tile is valid(1) or invalid(0)
      * @param invalidTile : specifies the parameter for setting all the invalid tiles in the board
-     * returns an empty board with invalid tiles positioned as specified in validTiles
+     *        returns an empty board with invalid tiles positioned as specified in validTiles
      */
     private static @Nullable Tile[][] generateBoard(int[][] validTiles, Tile invalidTile) {
         Tile[][] board = new Tile[BOARD_ROWS][BOARD_COLUMNS];
