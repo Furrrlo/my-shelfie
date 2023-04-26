@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.tui;
 
 import it.polimi.ingsw.model.*;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -86,16 +87,17 @@ public class TuiPrinter {
     }
 
     public static void tuiPrintBoard(Board board) {
+        int[][] validTiles = board.getValidTiles();
         for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
                 for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
-                    if (board.tile(row, col).get() != null && !(board.tile(row, col) == board.getInvalidTile()))
-                        sb.append(SpriteLine(i, Objects.requireNonNull(board.tile(row, col).get()).getColor()));
-                    else if (board.tile(row, col).get() == null)
-                        sb.append(EmptyLine());
-                    else if (board.tile(row, col) == board.getInvalidTile())
-                        sb.append(InvalidTileLine());
+                    if (validTiles[row][col] == 1) {
+                        Property<@Nullable Tile> tileProp = board.tile(row, col);
+                        if (tileProp.get() != null)
+                            sb.append(SpriteLine(i, Objects.requireNonNull(tileProp.get()).getColor()));
+                        else sb.append(EmptyLine());
+                    } else sb.append(InvalidTileLine());
                 }
                 System.out.println(sb);
             }
