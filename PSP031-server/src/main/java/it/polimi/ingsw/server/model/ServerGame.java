@@ -1,10 +1,10 @@
 package it.polimi.ingsw.server.model;
 
 import it.polimi.ingsw.model.Board;
+import it.polimi.ingsw.model.BoardView;
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.SerializableProperty;
 import it.polimi.ingsw.model.Tile;
-import it.polimi.ingsw.model.BoardView;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
