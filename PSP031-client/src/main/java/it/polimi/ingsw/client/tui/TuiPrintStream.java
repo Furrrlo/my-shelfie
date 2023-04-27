@@ -44,7 +44,7 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            write(2);
+            print(2);
             write('J');
         }
     }
@@ -65,7 +65,7 @@ class TuiPrintStream extends PrintStream {
             // Print both known sequences
             // DEC sequence
             write(FIRST_ESC_CHAR);
-            write(7);
+            print(7);
             // SCO sequence
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
@@ -87,7 +87,7 @@ class TuiPrintStream extends PrintStream {
                 write('u');
                 // DEC sequence
                 write(FIRST_ESC_CHAR);
-                write(8);
+                print(8);
             }
         }
     }
@@ -170,9 +170,9 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            write(Math.max(1, row));
+            print(Math.max(1, row));
             write(';');
-            write(Math.max(1, col));
+            print(Math.max(1, col));
             write('H');
         }
     }
@@ -186,7 +186,7 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            write(Math.max(1, col));
+            print(Math.max(1, col));
             write('G');
         }
     }
@@ -208,7 +208,7 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            write(y);
+            print(y);
             write('A');
         }
     }
@@ -230,7 +230,7 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            write(y);
+            print(y);
             write('B');
         }
     }
@@ -252,7 +252,7 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            write(x);
+            print(x);
             write('C');
         }
     }
@@ -274,7 +274,7 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            write(x);
+            print(x);
             write('D');
         }
     }
@@ -307,12 +307,8 @@ class TuiPrintStream extends PrintStream {
             super.write(b);
 
             Translation t;
-            if (b == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1) {
-                super.write(FIRST_ESC_CHAR);
-                super.write(SECOND_ESC_CHAR);
-                super.write(t.col);
-                super.write('G');
-            }
+            if (b == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1)
+                writeEscapeCommand('G', t.col);
         }
 
         @Override
@@ -329,17 +325,22 @@ class TuiPrintStream extends PrintStream {
                     // Write as far as we got
                     super.write(b, lastWritten, i);
                     lastWritten = i;
-
-                    super.write(FIRST_ESC_CHAR);
-                    super.write(SECOND_ESC_CHAR);
-                    super.write(t.col);
-                    super.write('G');
+                    writeEscapeCommand('G', t.col);
                 }
             }
 
             // Write leftovers
             if (lastWritten != len)
                 super.write(b, lastWritten, len);
+        }
+
+        private void writeEscapeCommand(char command, int arg) throws IOException {
+            super.write(FIRST_ESC_CHAR);
+            super.write(SECOND_ESC_CHAR);
+            String args = String.valueOf(arg);
+            for (int i = 0; i < args.length(); i++)
+                super.write(args.charAt(i));
+            super.write(command);
         }
     }
 }
