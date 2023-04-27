@@ -58,6 +58,40 @@ class TuiPrintStream extends PrintStream {
         }
     }
 
+    @MustBeClosed
+    public NoExceptionAutoCloseable saveCursorPos() {
+        synchronized (this) {
+            // Cursor saving is not standardized, see https://github.com/fusesource/jansi/issues/226
+            // Print both known sequences
+            // DEC sequence
+            write(FIRST_ESC_CHAR);
+            write(7);
+            // SCO sequence
+            write(FIRST_ESC_CHAR);
+            write(SECOND_ESC_CHAR);
+            write('s');
+            return new RestoreCursorPosCloseable();
+        }
+    }
+
+    /** Closeable to restore the cursor position */
+    private class RestoreCursorPosCloseable implements NoExceptionAutoCloseable {
+        @Override
+        public void close() {
+            synchronized (TuiPrintStream.this) {
+                // Cursor saving is not standardized, see https://github.com/fusesource/jansi/issues/226
+                // Print both known sequences
+                // SCO sequence
+                write(FIRST_ESC_CHAR);
+                write(SECOND_ESC_CHAR);
+                write('u');
+                // DEC sequence
+                write(FIRST_ESC_CHAR);
+                write(8);
+            }
+        }
+    }
+
     /**
      * Moves the cursor of the given row + col relative to the current translation position
      * and translates each subsequent printed new line to said position.
@@ -109,7 +143,7 @@ class TuiPrintStream extends PrintStream {
     }
 
     /** Closeable to pop a given translation from the translations stack */
-    private class PopTranslationCloseable implements AutoCloseable {
+    private class PopTranslationCloseable implements NoExceptionAutoCloseable {
 
         private final Translation translation;
 
