@@ -44,11 +44,11 @@ class FourRowsCommonGoalCheckerTest {
     void checkCommonGoal_FOUR_ROWS_normal_true() {
         Color[][] matrix = {
                 //@formatter:off
-                new Color[] { Color.YELLOW, Color.BLUE  , Color.YELLOW, Color.PINK     , Color.YELLOW},
-                new Color[] { Color.YELLOW, Color.BLUE  , Color.YELLOW, null           , Color.YELLOW},
-                new Color[] { Color.LIGHTBLUE, Color.WHITE, Color.GREEN , Color.LIGHTBLUE, Color.WHITE},
-                new Color[] { Color.YELLOW, Color.YELLOW, Color.BLUE  , Color.BLUE     , Color.BLUE   },
-                new Color[] { Color.YELLOW, Color.YELLOW, Color.YELLOW, Color.YELLOW, Color.GREEN  },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW, Color.PINK     , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW, null           , Color.YELLOW },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.YELLOW   , Color.YELLOW, Color.BLUE  , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.YELLOW   , Color.YELLOW, Color.YELLOW, Color.YELLOW   , Color.GREEN  },
                 new Color[] { null           , null        , null        , null           , null         }
                 //@formatter:on
         };
@@ -59,11 +59,11 @@ class FourRowsCommonGoalCheckerTest {
     void checkCommonGoal_FOUR_ROWS_normal_false() {
         Color[][] matrix = {
                 //@formatter:off
-                new Color[] { Color.YELLOW, Color.BLUE  , Color.YELLOW, Color.PINK     , Color.YELLOW},
-                new Color[] { Color.YELLOW, Color.BLUE  , Color.YELLOW, null           , Color.YELLOW},
-                new Color[] { Color.LIGHTBLUE, Color.WHITE, Color.GREEN , Color.LIGHTBLUE, Color.WHITE},
-                new Color[] { Color.YELLOW, Color.YELLOW, Color.BLUE  , Color.BLUE     , Color.BLUE   },
-                new Color[] { Color.YELLOW, null        , Color.YELLOW, Color.YELLOW, Color.GREEN  },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW, Color.PINK     , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW, null           , Color.YELLOW },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.YELLOW   , Color.YELLOW, Color.BLUE  , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.YELLOW   , null        , Color.YELLOW, Color.YELLOW   , Color.GREEN  },
                 new Color[] { null           , null        , null        , null           , null         }
                 //@formatter:on
         };

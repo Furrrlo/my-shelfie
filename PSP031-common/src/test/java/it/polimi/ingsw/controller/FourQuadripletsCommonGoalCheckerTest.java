@@ -66,10 +66,10 @@ class FourQuadripletsCommonGoalCheckerTest {
         Color[][] matrix = {
                 //@formatter:off
                 new Color[] { Color.GREEN, Color.GREEN , Color.GREEN    , Color.LIGHTBLUE, Color.BLUE },
-                new Color[] { Color.GREEN, Color.YELLOW, Color.LIGHTBLUE, Color.YELLOW, Color.BLUE },
-                new Color[] { Color.PINK , Color.YELLOW, Color.WHITE, Color.YELLOW, Color.BLUE },
+                new Color[] { Color.GREEN, Color.YELLOW, Color.LIGHTBLUE, Color.YELLOW   , Color.BLUE },
+                new Color[] { Color.PINK , Color.YELLOW, Color.WHITE    , Color.YELLOW   , Color.BLUE },
                 new Color[] { Color.PINK , Color.PINK  , null           , null           , Color.BLUE },
-                new Color[] { Color.PINK , Color.WHITE, null           , Color.YELLOW, null       },
+                new Color[] { Color.PINK , Color.WHITE , null           , Color.YELLOW   , null       },
                 new Color[] { null       , Color.GREEN , Color.GREEN    , Color.GREEN    , Color.GREEN}
                 //@formatter:on
         };

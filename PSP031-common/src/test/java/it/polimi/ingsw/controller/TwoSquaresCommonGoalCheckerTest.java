@@ -14,12 +14,12 @@ class TwoSquaresCommonGoalCheckerTest {
     void checkCommonGoal_TWO_SQUARES_normalTrue() {
         Color[][] matrix = {
                 //@formatter:off
-                new Color[] { Color.YELLOW, Color.YELLOW, Color.LIGHTBLUE, Color.WHITE, Color.LIGHTBLUE },
-                new Color[] { Color.YELLOW, Color.YELLOW, Color.BLUE     , Color.BLUE     , Color.BLUE      },
+                new Color[] { Color.YELLOW   , Color.YELLOW   , Color.LIGHTBLUE, Color.WHITE    , Color.LIGHTBLUE },
+                new Color[] { Color.YELLOW   , Color.YELLOW   , Color.BLUE     , Color.BLUE     , Color.BLUE      },
                 new Color[] { Color.BLUE     , Color.PINK     , Color.BLUE     , Color.BLUE     , Color.LIGHTBLUE },
-                new Color[] { Color.GREEN    , Color.WHITE, Color.PINK     , Color.GREEN    , Color.YELLOW},
-                new Color[] { Color.YELLOW, Color.GREEN    , Color.PINK     , Color.BLUE     , Color.PINK      },
-                new Color[] { Color.GREEN    , Color.BLUE     , Color.WHITE, Color.LIGHTBLUE, Color.GREEN     }
+                new Color[] { Color.GREEN    , Color.WHITE    , Color.PINK     , Color.GREEN    , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.PINK     , Color.BLUE     , Color.PINK      },
+                new Color[] { Color.GREEN    , Color.BLUE     , Color.WHITE    , Color.LIGHTBLUE, Color.GREEN     }
                 //@formatter:on
         };
         assertTrue(new TwoSquaresCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
