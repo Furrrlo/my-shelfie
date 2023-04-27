@@ -130,7 +130,17 @@ class TuiPrintStream extends PrintStream {
      */
     @MustBeClosed
     public NoExceptionAutoCloseable translateCursorToCol(int col) {
-        return translateCursor(0, col);
+        synchronized (this) {
+            var lastTranslation = translationStack.peek();
+
+            int row = Math.max(1, lastTranslation != null ? lastTranslation.row() : 0);
+            col = Math.max(1, lastTranslation != null ? lastTranslation.col() + col : col);
+            cursorToCol(col);
+
+            var translation = new Translation(row, col);
+            translationStack.push(translation);
+            return new PopTranslationCloseable(translation);
+        }
     }
 
     /**
