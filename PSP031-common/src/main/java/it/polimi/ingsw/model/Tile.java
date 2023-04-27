@@ -2,7 +2,6 @@ package it.polimi.ingsw.model;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.Random;
 
 public class Tile implements Serializable {
 
@@ -13,11 +12,7 @@ public class Tile implements Serializable {
      * generate tile with given color
      */
     public Tile(Color color) {
-        Random random = new Random();
-        int[] indexes = new int[] { 0, 1, 2 };
-        this.picIndex = indexes[random.nextInt(indexes.length)];
-        this.color = color;
-
+        this(color, 0);
     }
 
     public Tile(Color color, int picIndex) {
