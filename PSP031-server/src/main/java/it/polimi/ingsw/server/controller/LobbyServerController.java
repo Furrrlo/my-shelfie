@@ -110,14 +110,17 @@ public class LobbyServerController {
                                         RandomGenerator random,
                                         List<LobbyPlayer> lobbyPlayers) {
         System.out.println("game started");
-        final var firstFinisher = SerializableProperty.<ServerPlayer> nullableProperty(null);
-        // TODO: extract 2 common goals randomly
+
+        final var remainingCommonGoalTypes = new ArrayList<Type>();
+        Collections.addAll(remainingCommonGoalTypes, Type.values());
         final List<ServerCommonGoal> commonGoals = List.of(
-                new ServerCommonGoal(Type.CROSS),
-                new ServerCommonGoal(Type.ALL_CORNERS));
+                new ServerCommonGoal(remainingCommonGoalTypes.remove(random.nextInt(remainingCommonGoalTypes.size()))),
+                new ServerCommonGoal(remainingCommonGoalTypes.remove(random.nextInt(remainingCommonGoalTypes.size()))));
 
         final var bag = new ArrayList<>(BAG);
         Collections.shuffle(bag, Random.from(random));
+
+        final var firstFinisher = SerializableProperty.<ServerPlayer> nullableProperty(null);
 
         final List<ServerPlayer> players;
         var game = new ServerGame(
@@ -127,11 +130,10 @@ public class LobbyServerController {
                 players = lobbyPlayers.stream()
                         .map(n -> new ServerPlayer(
                                 n.getNick(),
-                                // TODO: extract personal goal randomly
-                                new PersonalGoal(1),
+                                new PersonalGoal(random.nextInt(PersonalGoal.PERSONAL_GOALS.size())),
                                 p -> new ScoreProvider(p, commonGoals, firstFinisher)))
                         .collect(Collectors.toList()),
-                players.size() - 1, // TODO: choose who starts randomly
+                random.nextInt(players.size()),
                 commonGoals,
                 firstFinisher);
         game.refillBoard();
