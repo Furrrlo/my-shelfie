@@ -171,8 +171,7 @@ class TuiRenderer implements Closeable {
      * @param scene scene to render
      */
     public void setScene(Consumer<TuiPrintStream> scene) {
-        this.scene = scene;
-        rerender();
+        events.add(new SetSceneEvent(scene));
     }
 
     /**
