@@ -212,13 +212,7 @@ public class TuiMain {
                                      ClientNetManager netManager,
                                      GameView game,
                                      GameController controller) {
-        renderer.setScene(out -> {
-            // TODO: game renderer, possibly in a different class
-
-            TuiGameScene.printBoard(out, game.getBoard());
-            out.println();
-            TuiGameScene.printShelfie(out, game.thePlayer().getShelfie());
-        });
+        renderer.setScene(new TuiGameScene(game));
 
         return new ChoicePrompt(
                 "Select an action:",
@@ -227,10 +221,6 @@ public class TuiMain {
                         (renderer0, ctx) -> {
                             if (!game.currentTurn().get().equals(game.thePlayer()))
                                 return ctx.invalid("It's not your turn");
-
-                            // TODO: somehow get our own player
-                            // TODO: if not our turn, return an error msg
-                            // TODO: additional prompt to get info to actually perform a move
                             return ctx.prompt(promptBoard(ctx.subPrompt(), netManager, game, controller));
                         }),
                 new ChoicePrompt.Choice(

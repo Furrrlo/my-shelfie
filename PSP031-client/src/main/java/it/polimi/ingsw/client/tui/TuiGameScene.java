@@ -4,11 +4,26 @@ import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
-class TuiGameScene {
+class TuiGameScene implements Consumer<TuiPrintStream> {
+
+    private final GameView game;
+
+    public TuiGameScene(GameView game) {
+        this.game = game;
+    }
+
+    @Override
+    public void accept(TuiPrintStream out) {
+        // TODO: game renderer, possibly in a different class
+        printBoard(out, game.getBoard());
+        out.println();
+        printShelfie(out, game.thePlayer().getShelfie());
+    }
 
     /** prints colored shelfie */
     public static void printShelfie(TuiPrintStream out, ShelfieView shelfie) {
@@ -151,6 +166,5 @@ class TuiGameScene {
             }
             out.println(msg);
         }
-
     }
 }
