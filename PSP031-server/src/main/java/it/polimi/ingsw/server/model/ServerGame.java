@@ -38,6 +38,7 @@ public class ServerGame implements ServerGameView {
         this.currentTurn = new SerializableProperty<>(players.get(startingPlayerIdx));
         this.commonGoal = List.copyOf(commonGoal);
         this.firstFinisher = firstFinisher;
+        refillBoard();
     }
 
     @Override
