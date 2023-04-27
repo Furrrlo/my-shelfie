@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.tui;
 
+import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
@@ -12,6 +13,8 @@ import org.fusesource.jansi.AnsiConsole;
 
 import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -203,6 +206,10 @@ public class TuiMain {
                                      GameController controller) {
         renderer.setScene(out -> {
             // TODO: game renderer, possibly in a different class
+
+            TuiGameScene.printBoard(out, game.getBoard());
+            out.println();
+            TuiGameScene.printShelfie(out, game.thePlayer().getShelfie());
         });
 
         return new ChoicePrompt(
@@ -210,10 +217,13 @@ public class TuiMain {
                 new ChoicePrompt.Choice(
                         "Make move",
                         (renderer0, ctx) -> {
+                            if (!game.currentTurn().get().equals(game.thePlayer()))
+                                return ctx.invalid("It's not your turn");
+
                             // TODO: somehow get our own player
                             // TODO: if not our turn, return an error msg
                             // TODO: additional prompt to get info to actually perform a move
-                            return ctx.done();
+                            return ctx.prompt(promptBoard(ctx.subPrompt(), netManager, game, controller));
                         }),
                 new ChoicePrompt.Choice(
                         "Quit",
@@ -222,5 +232,44 @@ public class TuiMain {
                             System.exit(-1);
                             return ctx.done();
                         }));
+    }
+
+    private static Prompt promptBoard(Prompt.Factory promptFactory,
+                                      ClientNetManager netManager,
+                                      GameView game,
+                                      GameController controller) {
+        return promptFactory.input(
+                "Coords of tiles in the board:\n(x,y);(x,y);(x,y)",
+                (renderer0, ctx, input) -> {
+                    List<BoardCoord> coords = new ArrayList<>();
+                    String[] v = input.split(";");
+                    for (String s : v) {
+                        String[] c = s.split(",");
+                        coords.add(new BoardCoord(Integer.parseInt(c[0]) - 1, Integer.parseInt(c[1]) - 1));
+                    }
+                    if (!game.getBoard().checkBoardCoord(coords))
+                        return ctx.invalid("selezione non valida");
+                    return ctx.prompt(promptCol(ctx.subPrompt(), netManager, controller, coords));
+                });
+    }
+
+    private static Prompt promptCol(Prompt.Factory promptFactory,
+                                    ClientNetManager netManager,
+                                    GameController controller,
+                                    List<BoardCoord> coords) {
+        return promptFactory.input(
+                "Select the column: ",
+                (renderer0, ctx, input) -> {
+                    try {
+                        int col = Integer.parseInt(input) - 1;
+                        controller.makeMove(coords, col);
+                    } catch (NumberFormatException e) {
+                        return ctx.invalid("You have to select a column");
+                    } catch (DisconnectedException e) {
+                        return ctx.prompt("Disconnected from the server",
+                                promptNick(renderer0, ctx.rootPrompt(), netManager));
+                    }
+                    return ctx.done();
+                });
     }
 }
