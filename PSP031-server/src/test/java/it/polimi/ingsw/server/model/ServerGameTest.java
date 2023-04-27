@@ -71,12 +71,11 @@ class ServerGameTest {
         assertNotEquals(game1, new Object(), "Different object should not be equals");
         assertEquals(game1, game2, "Instances with no differences should be equals");
 
-        // TODO:
-        // final var gameDiffRnd = LobbyServerController.createGame(
-        //         0,
-        //         new Random(seed1 + 10),
-        //         List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
-        // assertNotEquals(game1, gameDiffRnd, "Instances with different randoms should not be equals");
+        final var gameDiffRnd = LobbyServerController.createGame(
+                0,
+                randomFactory.create(seed1 + 10),
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
+        assertNotEquals(game1, gameDiffRnd, "Instances with different randoms should not be equals");
 
         final var gameDiffId = LobbyServerController.createGame(
                 1,
@@ -140,12 +139,11 @@ class ServerGameTest {
         assertEquals(game1.hashCode(), game1.hashCode(), "Same instance is not the same");
         assertEquals(game1.hashCode(), game2.hashCode(), "Instances with no differences should be equals");
 
-        // TODO:
-        // final var gameDiffRnd = LobbyServerController.createGame(
-        //         0,
-        //         new Random(seed1 + 10),
-        //         List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
-        // assertNotEquals(game1.hashCode(), gameDiffRnd.hashCode(), "Instances with different randoms should not be equals");
+        final var gameDiffRnd = LobbyServerController.createGame(
+                0,
+                randomFactory.create(seed1 + 10),
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
+        assertNotEquals(game1.hashCode(), gameDiffRnd.hashCode(), "Instances with different randoms should not be equals");
 
         final var gameDiffId = LobbyServerController.createGame(
                 1,
