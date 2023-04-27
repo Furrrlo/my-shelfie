@@ -137,7 +137,10 @@ public class TuiMain {
                 // Game is over, we go back to the lobby
                 : doPromptLobby(renderer, netManager, lobby, controller)));
 
-        return doPromptLobby(renderer, netManager, lobby, controller);
+        var currGame = lobby.game().get();
+        return currGame != null
+                ? promptGame(renderer, netManager, currGame.game(), currGame.controller())
+                : doPromptLobby(renderer, netManager, lobby, controller);
     }
 
     private static Prompt doPromptLobby(TuiRenderer renderer,
