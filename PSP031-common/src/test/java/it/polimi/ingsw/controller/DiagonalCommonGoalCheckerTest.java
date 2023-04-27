@@ -89,6 +89,70 @@ class DiagonalCommonGoalCheckerTest {
         assertFalse(new DiagonalCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
     }
 
+    /** testing Type.DIAGONAL.checkCommonGoal() */
+    @Test
+    void checkCommonGoal_DIAGONAL_offByOneFalse() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.WHITE    },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.WHITE    , Color.PINK     , Color.BLUE     },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.YELLOW   , Color.PINK     , Color.PINK     },
+                new Color[] { Color.WHITE    , Color.GREEN    , Color.PINK     , Color.YELLOW   , Color.YELLOW   },
+                new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.PINK     },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           },
+                //@formatter:on
+        };
+        assertFalse(new DiagonalCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
+
+    /** testing Type.DIAGONAL.checkCommonGoal() */
+    @Test
+    void checkCommonGoal_DIAGONAL_secondaryOffByOneFalse() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           },
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.WHITE    },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.WHITE    , Color.PINK     , Color.BLUE     },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.YELLOW   , Color.PINK     , Color.PINK     },
+                new Color[] { Color.WHITE    , Color.GREEN    , Color.PINK     , Color.YELLOW   , Color.YELLOW   },
+                new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.PINK     },
+                //@formatter:on
+        };
+        assertFalse(new DiagonalCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
+
+    /** testing Type.DIAGONAL.checkCommonGoal() */
+    @Test
+    void checkCommonGoal_DIAGONAL_reverseOffByOneFalse() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.WHITE    },
+                new Color[] { Color.WHITE    , Color.PINK     , Color.WHITE    , Color.WHITE    , Color.BLUE     },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.WHITE    , Color.PINK     , Color.PINK     },
+                new Color[] { Color.WHITE    , Color.WHITE    , Color.PINK     , Color.YELLOW   , Color.YELLOW   },
+                new Color[] { Color.PINK     , Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.YELLOW   },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           },
+                //@formatter:on
+        };
+        assertFalse(new DiagonalCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
+
+    /** testing Type.DIAGONAL.checkCommonGoal() */
+    @Test
+    void checkCommonGoal_DIAGONAL_reverseSecondaryOffByOneFalse() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           },
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.WHITE    },
+                new Color[] { Color.WHITE    , Color.PINK     , Color.WHITE    , Color.WHITE    , Color.BLUE     },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.WHITE    , Color.PINK     , Color.PINK     },
+                new Color[] { Color.WHITE    , Color.WHITE    , Color.PINK     , Color.YELLOW   , Color.YELLOW   },
+                new Color[] { Color.PINK     , Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.YELLOW   },
+                //@formatter:on
+        };
+        assertFalse(new DiagonalCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
+
     @Test
     void checkCommonGoal_DIAGONAL_allNull() {
         Color[][] matrix = {
