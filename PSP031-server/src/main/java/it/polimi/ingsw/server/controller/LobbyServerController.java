@@ -114,7 +114,7 @@ public class LobbyServerController {
                 new ServerCommonGoal(Type.CROSS),
                 new ServerCommonGoal(Type.ALL_CORNERS));
         final List<ServerPlayer> players;
-        return new ServerGame(
+        ServerGame serverGame = new ServerGame(
                 gameId,
                 new Board(lobbyPlayers.size()),
                 BAG, // This is defensively copied anyway
@@ -128,5 +128,7 @@ public class LobbyServerController {
                 players.size() - 1, // TODO: choose who starts randomly
                 commonGoals,
                 firstFinisher);
+        serverGame.refillBoard();
+        return serverGame;
     }
 }
