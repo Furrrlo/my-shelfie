@@ -7,6 +7,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
@@ -114,11 +115,15 @@ public class LobbyServerController {
         final List<ServerCommonGoal> commonGoals = List.of(
                 new ServerCommonGoal(Type.CROSS),
                 new ServerCommonGoal(Type.ALL_CORNERS));
+
+        final var bag = new ArrayList<>(BAG);
+        Collections.shuffle(bag, Random.from(random));
+
         final List<ServerPlayer> players;
-        return new ServerGame(
+        var game = new ServerGame(
                 gameId,
                 new Board(lobbyPlayers.size()),
-                BAG, // This is defensively copied anyway
+                bag,
                 players = lobbyPlayers.stream()
                         .map(n -> new ServerPlayer(
                                 n.getNick(),
@@ -129,5 +134,7 @@ public class LobbyServerController {
                 players.size() - 1, // TODO: choose who starts randomly
                 commonGoals,
                 firstFinisher);
+        game.refillBoard();
+        return game;
     }
 }

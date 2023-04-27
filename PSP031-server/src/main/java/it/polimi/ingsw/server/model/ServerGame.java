@@ -5,7 +5,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class ServerGame implements ServerGameView {
 
@@ -85,17 +88,12 @@ public class ServerGame implements ServerGameView {
     }
 
     public void refillBoard() {
-        Random random = new Random();
-        int temp;
-        for (int r = 0; r < BoardView.BOARD_ROWS; r++) {
+        for (int r = 0; r < BoardView.BOARD_ROWS && this.bag.size() > 0; r++) {
             for (int c = 0; c < BoardView.BOARD_COLUMNS && this.bag.size() > 0; c++) {
                 if (board.isValidTile(r, c)) {
                     Property<@Nullable Tile> tileProp = this.board.tile(r, c);
-                    if (tileProp.get() == null) {
-                        temp = random.nextInt(this.bag.size());
-                        board.tile(r, c).set(bag.get(temp));
-                        tileProp.set(this.bag.remove(temp));
-                    }
+                    if (tileProp.get() == null)
+                        tileProp.set(this.bag.remove(0));
                 }
             }
         }
