@@ -93,7 +93,7 @@ public class Shelfie implements ShelfieView {
     public void placeTiles(List<Tile> selectedTiles, int shelfCol) {
         //place tiles in the selected column from the bottom and first free space
         for (Tile tile : selectedTiles) {
-            for (int r = 0; r < ROWS; r++) {
+            for (int r = ROWS - 1; r >= 0; r--) {
                 if (shelfie[r][shelfCol].get() == null) {
                     shelfie[r][shelfCol].set(tile);
                     break;
