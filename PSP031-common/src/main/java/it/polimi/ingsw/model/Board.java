@@ -144,8 +144,9 @@ public class Board implements BoardView {
     //TODO: test everything!!
     @Override
     public boolean checkBoardCoord(List<BoardCoord> selected) {
-
         for (BoardCoord coord : selected) {
+            if (!isValidTile(coord.row(), coord.col()))
+                return false;
             if (!hasFreeSide(coord.row(), coord.col()))
                 return false;
             if (tile(coord.row(), coord.col()).get() == null)
@@ -169,13 +170,13 @@ public class Board implements BoardView {
      * returns true if the board tile in specified position has at least one free side
      */
     private boolean hasFreeSide(int row, int col) {
-        if (Objects.equals(tile(row + 1, col), invalidTile))
+        if (!isValidTile(row + 1, col))
             return true;
-        if (Objects.equals(tile(row - 1, col), invalidTile))
+        if (!isValidTile(row - 1, col))
             return true;
-        if (Objects.equals(tile(row, col + 1), invalidTile))
+        if (!isValidTile(row, col + 1))
             return true;
-        return Objects.equals(tile(row, col - 1), invalidTile);
+        return isValidTile(row, col - 1);
     }
 
     /** returns true if the two tiles in the specified positions have one common side */
