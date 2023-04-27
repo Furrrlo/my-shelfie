@@ -33,6 +33,12 @@ public class GameServerController {
     public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) throws IllegalArgumentException {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
+
+            if (!game.currentTurn().get().equals(player)) {
+                //TODO: disconnect player
+                return;
+            }
+
             List<Tile> selectedTiles = new ArrayList<>();
             if (!game.getBoard().checkBoardCoord(selected)
                     || !player.getShelfie().checkColumnSpace(shelfCol, selected.size())) {
@@ -58,6 +64,14 @@ public class GameServerController {
                 //game.endGame();
                 //game.firstFinisher=player;
             }
+
+            //Change current turn
+            int currPlayerIdx = game.getPlayers().indexOf(player);
+            int nextPlayerIdx = currPlayerIdx + 1;
+            if (nextPlayerIdx >= game.getPlayers().size())
+                nextPlayerIdx = 0;
+
+            game.currentTurn().set(game.getPlayers().get(nextPlayerIdx));
 
         }
     }
