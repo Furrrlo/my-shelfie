@@ -22,7 +22,24 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
         // TODO: game renderer, possibly in a different class
         printBoard(out, game.getBoard());
         out.println();
-        printShelfie(out, game.thePlayer().getShelfie());
+
+        int col = 0;
+        for (PlayerView player : game.getPlayers()) {
+            try (NoExceptionAutoCloseable ignored = out.saveCursorPos();
+                 NoExceptionAutoCloseable ignored1 = out.translateCursorToCol(col)) {
+
+                out.print(player.isCurrentTurn().get() ? "- " : "  ");
+                if (player.isStartingPlayer())
+                    out.print("S ");
+                if (player.isFirstFinisher().get())
+                    out.print("F ");
+                out.println(player.getNick() + ": " + player.score().get());
+                printShelfie(out, player.getShelfie());
+                col += 30;
+            }
+        }
+
+        out.moveCursorDown(10);
     }
 
     /** prints colored shelfie */
