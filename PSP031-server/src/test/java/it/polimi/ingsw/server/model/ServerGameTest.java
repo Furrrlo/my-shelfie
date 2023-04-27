@@ -88,7 +88,9 @@ class ServerGameTest {
                 0,
                 randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
-        gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().set(new Tile(Color.BLUE));
+        gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().update(t -> t != null && t.getColor() == Color.BLUE
+                ? new Tile(Color.GREEN)
+                : new Tile(Color.BLUE));
         assertNotEquals(game1, gameDiffBoard, "Instances with different boards should not be equals");
 
         final var gameDiffBag = LobbyServerController.createGame(
@@ -156,7 +158,9 @@ class ServerGameTest {
                 0,
                 randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
-        gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().set(new Tile(Color.BLUE));
+        gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().update(t -> t != null && t.getColor() == Color.BLUE
+                ? new Tile(Color.GREEN)
+                : new Tile(Color.BLUE));
         assertNotEquals(game1.hashCode(), gameDiffBoard.hashCode(), "Instances with different boards should not be equals");
 
         final var gameDiffBag = LobbyServerController.createGame(
