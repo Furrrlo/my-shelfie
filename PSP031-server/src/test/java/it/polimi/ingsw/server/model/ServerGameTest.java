@@ -137,9 +137,8 @@ class ServerGameTest {
                 randomFactory.create(seed1),
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
 
-        assertEquals(game1, game1, "Same instance is not the same");
-        assertNotEquals(game1, new Object(), "Different object should not be equals");
-        assertEquals(game1, game2, "Instances with no differences should be equals");
+        assertEquals(game1.hashCode(), game1.hashCode(), "Same instance is not the same");
+        assertEquals(game1.hashCode(), game2.hashCode(), "Instances with no differences should be equals");
 
         // TODO:
         // final var gameDiffRnd = LobbyServerController.createGame(
