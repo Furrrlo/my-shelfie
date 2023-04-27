@@ -132,18 +132,10 @@ public class TuiMain {
             players.forEach(player -> player.ready().registerObserver(readyObserver));
         });
         lobby.joinedPlayers().get().forEach(player -> player.ready().registerObserver(readyObserver));
-        lobby.game().registerObserver(g -> {
-            renderer.setPrompt(g != null
-                    ? promptGame(renderer, netManager, g.game(), g.controller())
-                    // Game is over, we go back to the lobby
-                    : doPromptLobby(renderer, netManager, lobby, controller));
-            if (g != null) {
-                g.game().getBoard().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender()));
-                g.game().getPlayers()
-                        .forEach(p -> p.getShelfie().tiles()
-                                .forEach(t -> t.tile().registerObserver(c -> renderer.rerender())));
-            }
-        });
+        lobby.game().registerObserver(g -> renderer.setPrompt(g != null
+                ? promptGame(renderer, netManager, g.game(), g.controller())
+                // Game is over, we go back to the lobby
+                : doPromptLobby(renderer, netManager, lobby, controller)));
 
         return doPromptLobby(renderer, netManager, lobby, controller);
     }
@@ -212,6 +204,10 @@ public class TuiMain {
                                      ClientNetManager netManager,
                                      GameView game,
                                      GameController controller) {
+        game.getBoard().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender()));
+        game.getPlayers()
+                .forEach(p -> p.getShelfie().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender())));
+
         renderer.setScene(new TuiGameScene(game));
 
         return new ChoicePrompt(
