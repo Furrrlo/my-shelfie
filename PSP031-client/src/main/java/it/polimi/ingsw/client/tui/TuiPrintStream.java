@@ -70,7 +70,7 @@ class TuiPrintStream extends PrintStream {
      * @return closeable to go back to the previous translation position
      */
     @MustBeClosed
-    public AutoCloseable translateCursor(int row, int col) {
+    public NoExceptionAutoCloseable translateCursor(int row, int col) {
         synchronized (this) {
             var lastTranslation = translationStack.peek();
 
@@ -95,7 +95,7 @@ class TuiPrintStream extends PrintStream {
      * @return closeable to go back to the previous translation position
      */
     @MustBeClosed
-    public AutoCloseable translateCursorToCol(int col) {
+    public NoExceptionAutoCloseable translateCursorToCol(int col) {
         return translateCursor(0, col);
     }
 
