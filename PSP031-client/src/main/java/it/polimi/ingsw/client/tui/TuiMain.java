@@ -132,10 +132,18 @@ public class TuiMain {
             players.forEach(player -> player.ready().registerObserver(readyObserver));
         });
         lobby.joinedPlayers().get().forEach(player -> player.ready().registerObserver(readyObserver));
-        lobby.game().registerObserver(p -> renderer.setPrompt(p != null
-                ? promptGame(renderer, netManager, p.game(), p.controller())
-                // Game is over, we go back to the lobby
-                : doPromptLobby(renderer, netManager, lobby, controller)));
+        lobby.game().registerObserver(g -> {
+            renderer.setPrompt(g != null
+                    ? promptGame(renderer, netManager, g.game(), g.controller())
+                    // Game is over, we go back to the lobby
+                    : doPromptLobby(renderer, netManager, lobby, controller));
+            if (g != null) {
+                g.game().getBoard().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender()));
+                g.game().getPlayers()
+                        .forEach(p -> p.getShelfie().tiles()
+                                .forEach(t -> t.tile().registerObserver(c -> renderer.rerender())));
+            }
+        });
 
         return doPromptLobby(renderer, netManager, lobby, controller);
     }
