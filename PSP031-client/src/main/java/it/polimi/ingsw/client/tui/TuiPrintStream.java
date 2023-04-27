@@ -328,20 +328,24 @@ class TuiPrintStream extends PrintStream {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            int lastWritten = off;
-            for (int i = off; i < len; i++) {
-                Translation t;
-                if (b[i] == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1) {
-                    // Write as far as we got
-                    super.write(b, lastWritten, i);
-                    lastWritten = i;
-                    writeEscapeCommand('G', t.col);
-                }
-            }
+            for (int i = off; i < len; i++)
+                write(b[i]);
 
-            // Write leftovers
-            if (lastWritten != len)
-                super.write(b, lastWritten, len);
+            // TODO: figure out why this is broken
+            //            int lastWritten = off;
+            //            for (int i = off; i < len; i++) {
+            //                Translation t;
+            //                if (b[i] == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1) {
+            //                    // Write as far as we got
+            //                    super.write(b, lastWritten, i + 1);
+            //                    lastWritten = i;
+            //                    writeEscapeCommand('G', t.col);
+            //                }
+            //            }
+            //
+            //            // Write leftovers
+            //            if (lastWritten < len - 1)
+            //                super.write(b, lastWritten, len);
         }
 
         private void writeEscapeCommand(char command, int arg) throws IOException {
