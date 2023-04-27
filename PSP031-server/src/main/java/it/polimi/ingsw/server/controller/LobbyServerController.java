@@ -92,6 +92,7 @@ public class LobbyServerController {
             lobbyPlayer.ready().set(ready);
             if (lobbyPlayers.size() > 1 && lobbyPlayers.stream().allMatch(p -> p.ready().get())) {
                 final ServerGame game = createGame(0, lobbyPlayers);
+                game.refillBoard();
                 use.obj().game().set(new ServerGameAndController<>(game,
                         new GameServerController(new LockProtected<>(game, lockedLobby.getLock()))));
             }
@@ -114,7 +115,7 @@ public class LobbyServerController {
                 new ServerCommonGoal(Type.CROSS),
                 new ServerCommonGoal(Type.ALL_CORNERS));
         final List<ServerPlayer> players;
-        ServerGame serverGame = new ServerGame(
+        return new ServerGame(
                 gameId,
                 new Board(lobbyPlayers.size()),
                 BAG, // This is defensively copied anyway
@@ -128,7 +129,5 @@ public class LobbyServerController {
                 players.size() - 1, // TODO: choose who starts randomly
                 commonGoals,
                 firstFinisher);
-        serverGame.refillBoard();
-        return serverGame;
     }
 }
