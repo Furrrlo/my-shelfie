@@ -108,6 +108,7 @@ class TuiRenderer implements Closeable {
                     }
                 }
 
+                out.eraseScreen(); // Does not work on windows, so also use eraseInDisplay
                 out.cursor(1, 1);
                 out.eraseInDisplay();
 
