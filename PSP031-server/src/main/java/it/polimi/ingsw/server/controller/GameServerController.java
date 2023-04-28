@@ -28,7 +28,9 @@ public class GameServerController {
                     .findFirst()
                     .ifPresent(serverPlayer -> {
                         serverPlayer.connected().set(false);
-                        changeCurrentTurn(game);
+                        // If the current player disconnects, skip his turn
+                        if (game.currentTurn().get().equals(serverPlayer))
+                            changeCurrentTurn(game);
                     });
         }
     }
