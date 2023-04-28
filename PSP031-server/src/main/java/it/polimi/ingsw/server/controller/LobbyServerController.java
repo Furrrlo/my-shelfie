@@ -102,7 +102,6 @@ public class LobbyServerController {
             lobbyPlayer.ready().set(ready);
             if (lobbyPlayers.size() > 1 && lobbyPlayers.stream().allMatch(p -> p.ready().get())) {
                 final ServerGame game = createGame(0, lobbyPlayers);
-                game.refillBoard();
                 use.obj().game().set(new ServerGameAndController<>(game,
                         new GameServerController(new LockProtected<>(game, lockedLobby.getLock()))));
             }
