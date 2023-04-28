@@ -236,16 +236,33 @@ public class TuiMain {
                                       GameView game,
                                       GameController controller) {
         return promptFactory.input(
-                "Coords of tiles in the board:\n(x,y);(x,y);(x,y)",
+                "Coords of tiles in the board (in the desired order):\nRxC;RxC;RxC",
                 (renderer0, ctx, input) -> {
                     List<BoardCoord> coords = new ArrayList<>();
-                    String[] v = input.split(";");
-                    for (String s : v) {
-                        String[] c = s.split(",");
-                        coords.add(new BoardCoord(Integer.parseInt(c[0]) - 1, Integer.parseInt(c[1]) - 1));
+                    String[] v = input.split(";", -1);
+                    for (String currCoords : v) {
+                        String[] coordsSplit = currCoords.split("x", -1);
+                        if (coordsSplit.length != 2)
+                            return ctx.invalid("Invalid coords string " + currCoords);
+
+                        int r;
+                        try {
+                            r = Integer.parseInt(coordsSplit[0]) - 1;
+                        } catch (NumberFormatException ex) {
+                            return ctx.invalid("Invalid row " + coordsSplit[0] + " in coords " + currCoords);
+                        }
+
+                        int c;
+                        try {
+                            c = Integer.parseInt(coordsSplit[1]) - 1;
+                        } catch (NumberFormatException ex) {
+                            return ctx.invalid("Invalid col " + coordsSplit[1] + " in coords " + currCoords);
+                        }
+
+                        coords.add(new BoardCoord(r, c));
                     }
                     if (!game.getBoard().checkBoardCoord(coords))
-                        return ctx.invalid("selezione non valida");
+                        return ctx.invalid("Invalid selection");
                     return ctx.prompt(promptCol(ctx.subPrompt(), netManager, controller, coords));
                 });
     }
