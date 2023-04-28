@@ -208,8 +208,14 @@ public class TuiMain {
                                      GameView game,
                                      GameController controller) {
         game.getBoard().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender()));
-        game.getPlayers()
-                .forEach(p -> p.getShelfie().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender())));
+        game.currentTurn().registerObserver(c -> renderer.rerender());
+        game.firstFinisher().registerObserver(c -> renderer.rerender());
+        game.getCommonGoals().forEach(g -> g.achieved().registerObserver(c -> renderer.rerender()));
+        game.getPlayers().forEach(p -> {
+            p.connected().registerObserver(c -> renderer.rerender());
+            p.score().registerObserver(c -> renderer.rerender());
+            p.getShelfie().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender()));
+        });
 
         renderer.setScene(new TuiGameScene(game));
 
