@@ -224,6 +224,17 @@ public class DisconnectionIntegrationTest {
                     .findFirst()
                     .orElseThrow();
 
+            // Make sure the current turn is not set on serverPlayer2, as we are going to disconnect it.
+            // That would cause a change between the old game instance (which will no longer be updated) and
+            // the new one, so we would not be able to easily compare the two and check that they are the same
+            serverController.runOnOnlyLobbyLocks(() -> {
+                if (serverGame.currentTurn().get().equals(serverPlayer2))
+                    serverGame.currentTurn().set(serverGame.getPlayers().stream()
+                            .filter(p -> !p.equals(serverPlayer2))
+                            .findFirst()
+                            .orElseThrow());
+            });
+
             serverController.runOnOnlyLobbyLocks(
                     () -> serverPlayer2.connected().registerObserver(value -> serverPlayerDisconnected.complete(null)));
             disconnect.execute();
