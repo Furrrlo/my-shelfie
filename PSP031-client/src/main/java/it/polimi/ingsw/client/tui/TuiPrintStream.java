@@ -15,7 +15,8 @@ import java.util.Objects;
 class TuiPrintStream extends PrintStream {
 
     /** First ANSI escape code character */
-    private static final char FIRST_ESC_CHAR = '\033';
+    @VisibleForTesting
+    static final char FIRST_ESC_CHAR = '\033';
     /** Second ANSI escape code character */
     private static final char SECOND_ESC_CHAR = '[';
 
