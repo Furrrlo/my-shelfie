@@ -2,6 +2,7 @@ package it.polimi.ingsw.client.tui;
 
 import com.google.errorprone.annotations.MustBeClosed;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -315,7 +316,7 @@ class TuiPrintStream extends PrintStream {
 
         @Override
         public void write(int b) throws IOException {
-            super.write(b);
+            out.write(b);
 
             Translation t;
             if (b == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1)
@@ -334,7 +335,7 @@ class TuiPrintStream extends PrintStream {
                 Translation t;
                 if (b[i] == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1) {
                     // Write as far as we got
-                    super.write(b, lastWritten, i - lastWritten + 1);
+                    out.write(b, lastWritten, i - lastWritten + 1);
                     lastWritten = i + 1;
                     writeEscapeCommand('G', t.col);
                 }
@@ -342,16 +343,16 @@ class TuiPrintStream extends PrintStream {
 
             // Write leftovers
             if (lastWritten < len)
-                super.write(b, lastWritten, len - lastWritten);
+                out.write(b, lastWritten, len - lastWritten);
         }
 
         private void writeEscapeCommand(char command, int arg) throws IOException {
-            super.write(FIRST_ESC_CHAR);
-            super.write(SECOND_ESC_CHAR);
+            out.write(FIRST_ESC_CHAR);
+            out.write(SECOND_ESC_CHAR);
             String args = String.valueOf(arg);
             for (int i = 0; i < args.length(); i++)
-                super.write(args.charAt(i));
-            super.write(command);
+                out.write(args.charAt(i));
+            out.write(command);
         }
     }
 }
