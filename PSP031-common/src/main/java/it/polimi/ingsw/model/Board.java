@@ -113,12 +113,13 @@ public class Board implements BoardView {
 
     @Override
     public boolean isValidTile(int r, int c) {
-        return board[r][c] != invalidTile;
+        return r >= 0 && r < getRows() && c >= 0 && c < getCols() && board[r][c] != invalidTile;
     }
 
     @Override
     public Property<@Nullable Tile> tile(int r, int c) {
-        if (!isValidTile(r, c))
+        // Force an AIOB if r or c are not between 0 and ROWS/COLS
+        if (board[r][c] == invalidTile)
             throw new IndexOutOfBoundsException("Invalid Position selected");
         return board[r][c];
     }
