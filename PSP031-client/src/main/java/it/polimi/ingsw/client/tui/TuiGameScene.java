@@ -28,12 +28,32 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
             try (NoExceptionAutoCloseable ignored = out.saveCursorPos();
                  NoExceptionAutoCloseable ignored1 = out.translateCursorToCol(col)) {
 
-                out.print(player.isCurrentTurn().get() ? "- " : "  ");
-                if (player.isStartingPlayer())
-                    out.print("S ");
-                if (player.isFirstFinisher().get())
-                    out.print("F ");
-                out.println(player.getNick() + ": " + player.score().get());
+                final String nickColor;
+                if (!player.connected().get())
+                    nickColor = ConsoleColors.RED;
+                else if (player.isCurrentTurn().get())
+                    nickColor = ConsoleColors.YELLOW;
+                else
+                    nickColor = ConsoleColors.GREEN;
+                out.print(nickColor);
+                out.print(player.isCurrentTurn().get() ? "> " : "· ");
+                out.print(player.getNick());
+
+                if (player.isStartingPlayer()) {
+                    out.print(ConsoleColors.PURPLE);
+                    out.print(" C");
+                    out.print(nickColor);
+                }
+
+                if (player.isFirstFinisher().get()) {
+                    out.print(ConsoleColors.BLUE);
+                    out.print(" *");
+                    out.print(nickColor);
+                }
+
+                out.print(": " + player.score().get());
+                out.println(ConsoleColors.RESET);
+
                 printShelfie(out, player.getShelfie());
                 col += 30;
             }
