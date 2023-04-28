@@ -248,6 +248,7 @@ public class ServerController implements Closeable {
                         });
                     } else {
                         System.out.println("[Server] " + nick + " is re-joining previous game...");
+                        serverLobbyAndController.controller().onReconnectedPlayer(nick);
                     }
 
                     if (currGameAndController != null)
@@ -292,7 +293,6 @@ public class ServerController implements Closeable {
                 .orElseThrow(() -> new IllegalStateException("" +
                         "Missing player " + nick + " which is supposed to be ingame " +
                         "(found players: " + game.getPlayers() + ")"));
-        thePlayer.connected().set(true);
 
         final GameUpdater gameUpdater = lobbyUpdater.updateGame(new GameAndController<>(
                 new Game(

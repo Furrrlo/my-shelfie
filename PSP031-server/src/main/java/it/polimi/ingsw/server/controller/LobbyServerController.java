@@ -83,6 +83,15 @@ public class LobbyServerController {
         }
     }
 
+    public void onReconnectedPlayer(String nick) {
+        try (var lobbyCloseable = lockedLobby.use()) {
+            var lobby = lobbyCloseable.obj();
+            var game = lobby.game().get();
+            if (game != null)
+                game.controller().onReconnectedPlayer(nick);
+        }
+    }
+
     public void ready(String nick, boolean ready) {
         try (var use = lockedLobby.use()) {
             List<LobbyPlayer> lobbyPlayers = use.obj().joinedPlayers().get();

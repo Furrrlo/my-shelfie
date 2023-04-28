@@ -26,7 +26,25 @@ public class GameServerController {
             game.getPlayers().stream()
                     .filter(p -> p.getNick().equals(nick))
                     .findFirst()
-                    .ifPresent(serverPlayer -> serverPlayer.connected().set(false));
+                    .ifPresent(serverPlayer -> {
+                        serverPlayer.connected().set(false);
+                        changeCurrentTurn(game);
+                    });
+        }
+    }
+
+    public void onReconnectedPlayer(String nick) {
+        try (var gameCloseable = game.use()) {
+            var game = gameCloseable.obj();
+            game.getPlayers().stream()
+                    .filter(p -> p.getNick().equals(nick))
+                    .findFirst()
+                    .ifPresent(serverPlayer -> {
+                        serverPlayer.connected().set(true);
+                        // If the current player is disconnected, we now have a new connected player that can play
+                        if (!game.currentTurn().get().connected().get())
+                            changeCurrentTurn(game);
+                    });
         }
     }
 
@@ -65,14 +83,25 @@ public class GameServerController {
                 //game.firstFinisher=player;
             }
 
-            //Change current turn
-            int currPlayerIdx = game.getPlayers().indexOf(player);
-            int nextPlayerIdx = currPlayerIdx + 1;
+            // Change current turn
+            changeCurrentTurn(game);
+        }
+    }
+
+    private void changeCurrentTurn(ServerGame game) {
+        int nextPlayerIdx = game.getPlayers().indexOf(game.currentTurn().get());
+        // Try for all the remaining players
+        for (int i = 0; i < game.getPlayers().size() - 1; i++) {
+            nextPlayerIdx++;
             if (nextPlayerIdx >= game.getPlayers().size())
                 nextPlayerIdx = 0;
 
-            game.currentTurn().set(game.getPlayers().get(nextPlayerIdx));
-
+            var nextPlayer = game.getPlayers().get(nextPlayerIdx);
+            // Only pick a player if there's a currently connected one
+            if (nextPlayer.connected().get()) {
+                game.currentTurn().set(nextPlayer);
+                return;
+            }
         }
     }
 }
