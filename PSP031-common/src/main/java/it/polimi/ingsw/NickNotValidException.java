@@ -3,6 +3,7 @@ package it.polimi.ingsw;
 public class NickNotValidException extends Exception {
 
     public NickNotValidException() {
+        super("Nick not valid");
     }
 
     public NickNotValidException(String message) {
