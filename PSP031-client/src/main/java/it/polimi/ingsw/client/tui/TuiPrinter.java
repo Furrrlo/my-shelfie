@@ -17,6 +17,7 @@ public class TuiPrinter {
     private static final @Unmodifiable String pxl = "  ";
     private static final @Unmodifiable int PXL_FOR_SPRITE = 24;
     private static final @Unmodifiable int PXL_FOR_NUMBERS = 5;
+    private static final @Unmodifiable int PXL_FOR_PERSONAL_GOAL = 12;
     private static final @Unmodifiable List<String> CAT = List.of("GGGGGGGGGGGGGGGGGGGGGGGG", "GGGGGGGGGGGGGBBGGGBBGGGG",
             "GGGGGBBGGGGGBBPBGBBPBGGG", "GGGGGBBBGGGBAACAAAACAGGG", "GGGGGGBBGGBAAAAAAAAAAAGG", "GGGGGGBBGGBAAAABBBBAAAGG",
             "GGGGBBBBGGBAABDBBBBDBAGG", "GGGBBBBGGGWWABDBBBBDBAWG", "GGGBBGGGGGBAAAAAACAAAAGG", "GGGBBGGGGGWWAAAAWAWAAAWG",
@@ -136,6 +137,31 @@ public class TuiPrinter {
             }
             printBoardSeparatingLine();
         }
+    }
+
+    public static void tuiPrintPersonalGoal(PersonalGoal p) {
+        printPersonalGoalHeader();
+        for (int row = 0; row < ROWS; row++) {
+            for (int i = 0; i < PXL_FOR_PERSONAL_GOAL; i++) {
+                StringBuilder sb = new StringBuilder();
+                for (int col = 0; col < COLUMNS; col++) {
+                    if (p.get(row, col) == null)
+                        sb.append(ConsoleColors.RESET).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL));
+                    else
+                        sb.append(PersonalGoalLine(i, Objects.requireNonNull(p.get(row, col)).getColor()));
+                }
+                System.out.println(sb);
+            }
+        }
+    }
+
+    public static void tuiPrintShelfieAndPersonalGoal(Shelfie shelfie, PersonalGoal pg) {
+        //TODO : implement printing personal goal next to shelfie
+    }
+
+    private static void printPersonalGoalHeader() {
+        //TODO : implement personalGoal printing
+
     }
 
     private static void printBoardSeparatingLine() {
@@ -350,6 +376,24 @@ public class TuiPrinter {
         }
         ss.append(ConsoleColors.RESET);
         return ss;
+    }
+
+    private static StringBuilder PersonalGoalLine(int index, Color color) {
+        StringBuilder sb = new StringBuilder();
+        return switch (color) {
+            case GREEN -> sb.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL))
+                    .append(ConsoleColors.RESET);
+            case WHITE -> sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL))
+                    .append(ConsoleColors.RESET);
+            case BLUE -> sb.append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL))
+                    .append(ConsoleColors.RESET);
+            case LIGHTBLUE -> sb.append(ConsoleColors.CYAN_BACKGROUND_BRIGHT).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL))
+                    .append(ConsoleColors.RESET);
+            case YELLOW -> sb.append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL))
+                    .append(ConsoleColors.RESET);
+            case PINK -> sb.append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL))
+                    .append(ConsoleColors.RESET);
+        };
     }
 
     @VisibleForTesting
