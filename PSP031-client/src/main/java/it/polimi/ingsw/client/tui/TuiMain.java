@@ -288,7 +288,7 @@ public class TuiMain {
                     try {
                         int col = Integer.parseInt(input) - 1;
                         if (!game.thePlayer().getShelfie().checkColumnSpace(col, coords.size()))
-                            return ctx.invalid("Invalid col " + col);
+                            return ctx.invalid("Invalid col " + (col + 1));
                         controller.makeMove(coords, col);
                     } catch (NumberFormatException e) {
                         return ctx.invalid("You have to select a column");
