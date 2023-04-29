@@ -13,6 +13,8 @@ import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
 public class TuiPrinter {
     private static final @Unmodifiable String pxl = "  ";
+    private static final @Unmodifiable int PXL_FOR_SPRITE = 24;
+    private static final @Unmodifiable int PXL_FOR_NUMBERS = 5;
     private static final @Unmodifiable List<String> CAT = List.of("GGGGGGGGGGGGGGGGGGGGGGGG", "GGGGGGGGGGGGGBBGGGBBGGGG",
             "GGGGGBBGGGGGBBPBGBBPBGGG", "GGGGGBBBGGGBAACAAAACAGGG", "GGGGGGBBGGBAAAAAAAAAAAGG", "GGGGGGBBGGBAAAABBBBAAAGG",
             "GGGGBBBBGGBAABDBBBBDBAGG", "GGGBBBBGGGWWABDBBBBDBAWG", "GGGBBGGGGGBAAAAAACAAAAGG", "GGGBBGGGGGWWAAAAWAWAAAWG",
@@ -72,6 +74,14 @@ public class TuiPrinter {
             "WWWWWWWWWWBWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW");
     private static final @Unmodifiable List<String> FIVE = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWWWWWWWWWWWWW",
             "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
+    private static final @Unmodifiable List<String> SIX = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWWWWWWWWWWWWW",
+            "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
+    private static final @Unmodifiable List<String> SEVEN = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW",
+            "WWWWWWWWWWWBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW");
+    private static final @Unmodifiable List<String> EIGHT = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWBWWWWWWWWWWW",
+            "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
+    private static final @Unmodifiable List<String> NINE = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWBWWWWWWWWWWW",
+            "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
 
     /** prints shelfie with complex design */
     public static void tuiPrintShelfie(Shelfie shelfie) {
@@ -100,10 +110,13 @@ public class TuiPrinter {
     }
 
     public static void tuiPrintBoard(Board board) {
+        printBoardSeparatingLine();
         for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
                 for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
+                    if (col == 0)
+                        sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.RESET);
                     if (board.isValidTile(row, col)) {
                         Property<@Nullable Tile> tileProp = board.tile(row, col);
                         if (tileProp.get() != null)
@@ -113,10 +126,18 @@ public class TuiPrinter {
                     } else {
                         sb.append(InvalidTileLine());
                     }
+                    sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.RESET);
                 }
                 System.out.println(sb);
             }
+            printBoardSeparatingLine();
         }
+    }
+
+    private static void printBoardSeparatingLine() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl.repeat(226)).append(ConsoleColors.RESET);
+        System.out.println(sb);
     }
 
     private static void printShelfieHeader() {
@@ -214,6 +235,10 @@ public class TuiPrinter {
             case 3 -> THREE.get(index);
             case 4 -> FOUR.get(index);
             case 5 -> FIVE.get(index);
+            case 6 -> SIX.get(index);
+            case 7 -> SEVEN.get(index);
+            case 8 -> EIGHT.get(index);
+            case 9 -> NINE.get(index);
             default -> throw new IllegalStateException("Unexpected value: " + number);
         };
         StringBuilder sb = new StringBuilder();
