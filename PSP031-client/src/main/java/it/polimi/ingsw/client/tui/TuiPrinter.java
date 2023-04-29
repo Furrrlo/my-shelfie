@@ -5,9 +5,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static it.polimi.ingsw.model.BoardView.BOARD_COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
@@ -111,9 +113,11 @@ public class TuiPrinter {
 
     public static void tuiPrintBoard(Board board) {
         printBoardSeparatingLine();
+        printBoardNumber();
         for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
+                sb.append(VerticalNumberLine(row + 1, i));
                 for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
                     if (col == 0)
                         sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.RESET);
@@ -136,6 +140,7 @@ public class TuiPrinter {
 
     private static void printBoardSeparatingLine() {
         StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(5));
         sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl.repeat(226)).append(ConsoleColors.RESET);
         System.out.println(sb);
     }
@@ -204,7 +209,7 @@ public class TuiPrinter {
     }
 
     private static void printNumber() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < PXL_FOR_NUMBERS; i++) {
             StringBuilder sb = new StringBuilder();
             for (int col = 0; col < COLUMNS; col++) {
                 if (col == 0)
@@ -220,12 +225,63 @@ public class TuiPrinter {
         }
     }
 
+    private static void printBoardNumber() {
+        for (int i = 0; i < PXL_FOR_NUMBERS; i++) {
+            StringBuilder sb = new StringBuilder();
+            for (int col = 0; col < BOARD_COLUMNS; col++) {
+                if (col == 0)
+                    sb.append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(6)).append(ConsoleColors.RESET);
+                sb.append(NumberLine(col + 1, i));
+                sb.append(ConsoleColors.BLUE_BACKGROUND).append(pxl).append(ConsoleColors.RESET);
+            }
+            System.out.println(sb);
+        }
+    }
+
+    private static List<String> convertToVerticalNumber(List<String> number) {
+        List<String> ss = new ArrayList<>();
+        for (int i = 0; i < PXL_FOR_SPRITE; i++) {
+            String s = String.valueOf(number.get(4).charAt(i)) + String.valueOf(number.get(3).charAt(i)) +
+                    String.valueOf(number.get(2).charAt(i)) + String.valueOf(number.get(1).charAt(i)) +
+                    String.valueOf(number.get(0).charAt(i));
+            ss.add(s);
+        }
+        return ss;
+    }
+
     private static StringBuilder EmptyLine() {
         return new StringBuilder(pxl.repeat(24));
     }
 
     private static StringBuilder InvalidTileLine() {
         return new StringBuilder().append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(24)).append(ConsoleColors.RESET);
+    }
+
+    private static StringBuilder VerticalNumberLine(int number, int index) {
+        String verticalNumberLine = switch (number) {
+            case 1 -> convertToVerticalNumber(ONE).get(index);
+            case 2 -> convertToVerticalNumber(TWO).get(index);
+            case 3 -> convertToVerticalNumber(THREE).get(index);
+            case 4 -> convertToVerticalNumber(FOUR).get(index);
+            case 5 -> convertToVerticalNumber(FIVE).get(index);
+            case 6 -> convertToVerticalNumber(SIX).get(index);
+            case 7 -> convertToVerticalNumber(SEVEN).get(index);
+            case 8 -> convertToVerticalNumber(EIGHT).get(index);
+            case 9 -> convertToVerticalNumber(NINE).get(index);
+            default -> throw new IllegalStateException("Unexpected value: " + number);
+        };
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.RESET);
+        for (int i = 0; i < PXL_FOR_NUMBERS; i++) {
+            String consoleColor = switch (verticalNumberLine.charAt(i)) {
+                case 'W' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
+                case 'B' -> ConsoleColors.BLACK_BACKGROUND;
+                default -> ConsoleColors.RESET;
+            };
+            sb.append(consoleColor).append(pxl);
+        }
+        sb.append(ConsoleColors.RESET);
+        return sb;
     }
 
     private static StringBuilder NumberLine(int number, int index) {

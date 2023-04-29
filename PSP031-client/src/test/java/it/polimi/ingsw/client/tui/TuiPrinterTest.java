@@ -108,6 +108,21 @@ class TuiPrinterTest {
     }
 
     @Test
+    void tuiPrintEmptyShelfie() {
+        Shelfie shelfie = new Shelfie(new Color[][] {
+                //@formatter:off
+                new Color[] { Color.GREEN    , null           , null           , null           , null            },
+                new Color[] { Color.GREEN    , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                //@formatter:on
+        });
+        TuiPrinter.tuiPrintShelfie(shelfie);
+    }
+
+    @Test
     void tuiPrintEmptyBoard() {
 
         TuiPrinter.tuiPrintBoard(new Board(4));
@@ -116,5 +131,10 @@ class TuiPrinterTest {
     @Test
     void tuiPrintBoardRandom() {
         TuiPrinter.tuiPrintBoard(Game.refillBoard(new Board(4), BAG));
+    }
+
+    @Test
+    void printPersonalGoalRandom() {
+        TuiPrinter.tuiPrintPersonalGoal(new PersonalGoal(1));
     }
 }
