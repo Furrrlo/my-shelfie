@@ -61,6 +61,19 @@ public class TuiPrinter {
             "TTIJJHHHHHHHHHHHHHIJJTTT", "TTIJJJJJJJJJJJJJJJJJJTTT", "TTIJJJJJJJJJJJJJJJJJJTTT", "TTTTTTTTTTTTTTTTTTTTTTTT",
             "TTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTT");
 
+    private static final @Unmodifiable List<String> ONE = List.of("WWWWWWWWWWBBWWWWWWWWWWWW", "WWWWWWWWWWWBWWWWWWWWWWWW",
+            "WWWWWWWWWWWBWWWWWWWWWWWW", "WWWWWWWWWWWBWWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
+
+    private static final @Unmodifiable List<String> TWO = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW",
+            "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWWWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
+    private static final @Unmodifiable List<String> THREE = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW",
+            "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
+    private static final @Unmodifiable List<String> FOUR = List.of("WWWWWWWWWWBWWWWWWWWWWWWW", "WWWWWWWWWWBWWWWWWWWWWWWW",
+            "WWWWWWWWWWBWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW");
+    private static final @Unmodifiable List<String> FIVE = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWWWWWWWWWWWWW",
+            "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
+
+    /** prints shelfie with complex design */
     public static void tuiPrintShelfie(Shelfie shelfie) {
         printShelfieHeader();
         for (int row = 0; row < ROWS; row++) {
@@ -106,15 +119,26 @@ public class TuiPrinter {
         }
     }
 
-    public static void printShelfieHeader() {
-        //TODO : implement Shelfie header with selection number
+    private static void printShelfieHeader() {
+        StringBuilder sb = new StringBuilder();
+        printMidShelf1();
+        printMidShelf3();
+        printMidShelf1();
+        printNumberHeader();
+        printNumber();
+        printNumberHeader();
+        printMidShelf1();
+        printMidShelf3();
+
     }
 
-    public static void printShelfieBottom() {
-        //TODO : implement Shelfie bottom with selection number
+    private static void printShelfieBottom() {
+        printMidShelf1();
+        printMidShelf3();
+        printMidShelf1();
     }
 
-    public static void printMidShelf1() {
+    private static void printMidShelf1() {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
                 .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl.repeat(131))
@@ -122,7 +146,7 @@ public class TuiPrinter {
         System.out.println(sb);
     }
 
-    public static void printMidShelf2() {
+    private static void printMidShelf2() {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
                 .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
@@ -140,15 +164,73 @@ public class TuiPrinter {
         System.out.println(sb);
     }
 
-    public static StringBuilder EmptyLine() {
+    private static void printMidShelf3() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(131));
+        sb.append(ConsoleColors.RESET);
+        System.out.println(sb);
+    }
+
+    private static void printNumberHeader() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
+        for (int i = 0; i < COLUMNS; i++)
+            sb.append(ConsoleColors.ORANGE_BACKGROUND)
+                    .append(pxl).append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl.repeat(24))
+                    .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl);
+        sb.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl).append(ConsoleColors.RESET);
+        System.out.println(sb);
+    }
+
+    private static void printNumber() {
+        for (int i = 0; i < 5; i++) {
+            StringBuilder sb = new StringBuilder();
+            for (int col = 0; col < COLUMNS; col++) {
+                if (col == 0)
+                    sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
+                            .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                            .append(ConsoleColors.RESET);
+                sb.append(NumberLine(col + 1, i));
+                sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl)
+                        .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                        .append(ConsoleColors.RESET);
+            }
+            System.out.println(sb);
+        }
+    }
+
+    private static StringBuilder EmptyLine() {
         return new StringBuilder(pxl.repeat(24));
     }
 
-    public static StringBuilder InvalidTileLine() {
+    private static StringBuilder InvalidTileLine() {
         return new StringBuilder().append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(24)).append(ConsoleColors.RESET);
     }
 
-    public static StringBuilder SpriteLine(int index, Color color) {
+    private static StringBuilder NumberLine(int number, int index) {
+        String numberLine = switch (number) {
+            case 1 -> ONE.get(index);
+            case 2 -> TWO.get(index);
+            case 3 -> THREE.get(index);
+            case 4 -> FOUR.get(index);
+            case 5 -> FIVE.get(index);
+            default -> throw new IllegalStateException("Unexpected value: " + number);
+        };
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.RESET);
+        for (int i = 0; i < 24; i++) {
+            String consoleColor = switch (numberLine.charAt(i)) {
+                case 'W' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
+                case 'B' -> ConsoleColors.BLACK_BACKGROUND;
+                default -> ConsoleColors.RESET;
+            };
+            sb.append(consoleColor).append(pxl);
+        }
+        sb.append(ConsoleColors.RESET);
+        return sb;
+    }
+
+    private static StringBuilder SpriteLine(int index, Color color) {
         String spriteLine = switch (color) {
             case GREEN -> CAT.get(index);
             case PINK -> TREE.get(index);
