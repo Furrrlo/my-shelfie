@@ -1,6 +1,7 @@
 package it.polimi.ingsw.server.rmi;
 
 import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.rmi.*;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
@@ -71,7 +72,8 @@ public class RmiConnectionServerController implements RmiConnectionController, C
     @Override
     public void joinGame(String nick,
                          RmiHeartbeatHandler handler,
-                         RmiLobbyUpdaterFactory updaterFactory) {
+                         RmiLobbyUpdaterFactory updaterFactory)
+            throws NickNotValidException {
         var connection = new PlayerConnection(controller, nick);
         connections.add(connection);
         try {
@@ -100,6 +102,15 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                     });
         } catch (DisconnectedException e) {
             connection.disconnectPlayer(e);
+        } catch (NickNotValidException e) {
+            try {
+                connection.close();
+            } catch (IOException ex) {
+                // ??
+                System.err.println("Failed to close player");
+                ex.printStackTrace();
+            }
+            throw e;
         }
     }
 

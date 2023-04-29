@@ -1,11 +1,10 @@
 package it.polimi.ingsw.client.network.socket;
 
 import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.Lobby;
-import it.polimi.ingsw.socket.packets.JoinGamePacket;
-import it.polimi.ingsw.socket.packets.LobbyPacket;
-import it.polimi.ingsw.socket.packets.LobbyReceivedPacket;
+import it.polimi.ingsw.socket.packets.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -65,9 +64,9 @@ public class SocketClientNetManager implements ClientNetManager {
     }
 
     @Override
-    public LobbyAndController<Lobby> joinGame(String nick) throws IOException {
-        if (socketManager == null) {
-            if (socket == null)
+    public LobbyAndController<Lobby> joinGame(String nick) throws IOException, NickNotValidException {
+        if (socketManager == null || socketManager.isClosed()) {
+            if (socket == null || socket.isClosed())
                 socket = new Socket(serverAddress.getAddress(), serverAddress.getPort());
             else
                 socket.connect(serverAddress);
@@ -79,36 +78,46 @@ public class SocketClientNetManager implements ClientNetManager {
             System.out.println("Connected to : " + serverAddress);
         }
 
-        try (var lobbyCtx = socketManager.send(new JoinGamePacket(nick), LobbyPacket.class)) {
-            final var lobby = lobbyCtx.getPacket().lobby();
-            CompletableFuture.runAsync(new SocketClientHeartbeatHandler(socketManager), threadPool)
-                    .handle((__, ex) -> {
-                        if (ex == null)
-                            return __;
-                        // TODO: reconnect
-                        // TODO: logging
-                        System.err.println("Uncaught exception in SocketClientHeartbeatHandler");
-                        ex.printStackTrace();
-                        return null;
-                    });
-            CompletableFuture.supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
-                    .thenAccept(clientUpdater -> {
-                        System.out.println("[Client][" + nick + "] shutting down lobby updater...");
-                        if (clientUpdater != null)
-                            clientUpdater.run();
-                        System.out.println("[Client][" + nick + "] shutting down game updater...");
-                    }).handle((__, ex) -> {
-                        if (ex == null)
-                            return __;
-                        // TODO: reconnect
-                        // TODO: logging
-                        System.err.println("Uncaught exception in SocketClient*Updater");
-                        ex.printStackTrace();
-                        return null;
-                    });
-            lobbyCtx.reply(new LobbyReceivedPacket());
-            return new LobbyAndController<>(lobby, new SocketLobbyController(socketManager));
+        try (var lobbyCtx = socketManager.send(new JoinGamePacket(nick), JoinResponsePacket.class)) {
+            switch (lobbyCtx.getPacket()) {
+                case NickNotValidPacket p -> {
+                    lobbyCtx.reply(new LobbyReceivedPacket());
+                    socketManager.close();
+                    throw new NickNotValidException(p.message());
+                }
+                case LobbyPacket p -> {
+                    final var lobby = p.lobby();
+                    CompletableFuture.runAsync(new SocketClientHeartbeatHandler(socketManager), threadPool)
+                            .handle((__, ex) -> {
+                                if (ex == null)
+                                    return __;
+                                // TODO: reconnect
+                                // TODO: logging
+                                System.err.println("Uncaught exception in SocketClientHeartbeatHandler");
+                                ex.printStackTrace();
+                                return null;
+                            });
+                    CompletableFuture.supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
+                            .thenAccept(clientUpdater -> {
+                                System.out.println("[Client][" + nick + "] shutting down lobby updater...");
+                                if (clientUpdater != null)
+                                    clientUpdater.run();
+                                System.out.println("[Client][" + nick + "] shutting down game updater...");
+                            }).handle((__, ex) -> {
+                                if (ex == null)
+                                    return __;
+                                // TODO: reconnect
+                                // TODO: logging
+                                System.err.println("Uncaught exception in SocketClient*Updater");
+                                ex.printStackTrace();
+                                return null;
+                            });
+                    lobbyCtx.reply(new LobbyReceivedPacket());
+                    return new LobbyAndController<>(lobby, new SocketLobbyController(socketManager));
+                }
+            }
         }
+        throw new RuntimeException("Why is this necessary?");
     }
 
     @VisibleForTesting

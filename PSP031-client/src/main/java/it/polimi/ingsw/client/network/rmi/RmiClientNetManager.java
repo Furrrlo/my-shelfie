@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.network.rmi;
 
 import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.rmi.*;
@@ -62,7 +63,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
     }
 
     @Override
-    public LobbyAndController<Lobby> joinGame(String nick) throws RemoteException, NotBoundException {
+    public LobbyAndController<Lobby> joinGame(String nick) throws RemoteException, NotBoundException, NickNotValidException {
         if (server == null) {
             final Registry registry = LocateRegistry.getRegistry(host, port);
             server = (RmiConnectionController) registry.lookup(remoteName);

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.server.socket;
 
 import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.socket.SocketManager;
@@ -169,6 +170,9 @@ public class SocketConnectionServerController implements Closeable {
                         return socketController;
                     });
             Objects.requireNonNull(lobbyCtx.get(), "Lobby was somehow not sent to the player").ack();
+        } catch (NickNotValidException e) {
+            joinCtx.reply(new NickNotValidPacket(Objects.requireNonNull(e.getMessage())), LobbyReceivedPacket.class).ack();
+            connection.close();
         } catch (Throwable e) {
             connection.disconnectPlayer(e);
         }

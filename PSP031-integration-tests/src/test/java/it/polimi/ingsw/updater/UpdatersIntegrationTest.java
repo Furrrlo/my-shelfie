@@ -1,9 +1,6 @@
 package it.polimi.ingsw.updater;
 
-import it.polimi.ingsw.DelegatingLobbyUpdater;
-import it.polimi.ingsw.DisconnectedException;
-import it.polimi.ingsw.GameAndController;
-import it.polimi.ingsw.HeartbeatHandler;
+import it.polimi.ingsw.*;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.*;
@@ -66,8 +63,13 @@ public class UpdatersIntegrationTest {
                         return gameUpdater;
                     }
                 };
-                var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, wrappedFactory, lobbyControllerFactory,
-                        gameControllerFactory);
+                LobbyView lobby = null;
+                try {
+                    lobby = super.joinGame(nick, heartbeatHandler, observableTracker, wrappedFactory, lobbyControllerFactory,
+                            gameControllerFactory);
+                } catch (NickNotValidException e) {
+                    throw new RuntimeException(e);
+                }
                 serverJoinedNick.complete(nick);
                 serverLobbyToSerialize.complete(lobby);
                 return lobby;

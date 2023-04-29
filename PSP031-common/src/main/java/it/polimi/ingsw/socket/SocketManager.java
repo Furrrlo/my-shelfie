@@ -63,6 +63,8 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     void setNick(String nick);
 
+    boolean isClosed();
+
     /**
      * Context of a Packet
      * Wraps a {@link SimpleSeqPacket} and allows to ack and reply

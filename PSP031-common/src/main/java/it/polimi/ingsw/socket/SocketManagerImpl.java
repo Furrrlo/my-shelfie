@@ -289,6 +289,11 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         this.nick = nick;
     }
 
+    @Override
+    public boolean isClosed() {
+        return isClosed;
+    }
+
     private void log(String s) {
         System.out.println("[" + name + "][" + nick + "] " + s);
     }

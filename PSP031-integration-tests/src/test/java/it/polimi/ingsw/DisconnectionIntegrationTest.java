@@ -50,7 +50,7 @@ public class DisconnectionIntegrationTest {
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
-                    throws DisconnectedException {
+                    throws DisconnectedException, NickNotValidException {
                 System.out.println("joining");
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
                         lobbyControllerFactory,
@@ -103,7 +103,7 @@ public class DisconnectionIntegrationTest {
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
-                    throws DisconnectedException {
+                    throws DisconnectedException, NickNotValidException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
                         lobbyControllerFactory,
                         gameControllerFactory);
@@ -168,7 +168,7 @@ public class DisconnectionIntegrationTest {
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
-                    throws DisconnectedException {
+                    throws DisconnectedException, NickNotValidException {
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
                         lobbyControllerFactory,
                         gameControllerFactory);

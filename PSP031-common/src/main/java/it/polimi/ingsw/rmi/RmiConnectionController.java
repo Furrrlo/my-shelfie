@@ -1,5 +1,7 @@
 package it.polimi.ingsw.rmi;
 
+import it.polimi.ingsw.NickNotValidException;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -10,5 +12,5 @@ public interface RmiConnectionController extends Remote {
     void joinGame(String nick,
                   RmiHeartbeatHandler heartbeatHandler,
                   RmiLobbyUpdaterFactory updaterFactory)
-            throws RemoteException;
+            throws RemoteException, NickNotValidException;
 }

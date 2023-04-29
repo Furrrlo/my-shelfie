@@ -2,6 +2,7 @@ package it.polimi.ingsw.client.tui;
 
 import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
@@ -15,6 +16,7 @@ import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -113,6 +115,8 @@ public class TuiMain {
                         var lobbyAndController = netManager.joinGame(nick);
                         return ctx.prompt(
                                 promptLobby(renderer, netManager, lobbyAndController.lobby(), lobbyAndController.controller()));
+                    } catch (NickNotValidException e) {
+                        return ctx.invalid(Objects.requireNonNull(e.getMessage()));
                     } catch (Exception ex) {
                         // TODO: logging
                         ex.printStackTrace();
