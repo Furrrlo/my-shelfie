@@ -273,12 +273,13 @@ public class TuiMain {
                     }
                     if (!game.getBoard().checkBoardCoord(coords))
                         return ctx.invalid("Invalid selection");
-                    return ctx.prompt(promptCol(ctx.subPrompt(), netManager, controller, coords));
+                    return ctx.prompt(promptCol(ctx.subPrompt(), netManager, game, controller, coords));
                 });
     }
 
     private static Prompt promptCol(Prompt.Factory promptFactory,
                                     ClientNetManager netManager,
+                                    GameView game,
                                     GameController controller,
                                     List<BoardCoord> coords) {
         return promptFactory.input(
@@ -286,6 +287,8 @@ public class TuiMain {
                 (renderer0, ctx, input) -> {
                     try {
                         int col = Integer.parseInt(input) - 1;
+                        if (!game.thePlayer().getShelfie().checkColumnSpace(col, coords.size()))
+                            return ctx.invalid("Invalid col " + col);
                         controller.makeMove(coords, col);
                     } catch (NumberFormatException e) {
                         return ctx.invalid("You have to select a column");

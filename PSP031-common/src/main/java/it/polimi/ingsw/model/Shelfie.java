@@ -86,7 +86,10 @@ public class Shelfie implements ShelfieView {
         return freeSpace;
     }
 
+    @Override
     public boolean checkColumnSpace(int shelfCol, int selected) {
+        if (shelfCol < 0 || shelfCol >= COLUMNS)
+            return false;
         return selected <= getColumnFreeSpace(shelfCol);
     }
 

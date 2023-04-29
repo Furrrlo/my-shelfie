@@ -20,4 +20,6 @@ public interface ShelfieView extends Serializable {
     Provider<@Nullable Tile> tile(int r, int c);
 
     Stream<? extends TileAndCoords<? extends Provider<@Nullable Tile>>> tiles();
+
+    boolean checkColumnSpace(int shelfCol, int selected);
 }
