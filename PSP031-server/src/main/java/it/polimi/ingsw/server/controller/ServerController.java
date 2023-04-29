@@ -173,6 +173,9 @@ public class ServerController implements Closeable {
                               LobbyControllerFactory lobbyControllerFactory,
                               BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
             throws DisconnectedException, NickNotValidException {
+        if (heartbeats.putIfAbsent(nick, heartbeatHandler) != null) {
+            throw new NickNotValidException("This nick is already in use");
+        }
 
         do {
             final var serverLobbyAndController = getOrCreateLobby(nick);
@@ -187,23 +190,6 @@ public class ServerController implements Closeable {
                 final List<String> joinedPlayersNicks = serverLobby.joinedPlayers().get().stream()
                         .map(LobbyPlayer::getNick)
                         .toList();
-
-                // We have to check that there aren't others connected player with this nick
-                // Players with the same nick can only be in this lobby, because:
-                // 1. if a player with the same nick was already present, getOrCreateGameLobby() returned his lobby
-                // 2. if two player with same nick are joining concurrently, getOrCreateGameLobby() will return 
-                //    the same lobby for both player, and the first one who get the lock will join
-                final var currGameAndController = serverLobby.game().get();
-                final var currGame = currGameAndController != null ? currGameAndController.game() : null;
-
-                if ((currGame == null && joinedPlayersNicks.contains(nick)) ||
-                        (currGame != null && currGame.getPlayers().stream()
-                                .filter(p -> p.getNick().equals(nick))
-                                .findFirst()
-                                .map(p -> p.connected().get())
-                                .orElse(false)))
-                    throw new NickNotValidException("This nick is already in use");
-
                 if (!joinedPlayersNicks.contains(nick) && !serverLobby.canOnePlayerJoin())
                     continue; // If we fail the test, let's just retry and search a new one
 
@@ -217,6 +203,8 @@ public class ServerController implements Closeable {
                     throw new IllegalStateException("Player disconnected during handshake process");
                 }
 
+                final var currGameAndController = serverLobby.game().get();
+                final var currGame = currGameAndController != null ? currGameAndController.game() : null;
                 try {
                     // Doesn't need to be concurrent as it will only be called inside the lobby lock
                     final var playersRegisteredObservers = new HashMap<LobbyPlayer, Consumer<?>>();
@@ -274,7 +262,6 @@ public class ServerController implements Closeable {
                     throw new DisconnectedException("Player disconnected during handshake process", ex);
                 }
 
-                heartbeats.put(nick, heartbeatHandler);
                 return lobbyAndController.lobby();
             }
         } while (true);
