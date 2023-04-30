@@ -168,7 +168,7 @@ class TuiRenderer implements Closeable {
 
     /**
      * Set the current scene to be rendered, replacing any already existing one
-     *
+     * <p>
      * There can be only 1 scene active at any time
      *
      * @param scene scene to render
@@ -180,7 +180,7 @@ class TuiRenderer implements Closeable {
     /**
      * Set the current root prompt to be rendered and interacted by the user,
      * replacing any already existing one.
-     *
+     * <p>
      * There can be only 1 root prompt active at any time, eventually with its children
      * (if any exists/are required)
      *
