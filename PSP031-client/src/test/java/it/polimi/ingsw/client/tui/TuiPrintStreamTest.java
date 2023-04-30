@@ -40,13 +40,13 @@ class TuiPrintStreamTest {
             output = output.replace("\r", "");
             assertEquals("""
                     ESC7ESC[sESC[11G- S F nick: 0
-                    ESC[11G   1  2  3  4  5\s
-                    ESC[11G1 │ ││ ││ ││ ││ │
-                    ESC[11G2 │ ││ ││ ││ ││ │
-                    ESC[11G3 │ ││ ││ ││ ││ │
-                    ESC[11G4 │ ││ ││ ││ ││ │
-                    ESC[11G5 │ ││ ││ ││ ││ │
-                    ESC[11G6 │ ││ ││ ││ ││ │
+                    ESC[11G 1  2  3  4  5\s
+                    ESC[11G│ ││ ││ ││ ││ │
+                    ESC[11G│ ││ ││ ││ ││ │
+                    ESC[11G│ ││ ││ ││ ││ │
+                    ESC[11G│ ││ ││ ││ ││ │
+                    ESC[11G│ ││ ││ ││ ││ │
+                    ESC[11G│ ││ ││ ││ ││ │
                     ESC[11G""",
                     output);
         }
