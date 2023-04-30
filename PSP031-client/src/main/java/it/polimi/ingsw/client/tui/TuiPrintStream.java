@@ -6,6 +6,7 @@ import org.fusesource.jansi.AnsiType;
 import org.fusesource.jansi.internal.CLibrary;
 import org.fusesource.jansi.internal.Kernel32;
 import org.fusesource.jansi.io.AnsiOutputStream;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -27,6 +28,11 @@ class TuiPrintStream extends PrintStream {
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
     private static final int DEFAULT_TERMINAL_WIDTH = 80;
     private static final int DEFAULT_TERMINAL_HEIGHT = 24;
+
+    public static final int BOX_TOP = 0x1;
+    public static final int BOX_BOTTOM = 0x10;
+    public static final int BOX_LEFT = 0x100;
+    public static final int BOX_RIGHT = 0x1000;
 
     /** First ANSI escape code character */
     @VisibleForTesting
@@ -419,6 +425,61 @@ class TuiPrintStream extends PrintStream {
         try (var ignored = translateCursor(drawnRect.row(), drawnRect.col())) {
             printer.print(this);
             return drawnRect;
+        }
+    }
+
+    public void printBox(TuiRect box, @MagicConstant(flags = { BOX_TOP, BOX_BOTTOM, BOX_LEFT, BOX_RIGHT }) int sides) {
+        boolean hasTop = (sides & BOX_TOP) != 0;
+        boolean hasBottom = (sides & BOX_BOTTOM) != 0;
+        boolean hasLeft = (sides & BOX_LEFT) != 0;
+        boolean hasRight = (sides & BOX_RIGHT) != 0;
+
+        cursor(box.row(), box.col());
+        if (hasTop || hasLeft)
+            print(hasTop && hasLeft ? '┌' : hasTop ? '─' : '│');
+
+        if (hasTop) {
+            for (int i = box.col() + 1; i <= box.lastCol() - 1; i++)
+                print('─');
+        }
+
+        if (hasTop || hasRight) {
+            if (!hasTop)
+                cursor(box.row(), box.lastCol());
+            print(hasTop && hasRight ? '┐' : hasTop ? '─' : '│');
+        }
+
+        cursor(box.lastRow(), box.col());
+        if (hasBottom || hasLeft)
+            print(hasBottom && hasLeft ? '└' : hasBottom ? '─' : '│');
+
+        if (hasBottom) {
+            for (int i = box.col() + 1; i <= box.lastCol() - 1; i++)
+                print('─');
+        }
+
+        if (hasBottom || hasRight) {
+            if (!hasBottom)
+                cursor(box.lastRow(), box.lastCol());
+            print(hasBottom && hasRight ? '┘' : hasBottom ? '─' : '│');
+        }
+
+        if (hasLeft) {
+            cursor(box.row() + 1, 0);
+            try (var ignored = translateCursorToCol(box.col())) {
+                for (int i = box.row() + 1; i <= box.lastRow() - 2; i++)
+                    println("│");
+                print("│"); // Don't print a new line to prevent scrolling
+            }
+        }
+
+        if (hasRight) {
+            cursor(box.row() + 1, 0);
+            try (var ignored = translateCursorToCol(box.lastCol())) {
+                for (int i = box.row() + 1; i <= box.lastRow() - 2; i++)
+                    println("│");
+                print("│"); // Don't print a new line to prevent scrolling
+            }
         }
     }
 
