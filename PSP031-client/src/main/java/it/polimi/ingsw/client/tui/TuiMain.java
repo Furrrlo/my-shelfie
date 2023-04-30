@@ -285,13 +285,18 @@ public class TuiMain {
         return promptFactory.input(
                 "Select the column: ",
                 (renderer0, ctx, input) -> {
+                    int col;
                     try {
-                        int col = Integer.parseInt(input) - 1;
-                        if (!game.thePlayer().getShelfie().checkColumnSpace(col, coords.size()))
-                            return ctx.invalid("Invalid col " + (col + 1));
-                        controller.makeMove(coords, col);
+                        col = Integer.parseInt(input) - 1;
                     } catch (NumberFormatException e) {
                         return ctx.invalid("You have to select a column");
+                    }
+
+                    if (!game.thePlayer().getShelfie().checkColumnSpace(col, coords.size()))
+                        return ctx.invalid("There's not enough space in column " + (col + 1));
+
+                    try {
+                        controller.makeMove(coords, col);
                     } catch (DisconnectedException e) {
                         return ctx.prompt("Disconnected from the server",
                                 promptNick(renderer0, ctx.rootPrompt(), netManager));
