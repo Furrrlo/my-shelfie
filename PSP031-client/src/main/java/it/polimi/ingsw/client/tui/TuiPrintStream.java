@@ -173,8 +173,8 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             var lastTranslation = translationStack.peek();
 
-            row = Math.max(1, lastTranslation != null ? lastTranslation.row() + row : row);
-            col = Math.max(1, lastTranslation != null ? lastTranslation.col() + col : col);
+            row = Math.max(0, lastTranslation != null ? lastTranslation.row() + row : row);
+            col = Math.max(0, lastTranslation != null ? lastTranslation.col() + col : col);
             cursor(row, col);
 
             var translation = new Translation(row, col);
@@ -198,8 +198,8 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             var lastTranslation = translationStack.peek();
 
-            int row = Math.max(1, lastTranslation != null ? lastTranslation.row() : 0);
-            col = Math.max(1, lastTranslation != null ? lastTranslation.col() + col : col);
+            int row = Math.max(0, lastTranslation != null ? lastTranslation.row() : 0);
+            col = Math.max(0, lastTranslation != null ? lastTranslation.col() + col : col);
             cursorToCol(col);
 
             var translation = new Translation(row, col);
@@ -245,9 +245,9 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            print(Math.max(1, row));
+            print(Math.max(0, row) + 1);
             write(';');
-            print(Math.max(1, col));
+            print(Math.max(0, col) + 1);
             write('H');
         }
     }
@@ -261,7 +261,7 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             write(FIRST_ESC_CHAR);
             write(SECOND_ESC_CHAR);
-            print(Math.max(1, col));
+            print(Math.max(0, col) + 1);
             write('G');
         }
     }
@@ -416,7 +416,7 @@ class TuiPrintStream extends PrintStream {
         private void writeEscapeCommand(char command, int arg) throws IOException {
             out.write(FIRST_ESC_CHAR);
             out.write(SECOND_ESC_CHAR);
-            String args = String.valueOf(arg);
+            String args = String.valueOf(arg + 1);
             for (int i = 0; i < args.length(); i++)
                 out.write(args.charAt(i));
             out.write(command);

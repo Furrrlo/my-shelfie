@@ -108,7 +108,7 @@ class TuiRenderer implements Closeable {
                     }
                 }
 
-                out.cursor(1, 1);
+                out.cursor(0, 0);
                 out.eraseInDisplay();
 
                 if (scene != null)
