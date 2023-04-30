@@ -105,6 +105,8 @@ class TuiPrinterTest {
                 //@formatter:on
         });
         TuiPrinter.tuiPrintShelfie(shelfie);
+        System.out.println("\n");
+        TuiPrinter.tuiPrintShelfieAndPersonalGoal(shelfie, new PersonalGoal(1));
     }
 
     @Test
@@ -119,7 +121,10 @@ class TuiPrinterTest {
                 new Color[] { null           , null           , null           , null           , null            },
                 //@formatter:on
         });
-        TuiPrinter.tuiPrintShelfie(shelfie);
+        //TuiPrinter.tuiPrintShelfie(shelfie);
+        TuiPrinter.tuiPrintPersonalGoal(new PersonalGoal(1));
+        System.out.println("\n");
+        TuiPrinter.tuiPrintShelfieAndPersonalGoal(shelfie, new PersonalGoal(1));
     }
 
     @Test
