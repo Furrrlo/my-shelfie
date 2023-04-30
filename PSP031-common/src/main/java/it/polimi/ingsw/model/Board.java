@@ -148,6 +148,10 @@ public class Board implements BoardView {
         if (selected.size() == 0 || selected.size() > 3)
             return false;
 
+        // If any coord is specified more than once, it's invalid
+        if (selected.stream().distinct().count() != selected.size())
+            return false;
+
         for (BoardCoord coord : selected) {
             if (!isValidTile(coord.row(), coord.col()))
                 return false;
