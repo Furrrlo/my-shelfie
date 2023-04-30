@@ -41,4 +41,7 @@ public interface BoardView extends Serializable {
      * @param selected : list of BoardCoord ( index of coords for tiles on Bord )
      */
     boolean checkBoardCoord(List<BoardCoord> selected);
+
+    /** Returns true if the board tile in specified position has at least one free side */
+    boolean hasFreeSide(int row, int col);
 }

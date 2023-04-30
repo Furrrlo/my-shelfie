@@ -27,21 +27,12 @@ class TuiBoardPrinter implements TuiPrinter2 {
 
                 var tile = board.isValidTile(row, col) ? board.tile(row, col).get() : null;
                 if (tile == null) {
-                    msg.append(ConsoleColors.BLACK).append(ConsoleColors.BLACK_BACKGROUND_BRIGHT);
-                    msg.append("   ").append(ConsoleColors.RESET);
+                    msg.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append("   ").append(ConsoleColors.RESET);
                     continue;
                 }
 
-                switch (tile.getColor()) {
-                    case BLUE -> msg.append(ConsoleColors.CYAN).append(ConsoleColors.BLUE_BACKGROUND_BRIGHT);
-                    case GREEN -> msg.append(ConsoleColors.GREEN).append(ConsoleColors.GREEN_BACKGROUND_BRIGHT);
-                    case YELLOW -> msg.append(ConsoleColors.YELLOW_BRIGHT).append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT);
-                    case PINK -> msg.append(ConsoleColors.PURPLE).append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT);
-                    case WHITE -> msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT);
-                    case LIGHTBLUE -> msg.append(ConsoleColors.BLUE).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT);
-                }
-
-                msg.append("   ").append(ConsoleColors.RESET);
+                String consoleColor = TuiColorConverter.color(tile.getColor(), board.hasFreeSide(row, col));
+                msg.append(consoleColor).append("   ").append(ConsoleColors.RESET);
             }
             out.println(msg);
         }

@@ -199,24 +199,10 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
 
                 Color color = tile.getColor();
                 if (checked[row][col] < 1) {
-                    String consoleColor = switch (color) {
-                        case BLUE -> ConsoleColors.BLUE_BACKGROUND;
-                        case GREEN -> ConsoleColors.GREEN_BACKGROUND;
-                        case YELLOW -> ConsoleColors.ORANGE_BACKGROUND;
-                        case PINK -> ConsoleColors.PURPLE_BACKGROUND;
-                        case WHITE -> ConsoleColors.YELLOW_BACKGROUND;
-                        case LIGHTBLUE -> ConsoleColors.CYAN_BACKGROUND;
-                    };
+                    String consoleColor = TuiColorConverter.color(color, false);
                     msg.append(consoleColor).append("   ").append(ConsoleColors.RESET);
                 } else {
-                    String consoleColor = switch (color) {
-                        case BLUE -> ConsoleColors.BLUE_BACKGROUND_BRIGHT;
-                        case GREEN -> ConsoleColors.GREEN_BACKGROUND_BRIGHT;
-                        case YELLOW -> ConsoleColors.ORANGE_BACKGROUND_BRIGHT;
-                        case PINK -> ConsoleColors.PURPLE_BACKGROUND_BRIGHT;
-                        case WHITE -> ConsoleColors.YELLOW_BACKGROUND_BRIGHT;
-                        case LIGHTBLUE -> ConsoleColors.CYAN_BACKGROUND_BRIGHT;
-                    };
+                    String consoleColor = TuiColorConverter.color(color, true);
                     msg.append(consoleColor)
                             .append(ConsoleColors.BLACK_BOLD)
                             .append(" ").append(checked[row][col]).append(" ")

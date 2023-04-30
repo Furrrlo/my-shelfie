@@ -184,10 +184,8 @@ public class Board implements BoardView {
 
     }
 
-    /**
-     * returns true if the board tile in specified position has at least one free side
-     */
-    private boolean hasFreeSide(int row, int col) {
+    @Override
+    public boolean hasFreeSide(int row, int col) {
         if (!isValidTile(row + 1, col) || tile(row + 1, col).get() == null)
             return true;
         if (!isValidTile(row - 1, col) || tile(row - 1, col).get() == null)

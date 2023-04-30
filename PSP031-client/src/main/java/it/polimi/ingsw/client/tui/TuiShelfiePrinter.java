@@ -6,6 +6,7 @@ import it.polimi.ingsw.model.Tile;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
 class TuiShelfiePrinter implements TuiPrinter2 {
 
@@ -23,10 +24,12 @@ class TuiShelfiePrinter implements TuiPrinter2 {
 
     @Override
     public void print(TuiPrintStream out) {
-        printShelfieMatrix(out, (row, col) -> shelfie.tile(row, col).get());
+        printShelfieMatrix(out, (row, col) -> shelfie.tile(row, col).get(), (row, col) -> false);
     }
 
-    static void printShelfieMatrix(TuiPrintStream out, BiFunction<Integer, Integer, @Nullable Tile> tiles) {
+    static void printShelfieMatrix(TuiPrintStream out,
+                                   BiFunction<Integer, Integer, @Nullable Tile> tiles,
+                                   BiPredicate<Integer, Integer> highlight) {
         for (int row = 0; row < ShelfieView.ROWS; row++) {
             StringBuilder msg = new StringBuilder();
             if (row == 0) {
@@ -46,16 +49,8 @@ class TuiShelfiePrinter implements TuiPrinter2 {
                     continue;
                 }
 
-                switch (tile.getColor()) {
-                    case BLUE -> msg.append(ConsoleColors.CYAN).append(ConsoleColors.BLUE_BACKGROUND_BRIGHT);
-                    case GREEN -> msg.append(ConsoleColors.GREEN).append(ConsoleColors.GREEN_BACKGROUND_BRIGHT);
-                    case YELLOW -> msg.append(ConsoleColors.YELLOW_BRIGHT).append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT);
-                    case PINK -> msg.append(ConsoleColors.PURPLE).append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT);
-                    case WHITE -> msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT);
-                    case LIGHTBLUE -> msg.append(ConsoleColors.BLUE).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT);
-                }
-
-                msg.append("   ").append(ConsoleColors.RESET);
+                String consoleColor = TuiColorConverter.color(tile.getColor(), highlight.test(row, col));
+                msg.append(consoleColor).append("   ").append(ConsoleColors.RESET);
             }
             out.println(msg);
         }
