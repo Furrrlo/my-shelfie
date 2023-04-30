@@ -25,7 +25,7 @@ class TuiGameSceneTest {
                 new Color[] { Color.LIGHTBLUE, Color.PINK  , Color.WHITE    , Color.BLUE  , Color.LIGHTBLUE }
                 //@formatter:on
         };
-        TuiGameScene.printShelfie(out, new Shelfie(matrix));
+        new TuiShelfiePrinter(new Shelfie(matrix)).print(out);
     }
 
     @Test

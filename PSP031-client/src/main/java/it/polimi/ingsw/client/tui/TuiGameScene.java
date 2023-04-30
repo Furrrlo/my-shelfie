@@ -3,6 +3,7 @@ package it.polimi.ingsw.client.tui;
 import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -19,52 +20,112 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
 
     @Override
     public void accept(TuiPrintStream out) {
-        // TODO: game renderer, possibly in a different class
-        printBoard(out, game.getBoard());
-        out.println();
+        var terminalSize = out.getTerminalSize();
+        var boardRect = out.printAligned(
+                new TuiBoardPrinter(game.getBoard()),
+                new TuiRect(0, 0, terminalSize),
+                TuiHAlignment.CENTER, TuiVAlignment.CENTER);
+        boardRect = boardRect.expand(4, 6);
 
-        int col = 0;
-        for (PlayerView player : game.getPlayers()) {
-            try (NoExceptionAutoCloseable ignored = out.saveCursorPos();
-                 NoExceptionAutoCloseable ignored1 = out.translateCursorToCol(col)) {
+        BiConsumer<PlayerView, TuiRect> printPlayerNick = (player, shelfieRect) -> {
+            out.cursor(shelfieRect.row() - 2, shelfieRect.col());
 
-                final String nickColor;
-                if (!player.connected().get())
-                    nickColor = ConsoleColors.RED;
-                else if (player.isCurrentTurn().get())
-                    nickColor = ConsoleColors.YELLOW;
-                else
-                    nickColor = ConsoleColors.GREEN;
+            final String nickColor;
+            if (!player.connected().get())
+                nickColor = ConsoleColors.RED;
+            else if (player.isCurrentTurn().get())
+                nickColor = ConsoleColors.YELLOW;
+            else
+                nickColor = ConsoleColors.GREEN;
+            out.print(nickColor);
+            out.print(player.isCurrentTurn().get() ? "> " : "· ");
+            out.print(player.getNick());
+
+            if (player.isStartingPlayer()) {
+                out.print(ConsoleColors.PURPLE);
+                out.print(" C");
                 out.print(nickColor);
-                out.print(player.isCurrentTurn().get() ? "> " : "· ");
-                out.print(player.getNick());
-
-                if (player.isStartingPlayer()) {
-                    out.print(ConsoleColors.PURPLE);
-                    out.print(" C");
-                    out.print(nickColor);
-                }
-
-                if (player.isFirstFinisher().get()) {
-                    out.print(ConsoleColors.BLUE);
-                    out.print(" *");
-                    out.print(nickColor);
-                }
-
-                out.print(": " + player.score().get());
-                out.println(ConsoleColors.RESET);
-
-                printShelfie(out, player.getShelfie());
-                col += 30;
             }
-        }
 
-        out.moveCursorDown(10);
-    }
+            if (player.isFirstFinisher().get()) {
+                out.print(ConsoleColors.BLUE);
+                out.print(" *");
+                out.print(nickColor);
+            }
 
-    /** prints colored shelfie */
-    public static void printShelfie(TuiPrintStream out, ShelfieView shelfie) {
-        printShelfieMatrix(out, (row, col) -> shelfie.tile(row, col).get());
+            out.print(": " + player.score().get());
+            out.print(ConsoleColors.RESET);
+        };
+
+        // thePlayer shelfie, always bottom-centered
+        var bottomPlayerRect = out.printAligned(
+                new TuiShelfiePrinter(game.thePlayer().getShelfie()),
+                TuiRect.fromCoords(boardRect.lastRow() + 3, 0, terminalSize.rows(), terminalSize.cols()),
+                TuiHAlignment.CENTER, TuiVAlignment.TOP);
+        printPlayerNick.accept(game.thePlayer(), bottomPlayerRect);
+        bottomPlayerRect = bottomPlayerRect.expand(4, 6);
+        out.printBox(
+                TuiRect.fromCoords(
+                        boardRect.lastRow() + 1, boardRect.col(),
+                        bottomPlayerRect.lastRow(), boardRect.lastCol()),
+                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_RIGHT | TuiPrintStream.BOX_BOTTOM);
+
+        var otherPlayers = game.getPlayers().stream()
+                .filter(p -> !p.equals(game.thePlayer()))
+                .toList();
+
+        var topPlayer = !otherPlayers.isEmpty() ? otherPlayers.get(0) : null;
+        var topPlayerRect = out.printAligned(
+                topPlayer != null ? new TuiShelfiePrinter(topPlayer.getShelfie()) : TuiShelfiePrinter.EMPTY,
+                TuiRect.fromCoords(2, 0, boardRect.row() - 1, terminalSize.cols()),
+                TuiHAlignment.CENTER, TuiVAlignment.BOTTOM);
+        if (topPlayer != null)
+            printPlayerNick.accept(topPlayer, topPlayerRect);
+        topPlayerRect = topPlayerRect.expand(4, 6);
+        out.printBox(
+                TuiRect.fromCoords(
+                        topPlayerRect.row() - 2, boardRect.col(),
+                        boardRect.row() - 1, boardRect.lastCol()),
+                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_RIGHT | TuiPrintStream.BOX_TOP);
+
+        var leftPlayer = otherPlayers.size() >= 2 ? otherPlayers.get(1) : null;
+        var leftPlayerRect = out.printAligned(
+                leftPlayer != null ? new TuiShelfiePrinter(leftPlayer.getShelfie()) : TuiShelfiePrinter.EMPTY,
+                TuiRect.fromCoords(2, 0, terminalSize.rows(), boardRect.col() - 1),
+                TuiHAlignment.RIGHT, TuiVAlignment.CENTER);
+        if (leftPlayer != null)
+            printPlayerNick.accept(leftPlayer, leftPlayerRect);
+        leftPlayerRect = leftPlayerRect.expand(4, 6);
+        out.printBox(
+                TuiRect.fromCoords(
+                        boardRect.row(), leftPlayerRect.col(),
+                        boardRect.lastRow(), boardRect.col() - 1),
+                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_TOP);
+
+        var rightPlayer = otherPlayers.size() >= 3 ? otherPlayers.get(2) : null;
+        var rightPlayerRect = out.printAligned(
+                rightPlayer != null ? new TuiShelfiePrinter(rightPlayer.getShelfie()) : TuiShelfiePrinter.EMPTY,
+                TuiRect.fromCoords(2, boardRect.lastCol() + 1, terminalSize.rows(), terminalSize.cols()),
+                TuiHAlignment.LEFT, TuiVAlignment.CENTER);
+        if (rightPlayer != null)
+            printPlayerNick.accept(rightPlayer, rightPlayerRect);
+        rightPlayerRect = rightPlayerRect.expand(4, 6);
+        out.printBox(
+                TuiRect.fromCoords(
+                        boardRect.row(), boardRect.lastCol() + 1,
+                        boardRect.lastRow(), rightPlayerRect.lastCol()),
+                TuiPrintStream.BOX_RIGHT | TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_TOP);
+
+        out.cursor(boardRect.row(), boardRect.col());
+        out.print("┘");
+        out.cursor(boardRect.row(), boardRect.lastCol());
+        out.print("└");
+        out.cursor(boardRect.lastRow(), boardRect.col());
+        out.print("┐");
+        out.cursor(boardRect.lastRow(), boardRect.lastCol());
+        out.print("┌");
+
+        out.cursor(boardRect.lastRow() + 2, 0);
     }
 
     public static void printShelfieMatrix(TuiPrintStream out, BiFunction<Integer, Integer, @Nullable Tile> tiles) {
@@ -161,45 +222,6 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
                             .append(" ").append(checked[row][col]).append(" ")
                             .append(ConsoleColors.RESET);
                 }
-            }
-            out.println(msg);
-        }
-    }
-
-    public static void printBoard(TuiPrintStream out, BoardView board) {
-        for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
-            StringBuilder msg = new StringBuilder();
-            if (row == 0) {
-                msg.append(' ');
-                for (int i = 1; i <= BoardView.BOARD_COLUMNS; i++)
-                    msg.append(' ').append(i).append(' ');
-                msg.append('\n');
-            }
-            for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
-                if (col == 0)
-                    msg.append(row + 1).append(" ");
-
-                if (board.isValidTile(row, col)) {
-                    @Nullable
-                    Tile tile = board.tile(row, col).get();
-                    if (tile != null) {
-                        switch (tile.getColor()) {
-                            case BLUE -> msg.append(ConsoleColors.CYAN).append(ConsoleColors.BLUE_BACKGROUND_BRIGHT);
-                            case GREEN -> msg.append(ConsoleColors.GREEN).append(ConsoleColors.GREEN_BACKGROUND_BRIGHT);
-                            case YELLOW -> msg.append(ConsoleColors.YELLOW_BRIGHT)
-                                    .append(ConsoleColors.ORANGE_BACKGROUND_BRIGHT);
-                            case PINK -> msg.append(ConsoleColors.PURPLE).append(ConsoleColors.PURPLE_BACKGROUND_BRIGHT);
-                            case WHITE -> msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT);
-                            case LIGHTBLUE -> msg.append(ConsoleColors.BLUE).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT);
-                        }
-                    } else {
-                        msg.append(ConsoleColors.BLACK).append(ConsoleColors.BLACK_BACKGROUND_BRIGHT);
-                    }
-                } else {
-                    msg.append(ConsoleColors.BLACK).append(ConsoleColors.BLACK_BACKGROUND_BRIGHT);
-                }
-
-                msg.append("   ").append(ConsoleColors.RESET);
             }
             out.println(msg);
         }

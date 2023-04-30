@@ -33,7 +33,7 @@ class TuiPrintStreamTest {
             if (player.isFirstFinisher().get())
                 out.print("F ");
             out.println(player.getNick() + ": " + player.score().get());
-            TuiGameScene.printShelfie(out, player.getShelfie());
+            new TuiShelfiePrinter(player.getShelfie()).print(out);
 
             var output = baos.toString(StandardCharsets.UTF_8);
             output = output.replace(String.valueOf(TuiPrintStream.FIRST_ESC_CHAR), "ESC");
