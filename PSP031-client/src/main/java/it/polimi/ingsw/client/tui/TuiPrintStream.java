@@ -1,6 +1,11 @@
 package it.polimi.ingsw.client.tui;
 
 import com.google.errorprone.annotations.MustBeClosed;
+import org.fusesource.jansi.AnsiPrintStream;
+import org.fusesource.jansi.AnsiType;
+import org.fusesource.jansi.internal.CLibrary;
+import org.fusesource.jansi.internal.Kernel32;
+import org.fusesource.jansi.io.AnsiOutputStream;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -11,9 +16,17 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Locale;
 import java.util.Objects;
 
+import static org.fusesource.jansi.internal.CLibrary.ioctl;
+import static org.fusesource.jansi.internal.Kernel32.*;
+
 class TuiPrintStream extends PrintStream {
+
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
+    private static final int DEFAULT_TERMINAL_WIDTH = 80;
+    private static final int DEFAULT_TERMINAL_HEIGHT = 24;
 
     /** First ANSI escape code character */
     @VisibleForTesting
@@ -35,6 +48,56 @@ class TuiPrintStream extends PrintStream {
     private TuiPrintStream(TranslatingOutputStream out, Charset encoding, @SuppressWarnings("unused") @Nullable Void unused) {
         super(out, false, encoding);
         out.outer = this;
+    }
+
+    private OutputStream getInnerOut() {
+        return ((TranslatingOutputStream) out).out();
+    }
+
+    public int getTerminalCols() {
+        var innerOut = getInnerOut();
+        if (innerOut instanceof AnsiOutputStream ansiOut) {
+            final int cols = ansiOut.getTerminalWidth();
+            return cols == 0 ? DEFAULT_TERMINAL_WIDTH : cols;
+        }
+
+        if (innerOut instanceof AnsiPrintStream ansiPrint) {
+            final int cols = ansiPrint.getTerminalWidth();
+            return cols == 0 ? DEFAULT_TERMINAL_WIDTH : cols;
+        }
+
+        return DEFAULT_TERMINAL_WIDTH;
+    }
+
+    public int getTerminalRows() {
+        var innerOut = getInnerOut();
+        final AnsiType type = innerOut instanceof AnsiOutputStream ansiOut
+                ? ansiOut.getType()
+                : innerOut instanceof AnsiPrintStream ansiPrint
+                        ? ansiPrint.getType()
+                        : null;
+        return type == null ? DEFAULT_TERMINAL_HEIGHT : switch (type) {
+            case Unsupported, Redirected -> DEFAULT_TERMINAL_HEIGHT;
+            case Emulation, VirtualTerminal -> {
+                final long console = GetStdHandle(STD_OUTPUT_HANDLE);
+                Kernel32.CONSOLE_SCREEN_BUFFER_INFO info = new Kernel32.CONSOLE_SCREEN_BUFFER_INFO();
+                GetConsoleScreenBufferInfo(console, info);
+                yield info.windowHeight();
+            }
+            case Native -> {
+                // IS_CONEMU || IS_CYGWIN || IS_MSYSTEM
+                if (IS_WINDOWS) {
+                    final long console = GetStdHandle(STD_OUTPUT_HANDLE);
+                    Kernel32.CONSOLE_SCREEN_BUFFER_INFO info = new Kernel32.CONSOLE_SCREEN_BUFFER_INFO();
+                    GetConsoleScreenBufferInfo(console, info);
+                    yield info.windowHeight();
+                }
+                // *nix TTY
+                CLibrary.WinSize sz = new CLibrary.WinSize();
+                ioctl(CLibrary.STDOUT_FILENO, CLibrary.TIOCGWINSZ, sz);
+                yield sz.ws_col;
+            }
+        };
     }
 
     /**
@@ -312,6 +375,10 @@ class TuiPrintStream extends PrintStream {
 
         public TranslatingOutputStream(OutputStream out) {
             super(out);
+        }
+
+        private OutputStream out() {
+            return out;
         }
 
         @Override
