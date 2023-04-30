@@ -384,7 +384,7 @@ public class TuiMain {
                 .map(c -> new TileAndCoords<>(game.getBoard().tile(c.row(), c.col()).get(), c.row(), c.col()))
                 .filter(c -> c.tile() != null)
                 .map(c -> coordToBoardDisplayString(new BoardCoord(c.row(), c.col())) + ": " +
-                        TuiColorConverter.color(c.tile().getColor(), true) + "   " + ConsoleColors.RESET)
+                        TuiColorConverter.color(c.tile().getColor(), false) + "   " + ConsoleColors.RESET)
                 .map(s -> '(' + s + ')')
                 .collect(Collectors.joining(", "));
     }
