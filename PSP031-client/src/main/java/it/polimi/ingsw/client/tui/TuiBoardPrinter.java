@@ -16,8 +16,8 @@ class TuiBoardPrinter implements TuiPrinter2 {
             StringBuilder msg = new StringBuilder();
             if (row == 0) {
                 msg.append("  ");
-                for (int i = 1; i <= board.getCols(); i++)
-                    msg.append(' ').append(i).append(' ');
+                for (int i = 0; i < board.getCols(); i++)
+                    msg.append(' ').append((char) ('A' + i)).append(' ');
                 msg.append('\n');
             }
 

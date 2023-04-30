@@ -10,15 +10,18 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
+import it.polimi.ingsw.model.TileAndCoords;
 import org.fusesource.jansi.AnsiConsole;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TuiMain {
 
@@ -230,7 +233,7 @@ public class TuiMain {
                         (renderer0, ctx) -> {
                             if (!game.currentTurn().get().equals(game.thePlayer()))
                                 return ctx.invalid("It's not your turn");
-                            return ctx.prompt(promptBoard(ctx.subPrompt(), netManager, game, controller));
+                            return ctx.prompt(promptBoard(ctx.subPrompt(), netManager, game, controller, List.of()));
                         }),
                 new ChoicePrompt.Choice(
                         "Quit",
@@ -244,36 +247,60 @@ public class TuiMain {
     private static Prompt promptBoard(Prompt.Factory promptFactory,
                                       ClientNetManager netManager,
                                       GameView game,
-                                      GameController controller) {
+                                      GameController controller,
+                                      @Unmodifiable List<BoardCoord> coords) {
+        final Pattern coordPattern = Pattern.compile("(?<col>[a-z]|[A-Z])(?<row>\\d)");
+        final var picked = "Picked: " + coordsToDisplayString(game, coords);
         return promptFactory.input(
-                "Coords of tiles in the board (in the desired order):\nRxC;RxC;RxC",
+                coords.isEmpty()
+                        ? "Select first tile to pick (ex: E3): "
+                        : coords.size() == 1
+                                ? "Select second tile to pick (ex: B5) or 'Done':\n" + picked
+                                : "Select last tile to pick (ex: F6) or 'Done':\n" + picked,
                 (renderer0, ctx, input) -> {
-                    List<BoardCoord> coords = new ArrayList<>();
-                    String[] v = input.split(";", -1);
-                    for (String currCoords : v) {
-                        String[] coordsSplit = currCoords.split("x", -1);
-                        if (coordsSplit.length != 2)
-                            return ctx.invalid("Invalid coords string " + currCoords);
+                    if (!coords.isEmpty() && input.equalsIgnoreCase("done"))
+                        return ctx.prompt(promptCol(ctx.subPrompt(), netManager, game, controller, coords));
 
-                        int r;
-                        try {
-                            r = Integer.parseInt(coordsSplit[0]) - 1;
-                        } catch (NumberFormatException ex) {
-                            return ctx.invalid("Invalid row " + coordsSplit[0] + " in coords " + currCoords);
-                        }
+                    var matcher = coordPattern.matcher(input);
+                    if (!matcher.matches())
+                        return ctx.invalid("Unrecognized coords format " + input);
 
-                        int c;
-                        try {
-                            c = Integer.parseInt(coordsSplit[1]) - 1;
-                        } catch (NumberFormatException ex) {
-                            return ctx.invalid("Invalid col " + coordsSplit[1] + " in coords " + currCoords);
-                        }
+                    var rowString = matcher.group("row");
+                    var colString = matcher.group("col").toUpperCase(Locale.ROOT);
 
-                        coords.add(new BoardCoord(r, c));
+                    int r;
+                    try {
+                        r = Integer.parseInt(rowString) - 1;
+                    } catch (NumberFormatException ex) {
+                        return ctx.invalid("Invalid row " + rowString);
                     }
-                    if (!game.getBoard().checkBoardCoord(coords))
-                        return ctx.invalid("Invalid selection");
-                    return ctx.prompt(promptCol(ctx.subPrompt(), netManager, game, controller, coords));
+
+                    if (colString.length() != 1)
+                        return ctx.invalid("Invalid col " + colString);
+
+                    int c = colString.charAt(0) - 'A';
+                    if (c > game.getBoard().getCols())
+                        return ctx.invalid("Invalid col " + colString + ". " +
+                                "Last col is " + (char) ('A' + game.getBoard().getCols() - 1));
+
+                    if (!game.getBoard().isValidTile(r, c))
+                        return ctx.invalid(input + " is not a tile");
+                    if (!game.getBoard().hasFreeSide(r, c))
+                        return ctx.invalid(input + " does not have a free side");
+
+                    var coord = new BoardCoord(r, c);
+                    if (coords.contains(coord))
+                        return ctx.invalid(input + " was already picked");
+
+                    var newCoords = Stream.concat(coords.stream(), Stream.of(coord)).toList();
+                    if (!game.getBoard().checkBoardCoord(newCoords))
+                        return ctx.invalid(newCoords.size() == 2
+                                ? input + " has no common side with the other"
+                                : input + " cannot be picked with the others");
+
+                    return ctx.prompt(newCoords.size() < 3
+                            ? promptBoard(ctx.subPrompt(), netManager, game, controller, newCoords)
+                            : promptCol(ctx.subPrompt(), netManager, game, controller, newCoords));
                 });
     }
 
@@ -281,9 +308,10 @@ public class TuiMain {
                                     ClientNetManager netManager,
                                     GameView game,
                                     GameController controller,
-                                    List<BoardCoord> coords) {
+                                    @Unmodifiable List<BoardCoord> coords) {
+        final var picked = "Picked: " + coordsToDisplayString(game, coords);
         return promptFactory.input(
-                "Select the column: ",
+                "Select the shelfie column:\n" + picked,
                 (renderer0, ctx, input) -> {
                     int col;
                     try {
@@ -295,13 +323,73 @@ public class TuiMain {
                     if (!game.thePlayer().getShelfie().checkColumnSpace(col, coords.size()))
                         return ctx.invalid("There's not enough space in column " + (col + 1));
 
-                    try {
-                        controller.makeMove(coords, col);
-                    } catch (DisconnectedException e) {
-                        return ctx.prompt("Disconnected from the server",
-                                promptNick(renderer0, ctx.rootPrompt(), netManager));
-                    }
-                    return ctx.done();
+                    return ctx.prompt(promptOrder(ctx.subPrompt(), netManager, game, controller, coords, col));
                 });
+    }
+
+    private static Prompt promptOrder(Prompt.Factory promptFactory,
+                                      ClientNetManager netManager,
+                                      GameView game,
+                                      GameController controller,
+                                      @Unmodifiable List<BoardCoord> coords,
+                                      int shelfCol) {
+        final String delimiter = ",";
+
+        final var exampleOrder = new ArrayList<>(coords);
+        Collections.shuffle(exampleOrder);
+        final var example = exampleOrder.stream()
+                .map(TuiMain::coordToBoardDisplayString)
+                .collect(Collectors.joining(delimiter));
+
+        return promptFactory.input(
+                "Change the tile order (ex: '" + example + "'):\n" +
+                        "Insertion Order (FIFO): " + coordsToDisplayString(game, coords) + "\n" +
+                        "Shelfie column: " + shelfCol + "\n" +
+                        "Type 'Done' when satisfied",
+                (renderer0, ctx, input) -> {
+                    if (input.equalsIgnoreCase("done")) {
+                        try {
+                            controller.makeMove(coords, shelfCol);
+                        } catch (DisconnectedException e) {
+                            return ctx.prompt("Disconnected from the server",
+                                    promptNick(renderer0, ctx.rootPrompt(), netManager));
+                        }
+                        return ctx.done();
+                    }
+
+                    final var inputParts = input.split(delimiter, -1);
+                    if (inputParts.length != coords.size())
+                        return ctx.invalid("Missing some coords, found only " + inputParts.length);
+
+                    var newCoords = new ArrayList<BoardCoord>();
+                    for (String inputPart : inputParts) {
+                        final var maybeCoord = coords.stream()
+                                .filter(c -> inputPart.equalsIgnoreCase(coordToBoardDisplayString(c)))
+                                .findFirst();
+                        if (maybeCoord.isEmpty())
+                            return ctx.invalid("Invalid coord " + inputPart);
+                        if (newCoords.contains(maybeCoord.get()))
+                            return ctx.invalid(inputPart + " was put multiple times");
+
+                        newCoords.add(maybeCoord.get());
+                    }
+
+                    return ctx.prompt(promptOrder(ctx.subPrompt(), netManager, game, controller,
+                            Collections.unmodifiableList(newCoords), shelfCol));
+                });
+    }
+
+    private static String coordsToDisplayString(GameView game, List<BoardCoord> coords) {
+        return coords.stream()
+                .map(c -> new TileAndCoords<>(game.getBoard().tile(c.row(), c.col()).get(), c.row(), c.col()))
+                .filter(c -> c.tile() != null)
+                .map(c -> coordToBoardDisplayString(new BoardCoord(c.row(), c.col())) + ": " +
+                        TuiColorConverter.color(c.tile().getColor(), true) + "   " + ConsoleColors.RESET)
+                .map(s -> '(' + s + ')')
+                .collect(Collectors.joining(", "));
+    }
+
+    private static String coordToBoardDisplayString(BoardCoord c) {
+        return String.valueOf((char) ('A' + c.col())) + (c.row() + 1);
     }
 }
