@@ -39,15 +39,15 @@ class TuiPrintStreamTest {
             output = output.replace(String.valueOf(TuiPrintStream.FIRST_ESC_CHAR), "ESC");
             output = output.replace("\r", "");
             assertEquals("""
-                    ESC7ESC[sESC[10G- S F nick: 0
-                    ESC[10G   1  2  3  4  5\s
-                    ESC[10G1 | || || || || |
-                    ESC[10G2 | || || || || |
-                    ESC[10G3 | || || || || |
-                    ESC[10G4 | || || || || |
-                    ESC[10G5 | || || || || |
-                    ESC[10G6 | || || || || |
-                    ESC[10G""",
+                    ESC7ESC[sESC[11G- S F nick: 0
+                    ESC[11G   1  2  3  4  5\s
+                    ESC[11G1 │ ││ ││ ││ ││ │
+                    ESC[11G2 │ ││ ││ ││ ││ │
+                    ESC[11G3 │ ││ ││ ││ ││ │
+                    ESC[11G4 │ ││ ││ ││ ││ │
+                    ESC[11G5 │ ││ ││ ││ ││ │
+                    ESC[11G6 │ ││ ││ ││ ││ │
+                    ESC[11G""",
                     output);
         }
     }
