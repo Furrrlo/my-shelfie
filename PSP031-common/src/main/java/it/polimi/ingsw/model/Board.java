@@ -142,6 +142,16 @@ public class Board implements BoardView {
         return true;
     }
 
+    @Override
+    public boolean needsRefill() {
+        return tiles()
+                .filter(t -> t.tile().get() != null)
+                .allMatch(t -> (!isValidTile(t.row() + 1, t.col()) || tile(t.row() + 1, t.col()).get() == null) &&
+                        (!isValidTile(t.row() - 1, t.col()) || tile(t.row() - 1, t.col()).get() == null) &&
+                        (!isValidTile(t.row(), t.col() + 1) || tile(t.row(), t.col() + 1).get() == null) &&
+                        (!isValidTile(t.row(), t.col() - 1) || tile(t.row(), t.col() - 1).get() == null));
+    }
+
     //TODO: test everything!!
     @Override
     public boolean checkBoardCoord(List<BoardCoord> selected) {

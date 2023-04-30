@@ -54,39 +54,43 @@ public class GameServerController {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
 
-            if (!game.currentTurn().get().equals(player)) {
-                //TODO: disconnect player
-                return;
-            }
+            if (!game.currentTurn().get().equals(player))
+                throw new IllegalArgumentException("It's not this player turn");
 
             List<Tile> selectedTiles = new ArrayList<>();
             if (!game.getBoard().checkBoardCoord(selected)
-                    || !player.getShelfie().checkColumnSpace(shelfCol, selected.size())) {
+                    || !player.getShelfie().checkColumnSpace(shelfCol, selected.size()))
                 throw new IllegalArgumentException("Invalid move");
-            }
 
-            //remove tiles from board
+            // remove tiles from board
             for (BoardCoord coord : selected) {
                 Property<@Nullable Tile> tileProp = game.getBoard().tile(coord.row(), coord.col());
                 selectedTiles.add(Objects.requireNonNull(tileProp.get(), "Checked tile was invalid"));
                 Property.setNullable(tileProp, null);
             }
 
-            //add tiles to shelfie
+            // add tiles to shelfie
             player.getShelfie().placeTiles(selectedTiles, shelfCol);
 
-            //TODO: check if player has finished and shelfie is full
+            if (player.getShelfie().isFull() && game.firstFinisher().get() == null)
+                game.firstFinisher().set(player);
 
-            if (game.getBoard().isEmpty() && game.getBag().size() > 0) {
+            if (game.getBoard().needsRefill())
                 game.refillBoard();
-            } else if (game.getBoard().isEmpty() && game.getBag().size() == 0) {
+
+            // Board is empty, and we can't refill it, end the game
+            if (game.getBoard().isEmpty() && game.getBag().isEmpty()) {
                 //TODO: end game
                 //game.endGame();
-                //game.firstFinisher=player;
+            } else {
+                // Change current turn
+                changeCurrentTurn(game);
+                // If someone already finished, and we reached the starting player, the game is over
+                if (game.firstFinisher().get() != null && game.getStartingPlayer().equals(player)) {
+                    //TODO: end game
+                    //game.endGame();
+                }
             }
-
-            // Change current turn
-            changeCurrentTurn(game);
         }
     }
 

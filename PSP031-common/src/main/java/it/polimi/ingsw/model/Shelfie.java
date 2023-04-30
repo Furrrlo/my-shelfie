@@ -93,6 +93,11 @@ public class Shelfie implements ShelfieView {
         return selected <= getColumnFreeSpace(shelfCol);
     }
 
+    @Override
+    public boolean isFull() {
+        return tiles().allMatch(t -> t.tile().get() != null);
+    }
+
     public void placeTiles(List<Tile> selectedTiles, int shelfCol) {
         //place tiles in the selected column from the bottom and first free space
         for (Tile tile : selectedTiles) {

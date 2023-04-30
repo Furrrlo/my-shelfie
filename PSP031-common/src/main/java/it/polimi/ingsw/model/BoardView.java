@@ -32,11 +32,13 @@ public interface BoardView extends Serializable {
      */
     boolean isEmpty();
 
+    /** returns true if the board needs to be refilled */
+    boolean needsRefill();
+
     /**
      * returns true if the tiles specified by the coords in selected can be picked according to the game rules
      * 
      * @param selected : list of BoardCoord ( index of coords for tiles on Bord )
      */
     boolean checkBoardCoord(List<BoardCoord> selected);
-
 }
