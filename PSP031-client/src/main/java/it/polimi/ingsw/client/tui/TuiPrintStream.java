@@ -54,6 +54,14 @@ class TuiPrintStream extends PrintStream {
         return ((TranslatingOutputStream) out).out();
     }
 
+    public TuiSize getTerminalSize() {
+        return new TuiSize(getTerminalRows(), getTerminalCols());
+    }
+
+    public TuiCoords getCursorPos() {
+        return new TuiCoords(0, 0); // TODO:
+    }
+
     public int getTerminalCols() {
         var innerOut = getInnerOut();
         if (innerOut instanceof AnsiOutputStream ansiOut) {
@@ -173,8 +181,9 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             var lastTranslation = translationStack.peek();
 
-            row = Math.max(0, lastTranslation != null ? lastTranslation.row() + row : row);
-            col = Math.max(0, lastTranslation != null ? lastTranslation.col() + col : col);
+            var currPos = getCursorPos();
+            row = Math.max(0, lastTranslation != null ? lastTranslation.row() + row : currPos.row() + row);
+            col = Math.max(0, lastTranslation != null ? lastTranslation.col() + col : currPos.col() + col);
             cursor(row, col);
 
             var translation = new Translation(row, col);
@@ -198,8 +207,9 @@ class TuiPrintStream extends PrintStream {
         synchronized (this) {
             var lastTranslation = translationStack.peek();
 
-            int row = Math.max(0, lastTranslation != null ? lastTranslation.row() : 0);
-            col = Math.max(0, lastTranslation != null ? lastTranslation.col() + col : col);
+            var currPos = getCursorPos();
+            int row = Math.max(0, lastTranslation != null ? lastTranslation.row() : currPos.row());
+            col = Math.max(0, lastTranslation != null ? lastTranslation.col() + col : currPos.col() + col);
             cursorToCol(col);
 
             var translation = new Translation(row, col);
@@ -357,13 +367,58 @@ class TuiPrintStream extends PrintStream {
     /**
      * Move cursor of the given number of rows and cols
      *
-     * @param x number of cols
-     * @param y number of rows
+     * @param cols number of cols
+     * @param rows number of rows
      */
-    public void moveCursor(int x, int y) {
+    public void moveCursor(int rows, int cols) {
         synchronized (this) {
-            moveCursorRight(x);
-            moveCursorDown(y);
+            moveCursorDown(rows);
+            moveCursorRight(cols);
+        }
+    }
+
+    public TuiRect printAligned(TuiPrinter2 printer, TuiRect rect, TuiHAlignment hAlign, TuiVAlignment vAlign) {
+        final var size = printer.getSize();
+        final var drawnRect = new TuiRect(
+                rect.row() + switch (vAlign) {
+                    case TOP -> 0;
+                    case BOTTOM -> rect.size().rows() - size.rows();
+                    case CENTER -> rect.size().rows() / 2 - size.rows() / 2;
+                },
+                rect.col() + switch (hAlign) {
+                    case LEADING, LEFT -> 0;
+                    case TRAILING, RIGHT -> rect.size().cols() - size.cols();
+                    case CENTER -> rect.size().cols() / 2 - size.cols() / 2;
+                },
+                size);
+
+        cursor(0, 0);
+        try (var ignored = translateCursor(drawnRect.row(), drawnRect.col())) {
+            printer.print(this);
+            return drawnRect;
+        }
+    }
+
+    public TuiRect printAligned(TuiPrinter2 printer, TuiSize rectSize, TuiHAlignment hAlign, TuiVAlignment vAlign) {
+        final var size = printer.getSize();
+        final var cursorPos = getCursorPos();
+        final var drawnRect = new TuiRect(
+                cursorPos.row() + switch (vAlign) {
+                    case TOP -> 0;
+                    case BOTTOM -> rectSize.rows() - size.rows();
+                    case CENTER -> rectSize.rows() / 2 - size.rows() / 2;
+                },
+                cursorPos.col() + switch (hAlign) {
+                    case LEADING, LEFT -> 0;
+                    case TRAILING, RIGHT -> rectSize.cols() - size.cols();
+                    case CENTER -> rectSize.cols() / 2 - size.cols() / 2;
+                },
+                size);
+
+        cursor(0, 0);
+        try (var ignored = translateCursor(drawnRect.row(), drawnRect.col())) {
+            printer.print(this);
+            return drawnRect;
         }
     }
 
