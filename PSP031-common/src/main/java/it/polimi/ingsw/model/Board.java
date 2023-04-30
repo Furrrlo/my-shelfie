@@ -120,7 +120,7 @@ public class Board implements BoardView {
     public Property<@Nullable Tile> tile(int r, int c) {
         // Force an AIOB if r or c are not between 0 and ROWS/COLS
         if (board[r][c] == invalidTile)
-            throw new IndexOutOfBoundsException("Invalid Position selected");
+            throw new IndexOutOfBoundsException("Invalid Position selected " + r + "x" + c);
         return board[r][c];
     }
 
