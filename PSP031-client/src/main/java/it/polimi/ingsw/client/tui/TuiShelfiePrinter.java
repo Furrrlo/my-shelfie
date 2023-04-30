@@ -33,16 +33,12 @@ class TuiShelfiePrinter implements TuiPrinter2 {
         for (int row = 0; row < ShelfieView.ROWS; row++) {
             StringBuilder msg = new StringBuilder();
             if (row == 0) {
-                msg.append("  ");
                 for (int i = 1; i <= ShelfieView.COLUMNS; i++)
                     msg.append(' ').append(i).append(' ');
                 msg.append('\n');
             }
 
             for (int col = 0; col < ShelfieView.COLUMNS; col++) {
-                if (col == 0)
-                    msg.append(row + 1).append(' ');
-
                 Tile tile = tiles.apply(row, col);
                 if (tile == null) {
                     msg.append("│ │");
@@ -58,6 +54,6 @@ class TuiShelfiePrinter implements TuiPrinter2 {
 
     @Override
     public TuiSize getSize() {
-        return new TuiSize(ShelfieView.ROWS + 1, ShelfieView.COLUMNS * 3 + 2);
+        return new TuiSize(ShelfieView.ROWS + 1, ShelfieView.COLUMNS * 3);
     }
 }
