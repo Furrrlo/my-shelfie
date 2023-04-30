@@ -64,6 +64,9 @@ class TuiRenderer implements Closeable {
                 String errorMsg = "";
                 switch (evt) {
                     case RenderEvent ignored -> {
+                        // Coalesce render events into a single re-render
+                        while (events.peek() instanceof RenderEvent)
+                            events.remove();
                     }
                     case SetSceneEvent sceneEvent -> scene = sceneEvent.scene();
                     case SetPromptEvent promptEvent -> {
