@@ -14,6 +14,14 @@ import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
 public class TuiPrinter {
+    /**
+     * pxl sets the basic unit for printing complex design, while PXL_FOR_SPRITE, PXL_FOR_NUMBERS and
+     * PXL_FOR_PERSONAL_GOAL sets the number of pxl respectively for printing tiles' sprites, number of shelfie and board,
+     * and personal goals' tile;
+     * List<String> of CAT, TREE, BOOK, TROPHY, GAME and Frame ( and all the other numbers ) represents the
+     * lines of each design composed by letters that represent colors that methods in TuiPrinter class handles in order
+     * to print different color of pxl
+     */
     private static final @Unmodifiable String pxl = "  ";
     private static final @Unmodifiable int PXL_FOR_SPRITE = 24;
     private static final @Unmodifiable int PXL_FOR_NUMBERS = 5;
@@ -86,6 +94,9 @@ public class TuiPrinter {
     private static final @Unmodifiable List<String> NINE = List.of("WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWBWBWWWWWWWWWWW",
             "WWWWWWWWWWBBBWWWWWWWWWWW", "WWWWWWWWWWWWBWWWWWWWWWWW", "WWWWWWWWWWBBBWWWWWWWWWWW");
 
+    //TODO : define design of COMMON GOAL, implement them as @Unmodifiable List<String> and add them as the first two
+    //  printed tiles in board, so that can be always seen during the game
+
     /** prints shelfie with complex design */
     public static void tuiPrintShelfie(Shelfie shelfie) {
         printShelfieHeader();
@@ -112,6 +123,7 @@ public class TuiPrinter {
         printShelfieBottom();
     }
 
+    /** prints board with complex design */
     public static void tuiPrintBoard(Board board) {
         printBoardSeparatingLine();
         printBoardNumber();
@@ -139,6 +151,7 @@ public class TuiPrinter {
         }
     }
 
+    /** prints personalGoal with complex design **/
     public static void tuiPrintPersonalGoal(PersonalGoal p) {
         for (int row = 0; row < ROWS; row++) {
             System.out.println(PersonalGoalMidShelf1());
@@ -164,6 +177,7 @@ public class TuiPrinter {
         System.out.println(PersonalGoalMidShelf1());
     }
 
+    /** prints personalGoal next to shelfie both with complex desing */
     public static void tuiPrintShelfieAndPersonalGoal(Shelfie shelfie, PersonalGoal pg) {
         printShelfieHeader();
         System.out.println(MidShelf1());
@@ -381,6 +395,10 @@ public class TuiPrinter {
         }
     }
 
+    /**
+     * takes a list of 5 elements of Strings of length == 24 of a NUMBER defined in TuiPrinter and converts it in to
+     * a list of 24 elements of Strings of length == 5
+     */
     private static List<String> convertToVerticalNumber(List<String> number) {
         List<String> ss = new ArrayList<>();
         for (int i = 0; i < PXL_FOR_SPRITE; i++) {
@@ -400,6 +418,7 @@ public class TuiPrinter {
         return new StringBuilder().append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(24)).append(ConsoleColors.RESET);
     }
 
+    /** returns the colored String, at given index, of a specified VerticalNumber as StringBuilder */
     private static StringBuilder VerticalNumberLine(int number, int index) {
         String verticalNumberLine = switch (number) {
             case 1 -> convertToVerticalNumber(ONE).get(index);
@@ -427,6 +446,7 @@ public class TuiPrinter {
         return sb;
     }
 
+    /** returns the colored String, at given index, of a specified number as StringBuilder */
     private static StringBuilder NumberLine(int number, int index) {
         String numberLine = switch (number) {
             case 1 -> ONE.get(index);
@@ -454,6 +474,7 @@ public class TuiPrinter {
         return sb;
     }
 
+    /** returns the colored String, at given index, of a specified coloredTile as StringBuilder */
     private static StringBuilder SpriteLine(int index, Color color) {
         String spriteLine = switch (color) {
             case GREEN -> CAT.get(index);
@@ -495,6 +516,7 @@ public class TuiPrinter {
         return ss;
     }
 
+    /** returns the colored String, at given index, of a specified PersonalGoal as StringBuilder */
     private static StringBuilder PersonalGoalLine(Color color) {
         StringBuilder sb = new StringBuilder();
         return switch (color) {
