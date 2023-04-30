@@ -140,28 +140,50 @@ public class TuiPrinter {
     }
 
     public static void tuiPrintPersonalGoal(PersonalGoal p) {
-        printPersonalGoalHeader();
         for (int row = 0; row < ROWS; row++) {
+            System.out.println(PersonalGoalMidShelf1());
+            System.out.println(PersonalGoalMidShelf2());
             for (int i = 0; i < PXL_FOR_PERSONAL_GOAL; i++) {
                 StringBuilder sb = new StringBuilder();
+                sb.append(ConsoleColors.RESET);
                 for (int col = 0; col < COLUMNS; col++) {
+                    if (col == 0)
+                        sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
+                                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl);
                     if (p.get(row, col) == null)
                         sb.append(ConsoleColors.RESET).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL));
                     else
                         sb.append(PersonalGoalLine(i, Objects.requireNonNull(p.get(row, col)).getColor()));
+                    sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl).append(ConsoleColors.ORANGE_BACKGROUND)
+                            .append(pxl);
+                    sb.append(ConsoleColors.RESET);
                 }
                 System.out.println(sb);
             }
         }
+        System.out.println(PersonalGoalMidShelf1());
     }
 
     public static void tuiPrintShelfieAndPersonalGoal(Shelfie shelfie, PersonalGoal pg) {
         //TODO : implement printing personal goal next to shelfie
     }
 
-    private static void printPersonalGoalHeader() {
-        //TODO : implement personalGoal printing
+    private static StringBuilder PersonalGoalMidShelf1() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.RESET).append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
+                .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl.repeat(COLUMNS * (PXL_FOR_PERSONAL_GOAL + 2)));
+        sb.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl).append(ConsoleColors.RESET);
+        return sb;
+    }
 
+    private static StringBuilder PersonalGoalMidShelf2() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.RESET).append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
+        for (int i = 0; i < COLUMNS; i++)
+            sb.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
+                    .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL + 1));
+        sb.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl).append(ConsoleColors.RESET);
+        return sb;
     }
 
     private static void printBoardSeparatingLine() {
@@ -172,7 +194,6 @@ public class TuiPrinter {
     }
 
     private static void printShelfieHeader() {
-        StringBuilder sb = new StringBuilder();
         printMidShelf1();
         printMidShelf3();
         printMidShelf1();
