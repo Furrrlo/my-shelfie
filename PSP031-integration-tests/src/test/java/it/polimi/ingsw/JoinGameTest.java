@@ -26,7 +26,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,21 +38,18 @@ public class JoinGameTest {
     private volatile SocketConnectionServerController socketConnectionServerController;
     private volatile RmiConnectionServerController rmiConnectionServerController;
 
-    private final Supplier<ClientNetManager> rmi = () -> new RmiClientNetManager(null,
-            portCapturingServerSocketFactory.getFirstCapturedPort(),
-            remoteName);
-    private final Supplier<ClientNetManager> socket = () -> {
+    private static final Function<JoinGameTest, ClientNetManager> rmiFunction = f -> new RmiClientNetManager(null,
+            f.portCapturingServerSocketFactory.getFirstCapturedPort(),
+            f.remoteName);
+    private static final Function<JoinGameTest, ClientNetManager> socketFunction = f -> {
         try {
             return new SocketClientNetManager(
-                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                    new InetSocketAddress(InetAddress.getLocalHost(), f.choosenPort.get()),
                     1, TimeUnit.SECONDS);
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
     };
-
-    private static final Function<JoinGameTest, Supplier<ClientNetManager>> rmiFunction = f -> f.rmi;
-    private static final Function<JoinGameTest, Supplier<ClientNetManager>> socketFunction = f -> f.socket;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -88,23 +84,23 @@ public class JoinGameTest {
 
     @ParameterizedTest
     @MethodSource
-    void twoPlayersTest(Function<JoinGameTest, Supplier<ClientNetManager>> clientNetManagerFactory1,
-                        Function<JoinGameTest, Supplier<ClientNetManager>> clientNetManagerFactory2) {
-        assertDoesNotThrow(() -> clientNetManagerFactory1.apply(this).get().joinGame("test_nick"), "First join failed");
-        assertThrows(NickNotValidException.class, () -> clientNetManagerFactory2.apply(this).get().joinGame("test_nick"),
+    void twoPlayersTest(Function<JoinGameTest, ClientNetManager> clientNetManagerFactory1,
+                        Function<JoinGameTest, ClientNetManager> clientNetManagerFactory2) {
+        assertDoesNotThrow(() -> clientNetManagerFactory1.apply(this).joinGame("test_nick"), "First join failed");
+        assertThrows(NickNotValidException.class, () -> clientNetManagerFactory2.apply(this).joinGame("test_nick"),
                 "Same nick not failed");
     }
 
     @ParameterizedTest
     @MethodSource("twoPlayersTest")
-    void twoPlayersConcurrentTest(Function<JoinGameTest, Supplier<ClientNetManager>> clientNetManagerFactory1,
-                                  Function<JoinGameTest, Supplier<ClientNetManager>> clientNetManagerFactory2)
+    void twoPlayersConcurrentTest(Function<JoinGameTest, ClientNetManager> clientNetManagerFactory1,
+                                  Function<JoinGameTest, ClientNetManager> clientNetManagerFactory2)
             throws InterruptedException {
         List<Throwable> throwableList = new CopyOnWriteArrayList<>();
 
         Thread t1 = new Thread(() -> {
             try {
-                clientNetManagerFactory1.apply(this).get().joinGame("test_nick");
+                clientNetManagerFactory1.apply(this).joinGame("test_nick");
             } catch (Exception e) {
                 throwableList.add(e);
             }
@@ -112,7 +108,7 @@ public class JoinGameTest {
 
         Thread t2 = new Thread(() -> {
             try {
-                clientNetManagerFactory2.apply(this).get().joinGame("test_nick");
+                clientNetManagerFactory2.apply(this).joinGame("test_nick");
             } catch (Exception e) {
                 throwableList.add(e);
             }
@@ -142,14 +138,14 @@ public class JoinGameTest {
 
     @ParameterizedTest
     @MethodSource("threePlayersTest")
-    void threePlayersGameStartedTest(Function<JoinGameTest, Supplier<ClientNetManager>> clientNetManagerFactory1,
-                                     Function<JoinGameTest, Supplier<ClientNetManager>> clientNetManagerFactory2,
-                                     Function<JoinGameTest, Supplier<ClientNetManager>> clientNetManagerFactory3)
+    void threePlayersGameStartedTest(Function<JoinGameTest, ClientNetManager> clientNetManagerFactory1,
+                                     Function<JoinGameTest, ClientNetManager> clientNetManagerFactory2,
+                                     Function<JoinGameTest, ClientNetManager> clientNetManagerFactory3)
             throws Exception {
         CompletableFuture<GameView> game1 = new CompletableFuture<>();
         CompletableFuture<GameView> game2 = new CompletableFuture<>();
         assertDoesNotThrow(() -> {
-            var player1 = clientNetManagerFactory1.apply(this).get().joinGame("player1");
+            var player1 = clientNetManagerFactory1.apply(this).joinGame("player1");
             player1.lobby().game().registerObserver(g -> {
                 assertNotNull(g);
                 game1.complete(g.game());
@@ -157,7 +153,7 @@ public class JoinGameTest {
             player1.controller().ready(true);
         });
         assertDoesNotThrow(() -> {
-            var player2 = clientNetManagerFactory2.apply(this).get().joinGame("player2");
+            var player2 = clientNetManagerFactory2.apply(this).joinGame("player2");
             player2.lobby().game().registerObserver(g -> {
                 assertNotNull(g);
                 game2.complete(g.game());
@@ -168,7 +164,7 @@ public class JoinGameTest {
         game1.get(500, TimeUnit.MILLISECONDS);
         game2.get(500, TimeUnit.MILLISECONDS);
 
-        assertThrows(NickNotValidException.class, () -> clientNetManagerFactory3.apply(this).get().joinGame("player2"),
+        assertThrows(NickNotValidException.class, () -> clientNetManagerFactory3.apply(this).joinGame("player2"),
                 "Same nick not failed");
 
     }
