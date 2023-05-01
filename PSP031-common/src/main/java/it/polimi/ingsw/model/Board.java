@@ -2,10 +2,12 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.BoardCoord;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -135,7 +137,7 @@ public class Board implements BoardView {
     public boolean isEmpty() {
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getCols(); j++) {
-                if (isValidTile(i, j) && board[i][j] != null)
+                if (isValidTile(i, j) && board[i][j].get() != null)
                     return false;
             }
         }
@@ -152,7 +154,48 @@ public class Board implements BoardView {
                         (!isValidTile(t.row(), t.col() - 1) || tile(t.row(), t.col() - 1).get() == null));
     }
 
-    //TODO: test everything!!
+    @VisibleForTesting
+    public void refillBoardRandom() {
+        List<Color> val = List.of(Color.values());
+        Random rand = new Random();
+        for (int r = 0; r < BOARD_ROWS; r++) {
+            for (int c = 0; c < BOARD_COLUMNS; c++) {
+                if (this.isValidTile(r, c)) {
+                    Property<@Nullable Tile> tileProp = this.tile(r, c);
+                    if (tileProp.get() == null) {
+                        tileProp.set(new Tile(val.get(rand.nextInt(Color.values().length))));
+                    }
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    public void refillBoardBag(List<Tile> bag) {
+        for (int r = 0; r < BOARD_ROWS && bag.size() > 0; r++) {
+            for (int c = 0; c < BOARD_COLUMNS && bag.size() > 0; c++) {
+                if (this.isValidTile(r, c)) {
+                    Property<@Nullable Tile> tileProp = this.tile(r, c);
+                    if (tileProp.get() == null) {
+                        tileProp.set(bag.remove(new Random().nextInt(bag.size())));
+                    }
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    public void refillBoardCoord(List<BoardCoord> positions) {
+        for (BoardCoord bc : positions) {
+            if (isValidTile(bc.row(), bc.col())) {
+                Property<@Nullable Tile> tileProp = this.tile(bc.row(), bc.col());
+                if (tileProp.get() == null) {
+                    tileProp.set(new Tile(Color.PINK));
+                }
+            }
+        }
+    }
+
     @Override
     public boolean checkBoardCoord(List<BoardCoord> selected) {
         if (selected.size() == 0 || selected.size() > 3)
