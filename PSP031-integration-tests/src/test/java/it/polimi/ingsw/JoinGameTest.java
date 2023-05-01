@@ -8,9 +8,7 @@ import it.polimi.ingsw.rmi.RMIPortCapturingServerSocketFactory;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,11 +19,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -35,59 +30,49 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("NullAway") //They are not null, trust me
 public class JoinGameTest {
-    private static @Nullable ServerController serverController;
-    private static @Nullable AtomicInteger choosenPort;
-    private static @Nullable RMIPortCapturingServerSocketFactory portCapturingServerSocketFactory;
-    private static @Nullable String remoteName;
-    private static @Nullable SocketConnectionServerController socketConnectionServerController;
-    private static @Nullable RmiConnectionServerController rmiConnectionServerController;
-    private static @Nullable Registry registry;
+    private static volatile ServerController serverController;
+    private static final AtomicInteger choosenPort = new AtomicInteger();
+    private static volatile RMIPortCapturingServerSocketFactory portCapturingServerSocketFactory;
+    private static volatile String remoteName;
+    private static volatile SocketConnectionServerController socketConnectionServerController;
+    private static volatile RmiConnectionServerController rmiConnectionServerController;
 
     private static final Supplier<?> rmi = () -> new RmiClientNetManager(null,
-            Objects.requireNonNull(portCapturingServerSocketFactory).getFirstCapturedPort(),
-            Objects.requireNonNull(remoteName));
+            portCapturingServerSocketFactory.getFirstCapturedPort(),
+            remoteName);
     private static final Supplier<?> socket = () -> {
         try {
             return new SocketClientNetManager(
-                    new InetSocketAddress(InetAddress.getLocalHost(), Objects.requireNonNull(choosenPort).get()),
+                    new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
                     1, TimeUnit.SECONDS);
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
     };
 
-    @BeforeAll
-    static void beforeAll() {
-        choosenPort = new AtomicInteger();
-        portCapturingServerSocketFactory = new RMIPortCapturingServerSocketFactory();
-        try {
-            registry = LocateRegistry.createRegistry(0, null, portCapturingServerSocketFactory);
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @BeforeEach
     void setUp() throws IOException {
         remoteName = "rmi_e2e_" + System.currentTimeMillis();
         var serverSocket = new ServerSocket(0);
-        Objects.requireNonNull(choosenPort).set(serverSocket.getLocalPort());
+        choosenPort.set(serverSocket.getLocalPort());
         serverController = new ServerController(5, TimeUnit.SECONDS);
         socketConnectionServerController = new SocketConnectionServerController(serverController, serverSocket,
                 -1, TimeUnit.MILLISECONDS,
                 1, TimeUnit.SECONDS);
+        portCapturingServerSocketFactory = new RMIPortCapturingServerSocketFactory();
         rmiConnectionServerController = RmiConnectionServerController.bind(
-                Objects.requireNonNull(registry),
-                Objects.requireNonNull(remoteName),
+                LocateRegistry.createRegistry(0, null, portCapturingServerSocketFactory),
+                remoteName,
                 serverController);
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        Objects.requireNonNull(serverController).close();
-        Objects.requireNonNull(socketConnectionServerController).close();
-        Objects.requireNonNull(rmiConnectionServerController).close();
+        serverController.close();
+        socketConnectionServerController.close();
+        rmiConnectionServerController.close();
     }
 
     public static Stream<Arguments> twoPlayersTest() {
