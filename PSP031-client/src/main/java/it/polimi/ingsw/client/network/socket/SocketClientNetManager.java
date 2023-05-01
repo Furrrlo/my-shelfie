@@ -119,10 +119,4 @@ public class SocketClientNetManager implements ClientNetManager {
         }
         throw new RuntimeException("Why is this necessary?");
     }
-
-    @VisibleForTesting
-    public void kill() {
-        //interrupt client updaters
-        threadPool.shutdownNow();
-    }
 }
