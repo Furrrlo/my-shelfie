@@ -6,7 +6,6 @@ import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,14 +28,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class RmiDisconnectionTest {
-
-    @BeforeAll
-    static void setUp() {
-        System.setProperty("sun.rmi.transport.connectionTimeout", "1000");
-        System.setProperty("sun.rmi.transport.tcp.readTimeout", "1000");
-        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "1000");
-        System.setProperty("sun.rmi.transport.tcp.handshakeTimeout", "1000");
-    }
 
     static Stream<Arguments> socketSource() {
         return Stream.of(

@@ -184,6 +184,12 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>@{jacocoArgLine} --enable-preview</argLine>
+                    <systemPropertyVariables>
+                        <sun.rmi.transport.connectionTimeout>1000</sun.rmi.transport.connectionTimeout>
+                        <sun.rmi.transport.tcp.readTimeout>1000</sun.rmi.transport.tcp.readTimeout>
+                        <sun.rmi.transport.tcp.responseTimeout>1000</sun.rmi.transport.tcp.responseTimeout>
+                        <sun.rmi.transport.tcp.handshakeTimeout>1000</sun.rmi.transport.tcp.handshakeTimeout>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
