@@ -59,4 +59,103 @@ class BoardTest {
         var board = new Board(2);
         assertDoesNotThrow(board::toString);
     }
+
+    @Test
+    void boardIsInstanceOfBoard() {
+        var board = new Board(2);
+        assertInstanceOf(Board.class, board);
+    }
+
+    @Test
+    void boardWrongNumOfPlayers5() {
+        UnsupportedOperationException thrown = assertThrows(
+                UnsupportedOperationException.class, () -> new Board(5),
+                "Invalid player number (min: 2, max: 4): " + 5);
+        assertTrue(("Invalid player number (min: 2, max: 4): " + 5).contentEquals(thrown.getMessage()));
+    }
+
+    @Test
+    void boardWrongNumOfPlayers1() {
+        UnsupportedOperationException thrown = assertThrows(
+                UnsupportedOperationException.class, () -> new Board(1),
+                "Invalid player number (min: 2, max: 4): " + 1);
+        assertTrue(("Invalid player number (min: 2, max: 4): " + 1).contentEquals(thrown.getMessage()));
+    }
+
+    @Test
+    void boarRightNumOfPlayers2() {
+        assertDoesNotThrow(() -> new Board(2));
+    }
+
+    @Test
+    void boarRightNumOfPlayers3() {
+        assertDoesNotThrow(() -> new Board(3));
+    }
+
+    @Test
+    void boarRightNumOfPlayers4() {
+        assertDoesNotThrow(() -> new Board(4));
+    }
+    /*
+     * @Test
+     * void boardIsEmptyTrue(){
+     * assertEquals();
+     * }
+     * 
+     * @Test
+     * void boardIsEmptyFalse(){
+     * assertNotEquals();
+     * }
+     * 
+     * @Test
+     * void boardIsNotEmptyTrue(){
+     * assertEquals();
+     * }
+     * 
+     * @Test
+     * void boardIsNotEmptyFalse(){
+     * assertNotEquals();
+     * }
+     * 
+     * @Test
+     * void needsRefillTrue(){
+     * assertEquals();
+     * }
+     * 
+     * @Test
+     * void needsRefillFalse(){
+     * assertNotEquals();
+     * }
+     * 
+     * @Test
+     * void checkBoardCoord1True(){
+     * 
+     * }
+     * 
+     * @Test
+     * void checkBoardCoord1False(){
+     * 
+     * }
+     * 
+     * @Test
+     * void hasFreeSidesTrue(){
+     * 
+     * }
+     * 
+     * @Test
+     * void hasFreeSidesFalse(){
+     * 
+     * }
+     * 
+     * @Test
+     * void hasCommonSidesTrue(){
+     * 
+     * }
+     * 
+     * @Test
+     * void hasCommonSidesFalse(){
+     * 
+     * }
+     * 
+     */
 }
