@@ -8,7 +8,6 @@ import org.fusesource.jansi.internal.Kernel32;
 import org.fusesource.jansi.io.AnsiOutputStream;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Locale;
 import java.util.Objects;
 
 import static org.fusesource.jansi.internal.CLibrary.ioctl;
@@ -25,7 +23,6 @@ import static org.fusesource.jansi.internal.Kernel32.*;
 
 class TuiPrintStream extends PrintStream {
 
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
     private static final int DEFAULT_TERMINAL_WIDTH = 80;
     private static final int DEFAULT_TERMINAL_HEIGHT = 24;
 
@@ -35,10 +32,18 @@ class TuiPrintStream extends PrintStream {
     public static final int BOX_RIGHT = 0x1000;
 
     /** First ANSI escape code character */
-    @VisibleForTesting
     static final char FIRST_ESC_CHAR = '\033';
     /** Second ANSI escape code character */
-    private static final char SECOND_ESC_CHAR = '[';
+    static final char SECOND_ESC_CHAR = '[';
+
+    /* See https://www.xfree86.org/current/ctlseqs.html */
+
+    /** Control Sequence Introducer */
+    static final String CSI = FIRST_ESC_CHAR + String.valueOf(SECOND_ESC_CHAR);
+    /** Device Control String */
+    static final String DCS = FIRST_ESC_CHAR + "P";
+    /** String Terminator */
+    static final String ST = FIRST_ESC_CHAR + "\\";
 
     /** Stack used to keep translations applied to the console screen */
     private final Deque<Translation> translationStack = new ArrayDeque<>();
@@ -100,7 +105,7 @@ class TuiPrintStream extends PrintStream {
             }
             case Native -> {
                 // IS_CONEMU || IS_CYGWIN || IS_MSYSTEM
-                if (IS_WINDOWS) {
+                if (WindowsDetection.IS_WINDOWS) {
                     final long console = GetStdHandle(STD_OUTPUT_HANDLE);
                     Kernel32.CONSOLE_SCREEN_BUFFER_INFO info = new Kernel32.CONSOLE_SCREEN_BUFFER_INFO();
                     GetConsoleScreenBufferInfo(console, info);

@@ -30,6 +30,17 @@ public class TuiMain {
         //@see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
         //System.setProperty("java.rmi.server.hostname", "<client address>");
+        WindowsDetection.detectSupportedCapabilities();
+        System.setProperty(AnsiConsole.JANSI_OUT_COLORS, switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
+            case Colors16 -> AnsiConsole.JANSI_COLORS_16;
+            case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+            case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+        });
+        System.setProperty(AnsiConsole.JANSI_ERR_COLORS, switch (WindowsDetection.ERR_SUPPORTED_COLORS) {
+            case Colors16 -> AnsiConsole.JANSI_COLORS_16;
+            case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+            case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+        });
         AnsiConsole.systemInstall();
         new TuiRenderer(
                 AnsiConsole.out(),
