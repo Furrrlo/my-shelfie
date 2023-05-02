@@ -14,7 +14,9 @@ import it.polimi.ingsw.model.TileAndCoords;
 import org.fusesource.jansi.AnsiConsole;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
 import java.rmi.registry.Registry;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -30,6 +32,9 @@ public class TuiMain {
         //@see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
         //System.setProperty("java.rmi.server.hostname", "<client address>");
+        System.setIn(InterruptibleInputStream.wrap(System.in, Thread.ofPlatform()
+                .name("stdin-read-th")
+                .factory()));
         WindowsDetection.detectSupportedCapabilities();
         System.setProperty(AnsiConsole.JANSI_OUT_COLORS, switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
             case Colors16 -> AnsiConsole.JANSI_COLORS_16;
@@ -44,7 +49,9 @@ public class TuiMain {
         AnsiConsole.systemInstall();
         new TuiRenderer(
                 AnsiConsole.out(),
-                System.in,
+                System.console() != null
+                        ? System.console().reader()
+                        : new InputStreamReader(System.in, Charset.defaultCharset()),
                 new ChoicePrompt(
                         "Which network protocol do you want to use?",
                         new ChoicePrompt.Choice("Socket",

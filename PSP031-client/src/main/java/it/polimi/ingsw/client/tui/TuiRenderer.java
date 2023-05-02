@@ -3,8 +3,8 @@ package it.polimi.ingsw.client.tui;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -30,12 +30,12 @@ class TuiRenderer implements Closeable {
      * IO operations.
      * 
      * @param outputStream stream to print to
-     * @param inputStream stream to read user input from
+     * @param inputReader stream to read user input from
      * @param initialPrompt initial prompt to ask the user
      * @param scene initial scene to be rendered
      */
     public TuiRenderer(OutputStream outputStream,
-                       InputStream inputStream,
+                       Reader inputReader,
                        Prompt initialPrompt,
                        @Nullable Consumer<TuiPrintStream> scene) {
         this.promptStack = new ArrayDeque<>(List.of(initialPrompt));
@@ -45,7 +45,7 @@ class TuiRenderer implements Closeable {
         this.renderThread.setName(this + "-render-thread");
         this.renderThread.start();
 
-        this.inputThread = new Thread(() -> inputLoop(inputStream));
+        this.inputThread = new Thread(() -> inputLoop(inputReader));
         this.inputThread.setName(this + "-input-thread");
         this.inputThread.start();
 
@@ -140,10 +140,8 @@ class TuiRenderer implements Closeable {
         }
     }
 
-    private void inputLoop(InputStream is) {
-        final var sc = new Scanner(is, System.console() != null
-                ? System.console().charset()
-                : Charset.defaultCharset());
+    private void inputLoop(Reader reader) {
+        final var sc = new Scanner(reader);
         try {
             do {
                 events.add(new InputEvent(sc.nextLine())); // TODO: how do we interrupt this?

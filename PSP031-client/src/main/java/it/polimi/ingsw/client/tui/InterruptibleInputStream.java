@@ -8,20 +8,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.nio.channels.InterruptedByTimeoutException;
+import java.util.Objects;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class InterruptibleInputStream extends BufferedInputStream {
 
     private final InterruptibleStream iin;
     private final InputStream underlyingStream;
-    private final TransferQueue<Object> queue;
+    private final TransferQueue<LockAndFuture<Integer>> queue;
 
     @SuppressWarnings("resource") // The thread is demon and cannot be interrupted anyway
     private InterruptibleInputStream(InputStream in, ThreadFactory threadFactory) {
-        super(new InterruptibleStream());
+        super(new InterruptibleStream(in));
 
-        this.underlyingStream = in;
         this.iin = (InterruptibleStream) this.in;
+        this.underlyingStream = iin.underlyingStream;
         this.queue = iin.queue;
 
         Executors.newSingleThreadExecutor(runnable -> {
@@ -47,11 +50,31 @@ public class InterruptibleInputStream extends BufferedInputStream {
 
     private void readLoop() {
         try {
-            while (!Thread.currentThread().isInterrupted()) {
+            readLoop: while (!Thread.currentThread().isInterrupted()) {
+                var lockAndFuture = new LockAndFuture<>(new ReentrantLock(), new CompletableFuture<Integer>());
+                queue.transfer(lockAndFuture);
                 try {
-                    queue.transfer(underlyingStream.read());
+                    var ch = underlyingStream.read();
+                    do {
+                        // Check that the future is not cancelled, lock to make sure it
+                        // does not get cancelled between our check and the completion
+                        boolean cancelled;
+                        lockAndFuture.lock().lock();
+                        try {
+                            cancelled = lockAndFuture.future().isCancelled();
+                            if (!cancelled) {
+                                lockAndFuture.future().complete(ch);
+                                continue readLoop;
+                            }
+                        } finally {
+                            lockAndFuture.lock().unlock();
+                        }
+
+                        lockAndFuture = new LockAndFuture<>(new ReentrantLock(), new CompletableFuture<>());
+                        queue.transfer(lockAndFuture);
+                    } while (true);
                 } catch (IOException e) {
-                    queue.transfer(e);
+                    lockAndFuture.future().completeExceptionally(e);
                 }
             }
         } catch (InterruptedException ignored) {
@@ -60,44 +83,123 @@ public class InterruptibleInputStream extends BufferedInputStream {
     }
 
     public void configureDefaultTimeout(@Range(from = 1, to = Integer.MAX_VALUE) long timeout, TimeUnit timeoutUnit) {
-        iin.timeout = timeout;
-        iin.timeoutUnit = timeoutUnit;
+        iin.configureDefaultTimeout(timeout, timeoutUnit);
     }
 
     public void clearDefaultTimeout() {
-        iin.timeout = 0;
-        iin.timeoutUnit = null;
+        iin.clearDefaultTimeout();
     }
 
-    static class InterruptibleStream extends InputStream {
+    private static class InterruptibleStream extends InputStream {
 
-        private final TransferQueue<Object> queue = new LinkedTransferQueue<>();
+        private final TransferQueue<LockAndFuture<Integer>> queue = new LinkedTransferQueue<>();
+        private final InputStream underlyingStream;
 
         private long timeout = 0;
         private @Nullable TimeUnit timeoutUnit;
 
-        public InterruptibleStream() {
+        public InterruptibleStream(InputStream underlyingStream) {
+            this.underlyingStream = underlyingStream;
+        }
+
+        public synchronized void configureDefaultTimeout(@Range(from = 1, to = Integer.MAX_VALUE) long timeout,
+                                                         TimeUnit timeoutUnit) {
+            this.timeout = timeout;
+            this.timeoutUnit = timeoutUnit;
+        }
+
+        public synchronized void clearDefaultTimeout() {
+            this.timeout = 0;
+            this.timeoutUnit = null;
+        }
+
+        public boolean hasSetTimeout() {
+            return timeout > 0 && timeoutUnit != null;
         }
 
         @Override
-        public int read() throws IOException {
-            Object res;
+        public synchronized int read() throws IOException {
             try {
-                if (timeout > 0 && timeoutUnit != null)
-                    res = queue.poll(timeout, timeoutUnit);
-                else
-                    res = queue.take();
+                if (hasSetTimeout()) {
+                    Objects.requireNonNull(timeoutUnit, "timeoutUnit should be checked by hasSetTimeout()");
+
+                    var lockAndFuture = queue.poll(timeout, timeoutUnit);
+                    if (lockAndFuture == null)
+                        throw new InterruptedByTimeoutException();
+
+                    try {
+                        return lockAndFuture.future().get(timeout, timeoutUnit);
+                    } catch (TimeoutException e) {
+                        // Try to acquire the lock to cancel it
+                        lockAndFuture.lock().lock();
+                        try {
+                            // If once acquired the lock, the future is still not done
+                            // cancel it and throw an interruption exception
+                            Integer res;
+                            if ((res = lockAndFuture.future().getNow(null)) == null) {
+                                lockAndFuture.future().cancel(true);
+                                throw (IOException) new InterruptedByTimeoutException().initCause(e);
+                            }
+                            // Found a value right before cancelling, we are lucky
+                            return res;
+                        } finally {
+                            lockAndFuture.lock().unlock();
+                        }
+                    }
+                }
+
+                return queue.take().future().get();
             } catch (InterruptedException e) {
                 throw (IOException) new InterruptedIOException().initCause(e);
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof IOException)
+                    throw new IOException(e.getCause());
+                throw new UnsupportedOperationException("Unexpected exception", e);
             }
-
-            if (res == null)
-                throw new InterruptedByTimeoutException();
-            if (res instanceof Integer)
-                return (int) res;
-            if (res instanceof IOException)
-                throw new IOException((IOException) res);
-            throw new UnsupportedOperationException("Unexpected res type " + res);
         }
+
+        @Override
+        public synchronized int read(byte[] b, int off, int len) throws IOException {
+            Objects.checkFromIndexSize(off, len, b.length);
+            if (len == 0)
+                return 0;
+
+            int c = read();
+            if (c == -1)
+                return -1;
+
+            b[off] = (byte) c;
+
+            var oldTimeout = this.timeout;
+            var oldTimeoutUnit = this.timeoutUnit;
+
+            int i = 1;
+            try {
+                if (!hasSetTimeout())
+                    configureDefaultTimeout(100, TimeUnit.MILLISECONDS);
+
+                for (; i < len; i++) {
+                    c = read();
+                    if (c == -1) {
+                        break;
+                    }
+                    b[off + i] = (byte) c;
+                }
+
+                this.timeout = oldTimeout;
+                this.timeoutUnit = oldTimeoutUnit;
+            } catch (IOException ee) {
+                // Ignored
+            }
+            return i;
+        }
+
+        @Override
+        public void close() throws IOException {
+            underlyingStream.close();
+        }
+    }
+
+    private record LockAndFuture<T>(Lock lock, CompletableFuture<T> future) {
     }
 }

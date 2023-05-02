@@ -32,22 +32,13 @@ class WindowsDetection {
 
         if (shouldCheck) {
             rawMode(inConsole, true);
-            InterruptibleInputStream iin = null;
+            var iin = InterruptibleInputStream.wrap(System.in);
             try {
-                // InterruptibleInputStream must be created after entering raw mode
-                // I think it's because by creating it before, windows sees that someone is
-                // constantly trying to read input, so it doesn't apply it
-                iin = InterruptibleInputStream.wrap(System.in, Thread.ofPlatform()
-                        .name("stdin-read-th")
-                        .factory());
-                System.setIn(iin); // Set it back to System.in, so if anybody else tries to rewrap it, there won't be issues
-                iin.configureDefaultTimeout(1000, TimeUnit.MILLISECONDS);
-
+                iin.configureDefaultTimeout(200, TimeUnit.MILLISECONDS);
                 OUT_SUPPORTED_COLORS = detectSupportedColors(GetStdHandle(STD_OUTPUT_HANDLE), System.out, iin);
                 ERR_SUPPORTED_COLORS = detectSupportedColors(GetStdHandle(STD_ERROR_HANDLE), System.err, iin);
             } finally {
-                if (iin != null)
-                    iin.clearDefaultTimeout();
+                iin.clearDefaultTimeout();
                 rawMode(inConsole, false);
             }
         } else {
