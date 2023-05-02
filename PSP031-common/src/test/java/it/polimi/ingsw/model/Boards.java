@@ -52,7 +52,7 @@ public class Boards {
         }
     }
 
-    public static void EmptyBoard(Board board) {
+    public static void emptyBoard(Board board) {
         for (int r = 0; r < BOARD_ROWS; r++) {
             for (int c = 0; c < BOARD_COLUMNS; c++) {
                 if (board.isValidTile(r, c)) {

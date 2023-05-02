@@ -195,14 +195,14 @@ public class Board implements BoardView {
     }
 
     /** returns true if the two tiles in the specified positions have one common side */
-    private boolean hasCommonSide(int row0, int col0, int row1, int col1) {
+    public boolean hasCommonSide(int row0, int col0, int row1, int col1) {
         if (row0 == row1 && (col1 == col0 + 1 || col1 == col0 - 1))
             return true;
         return col0 == col1 && (row1 == row0 + 1 || row1 == row0 - 1);
     }
 
     /** returns true if the three tiles in the specified positions are linked between them in a line */
-    private boolean hasCommonSide(int row0, int col0, int row1, int col1, int row2, int col2) {
+    public boolean hasCommonSide(int row0, int col0, int row1, int col1, int row2, int col2) {
         if ((row0 == row1 && row1 == row2) || (col0 == col1 && col1 == col2)) {
             return (hasCommonSide(row0, col0, row1, col1) && hasCommonSide(row1, col1, row2, col2)) ||
                     (hasCommonSide(row0, col0, row2, col2) && hasCommonSide(row1, col1, row2, col2)) ||

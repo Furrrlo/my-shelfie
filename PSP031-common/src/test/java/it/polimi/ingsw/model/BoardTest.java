@@ -72,18 +72,14 @@ class BoardTest {
 
     @Test
     void testBoardException1() {
-        UnsupportedOperationException thrown = assertThrows(
-                UnsupportedOperationException.class, () -> new Board(5),
+        assertThrows(UnsupportedOperationException.class, () -> new Board(5),
                 "Invalid player number (min: 2, max: 4): " + 5);
-        assertTrue(("Invalid player number (min: 2, max: 4): " + 5).contentEquals(thrown.getMessage()));
     }
 
     @Test
     void testBoardException2() {
-        UnsupportedOperationException thrown = assertThrows(
-                UnsupportedOperationException.class, () -> new Board(1),
+        assertThrows(UnsupportedOperationException.class, () -> new Board(1),
                 "Invalid player number (min: 2, max: 4): " + 1);
-        assertTrue(("Invalid player number (min: 2, max: 4): " + 1).contentEquals(thrown.getMessage()));
     }
 
     @Test
@@ -104,8 +100,12 @@ class BoardTest {
     @Test
     void IsEmpty_newBoardAlwaysEmpty_True() {
         //new board is empty by definition
-        var board = new Board(3);
-        assertTrue(board.isEmpty());
+        var board2 = new Board(2);
+        assertTrue(board2.isEmpty());
+        var board3 = new Board(3);
+        assertTrue(board3.isEmpty());
+        var board4 = new Board(4);
+        assertTrue(board4.isEmpty());
     }
 
     @Test
@@ -188,18 +188,17 @@ class BoardTest {
     @Test
     void needsRefill_ifTilesAreLinked_True() {
         /*
-         * private final static int[][] TWO_PLAYERS_MATRIX = new int[][] {
-         * 1 2 3 4 5 6 7 8 9
-         * 1 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-         * 2 { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
-         * 3 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
-         * 4 { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
-         * 5 { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
-         * 6 { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
-         * 7 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
-         * 8 { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
-         * 9 { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-         * };
+         * valid tiles for two players board
+         ****** 0**1**2**3**4**5**6**7**8
+         * 0 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+         * 1 { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+         * 2 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 3 { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+         * 4 { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+         * 5 { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
+         * 6 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 7 { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+         * 8 { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
          */
         var board = new Board(2);
         List<BoardCoord> bc = new ArrayList<>();
@@ -210,36 +209,137 @@ class BoardTest {
         assertFalse(board.needsRefill());
     }
 
+    @Test
+    void checkBoardCoord() {
+        /*
+         * valid tiles for two players board
+         ****** 0**1**2**3**4**5**6**7**8
+         * 0 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+         * 1 { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+         * 2 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 3 { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+         * 4 { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+         * 5 { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
+         * 6 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 7 { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+         * 8 { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+         */
+        var board = new Board(2);
+        Boards.refillBoardRandom(board);
+
+        List<BoardCoord> selected = new ArrayList<>();
+
+        //if selected size is 0, should return false
+        assertFalse(board.checkBoardCoord(selected));
+        selected.clear();
+
+        //if selected size is >3, should return false 
+        selected.add(new BoardCoord(1, 3));
+        selected.add(new BoardCoord(1, 4));
+        selected.add(new BoardCoord(4, 1));
+        selected.add(new BoardCoord(5, 1));
+        assertFalse(board.checkBoardCoord(selected));
+        selected.clear();
+
+        //if a tile is specified more than once should return false
+        board.tiles()
+                .filter(t -> board.tile(t.row(), t.col()).get() != null)
+                .forEach(t -> assertFalse(
+                        board.checkBoardCoord(List.of(new BoardCoord(t.row(), t.col()), new BoardCoord(t.row(), t.col())))));
+
+        selected.add(new BoardCoord(1, 3));
+        selected.add(new BoardCoord(1, 3));
+        assertFalse(board.checkBoardCoord(selected));
+        selected.clear();
+
+        //if one of selected tile is invalid, should return false
+        selected.add(new BoardCoord(0, 0));
+        selected.add(new BoardCoord(1, 3));
+        selected.add(new BoardCoord(1, 4));
+        assertFalse(board.checkBoardCoord(selected));
+        selected.clear();
+
+        //if one of the tiles selected is null, should return false 
+        Boards.emptyBoard(board);
+        board.tiles()
+                .filter(t -> t.tile().get() == null)
+                .forEach(t -> assertFalse(board.checkBoardCoord(List.of(new BoardCoord(t.row(), t.col())))));
+        Boards.refillBoardCoord(board, List.of(new BoardCoord(1, 3), new BoardCoord(1, 4)));
+        selected.add(new BoardCoord(1, 3));
+        selected.add(new BoardCoord(1, 4));
+        selected.add(new BoardCoord(2, 3)); //null tile
+        assertFalse(board.checkBoardCoord(selected));
+        selected.clear();
+
+        Boards.refillBoardRandom(board);
+
+        //For all tiles without free sides, should return false
+        board.tiles()
+                .filter(t -> !board.hasFreeSide(t.row(), t.col())).forEach(
+                        t -> assertFalse(board.checkBoardCoord(List.of(new BoardCoord(t.row(), t.col())))));
+
+        //for all tiles with free sides, selected singularly should return true
+        board.tiles()
+                .filter(t -> board.hasFreeSide(t.row(), t.col())).forEach(
+                        t -> assertTrue(board.checkBoardCoord(List.of(new BoardCoord(t.row(), t.col())))));
+
+        //if selected size is 2, tiles are not the same, not null and have common side, should return true
+        for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
+            for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
+                if (board.isValidTile(row, col) && board.tile(row, col).get() != null && board.hasFreeSide(row, col)) {
+                    for (int row1 = 0; row1 < BoardView.BOARD_ROWS; row1++) {
+                        for (int col1 = 0; col1 < BoardView.BOARD_COLUMNS; col1++) {
+                            if (board.isValidTile(row1, col1) && board.tile(row1, col1).get() != null
+                                    && board.hasCommonSide(row, col, row1, col1) && board.hasFreeSide(row1, col1))
+                                assertTrue(
+                                        board.checkBoardCoord(List.of(new BoardCoord(row, col), new BoardCoord(row1, col1))));
+                        }
+                    }
+                }
+            }
+        }
+        //if selected size is 3, tiles are not the same, not null and have common sides, should return true
+        for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
+            for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
+                if (board.isValidTile(row, col) && board.tile(row, col).get() != null && board.hasFreeSide(row, col)) {
+                    for (int row1 = 0; row1 < BoardView.BOARD_ROWS; row1++) {
+                        for (int col1 = 0; col1 < BoardView.BOARD_COLUMNS; col1++) {
+                            if (board.isValidTile(row1, col1) && board.tile(row1, col1).get() != null
+                                    && board.hasCommonSide(row, col, row1, col1) && board.hasFreeSide(row1, col1) && row != row1
+                                    && col != col1) {
+                                for (int row2 = 0; row2 < BoardView.BOARD_ROWS; row2++) {
+                                    for (int col2 = 0; col2 < BoardView.BOARD_COLUMNS; col2++) {
+                                        if (board.isValidTile(row2, col2) && board.tile(row2, col2).get() != null
+                                                && board.hasCommonSide(row, col, row1, col1, row2, col2)
+                                                && board.hasFreeSide(row2, col2)
+                                                && row2 != row1 && row2 != row && col1 != col2 && col != col2)
+                                            assertTrue(board.checkBoardCoord(List.of(new BoardCoord(row, col),
+                                                    new BoardCoord(row1, col1), new BoardCoord(row2, col2))));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     /*
      * @Test
-     * void checkBoardCoord1True(){
+     * void hasFreeSides(){
      * 
      * }
      * 
      * @Test
-     * void checkBoardCoord1False(){
+     * void hasCommonSides2(){
      * 
      * }
      * 
      * @Test
-     * void hasFreeSidesTrue(){
+     * void hasCommonSides3(){
      * 
      * }
-     * 
-     * @Test
-     * void hasFreeSidesFalse(){
-     * 
-     * }
-     * 
-     * @Test
-     * void hasCommonSidesTrue(){
-     * 
-     * }
-     * 
-     * @Test
-     * void hasCommonSidesFalse(){
-     * 
-     * }
-     * 
      */
 }
