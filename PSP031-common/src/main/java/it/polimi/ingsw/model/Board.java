@@ -2,12 +2,10 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.BoardCoord;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
