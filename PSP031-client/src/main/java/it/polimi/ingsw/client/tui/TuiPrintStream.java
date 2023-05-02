@@ -126,19 +126,19 @@ class TuiPrintStream extends PrintStream {
      */
     public void eraseScreen() {
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
             print(2);
-            write('J');
+            print('J');
         }
     }
 
     /** Erase all content visible on the console screen */
     public void eraseInDisplay() {
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
-            write('J');
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
+            print('J');
         }
     }
 
@@ -148,12 +148,12 @@ class TuiPrintStream extends PrintStream {
             // Cursor saving is not standardized, see https://github.com/fusesource/jansi/issues/226
             // Print both known sequences
             // DEC sequence
-            write(FIRST_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
             print(7);
             // SCO sequence
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
-            write('s');
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
+            print('s');
             return new RestoreCursorPosCloseable();
         }
     }
@@ -166,11 +166,11 @@ class TuiPrintStream extends PrintStream {
                 // Cursor saving is not standardized, see https://github.com/fusesource/jansi/issues/226
                 // Print both known sequences
                 // SCO sequence
-                write(FIRST_ESC_CHAR);
-                write(SECOND_ESC_CHAR);
-                write('u');
+                print(FIRST_ESC_CHAR);
+                print(SECOND_ESC_CHAR);
+                print('u');
                 // DEC sequence
-                write(FIRST_ESC_CHAR);
+                print(FIRST_ESC_CHAR);
                 print(8);
             }
         }
@@ -264,12 +264,12 @@ class TuiPrintStream extends PrintStream {
      */
     public void cursor(int row, int col) {
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
             print(Math.max(0, row) + 1);
-            write(';');
+            print(';');
             print(Math.max(0, col) + 1);
-            write('H');
+            print('H');
         }
     }
 
@@ -280,10 +280,10 @@ class TuiPrintStream extends PrintStream {
      */
     public void cursorToCol(int col) {
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
             print(Math.max(0, col) + 1);
-            write('G');
+            print('G');
         }
     }
 
@@ -302,10 +302,10 @@ class TuiPrintStream extends PrintStream {
         }
 
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
             print(y);
-            write('A');
+            print('A');
         }
     }
 
@@ -324,10 +324,10 @@ class TuiPrintStream extends PrintStream {
         }
 
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
             print(y);
-            write('B');
+            print('B');
         }
     }
 
@@ -346,10 +346,10 @@ class TuiPrintStream extends PrintStream {
         }
 
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
             print(x);
-            write('C');
+            print('C');
         }
     }
 
@@ -368,8 +368,8 @@ class TuiPrintStream extends PrintStream {
         }
 
         synchronized (this) {
-            write(FIRST_ESC_CHAR);
-            write(SECOND_ESC_CHAR);
+            print(FIRST_ESC_CHAR);
+            print(SECOND_ESC_CHAR);
             print(x);
             write('D');
         }
