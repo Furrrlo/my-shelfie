@@ -154,48 +154,6 @@ public class Board implements BoardView {
                         (!isValidTile(t.row(), t.col() - 1) || tile(t.row(), t.col() - 1).get() == null));
     }
 
-    @VisibleForTesting
-    public void refillBoardRandom() {
-        List<Color> val = List.of(Color.values());
-        Random rand = new Random();
-        for (int r = 0; r < BOARD_ROWS; r++) {
-            for (int c = 0; c < BOARD_COLUMNS; c++) {
-                if (this.isValidTile(r, c)) {
-                    Property<@Nullable Tile> tileProp = this.tile(r, c);
-                    if (tileProp.get() == null) {
-                        tileProp.set(new Tile(val.get(rand.nextInt(Color.values().length))));
-                    }
-                }
-            }
-        }
-    }
-
-    @VisibleForTesting
-    public void refillBoardBag(List<Tile> bag) {
-        for (int r = 0; r < BOARD_ROWS && bag.size() > 0; r++) {
-            for (int c = 0; c < BOARD_COLUMNS && bag.size() > 0; c++) {
-                if (this.isValidTile(r, c)) {
-                    Property<@Nullable Tile> tileProp = this.tile(r, c);
-                    if (tileProp.get() == null) {
-                        tileProp.set(bag.remove(new Random().nextInt(bag.size())));
-                    }
-                }
-            }
-        }
-    }
-
-    @VisibleForTesting
-    public void refillBoardCoord(List<BoardCoord> positions) {
-        for (BoardCoord bc : positions) {
-            if (isValidTile(bc.row(), bc.col())) {
-                Property<@Nullable Tile> tileProp = this.tile(bc.row(), bc.col());
-                if (tileProp.get() == null) {
-                    tileProp.set(new Tile(Color.PINK));
-                }
-            }
-        }
-    }
-
     @Override
     public boolean checkBoardCoord(List<BoardCoord> selected) {
         if (selected.size() == 0 || selected.size() > 3)

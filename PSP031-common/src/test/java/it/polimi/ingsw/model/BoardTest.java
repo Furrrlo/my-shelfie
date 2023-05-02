@@ -125,7 +125,7 @@ class BoardTest {
     void isEmpty_boardAfterRefill_False() {
         //refilled board is not empty by definition
         var board = new Board(2);
-        board.refillBoardRandom();
+        Boards.refillBoardRandom(board);
         assertFalse(board.isEmpty());
     }
 
@@ -133,7 +133,7 @@ class BoardTest {
     void isEmpty_boardAfterRefill() {
         //refilled board is not empty by definition
         var board = new Board(2);
-        board.refillBoardRandom();
+        Boards.refillBoardRandom(board);
         int count_tiles = 0;
         for (int r = 0; r < BoardView.BOARD_ROWS; r++) {
             for (int c = 0; c < BoardView.BOARD_COLUMNS; c++) {
@@ -155,7 +155,7 @@ class BoardTest {
         List<Tile> selected = new ArrayList<>();
         selected.add(new Tile(Color.PINK));
         var board = new Board(2);
-        board.refillBoardBag(selected);
+        Boards.refillBoardBag(board, selected);
         /* board now refilled with just one tile */
         assertTrue(board.needsRefill());
     }
@@ -164,15 +164,15 @@ class BoardTest {
     void needsRefill_ifTilesAreNotLinked_False() {
         /*
          * private final static int[][] TWO_PLAYERS_MATRIX = new int[][] {
-         * 1 2 3 4 5 6 7 8 9
-         * 1 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-         * 2 { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
-         * 3 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
-         * 4 { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
-         * 5 { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
-         * 6 { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
-         * 7 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
-         * 8 { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+         ****** 0**1**2**3**4**5**6**7**8
+         * 0 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+         * 1 { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+         * 2 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 3 { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+         * 4 { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+         * 5 { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
+         * 6 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 7 { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
          * 9 { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
          * };
          */
@@ -181,7 +181,7 @@ class BoardTest {
         bc.add(new BoardCoord(3, 4));
         bc.add(new BoardCoord(4, 3));
         //tiles are not linked
-        board.refillBoardCoord(bc);
+        Boards.refillBoardCoord(board, bc);
         assertTrue(board.needsRefill());
     }
 
@@ -206,7 +206,7 @@ class BoardTest {
         bc.add(new BoardCoord(3, 4));
         bc.add(new BoardCoord(2, 4));
         //tiles are  linked
-        board.refillBoardCoord(bc);
+        Boards.refillBoardCoord(board, bc);
         assertFalse(board.needsRefill());
     }
 
