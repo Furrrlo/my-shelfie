@@ -47,16 +47,19 @@ public class TuiMain {
                 .name("stdin-read-th")
                 .factory()));
         WindowsDetection.detectSupportedCapabilities();
-        System.setProperty(AnsiConsole.JANSI_OUT_COLORS, switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
-            case Colors16 -> AnsiConsole.JANSI_COLORS_16;
-            case Colors256 -> AnsiConsole.JANSI_COLORS_256;
-            case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
-        });
-        System.setProperty(AnsiConsole.JANSI_ERR_COLORS, switch (WindowsDetection.ERR_SUPPORTED_COLORS) {
-            case Colors16 -> AnsiConsole.JANSI_COLORS_16;
-            case Colors256 -> AnsiConsole.JANSI_COLORS_256;
-            case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
-        });
+        // Fix for jansi not detecting colors at all on Windows
+        if (WindowsDetection.IS_WINDOWS) {
+            System.setProperty(AnsiConsole.JANSI_OUT_COLORS, switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
+                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
+                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+            });
+            System.setProperty(AnsiConsole.JANSI_ERR_COLORS, switch (WindowsDetection.ERR_SUPPORTED_COLORS) {
+                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
+                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+            });
+        }
         AnsiConsole.systemInstall();
         new TuiRenderer(
                 AnsiConsole.out(),
