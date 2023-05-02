@@ -254,12 +254,45 @@ public class TuiMain {
                             return ctx.prompt(promptBoard(ctx.subPrompt(), netManager, game, controller, List.of()));
                         }),
                 new ChoicePrompt.Choice(
+                        "Zoom shelfie and personal goal",
+                        (renderer0, ctx) -> ctx.prompt(zoomShelfie(ctx.subPrompt(), renderer, game))),
+                new ChoicePrompt.Choice(
+                        "Zoom board",
+                        (renderer0, ctx) -> ctx.prompt(zoomBoard(ctx.subPrompt(), renderer, game))),
+                new ChoicePrompt.Choice(
                         "Quit",
                         (renderer0, ctx) -> {
                             // TODO: should quit more gracefully
                             System.exit(-1);
                             return ctx.done();
                         }));
+    }
+
+    private static Prompt zoomShelfie(Prompt.Factory promptFactory,
+                                      TuiRenderer renderer,
+                                      GameView game) {
+
+        renderer.setScene(new TuiPrinter.TuiShelfiePrinter(game));
+
+        return promptFactory.input(
+                "",
+                (renderer0, ctx, input) -> {
+                    renderer.setScene(new TuiGameScene(game));
+                    return ctx.done();
+                });
+    }
+
+    private static Prompt zoomBoard(Prompt.Factory promptFactory,
+                                    TuiRenderer renderer,
+                                    GameView game) {
+        renderer.setScene(new TuiPrinter.TuiBoardPrinter(game));
+
+        return promptFactory.input(
+                "",
+                (renderer0, ctx, input) -> {
+                    renderer.setScene(new TuiGameScene(game));
+                    return ctx.done();
+                });
     }
 
     private static Prompt promptBoard(Prompt.Factory promptFactory,

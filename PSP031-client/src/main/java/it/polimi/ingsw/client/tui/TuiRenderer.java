@@ -68,7 +68,11 @@ class TuiRenderer implements Closeable {
                         while (events.peek() instanceof RenderEvent)
                             events.remove();
                     }
-                    case SetSceneEvent sceneEvent -> scene = sceneEvent.scene();
+                    case SetSceneEvent sceneEvent -> {
+                        if (scene instanceof Closeable c)
+                            c.close();
+                        scene = sceneEvent.scene();
+                    }
                     case SetPromptEvent promptEvent -> {
                         // Replace the current prompt with the new one
                         promptStack.clear();

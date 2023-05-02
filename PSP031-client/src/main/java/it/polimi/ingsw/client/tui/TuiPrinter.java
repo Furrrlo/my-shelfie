@@ -1,13 +1,20 @@
 package it.polimi.ingsw.client.tui;
 
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.Color;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import static it.polimi.ingsw.model.BoardView.BOARD_COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
@@ -22,7 +29,7 @@ public class TuiPrinter {
      * lines of each design composed by letters that represent colors that methods in TuiPrinter class handles in order
      * to print different color of pxl
      */
-    private static final @Unmodifiable String pxl = "  ";
+    private static final @Unmodifiable String pxl = "   ";
     private static final @Unmodifiable int PXL_FOR_SPRITE = 24;
     private static final @Unmodifiable int PXL_FOR_NUMBERS = 5;
     private static final @Unmodifiable int PXL_FOR_PERSONAL_GOAL = 12;
@@ -98,11 +105,11 @@ public class TuiPrinter {
     //  printed tiles in board, so that can be always seen during the game
 
     /** prints shelfie with complex design */
-    public static void tuiPrintShelfie(Shelfie shelfie) {
-        printShelfieHeader();
+    public static void tuiPrintShelfie(PrintStream out, ShelfieView shelfie) {
+        printShelfieHeader(out);
         for (int row = 0; row < ROWS; row++) {
-            printMidShelf1();
-            printMidShelf2();
+            printMidShelf1(out);
+            printMidShelf2(out);
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
                 for (int col = 0; col < COLUMNS; col++) {
@@ -117,16 +124,15 @@ public class TuiPrinter {
                             .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
                             .append(ConsoleColors.RESET);
                 }
-                System.out.println(sb);
+                out.println(sb);
             }
         }
-        printShelfieBottom();
+        printShelfieBottom(out);
     }
 
-    /** prints board with complex design */
-    public static void tuiPrintBoard(Board board) {
-        printBoardSeparatingLine();
-        printBoardNumber();
+    public static void tuiPrintBoard(PrintStream out, BoardView board) {
+        printBoardSeparatingLine(out);
+        printBoardNumber(out);
         for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
             for (int i = 0; i < 24; i++) {
                 StringBuilder sb = new StringBuilder();
@@ -135,7 +141,7 @@ public class TuiPrinter {
                     if (col == 0)
                         sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.RESET);
                     if (board.isValidTile(row, col)) {
-                        Property<@Nullable Tile> tileProp = board.tile(row, col);
+                        Provider<@Nullable Tile> tileProp = board.tile(row, col);
                         if (tileProp.get() != null)
                             sb.append(SpriteLine(i, Objects.requireNonNull(tileProp.get()).getColor()));
                         else
@@ -145,17 +151,17 @@ public class TuiPrinter {
                     }
                     sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.RESET);
                 }
-                System.out.println(sb);
+                out.println(sb);
             }
-            printBoardSeparatingLine();
+            printBoardSeparatingLine(out);
         }
     }
 
     /** prints personalGoal with complex design **/
-    public static void tuiPrintPersonalGoal(PersonalGoal p) {
+    public static void tuiPrintPersonalGoal(PrintStream out, PersonalGoal p) {
         for (int row = 0; row < ROWS; row++) {
-            System.out.println(PersonalGoalMidShelf1());
-            System.out.println(PersonalGoalMidShelf2());
+            out.println(PersonalGoalMidShelf1());
+            out.println(PersonalGoalMidShelf2());
             for (int i = 0; i < PXL_FOR_PERSONAL_GOAL; i++) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(ConsoleColors.RESET);
@@ -171,17 +177,17 @@ public class TuiPrinter {
                             .append(pxl);
                     sb.append(ConsoleColors.RESET);
                 }
-                System.out.println(sb);
+                out.println(sb);
             }
         }
-        System.out.println(PersonalGoalMidShelf1());
+        out.println(PersonalGoalMidShelf1());
     }
 
     /** prints personalGoal next to shelfie both with complex desing */
-    public static void tuiPrintShelfieAndPersonalGoal(Shelfie shelfie, PersonalGoal pg) {
-        printShelfieHeader();
-        System.out.println(MidShelf1());
-        System.out.println(MidShelf2());
+    public static void tuiPrintShelfieAndPersonalGoal(PrintStream out, ShelfieView shelfie, PersonalGoalView pg) {
+        printShelfieHeader(out);
+        out.println(MidShelf1());
+        out.println(MidShelf2());
         int pg_i = -2;
         int pg_row = 0;
         for (int row = 0; row < ROWS; row++) {
@@ -239,10 +245,10 @@ public class TuiPrinter {
                     }
                     pg_i++;
                 }
-                System.out.println(sb);
+                out.println(sb);
             }
         }
-        System.out.println(MidShelf1());
+        out.println(MidShelf1());
     }
 
     private static StringBuilder PersonalGoalMidShelf1() {
@@ -263,37 +269,37 @@ public class TuiPrinter {
         return sb;
     }
 
-    private static void printBoardSeparatingLine() {
+    private static void printBoardSeparatingLine(PrintStream out) {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.BLUE_BACKGROUND).append(pxl.repeat(5));
         sb.append(ConsoleColors.BLUE_BACKGROUND_BRIGHT).append(pxl.repeat(226)).append(ConsoleColors.RESET);
-        System.out.println(sb);
+        out.println(sb);
     }
 
-    private static void printShelfieHeader() {
-        printMidShelf1();
-        printMidShelf3();
-        printMidShelf1();
-        printNumberHeader();
-        printNumber();
-        printNumberHeader();
-        printMidShelf1();
-        printMidShelf3();
+    private static void printShelfieHeader(PrintStream out) {
+        printMidShelf1(out);
+        printMidShelf3(out);
+        printMidShelf1(out);
+        printNumberHeader(out);
+        printNumber(out);
+        printNumberHeader(out);
+        printMidShelf1(out);
+        printMidShelf3(out);
 
     }
 
-    private static void printShelfieBottom() {
-        printMidShelf1();
-        printMidShelf3();
-        printMidShelf1();
+    private static void printShelfieBottom(PrintStream out) {
+        printMidShelf1(out);
+        printMidShelf3(out);
+        printMidShelf1(out);
     }
 
-    private static void printMidShelf1() {
+    private static void printMidShelf1(PrintStream out) {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
                 .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl.repeat(131))
                 .append(ConsoleColors.RESET);
-        System.out.println(sb);
+        out.println(sb);
     }
 
     private static StringBuilder MidShelf1() {
@@ -304,7 +310,7 @@ public class TuiPrinter {
         return sb;
     }
 
-    private static void printMidShelf2() {
+    private static void printMidShelf2(PrintStream out) {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
                 .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
@@ -319,7 +325,7 @@ public class TuiPrinter {
                 .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(25))
                 .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
                 .append(ConsoleColors.RESET);
-        System.out.println(sb);
+        out.println(sb);
     }
 
     private static StringBuilder MidShelf2() {
@@ -340,11 +346,11 @@ public class TuiPrinter {
         return sb;
     }
 
-    private static void printMidShelf3() {
+    private static void printMidShelf3(PrintStream out) {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl.repeat(131));
         sb.append(ConsoleColors.RESET);
-        System.out.println(sb);
+        out.println(sb);
     }
 
     private static StringBuilder MidShelf3() {
@@ -354,7 +360,7 @@ public class TuiPrinter {
         return sb;
     }
 
-    private static void printNumberHeader() {
+    private static void printNumberHeader(PrintStream out) {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
         for (int i = 0; i < COLUMNS; i++)
@@ -362,10 +368,10 @@ public class TuiPrinter {
                     .append(pxl).append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl.repeat(24))
                     .append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl);
         sb.append(ConsoleColors.ORANGE_BACKGROUND).append(pxl).append(ConsoleColors.RESET);
-        System.out.println(sb);
+        out.println(sb);
     }
 
-    private static void printNumber() {
+    private static void printNumber(PrintStream out) {
         for (int i = 0; i < PXL_FOR_NUMBERS; i++) {
             StringBuilder sb = new StringBuilder();
             for (int col = 0; col < COLUMNS; col++) {
@@ -378,11 +384,11 @@ public class TuiPrinter {
                         .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl)
                         .append(ConsoleColors.RESET);
             }
-            System.out.println(sb);
+            out.println(sb);
         }
     }
 
-    private static void printBoardNumber() {
+    private static void printBoardNumber(PrintStream out) {
         for (int i = 0; i < PXL_FOR_NUMBERS; i++) {
             StringBuilder sb = new StringBuilder();
             for (int col = 0; col < BOARD_COLUMNS; col++) {
@@ -391,7 +397,8 @@ public class TuiPrinter {
                 sb.append(NumberLine(col + 1, i));
                 sb.append(ConsoleColors.BLUE_BACKGROUND).append(pxl).append(ConsoleColors.RESET);
             }
-            System.out.println(sb);
+            out.println(sb);
+            out.println(sb);
         }
     }
 
@@ -544,5 +551,91 @@ public class TuiPrinter {
     @VisibleForTesting
     public static void tuiPrintSpriteLine(int index, Color color) {
         System.out.println(SpriteLine(index, color));
+    }
+
+    public static void zoomIn(int n) {
+        try {
+            Robot r = new Robot();
+            r.keyPress(KeyEvent.VK_CONTROL);
+            for (int i = 0; i < n; i++) {
+                r.keyPress(KeyEvent.VK_PLUS);
+                r.keyRelease(KeyEvent.VK_PLUS);
+            }
+            r.keyRelease(KeyEvent.VK_CONTROL);
+        } catch (AWTException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void zoomOut(int n) {
+        try {
+            Robot r = new Robot();
+            r.keyPress(KeyEvent.VK_CONTROL);
+            for (int i = 0; i < n; i++) {
+                r.keyPress(KeyEvent.VK_MINUS);
+                r.keyRelease(KeyEvent.VK_MINUS);
+            }
+            r.keyRelease(KeyEvent.VK_CONTROL);
+        } catch (AWTException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static class TuiBoardPrinter implements Consumer<TuiPrintStream>, Closeable {
+        private final GameView game;
+
+        public TuiBoardPrinter(GameView game) {
+            this.game = game;
+            zoomOut(11);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void accept(TuiPrintStream out) {
+            tuiPrintBoard(out, game.getBoard());
+        }
+
+        @Override
+        public void close() throws IOException {
+            zoomIn(11);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    static class TuiShelfiePrinter implements Consumer<TuiPrintStream>, Closeable {
+        private final GameView game;
+
+        public TuiShelfiePrinter(GameView game) {
+            this.game = game;
+            zoomOut(10);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void accept(TuiPrintStream out) {
+            tuiPrintShelfieAndPersonalGoal(out, game.thePlayer().getShelfie(), game.getPersonalGoal());
+        }
+
+        @Override
+        public void close() throws IOException {
+            zoomIn(10);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

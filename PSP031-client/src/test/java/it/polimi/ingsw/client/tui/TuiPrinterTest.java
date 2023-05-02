@@ -89,7 +89,7 @@ class TuiPrinterTest {
                 new Color[] { Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.BLUE     , Color.BLUE      },
                 //@formatter:on
         });
-        TuiPrinter.tuiPrintShelfie(shelfie);
+        TuiPrinter.tuiPrintShelfie(System.out, shelfie);
     }
 
     @Test
@@ -104,9 +104,9 @@ class TuiPrinterTest {
                 new Color[] { Color.YELLOW   , Color.YELLOW   , Color.PINK     , Color.GREEN    , Color.PINK      },
                 //@formatter:on
         });
-        TuiPrinter.tuiPrintShelfie(shelfie);
+        TuiPrinter.tuiPrintShelfie(System.out, shelfie);
         System.out.println("\n");
-        TuiPrinter.tuiPrintShelfieAndPersonalGoal(shelfie, new PersonalGoal(1));
+        TuiPrinter.tuiPrintShelfieAndPersonalGoal(System.out, shelfie, new PersonalGoal(1));
     }
 
     @Test
@@ -122,24 +122,24 @@ class TuiPrinterTest {
                 //@formatter:on
         });
         //TuiPrinter.tuiPrintShelfie(shelfie);
-        TuiPrinter.tuiPrintPersonalGoal(new PersonalGoal(1));
+        TuiPrinter.tuiPrintPersonalGoal(System.out, new PersonalGoal(1));
         System.out.println("\n");
-        TuiPrinter.tuiPrintShelfieAndPersonalGoal(shelfie, new PersonalGoal(1));
+        TuiPrinter.tuiPrintShelfieAndPersonalGoal(System.out, shelfie, new PersonalGoal(1));
     }
 
     @Test
     void tuiPrintEmptyBoard() {
 
-        TuiPrinter.tuiPrintBoard(new Board(4));
+        TuiPrinter.tuiPrintBoard(System.out, new Board(4));
     }
 
     @Test
     void tuiPrintBoardRandom() {
-        TuiPrinter.tuiPrintBoard(Game.refillBoard(new Board(4), BAG));
+        TuiPrinter.tuiPrintBoard(System.out, Game.refillBoard(new Board(4), BAG));
     }
 
     @Test
     void printPersonalGoalRandom() {
-        TuiPrinter.tuiPrintPersonalGoal(new PersonalGoal(1));
+        TuiPrinter.tuiPrintPersonalGoal(System.out, new PersonalGoal(1));
     }
 }
