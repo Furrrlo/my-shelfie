@@ -114,7 +114,7 @@ class TuiPrintStream extends PrintStream {
                 // *nix TTY
                 CLibrary.WinSize sz = new CLibrary.WinSize();
                 ioctl(CLibrary.STDOUT_FILENO, CLibrary.TIOCGWINSZ, sz);
-                yield sz.ws_col;
+                yield sz.ws_row;
             }
         };
     }
