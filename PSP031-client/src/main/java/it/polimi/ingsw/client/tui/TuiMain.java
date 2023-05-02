@@ -32,6 +32,17 @@ public class TuiMain {
         //@see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
         //System.setProperty("java.rmi.server.hostname", "<client address>");
+
+        // Fix for jansi, ot uses the two old sun internal properties
+        var stdoutEncoding = System.getProperty("stdout.encoding");
+        if (stdoutEncoding == null && System.console() != null)
+            stdoutEncoding = System.console().charset().name();
+
+        if (stdoutEncoding != null) {
+            System.setProperty("sun.stdout.encoding", stdoutEncoding);
+            System.setProperty("sun.stderr.encoding", stdoutEncoding);
+        }
+
         System.setIn(InterruptibleInputStream.wrap(System.in, Thread.ofPlatform()
                 .name("stdin-read-th")
                 .factory()));
