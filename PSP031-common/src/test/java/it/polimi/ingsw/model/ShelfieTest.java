@@ -107,4 +107,42 @@ class ShelfieTest {
         //Num of overlapping tiles expected to be : 4
         assertEquals(4, shelfie.numTilesOverlappingWithPersonalGoal(pg12));
     }
+
+    @Test
+    void groupsOfTiles() {
+        Shelfie shelfie = new Shelfie(new Color[][] {
+                //@formatter:off
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
+                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.BLUE     , Color.YELLOW, Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.PINK     , Color.YELLOW, Color.YELLOW   , Color.YELLOW   , Color.GREEN  },
+                new Color[] { Color.WHITE    , Color.GREEN , Color.WHITE    , Color.WHITE    , Color.YELLOW }
+                //@formatter:on
+        });
+        /*
+         * 1 -> yellow
+         * 2 -> blue, blue
+         * 3 -> yellow, yellow
+         * 4 -> pink
+         * 5 -> yellow, yellow
+         * 6 -> green
+         * 7 -> green
+         * 8 -> lightblue
+         * 9 -> white
+         * 10 -> green
+         * 11 -> lightblue
+         * 12 -> white
+         * 13 -> blue
+         * 14 -> yellow, yellow, yellow, yellow
+         * 15 -> blue, blue, blue
+         * 16 -> pink
+         * 17 -> green
+         * 18 -> white
+         * 19 -> green
+         * 20 -> white, white
+         * 21 -> yellow
+         */
+        assertEquals(21, shelfie.groupsOfTiles().size());
+    }
 }
