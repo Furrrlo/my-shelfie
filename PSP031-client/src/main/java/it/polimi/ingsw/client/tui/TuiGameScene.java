@@ -21,14 +21,26 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
 
     @Override
     public void accept(TuiPrintStream out) {
-        // TODO: if there's enough space, call printDetailed instead
-        printNormal(out);
+        var terminalSize = out.getTerminalSize();
+        var detailedNeededSize = getDetailedOuterRect(out).size();
+        var normalNeededSize = new TuiSize(40, 156);
+
+        if (terminalSize.rows() >= detailedNeededSize.rows() && terminalSize.cols() >= detailedNeededSize.cols()) {
+            printDetailed(out);
+        } else if (terminalSize.rows() >= normalNeededSize.rows() && terminalSize.cols() >= normalNeededSize.cols()) {
+            printNormal(out, detailedNeededSize);
+        } else {
+            out.println("Terminal is not big enough to display the game, " +
+                    "terminal size " + terminalSize.cols() + "x" + terminalSize.rows() + ", " +
+                    "zoom out to " + normalNeededSize.cols() + "x" + normalNeededSize.rows());
+        }
     }
 
-    private void printNormal(TuiPrintStream out) {
+    private void printNormal(TuiPrintStream out, TuiSize detailedSize) {
         var terminalSize = out.getTerminalSize();
         // Print terminal size in the top-left corner
-        out.print(terminalSize.rows() + "x" + terminalSize.cols());
+        out.print("terminal size " + terminalSize.cols() + "x" + terminalSize.rows() + ", " +
+                "zoom out to " + detailedSize.cols() + "x" + detailedSize.rows() + " for a detailed view");
 
         // Draw board
         var boardRect = out.printAligned(
@@ -138,18 +150,19 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
         out.cursor(boardRect.lastRow() + 2, 0);
     }
 
-    private void printDetailed(TuiPrintStream out) {
-        var terminalSize = out.getTerminalSize();
-        out.print(terminalSize.rows() + "x" + terminalSize.cols());
-
+    private TuiRect getDetailedOuterRect(TuiPrintStream out) {
         final var shelfiePrinterSize = TuiDetailedShelfiePrinter.EMPTY.getSize();
         final var boardPrinterSize = TuiDetailedBoardPrinter.EMPTY.getSize();
-        final var outerRect = out.getAlignedRect(
+        return out.getAlignedRect(
                 new TuiSize(
                         Math.max(boardPrinterSize.rows(), shelfiePrinterSize.rows() * 2),
                         boardPrinterSize.cols() + shelfiePrinterSize.cols() * 2),
-                new TuiRect(0, 0, terminalSize),
+                new TuiRect(0, 0, out.getTerminalSize()),
                 TuiHAlignment.CENTER, TuiVAlignment.CENTER);
+    }
+
+    private void printDetailed(TuiPrintStream out) {
+        var outerRect = getDetailedOuterRect(out);
 
         var thePlayerPrinter = new TuiDetailedShelfiePrinter(game.thePlayer().getShelfie());
         var thePlayerRect = out.printAligned(
@@ -161,26 +174,24 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
                 .filter(p -> !p.equals(game.thePlayer()))
                 .toList();
 
-        // I can't fit these in there :I
-        //        var lowerRightPlayer = !otherPlayers.isEmpty() ? otherPlayers.get(0) : null;
-        //        var lowerRightPlayerRect = out.printAligned(
-        //                lowerRightPlayer != null
-        //                        ? new TuiDetailedShelfiePrinter(lowerRightPlayer.getShelfie())
-        //                        : TuiDetailedShelfiePrinter.EMPTY,
-        //                outerRect,
-        //                TuiHAlignment.RIGHT, TuiVAlignment.BOTTOM);
+        var lowerRightPlayer = !otherPlayers.isEmpty() ? otherPlayers.get(0) : null;
+        var lowerRightPlayerRect = out.printAligned(
+                lowerRightPlayer != null
+                        ? new TuiDetailedShelfiePrinter(lowerRightPlayer.getShelfie())
+                        : TuiDetailedShelfiePrinter.EMPTY,
+                outerRect,
+                TuiHAlignment.RIGHT, TuiVAlignment.BOTTOM);
 
-        //        var lowerLeftPlayer = otherPlayers.size() >= 2 ? otherPlayers.get(1) : null;
-        //        out.printAligned(
-        //                lowerLeftPlayer != null
-        //                        ? new TuiDetailedShelfiePrinter(lowerLeftPlayer.getShelfie())
-        //                        : TuiDetailedShelfiePrinter.EMPTY,
-        //                outerRect,
-        //                TuiHAlignment.LEFT, TuiVAlignment.BOTTOM);
+        var lowerLeftPlayer = otherPlayers.size() >= 2 ? otherPlayers.get(1) : null;
+        out.printAligned(
+                lowerLeftPlayer != null
+                        ? new TuiDetailedShelfiePrinter(lowerLeftPlayer.getShelfie())
+                        : TuiDetailedShelfiePrinter.EMPTY,
+                outerRect,
+                TuiHAlignment.LEFT, TuiVAlignment.BOTTOM);
 
-        //        var upperRightPlayer = otherPlayers.size() >= 3 ? otherPlayers.get(2) : null;
-        var upperRightPlayer = !otherPlayers.isEmpty() ? otherPlayers.get(0) : null;
-        var upperRightPlayerRect = out.printAligned(
+        var upperRightPlayer = otherPlayers.size() >= 3 ? otherPlayers.get(2) : null;
+        out.printAligned(
                 upperRightPlayer != null
                         ? new TuiDetailedShelfiePrinter(upperRightPlayer.getShelfie())
                         : TuiDetailedShelfiePrinter.EMPTY,
@@ -192,7 +203,7 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
                 boardPrinter,
                 TuiRect.fromCoords(
                         thePlayerRect.row(), thePlayerRect.lastCol() + 1,
-                        terminalSize.rows(), upperRightPlayerRect.col() - 1),
+                        lowerRightPlayerRect.lastRow(), lowerRightPlayerRect.col() - 1),
                 TuiHAlignment.LEFT, TuiVAlignment.CENTER);
 
         out.cursor(0, 0);
