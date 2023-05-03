@@ -102,7 +102,18 @@ class ScoreProvider implements Provider<Integer>, Serializable {
     }
 
     private int getGroupsScore() {
-        return 0; // TODO: given the shelfie, calculate the groups and the score for each
+        int sum = 0;
+        for (int i = 0; i < player.getShelfie().groupsOfTiles().size(); i++) {
+            switch (player.getShelfie().groupsOfTiles().get(i).size()) {
+                case 0, 1, 2 -> sum += 0;
+                case 3 -> sum += 2;
+                case 4 -> sum += 3;
+                case 5 -> sum += 5;
+                case 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 -> sum += 8;
+                default -> throw new IllegalStateException("Unexpected value for groupsOfTiles");
+            }
+        }
+        return sum;
     }
 
     private int getFirstFinisherScore() {

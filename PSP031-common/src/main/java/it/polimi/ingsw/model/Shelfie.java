@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -75,6 +76,58 @@ public class Shelfie implements ShelfieView {
             }
         }
         return count;
+    }
+
+    public List<List<TileAndCoords>> groupsOfTiles() {
+        List<List<TileAndCoords>> groupsOfTiles = new ArrayList<>();
+        int[][] checked = new int[ROWS][COLUMNS];
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLUMNS; c++) {
+                if (checked[r][c] == 0 && tile(r, c).get() != null) {
+                    groupsOfTiles.add(this.groupOfTiles(r, c, checked));
+                }
+            }
+        }
+        return groupsOfTiles;
+    }
+
+    private List<TileAndCoords> groupOfTiles(int row, int col, int[][] checked) {
+        List<TileAndCoords> reachedTiles = new ArrayList<>();
+        reachedTiles.add(new TileAndCoords<>(tile(row, col), row, col));
+        checked[row][col] = 1;
+
+        int prevSize;
+        do {
+            prevSize = reachedTiles.size();
+            for (int i = 0; i < reachedTiles.size(); i++) {
+                TileAndCoords curr = reachedTiles.get(i);
+                if (curr.row() < ROWS - 1
+                        && Objects.equals(tile(curr.row() + 1, curr.col()).get(), curr.tile())
+                        && !reachedTiles.contains(new TileAndCoords(curr.tile(), curr.row() + 1, curr.col()))) {
+                    reachedTiles.add(new TileAndCoords(curr.tile(), curr.row() + 1, curr.col()));
+                    checked[curr.row() + 1][curr.col()] = 1;
+                }
+                if (curr.col() < COLUMNS - 1
+                        && Objects.equals(tile(curr.row(), curr.col() + 1).get(), curr.tile())
+                        && !reachedTiles.contains(new TileAndCoords(curr.tile(), curr.row(), curr.col() + 1))) {
+                    reachedTiles.add(new TileAndCoords(curr.tile(), curr.row(), curr.col() + 1));
+                    checked[curr.row()][curr.col() + 1] = 1;
+                }
+                if (curr.row() > 0
+                        && tile(curr.row() - 1, curr.col()) == tile(curr.row(), curr.col())
+                        && !reachedTiles.contains(new TileAndCoords(curr.tile(), curr.row() - 1, curr.col()))) {
+                    reachedTiles.add(new TileAndCoords(curr.tile(), curr.row() - 1, curr.col()));
+                    checked[curr.row() - 1][curr.col()] = 1;
+                }
+                if (curr.col() > 0
+                        && Objects.equals(tile(curr.row(), curr.col() - 1).get(), curr.tile())
+                        && !reachedTiles.contains(new TileAndCoords(curr.tile(), curr.row(), curr.col() - 1))) {
+                    reachedTiles.add(new TileAndCoords(curr.tile(), curr.row(), curr.col() - 1));
+                    checked[curr.row()][curr.col() - 1] = 1;
+                }
+            }
+        } while (reachedTiles.size() > prevSize);
+        return reachedTiles;
     }
 
     @Override
