@@ -507,7 +507,7 @@ class TuiPrintStream extends PrintStream {
             out.write(b);
 
             Translation t;
-            if (b == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1)
+            if (b == '\n' && (t = outer.translationStack.peek()) != null && t.col != -1)
                 writeEscapeCommand('G', t.col);
         }
 
@@ -521,7 +521,7 @@ class TuiPrintStream extends PrintStream {
             int lastWritten = off;
             for (int i = off; i < len; i++) {
                 Translation t;
-                if (b[i] == '\n' && (t = outer.translationStack.peekLast()) != null && t.col != -1) {
+                if (b[i] == '\n' && (t = outer.translationStack.peek()) != null && t.col != -1) {
                     // Write as far as we got
                     out.write(b, lastWritten, i - lastWritten + 1);
                     lastWritten = i + 1;
