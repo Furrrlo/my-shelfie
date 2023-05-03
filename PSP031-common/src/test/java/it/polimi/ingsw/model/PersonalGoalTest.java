@@ -24,10 +24,10 @@ class PersonalGoalTest {
         PersonalGoal p0 = new PersonalGoal(0);
         Shelfie shelfie = new Shelfie(new Color[][] {
                 //@formatter:off
-                new Color[]{Color.WHITE, null           , Color.LIGHTBLUE, Color.WHITE, Color.GREEN    },
-                new Color[]{null           , null           , null           , Color.WHITE, Color.GREEN    },
-                new Color[]{null           , Color.YELLOW, null           , null           , null           },
-                new Color[]{null           , null           , Color.PINK     , Color.WHITE, null           },
+                new Color[]{Color.WHITE    , null           , Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    },
+                new Color[]{null           , null           , null           , Color.WHITE    , Color.GREEN    },
+                new Color[]{null           , Color.YELLOW   , null           , null           , null           },
+                new Color[]{null           , null           , Color.PINK     , Color.WHITE    , null           },
                 new Color[]{null           , null           , null           , null           , Color.GREEN    },
                 new Color[]{Color.PINK     , null           , Color.BLUE     , null           , null           },
                 //@formatter:on
@@ -40,10 +40,10 @@ class PersonalGoalTest {
         PersonalGoal p0 = new PersonalGoal(0);
         Shelfie shelfie = new Shelfie(new Color[][] {
                 //@formatter:off
-                new Color[]{Color.WHITE, null           , Color.LIGHTBLUE, Color.WHITE, Color.GREEN    },
-                new Color[]{null           , null           , null           , Color.WHITE, Color.GREEN    },
+                new Color[]{Color.WHITE    , null           , Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    },
+                new Color[]{null           , null           , null           , Color.WHITE    , Color.GREEN    },
                 new Color[]{null           , null           , null           , null           , null           },
-                new Color[]{null           , null           , Color.PINK     , Color.WHITE, null           },
+                new Color[]{null           , null           , Color.PINK     , Color.WHITE    , null           },
                 new Color[]{null           , null           , null           , null           , Color.GREEN    },
                 new Color[]{Color.PINK     , null           , Color.BLUE     , null           , null           },
                 //@formatter:on
@@ -56,10 +56,10 @@ class PersonalGoalTest {
         PersonalGoal p1 = new PersonalGoal(1);
         Shelfie shelfie = new Shelfie(new Color[][] {
                 //@formatter:off
-                new Color[]{null           , null           , Color.YELLOW, null           , Color.BLUE     },
+                new Color[]{null           , null           , Color.YELLOW   , null           , Color.BLUE     },
                 new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
-                new Color[]{null           , null           , null           , null           , Color.WHITE},
-                new Color[]{Color.GREEN    , null           , Color.YELLOW, null           , null           },
+                new Color[]{null           , null           , null           , null           , Color.WHITE    },
+                new Color[]{Color.GREEN    , null           , Color.YELLOW   , null           , null           },
                 new Color[]{Color.GREEN    , Color.PINK     , null           , null           , null           },
                 new Color[]{Color.GREEN    , null           , null           , null           , null           },
                 //@formatter:on
