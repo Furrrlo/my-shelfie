@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
+
 public class TuiMain {
 
     public static void main(String[] args) {
@@ -422,7 +424,7 @@ public class TuiMain {
                 .map(c -> new TileAndCoords<>(game.getBoard().tile(c.row(), c.col()).get(), c.row(), c.col()))
                 .filter(c -> c.tile() != null)
                 .map(c -> coordToBoardDisplayString(new BoardCoord(c.row(), c.col())) + ": " +
-                        TuiColorConverter.color(c.tile().getColor(), false) + "   " + ConsoleColors.RESET)
+                        TuiColorConverter.color(c.tile().getColor(), false) + pxl + ConsoleColors.RESET)
                 .map(s -> '(' + s + ')')
                 .collect(Collectors.joining(", "));
     }

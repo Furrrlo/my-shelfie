@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
@@ -220,7 +221,7 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
                     case WHITE -> msg.append(ConsoleColors.ORANGE).append(ConsoleColors.YELLOW_BACKGROUND_BRIGHT);
                     case LIGHTBLUE -> msg.append(ConsoleColors.BLUE).append(ConsoleColors.CYAN_BACKGROUND_BRIGHT);
                 }
-                msg.append("   ").append(ConsoleColors.RESET);
+                msg.append(pxl).append(ConsoleColors.RESET);
             }
             out.println(msg);
         }
@@ -269,7 +270,7 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
                 Color color = tile.getColor();
                 if (checked[row][col] < 1) {
                     String consoleColor = TuiColorConverter.color(color, false);
-                    msg.append(consoleColor).append("   ").append(ConsoleColors.RESET);
+                    msg.append(consoleColor).append(pxl).append(ConsoleColors.RESET);
                 } else {
                     String consoleColor = TuiColorConverter.color(color, true);
                     msg.append(consoleColor)

@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
+import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
+
 class TuiShelfiePrinter implements TuiPrinter2 {
 
     public static TuiShelfiePrinter EMPTY = new TuiShelfiePrinter(new Shelfie()) {
@@ -46,7 +48,7 @@ class TuiShelfiePrinter implements TuiPrinter2 {
                 }
 
                 String consoleColor = TuiColorConverter.color(tile.getColor(), highlight.test(row, col));
-                msg.append(consoleColor).append("   ").append(ConsoleColors.RESET);
+                msg.append(consoleColor).append(pxl).append(ConsoleColors.RESET);
             }
             out.println(msg);
         }

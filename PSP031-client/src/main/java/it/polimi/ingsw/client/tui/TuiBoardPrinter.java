@@ -2,6 +2,8 @@ package it.polimi.ingsw.client.tui;
 
 import it.polimi.ingsw.model.BoardView;
 
+import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
+
 class TuiBoardPrinter implements TuiPrinter2 {
 
     private final BoardView board;
@@ -27,12 +29,12 @@ class TuiBoardPrinter implements TuiPrinter2 {
 
                 var tile = board.isValidTile(row, col) ? board.tile(row, col).get() : null;
                 if (tile == null) {
-                    msg.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append("   ").append(ConsoleColors.RESET);
+                    msg.append(ConsoleColors.BLACK_BACKGROUND_BRIGHT).append(pxl).append(ConsoleColors.RESET);
                     continue;
                 }
 
                 String consoleColor = TuiColorConverter.color(tile.getColor(), board.hasFreeSide(row, col));
-                msg.append(consoleColor).append("   ").append(ConsoleColors.RESET);
+                msg.append(consoleColor).append(pxl).append(ConsoleColors.RESET);
             }
             out.println(msg);
         }
