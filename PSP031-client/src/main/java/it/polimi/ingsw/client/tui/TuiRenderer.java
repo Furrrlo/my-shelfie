@@ -149,9 +149,8 @@ class TuiRenderer implements Closeable {
     private void inputLoop(Reader reader) {
         final var sc = new Scanner(reader);
         try {
-            do {
-                events.add(new InputEvent(sc.nextLine())); // TODO: how do we interrupt this?
-            } while (!Thread.currentThread().isInterrupted());
+            while (!Thread.currentThread().isInterrupted() && sc.hasNextLine())
+                events.add(new InputEvent(sc.nextLine()));
         } catch (Throwable t) {
             // TODO: log
             System.err.println("Uncaught exception in TuiRenderer render thread");
