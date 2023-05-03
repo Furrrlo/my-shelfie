@@ -184,6 +184,7 @@ class TuiRenderer implements Closeable {
     public void close() {
         renderThread.interrupt();
         inputThread.interrupt();
+        resizeThread.interrupt();
     }
 
     /** Request that the TUI is re-rendered sometime in the future */
