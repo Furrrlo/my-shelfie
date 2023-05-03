@@ -2,11 +2,9 @@ package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -132,26 +130,6 @@ public class Game implements GameView {
                 commonGoal.equals(game.commonGoal) &&
                 Objects.equals(firstFinisher.get(), game.firstFinisher.get()) &&
                 players.equals(game.players);
-    }
-
-    //TODO : remember to delete refillBoard from Common.Game
-    @VisibleForTesting
-    public static Board refillBoard(Board board, List<Tile> bag) {
-        Random random = new Random();
-        int temp;
-        for (int r = 0; r < BoardView.BOARD_ROWS; r++) {
-            for (int c = 0; c < BoardView.BOARD_COLUMNS && bag.size() > 0; c++) {
-                if (board.isValidTile(r, c)) {
-                    Property<@Nullable Tile> tileProp = board.tile(r, c);
-                    if (tileProp.get() == null) {
-                        temp = random.nextInt(bag.size());
-                        board.tile(r, c).set(bag.get(temp));
-                        //tileProp.set(bag.remove(temp));
-                    }
-                }
-            }
-        }
-        return board;
     }
 
     @Override
