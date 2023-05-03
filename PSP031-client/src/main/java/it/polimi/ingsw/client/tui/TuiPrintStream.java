@@ -126,14 +126,36 @@ class TuiPrintStream extends PrintStream {
     }
 
     public TuiCoords getCursorPos() {
-        if (WindowsDetection.IS_WINDOWS) {
-            final long console = GetStdHandle(STD_OUTPUT_HANDLE);
-            Kernel32.CONSOLE_SCREEN_BUFFER_INFO info = new Kernel32.CONSOLE_SCREEN_BUFFER_INFO();
-            GetConsoleScreenBufferInfo(console, info);
-            return new TuiCoords(info.cursorPosition.y, info.cursorPosition.x);
-        }
+        // TODO: works on windows, but can't rely on it cause it's not implemented for *nix
+        if (true)
+            return new TuiCoords(0, 0);
 
-        return new TuiCoords(0, 0); // TODO:
+        var innerOut = getInnerOut();
+        final AnsiType type = innerOut instanceof AnsiOutputStream ansiOut
+                ? ansiOut.getType()
+                : innerOut instanceof AnsiPrintStream ansiPrint
+                        ? ansiPrint.getType()
+                        : null;
+        return type == null ? new TuiCoords(0, 0) : switch (type) {
+            case Unsupported, Redirected -> new TuiCoords(0, 0);
+            case Emulation, VirtualTerminal -> {
+                final long console = GetStdHandle(STD_OUTPUT_HANDLE);
+                Kernel32.CONSOLE_SCREEN_BUFFER_INFO info = new Kernel32.CONSOLE_SCREEN_BUFFER_INFO();
+                GetConsoleScreenBufferInfo(console, info);
+                yield new TuiCoords(info.cursorPosition.y, info.cursorPosition.x);
+            }
+            case Native -> {
+                // IS_CONEMU || IS_CYGWIN || IS_MSYSTEM
+                if (WindowsDetection.IS_WINDOWS) {
+                    final long console = GetStdHandle(STD_OUTPUT_HANDLE);
+                    Kernel32.CONSOLE_SCREEN_BUFFER_INFO info = new Kernel32.CONSOLE_SCREEN_BUFFER_INFO();
+                    GetConsoleScreenBufferInfo(console, info);
+                    yield new TuiCoords(info.cursorPosition.y, info.cursorPosition.x);
+                }
+
+                yield new TuiCoords(0, 0);
+            }
+        };
     }
 
     public int getTerminalCols() {
