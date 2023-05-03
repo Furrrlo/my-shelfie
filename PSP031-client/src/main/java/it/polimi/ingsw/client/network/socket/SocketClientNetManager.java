@@ -7,6 +7,8 @@ import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.socket.packets.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,6 +19,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class SocketClientNetManager implements ClientNetManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocketClientNetManager.class);
+
     private final ExecutorService threadPool;
     private final InetSocketAddress serverAddress;
 
@@ -75,7 +80,7 @@ public class SocketClientNetManager implements ClientNetManager {
                     ? new ClientSocketManagerImpl(socket)
                     : new ClientSocketManagerImpl(socket, defaultResponseTimeout, defaultResponseTimeoutUnit);
             socketManager.setNick(nick);
-            System.out.println("Connected to : " + serverAddress);
+            LOGGER.info("Connected to : " + serverAddress);
         }
 
         try (var lobbyCtx = socketManager.send(new JoinGamePacket(nick), JoinResponsePacket.class)) {
@@ -92,24 +97,22 @@ public class SocketClientNetManager implements ClientNetManager {
                                 if (ex == null)
                                     return __;
                                 // TODO: reconnect
-                                // TODO: logging
-                                System.err.println("Uncaught exception in SocketClientHeartbeatHandler");
-                                ex.printStackTrace();
+                                LOGGER.error("Uncaught exception in SocketClientHeartbeatHandler", ex);
                                 return null;
                             });
                     CompletableFuture.supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
                             .thenAccept(clientUpdater -> {
-                                System.out.println("[Client][" + nick + "] shutting down lobby updater...");
-                                if (clientUpdater != null)
+                                LOGGER.info("[Client] [" + nick + "] shut down lobby updater");
+
+                                if (clientUpdater != null) {
                                     clientUpdater.run();
-                                System.out.println("[Client][" + nick + "] shutting down game updater...");
+                                    LOGGER.info("[Client] [" + nick + "] shut down game updater");
+                                }
                             }).handle((__, ex) -> {
                                 if (ex == null)
                                     return __;
                                 // TODO: reconnect
-                                // TODO: logging
-                                System.err.println("Uncaught exception in SocketClient*Updater");
-                                ex.printStackTrace();
+                                LOGGER.error("Uncaught exception in SocketClient*Updater", ex);
                                 return null;
                             });
                     lobbyCtx.reply(new LobbyReceivedPacket());

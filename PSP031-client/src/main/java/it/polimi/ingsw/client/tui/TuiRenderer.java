@@ -1,6 +1,8 @@
 package it.polimi.ingsw.client.tui;
 
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.Reader;
@@ -15,6 +17,7 @@ import java.util.stream.IntStream;
 
 class TuiRenderer implements Closeable {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TuiRenderer.class);
     private static final int RESIZE_PER_SECOND = 30;
 
     private final BlockingQueue<Event> events = new LinkedBlockingQueue<>();
@@ -140,9 +143,7 @@ class TuiRenderer implements Closeable {
         } catch (InterruptedException ex) {
             // We got closed
         } catch (Throwable t) {
-            // TODO: log
-            System.err.println("Uncaught exception in TuiRenderer render thread");
-            t.printStackTrace();
+            LOGGER.error("Uncaught exception in TuiRenderer render thread", t);
         }
     }
 
@@ -152,9 +153,7 @@ class TuiRenderer implements Closeable {
             while (!Thread.currentThread().isInterrupted() && sc.hasNextLine())
                 events.add(new InputEvent(sc.nextLine()));
         } catch (Throwable t) {
-            // TODO: log
-            System.err.println("Uncaught exception in TuiRenderer render thread");
-            t.printStackTrace();
+            LOGGER.error("Uncaught exception in TuiRenderer render thread", t);
         }
     }
 
@@ -173,9 +172,7 @@ class TuiRenderer implements Closeable {
         } catch (InterruptedException t) {
             // Thread got stopped, normal control flow
         } catch (Throwable t) {
-            // TODO: log
-            System.err.println("Uncaught exception in TuiRenderer resize thread");
-            t.printStackTrace();
+            LOGGER.error("Uncaught exception in TuiRenderer resize thread", t);
         }
     }
 

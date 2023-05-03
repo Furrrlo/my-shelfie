@@ -8,6 +8,8 @@ import it.polimi.ingsw.server.model.*;
 import it.polimi.ingsw.updater.LobbyUpdaterFactory;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.util.Random;
@@ -23,6 +25,8 @@ import static it.polimi.ingsw.updater.UpdatersIntegrationTest.ensurePropertyUpda
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DisconnectionIntegrationTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DisconnectionIntegrationTest.class);
 
     public static void doTestDisconnection_clientCloseInEmptyLobby(Function<ServerController, Closeable> bindServerController,
                                                                    Supplier<ClientNetManager> clientNetManagerFactory,
@@ -51,7 +55,7 @@ public class DisconnectionIntegrationTest {
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException, NickNotValidException {
-                System.out.println("joining");
+                LOGGER.trace("joining");
                 var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
                         lobbyControllerFactory,
                         gameControllerFactory);

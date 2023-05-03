@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="console"
+                 target="SYSTEM_OUT">
+            <PatternLayout>
+                <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} [%t] - %msg %ex%n</Pattern>
+            </PatternLayout>
+        </Console>
+        <RollingRandomAccessFile name="file"
+                                 fileName="./logs/latest.log"
+                                 filePattern="./logs/%d{yyyy-MM-dd}/logs.%d{yyyy-MM-dd}.%i.log.gz"
+                                 immediateFlush="true"
+                                 append="true">
+            <PatternLayout>
+                <Pattern>%d %-5level %logger{1.} [%t] - %msg %ex%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="it.polimi.ingsw"
+                additivity="false"
+                level="trace">
+            <AppenderRef ref="console" level="info"/>
+            <AppenderRef ref="file" level="trace"/>
+        </Logger>
+
+        <Root level="warn">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="file"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -3,12 +3,16 @@ package it.polimi.ingsw.client.network.socket;
 import it.polimi.ingsw.client.updater.GameClientUpdater;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.socket.packets.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 
 public class SocketGameClientUpdater extends GameClientUpdater implements Runnable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocketGameClientUpdater.class);
 
     private final ClientSocketManager socketManager;
 
@@ -19,7 +23,7 @@ public class SocketGameClientUpdater extends GameClientUpdater implements Runnab
 
     @Override
     public void run() {
-        System.out.println("[Client] Game Updater started");
+        LOGGER.info("[Client] Game Updater started");
         try {
             do {
                 try (var ctx = socketManager.receive(GameUpdaterPacket.class)) {

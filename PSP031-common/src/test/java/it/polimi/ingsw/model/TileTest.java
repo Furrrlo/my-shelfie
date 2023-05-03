@@ -20,7 +20,6 @@ class TileTest {
         Tile t1 = new Tile(Color.BLUE);
         Tile t2 = new Tile(Color.BLUE);
         assertEquals(t1, t2);
-        System.out.println("[T1]: " + t1.getPicIndex() + " ,[T2]: " + t2.getPicIndex());
     }
 
     @Test

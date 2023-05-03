@@ -2,6 +2,8 @@ package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.model.Provider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -11,6 +13,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 public abstract class BaseServerConnection implements PlayerObservableTracker, Closeable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseServerConnection.class);
 
     protected final ServerController controller;
     private final ConcurrentMap<Provider<?>, Set<Consumer<?>>> observablesToObservers = new ConcurrentHashMap<>();
@@ -23,8 +27,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     }
 
     public void disconnectPlayer(Throwable cause) {
-        System.err.println("Disconnecting " + nick);
-        cause.printStackTrace();
+        LOGGER.error("Disconnecting {}", nick, cause);
         controller.runOnLocks(nick, () -> {
             unregisterObservers();
             controller.onDisconnectPlayer(nick, cause);
@@ -33,9 +36,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
         try {
             close();
         } catch (IOException e) {
-            // TODO: log
-            System.err.println("Failed to disconnect player " + nick);
-            e.printStackTrace();
+            LOGGER.error("Failed to disconnect player {}", nick, e);
         }
     }
 

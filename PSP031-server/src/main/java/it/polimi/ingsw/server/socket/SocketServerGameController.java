@@ -5,6 +5,8 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.socket.packets.MakeMovePacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -12,6 +14,9 @@ import java.io.UncheckedIOException;
 import java.util.List;
 
 public class SocketServerGameController implements GameController, Runnable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocketServerGameController.class);
+
     private final ServerSocketManager socketManager;
     private final ServerPlayer player;
     private final GameServerController controller;
@@ -26,7 +31,7 @@ public class SocketServerGameController implements GameController, Runnable {
 
     @Override
     public void run() {
-        System.out.println("[Server] Strated game controller");
+        LOGGER.info("[Server] Started game controller");
         try {
             do {
                 try (var ctx = socketManager.receive(MakeMovePacket.class)) {

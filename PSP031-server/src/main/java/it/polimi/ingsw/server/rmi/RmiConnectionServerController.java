@@ -7,6 +7,8 @@ import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RmiConnectionServerController implements RmiConnectionController, Closeable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmiConnectionServerController.class);
 
     private final ServerController controller;
     private final Registry registry;
@@ -106,9 +110,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
             try {
                 connection.close();
             } catch (IOException ex) {
-                // ??
-                System.err.println("Failed to close player");
-                ex.printStackTrace();
+                LOGGER.error("Failed to close player", ex);
             }
             throw e;
         }
@@ -120,9 +122,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
             try {
                 connection.close();
             } catch (IOException ex) {
-                // TODO: log
-                System.err.println("Failed to close player RMI objects");
-                ex.printStackTrace();
+                LOGGER.error("Failed to close player RMI objects", ex);
             }
         }
 

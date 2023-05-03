@@ -1,5 +1,7 @@
 # Ignore game assets
 assets/*
+# Ignore logs
+**/logs/*
 
 ### Maven stuff ###
 target/

@@ -3,6 +3,8 @@ package it.polimi.ingsw.server.controller;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.model.*;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +14,8 @@ import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
 public class LobbyServerController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LobbyServerController.class);
 
     private static final List<Tile> BAG = List.of(
             new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0),
@@ -76,7 +80,7 @@ public class LobbyServerController {
                 lobby.joinedPlayers().update(lobbyPlayers -> {
                     List<LobbyPlayer> newP = new ArrayList<>(lobbyPlayers);
                     newP.remove(lobbyPlayer);
-                    System.out.println("[Server] Removed " + nick);
+                    LOGGER.info("[Server] Removed {}", nick);
                     return Collections.unmodifiableList(newP);
                 });
             }
@@ -142,7 +146,7 @@ public class LobbyServerController {
     public static ServerGame createGame(int gameId,
                                         RandomGenerator random,
                                         List<LobbyPlayer> lobbyPlayers) {
-        System.out.println("game started");
+        LOGGER.info("game started");
 
         final var remainingCommonGoalTypes = new ArrayList<Type>();
         Collections.addAll(remainingCommonGoalTypes, Type.values());

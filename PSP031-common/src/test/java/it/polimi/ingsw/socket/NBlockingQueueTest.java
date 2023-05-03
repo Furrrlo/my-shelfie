@@ -1,6 +1,8 @@
 package it.polimi.ingsw.socket;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -9,6 +11,8 @@ import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NBlockingQueueTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NBlockingQueueTest.class);
 
     @Test
     void testAddSingleThreaded() throws ExecutionException, InterruptedException, TimeoutException {
@@ -122,7 +126,7 @@ class NBlockingQueueTest {
             Thread.sleep(2000);
 
             // Supply the last and see if the mechanism works
-            System.out.println(queue.getQueueDebugState());
+            LOGGER.trace(queue.getQueueDebugState());
             queue.add(toSupply.get(threadNum - 1));
             assertEquals(
                     toSupply.get(threadNum - 1),

@@ -1,5 +1,8 @@
 package it.polimi.ingsw.rmi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
@@ -13,6 +16,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Serializable {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RMITimeoutClientSocketFactory.class);
+
     protected final long connectTimeoutMillis;
 
     public RMITimeoutClientSocketFactory(long connectTimeout, TimeUnit connectTimeoutUnit) {
@@ -21,7 +26,7 @@ public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Se
 
     @Override
     public Socket createSocket(String host, int port) throws IOException {
-        System.out.println("Creating new socket for RMI. Remote IP " + host + ":" + port);
+        LOGGER.trace("Creating new socket for RMI. Remote IP {}:{}", host, port);
         Socket s = doCreateNonConnectedSocket();
         s.connect(new InetSocketAddress(host, port), (int) connectTimeoutMillis);
         return s;

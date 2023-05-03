@@ -12,6 +12,8 @@ import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
 import it.polimi.ingsw.model.TileAndCoords;
 import org.jetbrains.annotations.Unmodifiable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
@@ -28,14 +30,23 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
 public class TuiMain {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TuiMain.class);
+
     public static void main(String[] args) {
         //If the client has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
         //@see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
         //System.setProperty("java.rmi.server.hostname", "<client address>");
+
+        // Configure log4j file if none is already set
+        if (System.getProperty("log4j.configurationFile") == null)
+            System.setProperty("log4j.configurationFile", "log4j2-tui.xml");
+
+        // Make System.in interruptible
         System.setIn(InterruptibleInputStream.wrap(System.in, Thread.ofPlatform()
                 .name("stdin-read-th")
                 .factory()));
+
         new TuiRenderer(
                 TuiPrintStream.installToStdOut(),
                 System.console() != null
@@ -128,8 +139,7 @@ public class TuiMain {
                     } catch (NickNotValidException e) {
                         return ctx.invalid(Objects.requireNonNull(e.getMessage()));
                     } catch (Exception ex) {
-                        // TODO: logging
-                        ex.printStackTrace();
+                        LOGGER.error("Failed to connect to the server", ex);
                         return ctx.invalid("Failed to connect to the server");
                     }
                 });

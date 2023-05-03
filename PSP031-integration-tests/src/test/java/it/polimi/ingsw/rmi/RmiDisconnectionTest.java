@@ -10,6 +10,8 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.ObjectStreamException;
@@ -28,6 +30,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class RmiDisconnectionTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmiDisconnectionTest.class);
 
     static Stream<Arguments> socketSource() {
         return Stream.of(
@@ -49,7 +53,8 @@ public class RmiDisconnectionTest {
                                                       ThrowingConsumer<Socket> cleanup)
             throws Throwable {
         final String testName = "testRmiDisconnection_clientCloseInEmptyLobby_" + name + "_" + System.currentTimeMillis();
-        System.out.println(testName);
+        LOGGER.trace(testName);
+
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
         final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
@@ -82,7 +87,8 @@ public class RmiDisconnectionTest {
                                                  ThrowingConsumer<Socket> cleanup)
             throws Throwable {
         final String testName = "testRmiDisconnection_clientCloseInLobby_" + name + "_" + System.currentTimeMillis();
-        System.out.println(testName);
+        LOGGER.trace(testName);
+
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
         final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
@@ -121,7 +127,8 @@ public class RmiDisconnectionTest {
                                                 ThrowingConsumer<Socket> cleanup)
             throws Throwable {
         final String testName = "testRmiDisconnection_clientCloseInGame_" + name + "_" + System.currentTimeMillis();
-        System.out.println(testName);
+        LOGGER.trace(testName);
+
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
         final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
@@ -176,19 +183,19 @@ public class RmiDisconnectionTest {
 
         @Serial
         private Object readResolve() throws ObjectStreamException {
-            System.out.println("Deserialized DisconnectingSocketFactory " + testName);
-            System.out.println(INSTANCES);
+            LOGGER.trace("Deserialized DisconnectingSocketFactory {}", testName);
+            LOGGER.trace("{}", INSTANCES);
             return Objects.requireNonNull(INSTANCES.get(testName));
         }
 
         @Override
         public Socket createSocket(String host, int port) throws IOException {
             Socket socket = super.createSocket(host, port);
-            System.out.println(socket.getClass());
+            LOGGER.trace("{}", socket.getClass());
             sockets.add(socket);
             if (closed.get()) {
                 socket.close();
-                System.out.println("Returning closed socket");
+                LOGGER.trace("Returning closed socket");
             }
             return socket;
         }
@@ -199,7 +206,7 @@ public class RmiDisconnectionTest {
         }
 
         public void close() {
-            System.out.println("Closing all sockets");
+            LOGGER.trace("Closing all sockets");
             closed.set(true);
             sockets.forEach(s -> {
                 try {

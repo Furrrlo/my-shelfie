@@ -31,7 +31,7 @@ mvn compile -Prun-server
 Execute the package lifecycle:
 
 ```shell
-mvn package
+mvn clean package
 ```
 
 The built jars can be found in `PSP031-client/target` and `PSP031-server/target`.
@@ -41,7 +41,7 @@ To run the client:
 java --enable-preview -jar PSP031-client-1.0-SNAPSHOT.jar
 ```
 
-To run the server (it requires preview features):
+To run the server:
 
 ```shell
 java --enable-preview -jar PSP031-server-1.0-SNAPSHOT.jar

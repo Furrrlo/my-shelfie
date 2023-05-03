@@ -5,6 +5,8 @@ import it.polimi.ingsw.socket.packets.Packet;
 import it.polimi.ingsw.utils.ThreadPools;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
@@ -17,6 +19,7 @@ import java.util.function.Predicate;
 public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ AckPacket, ACK_OUT extends /* Packet & */ AckPacket, OUT extends Packet>
         implements SocketManager<IN, ACK_IN, ACK_OUT, OUT> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocketManagerImpl.class);
     @VisibleForTesting
     static final String CLOSE_EX_MSG = "Socket was closed";
 
@@ -119,8 +122,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 try {
                     p = (SeqPacket) ois.readObject();
                 } catch (ClassNotFoundException | ClassCastException ex) {
-                    log("Received unexpected input packet");
-                    ex.printStackTrace();
+                    LOGGER.error("[{}][{}] Received unexpected input packet", name, nick, ex);
                     continue;
                 }
 
@@ -138,8 +140,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 return;
             }
 
-            log("Failed to read packet, closing...");
-            e.printStackTrace();
+            LOGGER.error("[{}][{}] Failed to read packet, closing...", name, nick, e);
             try {
                 close();
             } catch (IOException ignored) {
@@ -170,8 +171,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             if (Thread.currentThread().isInterrupted())
                 return;
 
-            log("Failed to write packet, closing...");
-            e.printStackTrace();
+            LOGGER.error("[{}][{}] Failed to write packet, closing...", name, nick, e);
             try {
                 close();
             } catch (IOException ignored) {
@@ -295,7 +295,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     }
 
     private void log(String s) {
-        System.out.println("[" + name + "][" + nick + "] " + s);
+        LOGGER.trace("[{}][{}] {}", name, nick, s);
     }
 
     private class PacketReplyContextImpl<T extends Packet> implements PacketReplyContext<ACK_IN, ACK_OUT, T> {

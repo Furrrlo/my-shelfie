@@ -1,5 +1,8 @@
 package it.polimi.ingsw;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -8,6 +11,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class ImproperShutdownSocket extends Socket {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImproperShutdownSocket.class);
 
     private final Semaphore readSemaphore = new Semaphore(Integer.MAX_VALUE);
     private volatile boolean discardOutput;
@@ -24,17 +29,17 @@ public class ImproperShutdownSocket extends Socket {
 
     @Override
     public synchronized void close() {
-        System.out.println("closing...");
+        LOGGER.trace("closing...");
         if (discardOutput) //Already closed
             return;
         readSemaphore.drainPermits();
-        System.out.println("locked");
+        LOGGER.trace("locked");
         discardOutput = true;
     }
 
     public synchronized void actuallyClose() throws IOException {
         super.close();
-        System.out.println("Actually closed");
+        LOGGER.trace("Actually closed");
     }
 
     private class BlockableInputStream extends FilterInputStream {

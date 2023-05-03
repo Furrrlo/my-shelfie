@@ -12,6 +12,8 @@ import it.polimi.ingsw.updater.LobbyUpdater;
 import it.polimi.ingsw.updater.LobbyUpdaterFactory;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.time.Clock;
@@ -26,6 +28,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ServerController implements Closeable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerController.class);
 
     private final Clock clock;
     private final ScheduledExecutorService heartbeatExecutor;
@@ -252,7 +256,7 @@ public class ServerController implements Closeable {
                             return Collections.unmodifiableList(newList);
                         });
                     } else {
-                        System.out.println("[Server] " + nick + " is re-joining previous game...");
+                        LOGGER.info("[Server] {} is re-joining previous game...", nick);
                         serverLobbyAndController.controller().onReconnectedPlayer(nick);
                     }
 

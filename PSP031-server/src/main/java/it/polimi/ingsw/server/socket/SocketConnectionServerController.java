@@ -9,6 +9,8 @@ import it.polimi.ingsw.socket.packets.*;
 import it.polimi.ingsw.utils.ThreadPools;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -22,6 +24,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SocketConnectionServerController implements Closeable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocketConnectionServerController.class);
 
     private final ServerController controller;
     private final ExecutorService threadPool;
@@ -83,7 +87,7 @@ public class SocketConnectionServerController implements Closeable {
                 final Socket socket = socketServer.accept();
                 if (readTimeout != -1)
                     socket.setSoTimeout((int) readTimeoutUnit.toMillis(readTimeout));
-                System.out.println("[Server] New client connected: " + socket.getRemoteSocketAddress());
+                LOGGER.info("[Server] New socket client connected: {}", socket.getRemoteSocketAddress());
                 threadPool.submit(ThreadPools.giveNameToTask(n -> n + "[doJoin]", () -> {
                     try {
                         doJoin(responseTimeout == -1
@@ -107,9 +111,7 @@ public class SocketConnectionServerController implements Closeable {
             try {
                 c.close();
             } catch (IOException ex) {
-                // TODO: log
-                System.err.println("Failed to close player socket");
-                ex.printStackTrace();
+                LOGGER.error("Failed to close player socket", ex);
             }
         }
 
@@ -121,7 +123,7 @@ public class SocketConnectionServerController implements Closeable {
     private void doJoin(ServerSocketManager socketManager) throws IOException {
         final var joinCtx = socketManager.receive(JoinGamePacket.class);
         final var nick = joinCtx.getPacket().nick();
-        System.out.println("[Server] " + nick + " is joining...");
+        LOGGER.info("[Server] {} is joining...", nick);
         socketManager.setNick(nick);
 
         final var connection = new PlayerConnection(controller, socketManager, nick);

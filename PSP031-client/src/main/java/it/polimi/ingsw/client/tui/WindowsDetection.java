@@ -2,6 +2,8 @@ package it.polimi.ingsw.client.tui;
 
 import org.fusesource.jansi.AnsiColors;
 import org.fusesource.jansi.WindowsSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.channels.InterruptedByTimeoutException;
@@ -15,6 +17,8 @@ import static org.fusesource.jansi.internal.Kernel32.*;
 
 @SuppressWarnings("SameParameterValue")
 class WindowsDetection {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WindowsDetection.class);
 
     public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
     public static final AnsiColors OUT_SUPPORTED_COLORS;
@@ -79,9 +83,7 @@ class WindowsDetection {
                 return AnsiColors.Colors256;
             return AnsiColors.Colors16;
         } catch (IOException ex) {
-            // TODO: logging
-            System.err.println("Unexpected exception while trying to detect supported colors");
-            ex.printStackTrace();
+            LOGGER.error("Unexpected exception while trying to detect supported colors", ex);
             return AnsiColors.Colors16;
         } finally {
             // Disable Virtual Terminal
@@ -120,15 +122,13 @@ class WindowsDetection {
             if (response.equals(color) || response.equals("0;" + color))
                 return true;
 
-            System.err.println("Read back incorrect color " + response);
+            LOGGER.error("Read back incorrect color {}", response);
             return false;
         } catch (UnsupportedOperationException | TimeoutException e) {
             // Reset color
             out.print(CSI + "0m");
             out.flush();
-            // TODO: logging
-            System.err.println("Failed to read back color");
-            System.err.println(e.getMessage());
+            LOGGER.error("Failed to read back color", e);
             return false;
         }
     }
