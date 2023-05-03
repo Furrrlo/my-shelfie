@@ -443,25 +443,28 @@ class TuiPrintStream extends PrintStream {
     }
 
     public TuiRect printAligned(TuiPrinter2 printer, TuiRect rect, TuiHAlignment hAlign, TuiVAlignment vAlign) {
-        final var size = printer.getSize();
-        final var drawnRect = new TuiRect(
-                rect.row() + switch (vAlign) {
-                    case TOP -> 0;
-                    case BOTTOM -> rect.size().rows() - size.rows();
-                    case CENTER -> rect.size().rows() / 2 - size.rows() / 2;
-                },
-                rect.col() + switch (hAlign) {
-                    case LEADING, LEFT -> 0;
-                    case TRAILING, RIGHT -> rect.size().cols() - size.cols();
-                    case CENTER -> rect.size().cols() / 2 - size.cols() / 2;
-                },
-                size);
+        final var drawnRect = getAlignedRect(printer.getSize(), rect, hAlign, vAlign);
 
         cursor(0, 0);
         try (var ignored = translateCursor(drawnRect.row(), drawnRect.col())) {
             printer.print(this);
             return drawnRect;
         }
+    }
+
+    public TuiRect getAlignedRect(TuiSize sizeToPrint, TuiRect rect, TuiHAlignment hAlign, TuiVAlignment vAlign) {
+        return new TuiRect(
+                rect.row() + switch (vAlign) {
+                    case TOP -> 0;
+                    case BOTTOM -> rect.size().rows() - sizeToPrint.rows();
+                    case CENTER -> rect.size().rows() / 2 - sizeToPrint.rows() / 2;
+                },
+                rect.col() + switch (hAlign) {
+                    case LEADING, LEFT -> 0;
+                    case TRAILING, RIGHT -> rect.size().cols() - sizeToPrint.cols();
+                    case CENTER -> rect.size().cols() / 2 - sizeToPrint.cols() / 2;
+                },
+                sizeToPrint);
     }
 
     public TuiRect printAligned(TuiPrinter2 printer, TuiSize rectSize, TuiHAlignment hAlign, TuiVAlignment vAlign) {
