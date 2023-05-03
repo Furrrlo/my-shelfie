@@ -57,12 +57,24 @@ public class Shelfie implements ShelfieView {
     public boolean isOverlapping(Shelfie that) {
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLUMNS; c++) {
-                if (this.shelfie[r][c].get() != null &&
-                        !Objects.equals(this.shelfie[r][c].get(), that.shelfie[r][c].get()))
+                if (this.tile(r, c).get() != null &&
+                        !Objects.equals(this.tile(r, c).get(), that.tile(r, c).get()))
                     return false;
             }
         }
         return true;
+    }
+
+    public int numTilesOverlappingWithPersonalGoal(PersonalGoal personalGoal) {
+        int count = 0;
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLUMNS; col++) {
+                if (personalGoal.get(row, col) != null && this.tile(row, col).get() != null &&
+                        Objects.equals(personalGoal.get(row, col), tile(row, col).get()))
+                    count++;
+            }
+        }
+        return count;
     }
 
     @Override

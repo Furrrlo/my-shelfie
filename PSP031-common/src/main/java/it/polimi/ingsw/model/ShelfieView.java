@@ -10,6 +10,7 @@ public interface ShelfieView extends Serializable {
     int ROWS = 6;
     int COLUMNS = 5;
 
+    //TODO : finish organizing ShelfieView and javadocs for public methods
     /**
      * Returns the tile in position r & c
      * 
