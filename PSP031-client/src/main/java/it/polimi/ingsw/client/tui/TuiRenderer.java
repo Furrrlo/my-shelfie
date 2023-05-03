@@ -17,6 +17,8 @@ import java.util.stream.IntStream;
 
 class TuiRenderer implements Closeable {
 
+    private static final int RESIZE_PER_SECOND = 30;
+
     private final BlockingQueue<Event> events = new LinkedBlockingQueue<>();
 
     private final Deque<Prompt> promptStack;
@@ -24,11 +26,12 @@ class TuiRenderer implements Closeable {
 
     private final Thread renderThread;
     private final Thread inputThread;
+    private final Thread resizeThread;
 
     /**
      * Creates a new TUI renderer which uses the given streams to perform
      * IO operations.
-     * 
+     *
      * @param outputStream stream to print to
      * @param inputReader stream to read user input from
      * @param initialPrompt initial prompt to ask the user
@@ -41,7 +44,11 @@ class TuiRenderer implements Closeable {
         this.promptStack = new ArrayDeque<>(List.of(initialPrompt));
         this.scene = scene;
 
-        this.renderThread = new Thread(() -> renderLoop(outputStream));
+        final TuiPrintStream out = new TuiPrintStream(outputStream, System.console() != null
+                ? System.console().charset()
+                : Charset.defaultCharset());
+
+        this.renderThread = new Thread(() -> renderLoop(out));
         this.renderThread.setName(this + "-render-thread");
         this.renderThread.start();
 
@@ -49,13 +56,14 @@ class TuiRenderer implements Closeable {
         this.inputThread.setName(this + "-input-thread");
         this.inputThread.start();
 
+        this.resizeThread = new Thread(() -> resizeLoop(out));
+        this.resizeThread.setName(this + "-input-thread");
+        this.resizeThread.start();
+
         rerender();
     }
 
-    private void renderLoop(OutputStream os) {
-        final TuiPrintStream out = new TuiPrintStream(os, System.console() != null
-                ? System.console().charset()
-                : Charset.defaultCharset());
+    private void renderLoop(TuiPrintStream out) {
         try {
             do {
                 Event evt = events.take();
@@ -153,6 +161,27 @@ class TuiRenderer implements Closeable {
         } catch (Throwable t) {
             // TODO: log
             System.err.println("Uncaught exception in TuiRenderer render thread");
+            t.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("BusyWait") // Done on purpose
+    private void resizeLoop(TuiPrintStream out) {
+        try {
+            var timeoutMillis = 1000 / RESIZE_PER_SECOND;
+            var oldSize = out.getTerminalSize();
+            while (!Thread.currentThread().isInterrupted()) {
+                var size = out.getTerminalSize();
+                if (!oldSize.equals(size))
+                    rerender();
+                oldSize = size;
+                Thread.sleep(timeoutMillis);
+            }
+        } catch (InterruptedException t) {
+            // Thread got stopped, normal control flow
+        } catch (Throwable t) {
+            // TODO: log
+            System.err.println("Uncaught exception in TuiRenderer resize thread");
             t.printStackTrace();
         }
     }
