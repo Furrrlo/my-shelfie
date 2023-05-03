@@ -47,34 +47,36 @@ class TuiPrinterTest {
             new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2),
             new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 0));
 
+    static TuiPrintStream out = TuiPrintStream.installToStdOut();
+
     @Test
     void PrintTileGreen() {
-        TuiPrinter.tuiPrintTile(Color.GREEN);
+        TuiDetailedTilePrinter.of(Color.GREEN).print(out);
     }
 
     @Test
     void PrintTilePink() {
-        TuiPrinter.tuiPrintTile(Color.PINK);
+        TuiDetailedTilePrinter.of(Color.PINK).print(out);
     }
 
     @Test
     void PrintTileWhite() {
-        TuiPrinter.tuiPrintTile(Color.WHITE);
+        TuiDetailedTilePrinter.of(Color.WHITE).print(out);
     }
 
     @Test
     void PrintTileLightBlue() {
-        TuiPrinter.tuiPrintTile(Color.LIGHTBLUE);
+        TuiDetailedTilePrinter.of(Color.LIGHTBLUE).print(out);
     }
 
     @Test
     void PrintTileYellow() {
-        TuiPrinter.tuiPrintTile(Color.YELLOW);
+        TuiDetailedTilePrinter.of(Color.YELLOW).print(out);
     }
 
     @Test
     void PrintTileBlue() {
-        TuiPrinter.tuiPrintTile(Color.BLUE);
+        TuiDetailedTilePrinter.of(Color.BLUE).print(out);
     }
 
     @Test
@@ -89,7 +91,7 @@ class TuiPrinterTest {
                 new Color[] { Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.BLUE     , Color.BLUE      },
                 //@formatter:on
         });
-        TuiPrinter.tuiPrintShelfie(System.out, shelfie);
+        new TuiShelfiePrinter(shelfie).print(out);
     }
 
     @Test
@@ -104,9 +106,7 @@ class TuiPrinterTest {
                 new Color[] { Color.YELLOW   , Color.YELLOW   , Color.PINK     , Color.GREEN    , Color.PINK      },
                 //@formatter:on
         });
-        TuiPrinter.tuiPrintShelfie(System.out, shelfie);
-        System.out.println("\n");
-        TuiPrinter.tuiPrintShelfieAndPersonalGoal(System.out, shelfie, new PersonalGoal(1));
+        new TuiDetailedShelfiePrinter(shelfie).print(out);
     }
 
     @Test
@@ -121,25 +121,25 @@ class TuiPrinterTest {
                 new Color[] { null           , null           , null           , null           , null            },
                 //@formatter:on
         });
-        //TuiPrinter.tuiPrintShelfie(shelfie);
-        TuiPrinter.tuiPrintPersonalGoal(System.out, new PersonalGoal(1));
-        System.out.println("\n");
-        TuiPrinter.tuiPrintShelfieAndPersonalGoal(System.out, shelfie, new PersonalGoal(1));
+        new TuiDetailedShelfiePrinter(shelfie).print(out);
+        out.println();
+        new TuiDetailedPersonalGoalPrinter(new PersonalGoal(1)).print(out);
     }
 
     @Test
     void tuiPrintEmptyBoard() {
-
-        TuiPrinter.tuiPrintBoard(System.out, new Board(4));
+        new TuiDetailedBoardPrinter(new Board(4)).print(out);
     }
 
     @Test
     void tuiPrintBoardRandom() {
-        TuiPrinter.tuiPrintBoard(System.out, Game.refillBoard(new Board(4), BAG));
+        try (var ignored = out.translateCursorToCol(20)) {
+            new TuiDetailedBoardPrinter(Game.refillBoard(new Board(4), BAG)).print(out);
+        }
     }
 
     @Test
     void printPersonalGoalRandom() {
-        TuiPrinter.tuiPrintPersonalGoal(System.out, new PersonalGoal(1));
+        new TuiDetailedPersonalGoalPrinter(new PersonalGoal(1)).print(out);
     }
 }

@@ -27,6 +27,8 @@ class TuiPrintStream extends PrintStream {
     private static final int DEFAULT_TERMINAL_WIDTH = 80;
     private static final int DEFAULT_TERMINAL_HEIGHT = 24;
 
+    public static final String pxl = "   ";
+
     public static final int BOX_TOP = 0x1;
     public static final int BOX_BOTTOM = 0x10;
     public static final int BOX_LEFT = 0x100;
@@ -124,6 +126,13 @@ class TuiPrintStream extends PrintStream {
     }
 
     public TuiCoords getCursorPos() {
+        if (WindowsDetection.IS_WINDOWS) {
+            final long console = GetStdHandle(STD_OUTPUT_HANDLE);
+            Kernel32.CONSOLE_SCREEN_BUFFER_INFO info = new Kernel32.CONSOLE_SCREEN_BUFFER_INFO();
+            GetConsoleScreenBufferInfo(console, info);
+            return new TuiCoords(info.cursorPosition.y, info.cursorPosition.x);
+        }
+
         return new TuiCoords(0, 0); // TODO:
     }
 
