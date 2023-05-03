@@ -231,7 +231,6 @@ public class ServerController implements Closeable {
                     observableTracker.registerObserver(serverLobby.game(), game -> {
                         if (game != null) {
                             try (var serverLobbyCloseable0 = lockedServerLobby.use()) {
-                                System.out.println("Gotten lock");
                                 var game0 = serverLobbyCloseable0.obj().game().get();
                                 updateGameForPlayer(
                                         nick,
