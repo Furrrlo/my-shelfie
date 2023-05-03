@@ -66,7 +66,16 @@ class ScoreProvider implements Provider<Integer>, Serializable {
     }
 
     private int getPersonalGoalScore() {
-        return 0; // TODO: given the shelfie and the personal goal, calculate the matches
+        return switch (player.getShelfie().numTilesOverlappingWithPersonalGoal(player.getPersonalGoal())) {
+            case 0 -> 0;
+            case 1 -> 1;
+            case 2 -> 2;
+            case 3 -> 4;
+            case 4 -> 6;
+            case 5 -> 9;
+            case 6 -> 12;
+            default -> throw new IllegalStateException("Unexpected value during personalGoal score check");
+        };
     }
 
     private int getCommonGoalsScore() {
