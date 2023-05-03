@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.tui;
 
 import com.google.errorprone.annotations.MustBeClosed;
+import org.fusesource.jansi.AnsiConsole;
 import org.fusesource.jansi.AnsiPrintStream;
 import org.fusesource.jansi.AnsiType;
 import org.fusesource.jansi.internal.CLibrary;
@@ -47,6 +48,59 @@ class TuiPrintStream extends PrintStream {
 
     /** Stack used to keep translations applied to the console screen */
     private final Deque<Translation> translationStack = new ArrayDeque<>();
+
+    public static TuiPrintStream installToStdOut() {
+        if (System.out instanceof TuiPrintStream)
+            return (TuiPrintStream) System.out;
+
+        installToStdStreams();
+        return (TuiPrintStream) System.out;
+    }
+
+    public static TuiPrintStream installToStdErr() {
+        if (System.err instanceof TuiPrintStream)
+            return (TuiPrintStream) System.err;
+
+        installToStdStreams();
+        return (TuiPrintStream) System.err;
+    }
+
+    private static void installToStdStreams() {
+        // Fix for jansi, ot uses the two old sun internal properties
+        var stdoutEncoding = System.getProperty("stdout.encoding");
+        if (stdoutEncoding == null && System.console() != null)
+            stdoutEncoding = System.console().charset().name();
+
+        if (stdoutEncoding != null) {
+            System.setProperty("sun.stdout.encoding", stdoutEncoding);
+            System.setProperty("sun.stderr.encoding", stdoutEncoding);
+        }
+
+        WindowsDetection.detectSupportedCapabilities();
+        // Fix for jansi not detecting colors at all on Windows
+        if (WindowsDetection.IS_WINDOWS) {
+            System.setProperty(AnsiConsole.JANSI_OUT_COLORS, switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
+                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
+                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+            });
+            System.setProperty(AnsiConsole.JANSI_ERR_COLORS, switch (WindowsDetection.ERR_SUPPORTED_COLORS) {
+                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
+                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+            });
+        }
+        AnsiConsole.systemInstall();
+
+        TuiPrintStream out = new TuiPrintStream(System.out, System.console() != null
+                ? System.console().charset()
+                : Charset.defaultCharset());
+        TuiPrintStream err = new TuiPrintStream(System.err, System.console() != null
+                ? System.console().charset()
+                : Charset.defaultCharset());
+        System.setOut(out);
+        System.setErr(err);
+    }
 
     public TuiPrintStream(OutputStream out, Charset encoding) {
         this(new TranslatingOutputStream(out), encoding, null);

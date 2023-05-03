@@ -11,7 +11,6 @@ import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
 import it.polimi.ingsw.model.TileAndCoords;
-import org.fusesource.jansi.AnsiConsole;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.InputStreamReader;
@@ -32,37 +31,11 @@ public class TuiMain {
         //@see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
         //System.setProperty("java.rmi.server.hostname", "<client address>");
-
-        // Fix for jansi, ot uses the two old sun internal properties
-        var stdoutEncoding = System.getProperty("stdout.encoding");
-        if (stdoutEncoding == null && System.console() != null)
-            stdoutEncoding = System.console().charset().name();
-
-        if (stdoutEncoding != null) {
-            System.setProperty("sun.stdout.encoding", stdoutEncoding);
-            System.setProperty("sun.stderr.encoding", stdoutEncoding);
-        }
-
         System.setIn(InterruptibleInputStream.wrap(System.in, Thread.ofPlatform()
                 .name("stdin-read-th")
                 .factory()));
-        WindowsDetection.detectSupportedCapabilities();
-        // Fix for jansi not detecting colors at all on Windows
-        if (WindowsDetection.IS_WINDOWS) {
-            System.setProperty(AnsiConsole.JANSI_OUT_COLORS, switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
-                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
-                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
-                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
-            });
-            System.setProperty(AnsiConsole.JANSI_ERR_COLORS, switch (WindowsDetection.ERR_SUPPORTED_COLORS) {
-                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
-                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
-                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
-            });
-        }
-        AnsiConsole.systemInstall();
         new TuiRenderer(
-                AnsiConsole.out(),
+                TuiPrintStream.installToStdOut(),
                 System.console() != null
                         ? System.console().reader()
                         : new InputStreamReader(System.in, Charset.defaultCharset()),

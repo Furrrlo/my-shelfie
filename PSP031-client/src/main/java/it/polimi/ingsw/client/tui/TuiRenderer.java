@@ -3,9 +3,7 @@ package it.polimi.ingsw.client.tui;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
-import java.io.OutputStream;
 import java.io.Reader;
-import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -37,18 +35,14 @@ class TuiRenderer implements Closeable {
      * @param initialPrompt initial prompt to ask the user
      * @param scene initial scene to be rendered
      */
-    public TuiRenderer(OutputStream outputStream,
+    public TuiRenderer(TuiPrintStream outputStream,
                        Reader inputReader,
                        Prompt initialPrompt,
                        @Nullable Consumer<TuiPrintStream> scene) {
         this.promptStack = new ArrayDeque<>(List.of(initialPrompt));
         this.scene = scene;
 
-        final TuiPrintStream out = new TuiPrintStream(outputStream, System.console() != null
-                ? System.console().charset()
-                : Charset.defaultCharset());
-
-        this.renderThread = new Thread(() -> renderLoop(out));
+        this.renderThread = new Thread(() -> renderLoop(outputStream));
         this.renderThread.setName(this + "-render-thread");
         this.renderThread.start();
 
@@ -56,7 +50,7 @@ class TuiRenderer implements Closeable {
         this.inputThread.setName(this + "-input-thread");
         this.inputThread.start();
 
-        this.resizeThread = new Thread(() -> resizeLoop(out));
+        this.resizeThread = new Thread(() -> resizeLoop(outputStream));
         this.resizeThread.setName(this + "-input-thread");
         this.resizeThread.start();
 
