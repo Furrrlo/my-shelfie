@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
-public class TuiMain {
+public class TuiPrompts {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TuiMain.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TuiPrompts.class);
 
     public static void main(String[] args) {
         //If the client has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
@@ -58,7 +58,7 @@ public class TuiMain {
                                 (renderer, ctx) -> ctx.prompt(promptSocketAddress(ctx.subPrompt()))),
                         new ChoicePrompt.Choice("RMI",
                                 (renderer, ctx) -> ctx.prompt(promptRmiAddress(ctx.subPrompt())))),
-                TuiMain::printLogo);
+                TuiPrompts::printLogo);
     }
 
     private static void printLogo(TuiPrintStream out) {
@@ -459,7 +459,7 @@ public class TuiMain {
         final var exampleOrder = new ArrayList<>(coords);
         Collections.shuffle(exampleOrder);
         final var example = exampleOrder.stream()
-                .map(TuiMain::coordToBoardDisplayString)
+                .map(TuiPrompts::coordToBoardDisplayString)
                 .collect(Collectors.joining(delimiter));
 
         return promptFactory.input(
