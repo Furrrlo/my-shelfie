@@ -229,14 +229,19 @@ public class ServerController implements Closeable {
                         playersRegisteredObservers.entrySet().removeIf(e -> !newLobbyPlayers.contains(e.getKey()));
                     });
                     observableTracker.registerObserver(serverLobby.game(), game -> {
-                        if (game != null)
-                            updateGameForPlayer(
-                                    nick,
-                                    game.game(),
-                                    game.controller(),
-                                    observableTracker,
-                                    lobbyUpdater,
-                                    gameControllerFactory);
+                        if (game != null) {
+                            try (var serverLobbyCloseable0 = lockedServerLobby.use()) {
+                                System.out.println("Gotten lock");
+                                var game0 = serverLobbyCloseable0.obj().game().get();
+                                updateGameForPlayer(
+                                        nick,
+                                        game0.game(),
+                                        game0.controller(),
+                                        observableTracker,
+                                        lobbyUpdater,
+                                        gameControllerFactory);
+                            }
+                        }
                     });
 
                     // Add the player after registering the listeners, 
