@@ -168,7 +168,8 @@ public class TuiMain {
             out.println();
 
             var players = lobby.joinedPlayers().get();
-            out.printf("Players (%d/%d):%n", players.size(), Math.max(players.size(), lobby.getRequiredPlayers()));
+            out.printf("Players (%d/%d):%n", players.size(),
+                    Math.max(players.size(), lobby.requiredPlayers().get() != null ? lobby.requiredPlayers().get() : 0));
             out.println();
 
             int i;
@@ -184,6 +185,76 @@ public class TuiMain {
                 out.println();
         });
 
+        if (lobby.requiredPlayers().get() == null) {
+            return promptRequiredPlayers(netManager, controller);
+        }
+        return promptReady(netManager, false, controller);
+    }
+
+    private static Prompt promptRequiredPlayers(ClientNetManager netManager,
+                                                LobbyController controller) {
+        return new InputPrompt("Enter number of players\nIf left blank the game will start when all players are ready",
+                (renderer0, ctx, input) -> {
+                    int requiredPlayers = 0;
+                    if (!input.isEmpty()) {
+                        try {
+                            requiredPlayers = Integer.parseInt(input);
+                        } catch (NumberFormatException e) {
+                            return ctx.invalid("Number not valid");
+                        }
+
+                        if (requiredPlayers < 2 || requiredPlayers > 4)
+                            return ctx.invalid("Number of players must be between 2 and 4");
+                    }
+                    try {
+                        controller.setRequiredPlayers(requiredPlayers);
+                        return ctx.prompt(promptReady(netManager, true, controller));
+                    } catch (DisconnectedException e) {
+                        return ctx.prompt("Disconnected from the server",
+                                promptNick(renderer0, ctx.rootPrompt(), netManager));
+                    }
+                });
+    }
+
+    private static Prompt promptReady(ClientNetManager netManager,
+                                      boolean creator,
+                                      LobbyController controller) {
+        if (creator) {
+            return new ChoicePrompt(
+                    "Select an action:",
+                    new ChoicePrompt.Choice(
+                            "Ready",
+                            (renderer0, ctx) -> {
+                                try {
+                                    controller.ready(true);
+                                    return ctx.done();
+                                } catch (DisconnectedException e) {
+                                    return ctx.prompt("Disconnected from the server",
+                                            promptNick(renderer0, ctx.rootPrompt(), netManager));
+                                }
+                            }),
+                    new ChoicePrompt.Choice(
+                            "Not ready",
+                            (renderer0, ctx) -> {
+                                try {
+                                    controller.ready(false);
+                                    return ctx.done();
+                                } catch (DisconnectedException e) {
+                                    return ctx.prompt("Disconnected from the server",
+                                            promptNick(renderer0, ctx.rootPrompt(), netManager));
+                                }
+                            }),
+                    new ChoicePrompt.Choice(
+                            "Modify required players",
+                            (renderer0, ctx) -> ctx.prompt(promptRequiredPlayers(netManager, controller))),
+                    new ChoicePrompt.Choice(
+                            "Quit",
+                            (renderer0, ctx) -> {
+                                // TODO: should quit more gracefully
+                                System.exit(-1);
+                                return ctx.done();
+                            }));
+        }
         return new ChoicePrompt(
                 "Select an action:",
                 new ChoicePrompt.Choice(

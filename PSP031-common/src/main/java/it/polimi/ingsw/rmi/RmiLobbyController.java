@@ -9,6 +9,8 @@ import java.rmi.RemoteException;
 
 public interface RmiLobbyController extends Remote {
 
+    void setRequiredPlayers(int requiredPlayers) throws RemoteException;
+
     void ready(boolean ready) throws RemoteException;
 
     class Adapter extends RmiAdapter implements LobbyController, Serializable {
@@ -17,6 +19,11 @@ public interface RmiLobbyController extends Remote {
 
         public Adapter(RmiLobbyController controller) {
             this.controller = controller;
+        }
+
+        @Override
+        public void setRequiredPlayers(int requiredPlayers) throws DisconnectedException {
+            adapt(() -> controller.setRequiredPlayers(requiredPlayers));
         }
 
         @Override

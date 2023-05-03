@@ -4,10 +4,7 @@ import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.updater.LobbyClientUpdater;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Lobby;
-import it.polimi.ingsw.socket.packets.CreateGamePacket;
-import it.polimi.ingsw.socket.packets.LobbyUpdaterPacket;
-import it.polimi.ingsw.socket.packets.UpdateJoinedPlayerPacket;
-import it.polimi.ingsw.socket.packets.UpdatePlayerReadyPacket;
+import it.polimi.ingsw.socket.packets.*;
 import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +28,7 @@ public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supp
             do {
                 try (var ctx = socketManager.receive(LobbyUpdaterPacket.class)) {
                     switch (ctx.getPacket()) {
+                        case UpdateRequiredPlayersPacket packet -> updateRequiredPlayers(packet.requiredPlayers());
                         case UpdateJoinedPlayerPacket packet -> updateJoinedPlayers(packet.players());
                         case UpdatePlayerReadyPacket packet -> updatePlayerReady(packet.nick(), packet.ready());
                         case CreateGamePacket packet -> {

@@ -2,7 +2,9 @@ package it.polimi.ingsw.server.socket;
 
 import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.server.controller.LobbyServerController;
+import it.polimi.ingsw.socket.packets.LobbyActionPacket;
 import it.polimi.ingsw.socket.packets.ReadyPacket;
+import it.polimi.ingsw.socket.packets.RequiredPlayersPacket;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -26,8 +28,11 @@ public class SocketServerLobbyController implements LobbyController, Runnable {
     public void run() {
         try {
             do {
-                try (var ctx = socketManager.receive(ReadyPacket.class)) {
-                    ready(ctx.getPacket().ready());
+                try (var ctx = socketManager.receive(LobbyActionPacket.class)) {
+                    switch (ctx.getPacket()) {
+                        case RequiredPlayersPacket p -> setRequiredPlayers(p.requiredPlayers());
+                        case ReadyPacket p -> ready(p.ready());
+                    }
                 }
             } while (!Thread.currentThread().isInterrupted());
         } catch (InterruptedIOException ignored) {
@@ -35,6 +40,11 @@ public class SocketServerLobbyController implements LobbyController, Runnable {
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
         }
+    }
+
+    @Override
+    public void setRequiredPlayers(int requiredPlayers) {
+        controller.setRequiredPlayers(nick, requiredPlayers);
     }
 
     @Override

@@ -9,25 +9,25 @@ import java.util.Objects;
 
 public class Lobby implements LobbyView {
 
-    private final int requiredPlayers;
+    private final Property<@Nullable Integer> requiredPlayers;
     private final Property<@Unmodifiable List<LobbyPlayer>> joinedPlayers;
     private final Property<@Nullable GameAndController<Game>> game;
 
-    public Lobby(int requiredPlayers, List<LobbyPlayer> joinedPlayers) {
+    public Lobby(@Nullable Integer requiredPlayers, List<LobbyPlayer> joinedPlayers) {
         this(requiredPlayers, joinedPlayers, null);
     }
 
-    public Lobby(int requiredPlayers,
+    public Lobby(@Nullable Integer requiredPlayers,
                  List<LobbyPlayer> joinedPlayers,
                  @Nullable GameAndController<Game> game) {
 
-        this.requiredPlayers = requiredPlayers;
+        this.requiredPlayers = SerializableProperty.nullableProperty(requiredPlayers);
         this.joinedPlayers = new SerializableProperty<>(List.copyOf(joinedPlayers));
         this.game = SerializableProperty.nullableProperty(game);
     }
 
     @Override
-    public int getRequiredPlayers() {
+    public Property<@Nullable Integer> requiredPlayers() {
         return requiredPlayers;
     }
 
@@ -47,14 +47,14 @@ public class Lobby implements LobbyView {
             return true;
         if (!(o instanceof Lobby lobby))
             return false;
-        return requiredPlayers == lobby.requiredPlayers &&
+        return Objects.equals(requiredPlayers.get(), lobby.requiredPlayers.get()) &&
                 joinedPlayers.get().equals(lobby.joinedPlayers.get()) &&
                 Objects.equals(game.get(), lobby.game.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requiredPlayers, joinedPlayers.get(), game.get());
+        return Objects.hash(requiredPlayers.get(), joinedPlayers.get(), game.get());
     }
 
     @Override

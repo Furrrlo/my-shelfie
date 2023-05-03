@@ -11,21 +11,21 @@ import java.util.Objects;
 
 public class ServerLobby implements ServerLobbyView {
 
-    private final int requiredPlayers;
+    private final Property<@Nullable Integer> requiredPlayers;
     private final Property<List<LobbyPlayer>> joinedPlayers;
     private final Property<@Nullable ServerGameAndController<ServerGame>> game;
 
     /**
      * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
      */
-    public ServerLobby(int requiredPlayers) {
-        this.requiredPlayers = requiredPlayers;
+    public ServerLobby() {
+        this.requiredPlayers = SerializableProperty.nullableProperty(null);
         this.joinedPlayers = new SerializableProperty<>(List.of());
         this.game = SerializableProperty.nullableProperty(null);
     }
 
     @Override
-    public int getRequiredPlayers() {
+    public Property<@Nullable Integer> requiredPlayers() {
         return requiredPlayers;
     }
 
@@ -45,14 +45,14 @@ public class ServerLobby implements ServerLobbyView {
             return true;
         if (!(o instanceof ServerLobby that))
             return false;
-        return requiredPlayers == that.requiredPlayers &&
+        return Objects.equals(requiredPlayers.get(), that.requiredPlayers.get()) &&
                 joinedPlayers.get().equals(that.joinedPlayers.get()) &&
                 Objects.equals(game.get(), that.game.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requiredPlayers, joinedPlayers.get(), game.get());
+        return Objects.hash(requiredPlayers.get(), joinedPlayers.get(), game.get());
     }
 
     @Override

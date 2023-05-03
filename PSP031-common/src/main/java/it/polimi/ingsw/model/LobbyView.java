@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface LobbyView extends Serializable {
     /** Return number of required players */
-    int getRequiredPlayers();
+    Provider<@Nullable Integer> requiredPlayers();
 
     /** Return Property list of joined players */
     Provider<? extends @Unmodifiable List<? extends LobbyPlayer>> joinedPlayers();

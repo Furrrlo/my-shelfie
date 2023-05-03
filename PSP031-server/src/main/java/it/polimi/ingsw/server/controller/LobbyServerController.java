@@ -92,19 +92,44 @@ public class LobbyServerController {
         }
     }
 
+    public void setRequiredPlayers(String nick, int requiredPlayers) {
+        try (var use = lockedLobby.use()) {
+            ServerLobby lobby = use.obj();
+            if (lobby.hasRequiredPlayers() && !lobby.joinedPlayers().get().get(0).getNick().equals(nick))
+                throw new IllegalArgumentException("This player is not the creator of this lobby");
+
+            if (requiredPlayers != 0
+                    && (requiredPlayers < ServerLobbyView.MIN_PLAYERS || requiredPlayers > ServerLobbyView.MAX_PLAYERS))
+                throw new IllegalArgumentException("Number of player not valid");
+            lobby.requiredPlayers().set(requiredPlayers);
+
+            checkGameStart(lobby);
+        }
+    }
+
     public void ready(String nick, boolean ready) {
         try (var use = lockedLobby.use()) {
-            List<LobbyPlayer> lobbyPlayers = use.obj().joinedPlayers().get();
-            LobbyPlayer lobbyPlayer = lobbyPlayers.stream()
+            var lobby = use.obj();
+            if (lobby.hasGameStarted())
+                return;
+            LobbyPlayer lobbyPlayer = lobby.joinedPlayers().get().stream()
                     .filter(p -> p.getNick().equals(nick))
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("Somehow missing the player " + nick));
             lobbyPlayer.ready().set(ready);
-            if (lobbyPlayers.size() > 1 && lobbyPlayers.stream().allMatch(p -> p.ready().get())) {
-                final ServerGame game = createGame(0, lobbyPlayers);
-                use.obj().game().set(new ServerGameAndController<>(game,
-                        new GameServerController(new LockProtected<>(game, lockedLobby.getLock()))));
-            }
+
+            checkGameStart(lobby);
+        }
+    }
+
+    private void checkGameStart(ServerLobby lobby) {
+        List<LobbyPlayer> lobbyPlayers = lobby.joinedPlayers().get();
+        if (lobbyPlayers.stream().allMatch(p -> p.ready().get())
+                && ((!lobby.hasRequiredPlayers() && lobbyPlayers.size() > 1)
+                        || (lobby.hasRequiredPlayers() && lobbyPlayers.size() == lobby.requiredPlayers().get()))) {
+            final ServerGame game = createGame(0, lobbyPlayers);
+            lobby.game().set(new ServerGameAndController<>(game,
+                    new GameServerController(new LockProtected<>(game, lockedLobby.getLock()))));
         }
     }
 

@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface RmiLobbyUpdater extends Remote {
 
+    void updateRequiredPlayers(int requiredPlayers) throws RemoteException;
+
     void updateJoinedPlayers(List<String> joinedPlayers) throws RemoteException;
 
     void updatePlayerReady(String nick, boolean ready) throws RemoteException;
@@ -24,6 +26,11 @@ public interface RmiLobbyUpdater extends Remote {
 
         public Adapter(RmiLobbyUpdater updater) {
             this.updater = updater;
+        }
+
+        @Override
+        public void updateRequiredPlayers(int requiredPlayers) throws DisconnectedException {
+            adapt(() -> updater.updateRequiredPlayers(requiredPlayers));
         }
 
         @Override

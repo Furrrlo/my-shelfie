@@ -14,7 +14,7 @@ class ServerLobbyTest {
 
     @Test
     void hasGameStartedRespectsGameAttribute() {
-        final var lobby = new ServerLobby(4);
+        final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
         assertFalse(lobby.hasGameStarted(), "There's no game yet");
 
@@ -27,7 +27,7 @@ class ServerLobbyTest {
 
     @Test
     void playerCantJoinWhenGameHasStarted() {
-        final var lobby = new ServerLobby(4);
+        final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
 
         final ServerGame game;
@@ -40,7 +40,7 @@ class ServerLobbyTest {
 
     @Test
     void playerCantJoinWhenTheresNoSpace() {
-        final var lobby = new ServerLobby(4);
+        final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(
                 new LobbyPlayer("test_player_1"),
                 new LobbyPlayer("test_player_2"),
@@ -51,7 +51,7 @@ class ServerLobbyTest {
 
     @Test
     void playerCanJoin() {
-        final var lobby = new ServerLobby(4);
+        final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(
                 new LobbyPlayer("test_player_1"),
                 new LobbyPlayer("test_player_2"),
@@ -62,26 +62,28 @@ class ServerLobbyTest {
     @Test
     @SuppressWarnings("EqualsWithItself")
     void testEquals() {
-        final var lobby1 = new ServerLobby(4);
+        final var lobby1 = new ServerLobby();
         lobby1.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
 
-        final var lobby2 = new ServerLobby(4);
+        final var lobby2 = new ServerLobby();
         lobby2.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
 
         assertEquals(lobby1, lobby1, "Same instance is not the same");
         assertNotEquals(lobby1, new Object(), "Different object should not be equals");
         assertEquals(lobby1, lobby2, "Instances with no differences should be equals");
 
-        final var lobbyDiffReqPlayers = new ServerLobby(2);
+        final var lobbyDiffReqPlayers = new ServerLobby();
+        lobbyDiffReqPlayers.requiredPlayers().set(2);
         lobbyDiffReqPlayers.joinedPlayers()
                 .update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
         assertNotEquals(lobby1, lobbyDiffReqPlayers, "Instances with different required players should not be equals");
 
-        final var lobbyDiffJoinedPlayers = new ServerLobby(4);
+        final var lobbyDiffJoinedPlayers = new ServerLobby();
+        lobbyDiffReqPlayers.requiredPlayers().set(4);
         lobbyDiffJoinedPlayers.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_2")));
         assertNotEquals(lobby1, lobbyDiffJoinedPlayers, "Instances with different joined players should not be equals");
 
-        final var lobbyDiffGame = new ServerLobby(4);
+        final var lobbyDiffGame = new ServerLobby();
         lobbyDiffGame.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
         final ServerGame game;
         lobbyDiffGame.game().set(new ServerGameAndController<>(
@@ -92,27 +94,29 @@ class ServerLobbyTest {
 
     @Test
     void testHashCode() {
-        final var lobby1 = new ServerLobby(4);
+        final var lobby1 = new ServerLobby();
         lobby1.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
 
-        final var lobby2 = new ServerLobby(4);
+        final var lobby2 = new ServerLobby();
         lobby2.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
 
         assertEquals(lobby1.hashCode(), lobby1.hashCode(), "Same instance is not the same");
         assertEquals(lobby1.hashCode(), lobby2.hashCode(), "Instances with no differences should be equals");
 
-        final var lobbyDiffReqPlayers = new ServerLobby(2);
+        final var lobbyDiffReqPlayers = new ServerLobby();
+        lobbyDiffReqPlayers.requiredPlayers().set(2);
         lobbyDiffReqPlayers.joinedPlayers()
                 .update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
         assertNotEquals(lobby1.hashCode(), lobbyDiffReqPlayers.hashCode(),
                 "Instances with different required players should not be equals");
 
-        final var lobbyDiffJoinedPlayers = new ServerLobby(4);
+        final var lobbyDiffJoinedPlayers = new ServerLobby();
+        lobbyDiffReqPlayers.requiredPlayers().set(4);
         lobbyDiffJoinedPlayers.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_2")));
         assertNotEquals(lobby1.hashCode(), lobbyDiffJoinedPlayers.hashCode(),
                 "Instances with different joined players should not be equals");
 
-        final var lobbyDiffGame = new ServerLobby(4);
+        final var lobbyDiffGame = new ServerLobby();
         lobbyDiffGame.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
         final ServerGame game;
         lobbyDiffGame.game().set(new ServerGameAndController<>(
@@ -124,7 +128,7 @@ class ServerLobbyTest {
 
     @Test
     void testToString() {
-        final var lobby = new ServerLobby(4);
+        final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player")));
         assertDoesNotThrow(lobby::toString);
     }

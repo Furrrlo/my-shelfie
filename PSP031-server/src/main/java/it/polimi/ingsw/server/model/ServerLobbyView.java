@@ -9,13 +9,27 @@ import java.util.List;
 
 public interface ServerLobbyView {
 
+    int MIN_PLAYERS = 2;
+    int MAX_PLAYERS = 4;
+
     /** Returns the number of required players */
-    int getRequiredPlayers();
+    Provider<@Nullable Integer> requiredPlayers();
 
     /** Returns the list of joined players */
     Provider<? extends @Unmodifiable List<? extends LobbyPlayerView>> joinedPlayers();
 
     Provider<? extends @Nullable ServerGameAndController<? extends ServerGameView>> game();
+
+    /**
+     * Return whether the creator of this lobby has set {@link #requiredPlayers()}.
+     * If this method returns false, nobody can join this lobby yet.
+     * This method does NOT check how many players have joined
+     *
+     * @return true if requiredPlayers != null
+     */
+    default boolean hasRequiredPlayers() {
+        return requiredPlayers().get() != null;
+    }
 
     /**
      * Returns whether the game has been started, so that it can be safely be grabbed using
@@ -29,6 +43,8 @@ public interface ServerLobbyView {
 
     /** Returns true if there's space for another player in this lobby */
     default boolean canOnePlayerJoin() {
-        return !hasGameStarted() && joinedPlayers().get().size() < getRequiredPlayers();
+        return !hasGameStarted() &&
+                ((hasRequiredPlayers() && joinedPlayers().get().size() < requiredPlayers().get())
+                        || (!hasRequiredPlayers() && joinedPlayers().get().size() < MAX_PLAYERS));
     }
 }

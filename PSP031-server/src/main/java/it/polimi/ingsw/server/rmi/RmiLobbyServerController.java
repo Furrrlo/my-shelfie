@@ -16,6 +16,11 @@ public class RmiLobbyServerController implements RmiLobbyController {
     }
 
     @Override
+    public void setRequiredPlayers(int requiredPlayers) throws RemoteException {
+        controller.setRequiredPlayers(nick, requiredPlayers);
+    }
+
+    @Override
     public void ready(boolean ready) throws RemoteException {
         controller.ready(nick, ready);
     }

@@ -15,6 +15,11 @@ public class DelegatingLobbyUpdater implements LobbyUpdater {
     }
 
     @Override
+    public void updateRequiredPlayers(int requiredPlayers) throws DisconnectedException {
+        delegate.updateRequiredPlayers(requiredPlayers);
+    }
+
+    @Override
     public void updateJoinedPlayers(List<String> joinedPlayers) throws DisconnectedException {
         delegate.updateJoinedPlayers(joinedPlayers);
     }

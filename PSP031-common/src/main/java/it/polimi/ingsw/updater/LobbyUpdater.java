@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface LobbyUpdater {
 
+    void updateRequiredPlayers(int requiredPlayers) throws DisconnectedException;
+
     void updateJoinedPlayers(List<String> joinedPlayers) throws DisconnectedException;
 
     void updatePlayerReady(String nick, boolean ready) throws DisconnectedException;

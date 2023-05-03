@@ -114,7 +114,7 @@ public class ServerController implements Closeable {
                     .filter(l -> l.lobby().getUnsafe().canOnePlayerJoin())
                     .findFirst()
                     .orElseGet(() -> {
-                        var lockedLobby = new LockProtected<>(new ServerLobby(4));
+                        var lockedLobby = new LockProtected<>(new ServerLobby());
                         ServerLobbyAndController<ServerLobby> newLobby = new ServerLobbyAndController<>(lockedLobby,
                                 new LobbyServerController(lockedLobby));
                         lobbies.add(newLobby);
@@ -190,14 +190,14 @@ public class ServerController implements Closeable {
                 final List<String> joinedPlayersNicks = serverLobby.joinedPlayers().get().stream()
                         .map(LobbyPlayer::getNick)
                         .toList();
-                if (!joinedPlayersNicks.contains(nick) && !serverLobby.canOnePlayerJoin())
+                if (!joinedPlayersNicks.contains(nick) && !serverLobby.canOnePlayerJoin() && serverLobby.hasRequiredPlayers())
                     continue; // If we fail the test, let's just retry and search a new one
 
                 final LobbyAndController<Lobby> lobbyAndController;
                 final LobbyUpdater lobbyUpdater;
                 try {
                     lobbyUpdater = lobbyUpdaterFactory.create(lobbyAndController = new LobbyAndController<>(
-                            new Lobby(serverLobby.getRequiredPlayers(), serverLobby.joinedPlayers().get()),
+                            new Lobby(serverLobby.requiredPlayers().get(), serverLobby.joinedPlayers().get()),
                             lobbyControllerFactory.create(serverLobbyAndController.controller())));
                 } catch (DisconnectedException e) {
                     throw new IllegalStateException("Player disconnected during handshake process");
@@ -213,6 +213,8 @@ public class ServerController implements Closeable {
                                 player,
                                 observableTracker.registerObserver(player.ready(),
                                         ready -> lobbyUpdater.updatePlayerReady(player.getNick(), ready)));
+
+                    observableTracker.registerObserver(serverLobby.requiredPlayers(), lobbyUpdater::updateRequiredPlayers);
 
                     observableTracker.registerObserver(serverLobby.joinedPlayers(), newLobbyPlayers -> {
                         lobbyUpdater.updateJoinedPlayers(newLobbyPlayers.stream()

@@ -29,6 +29,11 @@ public abstract class LobbyClientUpdater implements LobbyUpdater {
     }
 
     @Override
+    public void updateRequiredPlayers(int requiredPlayers) {
+        lobby.requiredPlayers().set(requiredPlayers);
+    }
+
+    @Override
     public void updateJoinedPlayers(List<String> joinedPlayers) {
         lobby.joinedPlayers().update(players -> {
             var newP = new ArrayList<>(players);
