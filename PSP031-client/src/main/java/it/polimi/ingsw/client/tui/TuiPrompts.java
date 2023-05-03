@@ -15,9 +15,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.rmi.registry.Registry;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -28,37 +26,16 @@ import java.util.stream.Stream;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
-public class TuiPrompts {
+class TuiPrompts {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TuiPrompts.class);
 
-    public static void main(String[] args) {
-        //If the client has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
-        //@see https://bugs.openjdk.org/browse/JDK-8042232
-        // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.
-        //System.setProperty("java.rmi.server.hostname", "<client address>");
+    public static Prompt initialPrompt() {
+        return promptNetworkProtocol();
+    }
 
-        // Configure log4j file if none is already set
-        if (System.getProperty("log4j.configurationFile") == null)
-            System.setProperty("log4j.configurationFile", "log4j2-tui.xml");
-
-        // Make System.in interruptible
-        System.setIn(InterruptibleInputStream.wrap(System.in, Thread.ofPlatform()
-                .name("stdin-read-th")
-                .factory()));
-
-        new TuiRenderer(
-                TuiPrintStream.installToStdOut(),
-                System.console() != null
-                        ? System.console().reader()
-                        : new InputStreamReader(System.in, Charset.defaultCharset()),
-                new ChoicePrompt(
-                        "Which network protocol do you want to use?",
-                        new ChoicePrompt.Choice("Socket",
-                                (renderer, ctx) -> ctx.prompt(promptSocketAddress(ctx.subPrompt()))),
-                        new ChoicePrompt.Choice("RMI",
-                                (renderer, ctx) -> ctx.prompt(promptRmiAddress(ctx.subPrompt())))),
-                TuiPrompts::printLogo);
+    public static Consumer<TuiPrintStream> initialScene() {
+        return TuiPrompts::printLogo;
     }
 
     private static void printLogo(TuiPrintStream out) {
@@ -82,6 +59,15 @@ public class TuiPrompts {
         ConsoleColors.RESET
         //@formatter:on
         );
+    }
+
+    private static Prompt promptNetworkProtocol() {
+        return new ChoicePrompt(
+                "Which network protocol do you want to use?",
+                new ChoicePrompt.Choice("Socket",
+                        (renderer, ctx) -> ctx.prompt(promptSocketAddress(ctx.subPrompt()))),
+                new ChoicePrompt.Choice("RMI",
+                        (renderer, ctx) -> ctx.prompt(promptRmiAddress(ctx.subPrompt()))));
     }
 
     private static Prompt promptSocketAddress(Prompt.Factory promptFactory) {
