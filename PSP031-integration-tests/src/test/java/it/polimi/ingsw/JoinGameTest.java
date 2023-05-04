@@ -4,6 +4,7 @@ import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.model.GameView;
+import it.polimi.ingsw.model.LobbyView;
 import it.polimi.ingsw.rmi.RMIPortCapturingServerSocketFactory;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
@@ -21,10 +22,13 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -166,6 +170,51 @@ public class JoinGameTest {
 
         assertThrows(NickNotValidException.class, () -> clientNetManagerFactory3.apply(this).joinGame("player2"),
                 "Same nick not failed");
+    }
 
+    @ParameterizedTest
+    @MethodSource("twoPlayersTest")
+    void twoPlayersGameStartedConcurrentReadyTest(Function<JoinGameTest, ClientNetManager> clientNetManagerFactory1,
+                                                  Function<JoinGameTest, ClientNetManager> clientNetManagerFactory2)
+            throws Exception {
+        List<Throwable> throwableList = new CopyOnWriteArrayList<>();
+        AtomicReference<LobbyAndController<? extends LobbyView>> player1 = new AtomicReference<>();
+        AtomicReference<LobbyAndController<? extends LobbyView>> player2 = new AtomicReference<>();
+        player1.set(clientNetManagerFactory1.apply(this).joinGame("player1"));
+        player2.set(clientNetManagerFactory2.apply(this).joinGame("player2"));
+        Thread t1 = new Thread(() -> {
+            try {
+                Random r = new Random();
+                for (int i = 0; i < 20; i++) {
+                    Objects.requireNonNull(player1.get()).controller().ready(r.nextBoolean());
+                    Thread.sleep(r.nextInt(10));
+                }
+                Objects.requireNonNull(player1.get()).controller().ready(true);
+            } catch (Exception e) {
+                throwableList.add(e);
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            try {
+                Random r = new Random();
+                for (int i = 0; i < 20; i++) {
+                    Objects.requireNonNull(player2.get()).controller().ready(r.nextBoolean());
+                    Thread.sleep(r.nextInt(10));
+                }
+                Objects.requireNonNull(player2.get()).controller().ready(true);
+            } catch (Exception e) {
+                throwableList.add(e);
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        throwableList.forEach(Throwable::printStackTrace);
+        assertTrue(throwableList.isEmpty());
     }
 }
