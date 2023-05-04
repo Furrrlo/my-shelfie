@@ -119,7 +119,10 @@ class TuiPrompts {
                 myNick == null ? "Choose a nickname:" : "Press enter to reconnect",
                 (renderer0, ctx, nick) -> {
                     try {
-                        if (myNick == null)
+                        if (nick.isEmpty())
+                            return ctx.invalid("Nick can't be empty");
+
+                        if (myNick == null || myNick.isEmpty())
                             myNick = nick;
                         var lobbyAndController = netManager.joinGame(myNick);
                         return ctx.prompt(

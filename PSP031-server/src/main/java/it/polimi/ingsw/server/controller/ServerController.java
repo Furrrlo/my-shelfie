@@ -177,6 +177,8 @@ public class ServerController implements Closeable {
                               LobbyControllerFactory lobbyControllerFactory,
                               BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
             throws DisconnectedException, NickNotValidException {
+        if (nick.isEmpty())
+            throw new NickNotValidException("Nick can't be empty");
         if (heartbeats.putIfAbsent(nick, heartbeatHandler) != null) {
             throw new NickNotValidException("This nick is already in use");
         }
