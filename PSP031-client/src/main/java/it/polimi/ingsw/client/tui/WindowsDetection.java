@@ -2,15 +2,15 @@ package it.polimi.ingsw.client.tui;
 
 import org.fusesource.jansi.AnsiColors;
 import org.fusesource.jansi.WindowsSupport;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.nio.channels.InterruptedByTimeoutException;
-import java.nio.charset.Charset;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.IntConsumer;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.*;
 import static org.fusesource.jansi.internal.Kernel32.*;
@@ -53,19 +53,16 @@ class WindowsDetection {
             return new StreamsColors(AnsiColors.Colors16, AnsiColors.Colors16);
 
         rawMode(inConsole, true);
-        var iin = InterruptibleInputStream.wrap(System.in);
         try {
-            iin.configureDefaultTimeout(200, TimeUnit.MILLISECONDS);
             return new StreamsColors(
-                    doDetectSupportedColorsByAnsiSequence(GetStdHandle(STD_OUTPUT_HANDLE), System.out, iin),
-                    doDetectSupportedColorsByAnsiSequence(GetStdHandle(STD_ERROR_HANDLE), System.err, iin));
+                    doDetectSupportedColorsByAnsiSequence(GetStdHandle(STD_OUTPUT_HANDLE), System.out, inConsole),
+                    doDetectSupportedColorsByAnsiSequence(GetStdHandle(STD_ERROR_HANDLE), System.err, inConsole));
         } finally {
-            iin.clearDefaultTimeout();
             rawMode(inConsole, false);
         }
     }
 
-    private static AnsiColors doDetectSupportedColorsByAnsiSequence(long outConsole, PrintStream out, InputStream in) {
+    private static AnsiColors doDetectSupportedColorsByAnsiSequence(long outConsole, PrintStream out, long inConsole) {
         final int[] mode = new int[1];
         final boolean isOutConsole = GetConsoleMode(outConsole, mode) != 0;
         // Try to enable Virtual Terminal
@@ -77,12 +74,9 @@ class WindowsDetection {
             // Simply try sending a truecolor value to the terminal,
             // followed by a query to ask what color it currently has.
             // If the response indicates the same color as was just set, then truecolor is supported.
-            var reader = new InputStreamReader(in, System.console() != null
-                    ? System.console().charset()
-                    : Charset.defaultCharset());
-            if (ansiCheckColor(out, reader, "48;2;1;2;3")) // set background color to RGB(1,2,3)
+            if (ansiCheckColor(out, inConsole, "48;2;1;2;3")) // set background color to RGB(1,2,3)
                 return AnsiColors.TrueColor;
-            if (ansiCheckColor(out, reader, "48;5;225")) // set background color to color 225
+            if (ansiCheckColor(out, inConsole, "48;5;225")) // set background color to color 225
                 return AnsiColors.Colors256;
             return AnsiColors.Colors16;
         } catch (IOException ex) {
@@ -109,13 +103,16 @@ class WindowsDetection {
                     new IOException(WindowsSupport.getLastErrorMessage()));
     }
 
-    private static boolean ansiCheckColor(PrintStream out, Reader in, String color) throws IOException {
+    private static boolean ansiCheckColor(PrintStream out, long inConsole, String color) throws IOException {
+        // Consume any leftover input
+        consumeRemainingInput(inConsole, null);
+
         out.print(CSI + color + "m");
         out.print(DCS + "$qm" + ST); // DECRQSS (Request Selection or Setting) for SGR
         out.flush();
 
         try {
-            var response = readResponseColor(in);
+            var response = readResponseColor(inConsole);
             // Reset color
             out.print(CSI + "0m");
             out.flush();
@@ -136,7 +133,7 @@ class WindowsDetection {
         }
     }
 
-    private static String readResponseColor(Reader in) throws IOException, TimeoutException {
+    private static String readResponseColor(long inConsole) throws IOException, TimeoutException {
         enum ParserState {
             LOOKING_FOR_ESC,
             LOOKING_FOR_DCS,
@@ -160,7 +157,7 @@ class WindowsDetection {
             int ch;
             try {
                 // First character needs to be read without timeout cause Reader#available() won't work
-                ch = readWithTimeout(in);
+                ch = readWithTimeout(inConsole);
             } catch (TimeoutException ex) {
                 state = ParserState.TIMEOUT;
                 continue;
@@ -190,13 +187,14 @@ class WindowsDetection {
             };
         }
         // Consume remaining input
-        while (in.ready())
-            responseBuilder.append((char) in.read());
+        consumeRemainingInput(inConsole, ch -> responseBuilder.append((char) ch));
 
         if (state == ParserState.DONE)
             return responseColor.toString();
 
-        var response = responseBuilder.toString().replace(String.valueOf(FIRST_ESC_CHAR), "ESC");
+        var response = responseBuilder.toString()
+                .replace(String.valueOf(FIRST_ESC_CHAR), "ESC")
+                .replace("\n", "\\n");
         if (state == ParserState.TIMEOUT)
             throw new TimeoutException("Timeout expired (collected response '" + response + "')");
 
@@ -205,17 +203,42 @@ class WindowsDetection {
                 : "Unrecognized response '" + response + '\'');
     }
 
-    private static int readWithTimeout(Reader in) throws IOException, TimeoutException {
-        int ch;
+    @SuppressWarnings("InfiniteLoopStatement")
+    private static void consumeRemainingInput(long inConsole, @Nullable IntConsumer consumer) throws IOException {
         try {
-            ch = in.read();
-        } catch (InterruptedByTimeoutException ex) {
-            throw (TimeoutException) new TimeoutException().initCause(ex);
+            while (true) {
+                if (consumer == null)
+                    readWithTimeout(inConsole);
+                else
+                    consumer.accept((char) readWithTimeout(inConsole));
+            }
+        } catch (TimeoutException ignored) {
+            // No more input
+        }
+    }
+
+    private static int readWithTimeout(long inConsole) throws IOException, TimeoutException {
+        var timeoutMillis = 100;
+        var startTimeMillis = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTimeMillis < timeoutMillis) {
+            Thread.onSpinWait();
+
+            // Peek first and if there's one, take it
+            if (readConsoleInputHelper(inConsole, 1, true).length == 0)
+                continue;
+
+            INPUT_RECORD[] inputRecordArr;
+            if ((inputRecordArr = readConsoleInputHelper(inConsole, 1, false)).length == 0)
+                continue;
+            // Discard anything that isn't a keyUp KEY_EVENT
+            var inputRecord = inputRecordArr[0];
+            if (inputRecord.eventType != INPUT_RECORD.KEY_EVENT || inputRecord.keyEvent.keyDown)
+                continue;
+
+            return inputRecord.keyEvent.uchar;
         }
 
-        if (ch == -1)
-            throw new EOFException();
-        return ch;
+        throw new TimeoutException();
     }
 
     private record StreamsColors(AnsiColors out, AnsiColors err) {
