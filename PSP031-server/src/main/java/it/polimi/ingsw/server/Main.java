@@ -5,6 +5,7 @@ import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -25,6 +26,10 @@ public class Main {
         // @see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<server address> or uncomment the following line.
         // System.setProperty("java.rmi.server.hostname", "<server address>");
+
+        // add SLF4JBridgeHandler to j.u.l's root logger
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
 
         LOGGER.info("Starting server");
 

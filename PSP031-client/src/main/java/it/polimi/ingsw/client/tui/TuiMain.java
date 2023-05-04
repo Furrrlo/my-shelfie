@@ -1,5 +1,7 @@
 package it.polimi.ingsw.client.tui;
 
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
@@ -22,6 +24,10 @@ class TuiMain {
         // Configure log4j file if none is already set
         if (System.getProperty("log4j.configurationFile") == null)
             System.setProperty("log4j.configurationFile", "log4j2-tui.xml");
+
+        // add SLF4JBridgeHandler to j.u.l's root logger
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
 
         // Make System.in interruptible
         System.setIn(InterruptibleInputStream.wrap(System.in, Thread.ofPlatform()
