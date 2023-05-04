@@ -11,6 +11,7 @@ import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
 import it.polimi.ingsw.model.TileAndCoords;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,8 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 class TuiPrompts {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TuiPrompts.class);
+
+    private static @Nullable String myNick;
 
     public static Prompt initialPrompt() {
         return promptNetworkProtocol();
@@ -119,6 +122,7 @@ class TuiPrompts {
                 "Choose a nickname:",
                 (renderer0, ctx, nick) -> {
                     try {
+                        myNick = nick;
                         var lobbyAndController = netManager.joinGame(nick);
                         return ctx.prompt(
                                 promptLobby(renderer, netManager, lobbyAndController.lobby(), lobbyAndController.controller()));
@@ -146,6 +150,7 @@ class TuiPrompts {
                 ? promptGame(renderer, netManager, g.game(), g.controller())
                 // Game is over, we go back to the lobby
                 : doPromptLobby(renderer, netManager, lobby, controller)));
+        lobby.requiredPlayers().registerObserver(r -> renderer.rerender());
 
         var currGame = lobby.game().get();
         return currGame != null
@@ -182,12 +187,13 @@ class TuiPrompts {
         });
 
         if (lobby.requiredPlayers().get() == null) {
-            return promptRequiredPlayers(netManager, controller);
+            return promptRequiredPlayers(netManager, lobby, controller);
         }
-        return promptReady(netManager, false, controller);
+        return promptReady(netManager, lobby, controller);
     }
 
     private static Prompt promptRequiredPlayers(ClientNetManager netManager,
+                                                LobbyView lobby,
                                                 LobbyController controller) {
         return new InputPrompt("Enter number of players\nIf left blank the game will start when all players are ready",
                 (renderer0, ctx, input) -> {
@@ -204,7 +210,7 @@ class TuiPrompts {
                     }
                     try {
                         controller.setRequiredPlayers(requiredPlayers);
-                        return ctx.prompt(promptReady(netManager, true, controller));
+                        return ctx.prompt(promptReady(netManager, lobby, controller));
                     } catch (DisconnectedException e) {
                         return ctx.prompt("Disconnected from the server",
                                 promptNick(renderer0, ctx.rootPrompt(), netManager));
@@ -213,46 +219,9 @@ class TuiPrompts {
     }
 
     private static Prompt promptReady(ClientNetManager netManager,
-                                      boolean creator,
+                                      LobbyView lobby,
                                       LobbyController controller) {
-        if (creator) {
-            return new ChoicePrompt(
-                    "Select an action:",
-                    new ChoicePrompt.Choice(
-                            "Ready",
-                            (renderer0, ctx) -> {
-                                try {
-                                    controller.ready(true);
-                                    return ctx.done();
-                                } catch (DisconnectedException e) {
-                                    return ctx.prompt("Disconnected from the server",
-                                            promptNick(renderer0, ctx.rootPrompt(), netManager));
-                                }
-                            }),
-                    new ChoicePrompt.Choice(
-                            "Not ready",
-                            (renderer0, ctx) -> {
-                                try {
-                                    controller.ready(false);
-                                    return ctx.done();
-                                } catch (DisconnectedException e) {
-                                    return ctx.prompt("Disconnected from the server",
-                                            promptNick(renderer0, ctx.rootPrompt(), netManager));
-                                }
-                            }),
-                    new ChoicePrompt.Choice(
-                            "Modify required players",
-                            (renderer0, ctx) -> ctx.prompt(promptRequiredPlayers(netManager, controller))),
-                    new ChoicePrompt.Choice(
-                            "Quit",
-                            (renderer0, ctx) -> {
-                                // TODO: should quit more gracefully
-                                System.exit(-1);
-                                return ctx.done();
-                            }));
-        }
-        return new ChoicePrompt(
-                "Select an action:",
+        return new ChoicePrompt("Select an action:",
                 new ChoicePrompt.Choice(
                         "Ready",
                         (renderer0, ctx) -> {
@@ -275,6 +244,24 @@ class TuiPrompts {
                                         promptNick(renderer0, ctx.rootPrompt(), netManager));
                             }
                         }),
+                new ChoicePrompt.Choice(
+                        "Modify required players",
+                        (renderer0, ctx) -> ctx.prompt(promptRequiredPlayers(netManager, lobby, controller)),
+                        () -> lobby.joinedPlayers().get().get(0).getNick().equals(myNick)),
+                new ChoicePrompt.Choice(
+                        "Start now",
+                        (renderer0, ctx) -> {
+                            try {
+                                controller.setRequiredPlayers(0);
+                                return ctx.done();
+                            } catch (DisconnectedException e) {
+                                return ctx.prompt("Disconnected from the server",
+                                        promptNick(renderer0, ctx.rootPrompt(), netManager));
+                            }
+                        },
+                        () -> lobby.joinedPlayers().get().get(0).getNick().equals(myNick)
+                                && Objects.requireNonNull(lobby.requiredPlayers().get()) != 0
+                                && lobby.joinedPlayers().get().stream().allMatch(p -> p.ready().get())),
                 new ChoicePrompt.Choice(
                         "Quit",
                         (renderer0, ctx) -> {
