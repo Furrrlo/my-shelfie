@@ -119,13 +119,15 @@ class TuiPrompts {
             out.println();
         });
         return promptFactory.input(
-                "Choose a nickname:",
+                myNick == null ? "Choose a nickname:" : "Press enter to reconnect",
                 (renderer0, ctx, nick) -> {
                     try {
-                        myNick = nick;
-                        var lobbyAndController = netManager.joinGame(nick);
+                        if (myNick == null)
+                            myNick = nick;
+                        var lobbyAndController = netManager.joinGame(myNick);
                         return ctx.prompt(
-                                promptLobby(renderer, netManager, lobbyAndController.lobby(), lobbyAndController.controller()));
+                                promptLobby(renderer, netManager, lobbyAndController.lobby(),
+                                        lobbyAndController.controller()));
                     } catch (NickNotValidException e) {
                         return ctx.invalid(Objects.requireNonNull(e.getMessage()));
                     } catch (Exception ex) {
