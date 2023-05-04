@@ -85,19 +85,26 @@ class TuiPrintStream extends PrintStream {
         WindowsDetection.detectSupportedCapabilities();
         // Fix for jansi not detecting colors at all on Windows
         if (WindowsDetection.IS_WINDOWS) {
-            System.setProperty(AnsiConsole.JANSI_OUT_COLORS, switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
-                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
-                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
-                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
-            });
-            System.setProperty(AnsiConsole.JANSI_ERR_COLORS, switch (WindowsDetection.ERR_SUPPORTED_COLORS) {
-                case Colors16 -> AnsiConsole.JANSI_COLORS_16;
-                case Colors256 -> AnsiConsole.JANSI_COLORS_256;
-                case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
-            });
-
-            LOGGER.info("Detected stdout color capabilities: {}", WindowsDetection.OUT_SUPPORTED_COLORS);
-            LOGGER.info("Detected stderr color capabilities: {}", WindowsDetection.ERR_SUPPORTED_COLORS);
+            if (System.getProperty(AnsiConsole.JANSI_OUT_COLORS) == null) {
+                var str = switch (WindowsDetection.OUT_SUPPORTED_COLORS) {
+                    case Colors16 -> null;
+                    case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+                    case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+                };
+                if (str != null)
+                    System.setProperty(AnsiConsole.JANSI_OUT_COLORS, str);
+                LOGGER.info("Detected stdout color capabilities: {}", WindowsDetection.OUT_SUPPORTED_COLORS);
+            }
+            if (System.getProperty(AnsiConsole.JANSI_ERR_COLORS) == null) {
+                var str = switch (WindowsDetection.ERR_SUPPORTED_COLORS) {
+                    case Colors16 -> null;
+                    case Colors256 -> AnsiConsole.JANSI_COLORS_256;
+                    case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
+                };
+                if (str != null)
+                    System.setProperty(AnsiConsole.JANSI_ERR_COLORS, str);
+                LOGGER.info("Detected stderr color capabilities: {}", WindowsDetection.ERR_SUPPORTED_COLORS);
+            }
         }
         AnsiConsole.systemInstall();
 
