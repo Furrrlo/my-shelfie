@@ -40,6 +40,26 @@ class ServerLobbyTest {
     }
 
     @Test
+    void hasRequiredPlayersClosedLobby() {
+        final var lobby = new ServerLobby();
+        assertFalse(lobby.hasRequiredPlayers());
+    }
+
+    @Test
+    void hasRequiredPlayersNotSet() {
+        final var lobby = new ServerLobby();
+        lobby.requiredPlayers().set(0);
+        assertFalse(lobby.hasRequiredPlayers());
+    }
+
+    @Test
+    void hasRequiredPlayersSet() {
+        final var lobby = new ServerLobby();
+        lobby.requiredPlayers().set(2);
+        assertTrue(lobby.hasRequiredPlayers());
+    }
+
+    @Test
     void playerCantJoinWhenTheresNoSpace() {
         final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(
@@ -52,13 +72,19 @@ class ServerLobbyTest {
     }
 
     @Test
-    void playerCantJoinWhenTheresLobbyIsNotOpen() {
+    void playerCantJoinWhenTheresNoSpace2() {
         final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(
                 new LobbyPlayer("test_player_1"),
                 new LobbyPlayer("test_player_2"),
-                new LobbyPlayer("test_player_3"),
-                new LobbyPlayer("test_player_4")));
+                new LobbyPlayer("test_player_3")));
+        lobby.requiredPlayers().set(3);
+        assertFalse(lobby.canOnePlayerJoin(), "There's no space, player can't join");
+    }
+
+    @Test
+    void playerCantJoinWhenLobbyIsNotOpen() {
+        final var lobby = new ServerLobby();
         assertFalse(lobby.canOnePlayerJoin(), "This lobby isn't open yet");
     }
 
@@ -70,6 +96,16 @@ class ServerLobbyTest {
                 new LobbyPlayer("test_player_2"),
                 new LobbyPlayer("test_player_3")));
         lobby.requiredPlayers().set(0);
+        assertTrue(lobby.canOnePlayerJoin());
+    }
+
+    @Test
+    void playerCanJoin2() {
+        final var lobby = new ServerLobby();
+        lobby.joinedPlayers().update(l -> List.of(
+                new LobbyPlayer("test_player_1"),
+                new LobbyPlayer("test_player_2")));
+        lobby.requiredPlayers().set(3);
         assertTrue(lobby.canOnePlayerJoin());
     }
 
