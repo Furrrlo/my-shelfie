@@ -18,11 +18,16 @@ public class TuiPrinter {
         try {
             Robot r = new Robot();
             r.keyPress(KeyEvent.VK_CONTROL);
+            //r.keyPress(KeyEvent.VK_META);
             for (int i = 0; i < n; i++) {
                 r.keyPress(KeyEvent.VK_PLUS);
+                //r.keyPress(KeyEvent.VK_EQUALS);
                 r.keyRelease(KeyEvent.VK_PLUS);
+                //r.keyRelease(KeyEvent.VK_EQUALS);
             }
+
             r.keyRelease(KeyEvent.VK_CONTROL);
+            //r.keyRelease(KeyEvent.VK_META);
         } catch (AWTException e) {
             throw new RuntimeException(e);
         }
@@ -32,11 +37,13 @@ public class TuiPrinter {
         try {
             Robot r = new Robot();
             r.keyPress(KeyEvent.VK_CONTROL);
+            //r.keyPress(KeyEvent.VK_META);
             for (int i = 0; i < n; i++) {
                 r.keyPress(KeyEvent.VK_MINUS);
                 r.keyRelease(KeyEvent.VK_MINUS);
             }
             r.keyRelease(KeyEvent.VK_CONTROL);
+            //r.keyRelease(KeyEvent.VK_META);
         } catch (AWTException e) {
             throw new RuntimeException(e);
         }
@@ -60,7 +67,7 @@ public class TuiPrinter {
             new TuiDetailedBoardPrinter(game.getBoard(),
                     List.of(game.getCommonGoals().get(0).getType(),
                             game.getCommonGoals().get(1).getType()))
-                    .print(out);
+                                    .print(out);
         }
 
         @Override
