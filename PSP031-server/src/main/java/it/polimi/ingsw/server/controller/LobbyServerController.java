@@ -99,7 +99,7 @@ public class LobbyServerController {
     public void setRequiredPlayers(String nick, int requiredPlayers) {
         try (var use = lockedLobby.use()) {
             ServerLobby lobby = use.obj();
-            if (lobby.hasRequiredPlayers() && !lobby.joinedPlayers().get().get(0).getNick().equals(nick))
+            if (lobby.isOpen() && !lobby.joinedPlayers().get().get(0).getNick().equals(nick))
                 throw new IllegalArgumentException("This player is not the creator of this lobby");
 
             if (requiredPlayers != 0

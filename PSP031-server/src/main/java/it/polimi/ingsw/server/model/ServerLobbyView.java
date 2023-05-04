@@ -27,8 +27,20 @@ public interface ServerLobbyView {
      *
      * @return true if requiredPlayers != null
      */
-    default boolean hasRequiredPlayers() {
+    default boolean isOpen() {
         return requiredPlayers().get() != null;
+    }
+
+    /**
+     * Return whether {@link #requiredPlayers()} is set
+     * If this method returns false, the game can start when all players are ready
+     * and {@link #MAX_PLAYERS} can join this lobby.
+     * This method does NOT check how many players have joined
+     *
+     * @return true if requiredPlayers != 0
+     */
+    default boolean hasRequiredPlayers() {
+        return isOpen() && requiredPlayers().get() != 0;
     }
 
     /**
