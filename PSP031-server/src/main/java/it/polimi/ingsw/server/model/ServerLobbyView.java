@@ -53,9 +53,9 @@ public interface ServerLobbyView {
         return game().get() != null;
     }
 
-    /** Returns true if there's space for another player in this lobby */
+    /** Returns true if this lobby is open and there's space for another player */
     default boolean canOnePlayerJoin() {
-        return !hasGameStarted() &&
+        return isOpen() && !hasGameStarted() &&
                 ((hasRequiredPlayers() && joinedPlayers().get().size() < requiredPlayers().get())
                         || (!hasRequiredPlayers() && joinedPlayers().get().size() < MAX_PLAYERS));
     }

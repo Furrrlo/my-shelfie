@@ -155,6 +155,7 @@ public class JoinGameTest {
                 game1.complete(g.game());
             });
             player1.controller().ready(true);
+            player1.controller().setRequiredPlayers(0);
         });
         assertDoesNotThrow(() -> {
             var player2 = clientNetManagerFactory2.apply(this).joinGame("player2");

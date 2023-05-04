@@ -29,6 +29,7 @@ class ServerLobbyTest {
     void playerCantJoinWhenGameHasStarted() {
         final var lobby = new ServerLobby();
         lobby.joinedPlayers().update(l -> List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")));
+        lobby.requiredPlayers().set(0);
 
         final ServerGame game;
         lobby.game().set(new ServerGameAndController<>(
@@ -46,7 +47,19 @@ class ServerLobbyTest {
                 new LobbyPlayer("test_player_2"),
                 new LobbyPlayer("test_player_3"),
                 new LobbyPlayer("test_player_4")));
+        lobby.requiredPlayers().set(0);
         assertFalse(lobby.canOnePlayerJoin(), "There's no space, player can't join");
+    }
+
+    @Test
+    void playerCantJoinWhenTheresLobbyIsNotOpen() {
+        final var lobby = new ServerLobby();
+        lobby.joinedPlayers().update(l -> List.of(
+                new LobbyPlayer("test_player_1"),
+                new LobbyPlayer("test_player_2"),
+                new LobbyPlayer("test_player_3"),
+                new LobbyPlayer("test_player_4")));
+        assertFalse(lobby.canOnePlayerJoin(), "This lobby isn't open yet");
     }
 
     @Test
@@ -56,6 +69,7 @@ class ServerLobbyTest {
                 new LobbyPlayer("test_player_1"),
                 new LobbyPlayer("test_player_2"),
                 new LobbyPlayer("test_player_3")));
+        lobby.requiredPlayers().set(0);
         assertTrue(lobby.canOnePlayerJoin());
     }
 

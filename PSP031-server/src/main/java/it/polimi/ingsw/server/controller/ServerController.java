@@ -194,7 +194,9 @@ public class ServerController implements Closeable {
                 final List<String> joinedPlayersNicks = serverLobby.joinedPlayers().get().stream()
                         .map(LobbyPlayer::getNick)
                         .toList();
-                if (!joinedPlayersNicks.contains(nick) && !serverLobby.canOnePlayerJoin() && serverLobby.isOpen())
+
+                //I have the lock, so if this lobby is not open yet, I become the creator.
+                if (!joinedPlayersNicks.contains(nick) && !(serverLobby.canOnePlayerJoin() || !serverLobby.isOpen()))
                     continue; // If we fail the test, let's just retry and search a new one
 
                 final LobbyAndController<Lobby> lobbyAndController;

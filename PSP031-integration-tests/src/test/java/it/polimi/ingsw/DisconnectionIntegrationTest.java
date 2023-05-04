@@ -116,7 +116,8 @@ public class DisconnectionIntegrationTest {
             }
         }; var ignored = bindServerController.apply(serverController)) {
             ClientNetManager clientManager1 = clientNetManagerFactory1.get();
-            LobbyView lobbyView = clientManager1.joinGame(testNickname).lobby();
+            var player1 = clientManager1.joinGame(testNickname);
+            player1.controller().setRequiredPlayers(0);
 
             ClientNetManager clientManager2 = clientNetManagerFactory2.get();
             LobbyView lobbyView2 = clientManager2.joinGame("p2").lobby();
@@ -183,10 +184,11 @@ public class DisconnectionIntegrationTest {
         }; var ignored = bindServerController.apply(serverController)) {
 
             //Connect 3 client
-            LobbyView lobbyView = clientNetManagerFactory1.get().joinGame("test_1").lobby();
+            var player1 = clientNetManagerFactory1.get().joinGame("test_1");
+            player1.controller().setRequiredPlayers(0);
 
-            ClientNetManager socketClientManager2 = clientNetManagerFactory2.get();
-            LobbyView lobbyView2 = socketClientManager2.joinGame("test_2").lobby();
+            ClientNetManager clientNetManager2 = clientNetManagerFactory2.get();
+            LobbyView lobbyView2 = clientNetManager2.joinGame("test_2").lobby();
 
             LobbyView lobbyView3 = clientNetManagerFactory3.get().joinGame("test_3").lobby();
 
@@ -245,12 +247,9 @@ public class DisconnectionIntegrationTest {
             serverPlayerDisconnected.get(10, TimeUnit.SECONDS);
             assertFalse(serverPlayer2.connected().get());
 
-            //Client gets stuck on receive(), kill it
-            //socketClientManager2.kill();
-
             //Restart player test_2 creating a new client
-            socketClientManager2 = clientNetManagerFactory2New.get();
-            LobbyView lobbyView2_new = socketClientManager2.joinGame("test_2").lobby();
+            clientNetManager2 = clientNetManagerFactory2New.get();
+            LobbyView lobbyView2_new = clientNetManager2.joinGame("test_2").lobby();
 
             final var newClient2GameAndController = lobbyView2_new.game().get();
             assertNotNull(newClient2GameAndController);
