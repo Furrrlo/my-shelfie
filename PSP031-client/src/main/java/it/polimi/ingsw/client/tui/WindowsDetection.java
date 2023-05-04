@@ -25,26 +25,10 @@ class WindowsDetection {
     public static final AnsiColors ERR_SUPPORTED_COLORS;
 
     static {
-        long inConsole = 0;
-        final int[] mode = new int[1];
-
-        boolean shouldCheck = false;
         if (IS_WINDOWS) {
-            inConsole = GetStdHandle(STD_INPUT_HANDLE);
-            shouldCheck = GetConsoleMode(inConsole, mode) != 0;
-        }
-
-        if (shouldCheck) {
-            rawMode(inConsole, true);
-            var iin = InterruptibleInputStream.wrap(System.in);
-            try {
-                iin.configureDefaultTimeout(200, TimeUnit.MILLISECONDS);
-                OUT_SUPPORTED_COLORS = detectSupportedColors(GetStdHandle(STD_OUTPUT_HANDLE), System.out, iin);
-                ERR_SUPPORTED_COLORS = detectSupportedColors(GetStdHandle(STD_ERROR_HANDLE), System.err, iin);
-            } finally {
-                iin.clearDefaultTimeout();
-                rawMode(inConsole, false);
-            }
+            var res = detectSupportedColorsByAnsiSequence();
+            OUT_SUPPORTED_COLORS = res.out;
+            ERR_SUPPORTED_COLORS = res.err;
         } else {
             OUT_SUPPORTED_COLORS = AnsiColors.Colors16;
             ERR_SUPPORTED_COLORS = AnsiColors.Colors16;
@@ -62,7 +46,26 @@ class WindowsDetection {
     private static final int ENABLE_ECHO_INPUT = 0x0004;
     private static final int ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
 
-    private static AnsiColors detectSupportedColors(long outConsole, PrintStream out, InputStream in) {
+    private static StreamsColors detectSupportedColorsByAnsiSequence() {
+        long inConsole = GetStdHandle(STD_INPUT_HANDLE);
+        final int[] mode = new int[1];
+        if (GetConsoleMode(inConsole, mode) == 0)
+            return new StreamsColors(AnsiColors.Colors16, AnsiColors.Colors16);
+
+        rawMode(inConsole, true);
+        var iin = InterruptibleInputStream.wrap(System.in);
+        try {
+            iin.configureDefaultTimeout(200, TimeUnit.MILLISECONDS);
+            return new StreamsColors(
+                    doDetectSupportedColorsByAnsiSequence(GetStdHandle(STD_OUTPUT_HANDLE), System.out, iin),
+                    doDetectSupportedColorsByAnsiSequence(GetStdHandle(STD_ERROR_HANDLE), System.err, iin));
+        } finally {
+            iin.clearDefaultTimeout();
+            rawMode(inConsole, false);
+        }
+    }
+
+    private static AnsiColors doDetectSupportedColorsByAnsiSequence(long outConsole, PrintStream out, InputStream in) {
         final int[] mode = new int[1];
         final boolean isOutConsole = GetConsoleMode(outConsole, mode) != 0;
         // Try to enable Virtual Terminal
@@ -77,9 +80,9 @@ class WindowsDetection {
             var reader = new InputStreamReader(in, System.console() != null
                     ? System.console().charset()
                     : Charset.defaultCharset());
-            if (checkColor(out, reader, "48;2;1;2;3")) // set background color to RGB(1,2,3)
+            if (ansiCheckColor(out, reader, "48;2;1;2;3")) // set background color to RGB(1,2,3)
                 return AnsiColors.TrueColor;
-            if (checkColor(out, reader, "48;5;225")) // set background color to color 225
+            if (ansiCheckColor(out, reader, "48;5;225")) // set background color to color 225
                 return AnsiColors.Colors256;
             return AnsiColors.Colors16;
         } catch (IOException ex) {
@@ -106,7 +109,7 @@ class WindowsDetection {
                     new IOException(WindowsSupport.getLastErrorMessage()));
     }
 
-    private static boolean checkColor(PrintStream out, Reader in, String color) throws IOException {
+    private static boolean ansiCheckColor(PrintStream out, Reader in, String color) throws IOException {
         out.print(CSI + color + "m");
         out.print(DCS + "$qm" + ST); // DECRQSS (Request Selection or Setting) for SGR
         out.flush();
@@ -213,5 +216,8 @@ class WindowsDetection {
         if (ch == -1)
             throw new EOFException();
         return ch;
+    }
+
+    private record StreamsColors(AnsiColors out, AnsiColors err) {
     }
 }
