@@ -67,7 +67,7 @@ public class TuiPrinter {
             new TuiDetailedBoardPrinter(game.getBoard(),
                     List.of(game.getCommonGoals().get(0).getType(),
                             game.getCommonGoals().get(1).getType()))
-                                    .print(out);
+                    .print(out);
         }
 
         @Override
