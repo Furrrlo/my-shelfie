@@ -9,6 +9,8 @@ import org.fusesource.jansi.internal.Kernel32;
 import org.fusesource.jansi.io.AnsiOutputStream;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -23,6 +25,8 @@ import static org.fusesource.jansi.internal.CLibrary.ioctl;
 import static org.fusesource.jansi.internal.Kernel32.*;
 
 class TuiPrintStream extends PrintStream {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TuiPrintStream.class);
 
     private static final int DEFAULT_TERMINAL_WIDTH = 80;
     private static final int DEFAULT_TERMINAL_HEIGHT = 24;
@@ -91,6 +95,9 @@ class TuiPrintStream extends PrintStream {
                 case Colors256 -> AnsiConsole.JANSI_COLORS_256;
                 case TrueColor -> AnsiConsole.JANSI_COLORS_TRUECOLOR;
             });
+
+            LOGGER.info("Detected stdout color capabilities: {}", WindowsDetection.OUT_SUPPORTED_COLORS);
+            LOGGER.info("Detected stderr color capabilities: {}", WindowsDetection.ERR_SUPPORTED_COLORS);
         }
         AnsiConsole.systemInstall();
 
