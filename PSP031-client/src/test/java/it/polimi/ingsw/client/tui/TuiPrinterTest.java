@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Random;
 
 class TuiPrinterTest {
@@ -89,13 +90,15 @@ class TuiPrinterTest {
 
     @Test
     void tuiPrintEmptyBoard() {
-        new TuiDetailedBoardPrinter(new Board(4)).print(out);
+        new TuiDetailedBoardPrinter(new Board(4),
+                List.of(Type.TWO_SQUARES, Type.FOUR_QUADRIPLETS)).print(out);
     }
 
     @Test
     void tuiPrintBoardRandom() {
         try (var ignored = out.translateCursorToCol(20)) {
-            new TuiDetailedBoardPrinter(refillBoardRandomly(new Board(4))).print(out);
+            new TuiDetailedBoardPrinter(refillBoardRandomly(new Board(4)),
+                    List.of(Type.TWO_SQUARES, Type.SIX_COUPLES)).print(out);
         }
     }
 

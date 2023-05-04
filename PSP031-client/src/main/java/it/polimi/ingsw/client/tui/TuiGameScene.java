@@ -3,6 +3,7 @@ package it.polimi.ingsw.client.tui;
 import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -198,7 +199,8 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
                 outerRect,
                 TuiHAlignment.RIGHT, TuiVAlignment.TOP);
 
-        var boardPrinter = new TuiDetailedBoardPrinter(game.getBoard());
+        var boardPrinter = new TuiDetailedBoardPrinter(game.getBoard(),
+                List.of(game.getCommonGoals().get(0).getType(), game.getCommonGoals().get(1).getType()));
         out.printAligned(
                 boardPrinter,
                 TuiRect.fromCoords(

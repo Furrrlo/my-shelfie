@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class TuiPrinter {
@@ -56,7 +57,10 @@ public class TuiPrinter {
 
         @Override
         public void accept(TuiPrintStream out) {
-            new TuiDetailedBoardPrinter(game.getBoard()).print(out);
+            new TuiDetailedBoardPrinter(game.getBoard(),
+                    List.of(game.getCommonGoals().get(0).getType(),
+                            game.getCommonGoals().get(1).getType()))
+                    .print(out);
         }
 
         @Override
@@ -85,6 +89,10 @@ public class TuiPrinter {
 
         @Override
         public void accept(TuiPrintStream out) {
+            new TuiDetailedShelfiePrinter(game.thePlayer().getShelfie()).print(out);
+            try (var ignored = out.translateCursor(30, 500)) {
+                new TuiDetailedPersonalGoalPrinter(game.getPersonalGoal()).print(out);
+            }
         }
 
         @Override

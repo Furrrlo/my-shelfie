@@ -2,8 +2,10 @@ package it.polimi.ingsw.client.tui;
 
 import it.polimi.ingsw.model.Board;
 import it.polimi.ingsw.model.BoardView;
+import it.polimi.ingsw.model.Type;
 
 import java.io.PrintStream;
+import java.util.List;
 
 import static it.polimi.ingsw.client.tui.TuiDetailedNumberPrinter.PXL_COLS_FOR_NUMBERS;
 import static it.polimi.ingsw.client.tui.TuiDetailedNumberPrinter.PXL_ROWS_FOR_NUMBERS;
@@ -14,16 +16,19 @@ import static it.polimi.ingsw.model.BoardView.BOARD_ROWS;
 
 class TuiDetailedBoardPrinter implements TuiPrinter2 {
 
-    public static final TuiDetailedBoardPrinter EMPTY = new TuiDetailedBoardPrinter(new Board(2)) {
+    public static final TuiDetailedBoardPrinter EMPTY = new TuiDetailedBoardPrinter(new Board(2),
+            List.of(Type.FOUR_QUADRIPLETS, Type.SIX_COUPLES)) {
         @Override
         public void print(TuiPrintStream out) {
         }
     };
 
     private final BoardView board;
+    private final List<Type> commonGoalTypes;
 
-    public TuiDetailedBoardPrinter(BoardView board) {
+    public TuiDetailedBoardPrinter(BoardView board, List<Type> commonGoalTypes) {
         this.board = board;
+        this.commonGoalTypes = commonGoalTypes;
     }
 
     @Override
@@ -54,7 +59,16 @@ class TuiDetailedBoardPrinter implements TuiPrinter2 {
                         tilePrinter.print(out);
                         colOffset += tilePrinter.getSize().cols();
                     } else {
-                        colOffset += printInvalidTile(out);
+                        if (row == BOARD_ROWS - 1 && col == BOARD_COLUMNS - 2) {
+                            var commonGoalPrinter = TuiDetailedCommonGoalPrinter.of(commonGoalTypes.get(0));
+                            commonGoalPrinter.print(out);
+                            colOffset += commonGoalPrinter.getSize().cols();
+                        } else if (row == BOARD_ROWS - 1 && col == BOARD_COLUMNS - 1) {
+                            var commonGoalPrinter = TuiDetailedCommonGoalPrinter.of(commonGoalTypes.get(1));
+                            commonGoalPrinter.print(out);
+                            colOffset += commonGoalPrinter.getSize().cols();
+                        } else
+                            colOffset += printInvalidTile(out);
                     }
                 }
 

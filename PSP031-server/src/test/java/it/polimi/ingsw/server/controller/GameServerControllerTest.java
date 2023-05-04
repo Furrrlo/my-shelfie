@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameServerControllerTest {
 
+    //TODO: finish testing makeMove
     @Test
     void makeMove() {
         final var randomFactory = RandomGeneratorFactory.getDefault();

@@ -62,11 +62,11 @@ class TuiRenderer implements Closeable {
 
     private void renderLoop(TuiPrintStream out) {
         try {
+            String errorMsg = "";
             do {
                 Event evt = events.take();
                 Prompt currPrompt = promptStack.peek();
 
-                String errorMsg = "";
                 switch (evt) {
                     case RenderEvent ignored -> {
                         // Coalesce render events into a single re-render
@@ -82,6 +82,7 @@ class TuiRenderer implements Closeable {
                         // Replace the current prompt with the new one
                         promptStack.clear();
                         promptStack.push(currPrompt = promptEvent.prompt());
+                        errorMsg = "";
                     }
                     case InputEvent input -> {
                         Prompt.Result res;
@@ -91,6 +92,7 @@ class TuiRenderer implements Closeable {
                             // Back, pop the last
                             promptStack.pop();
                             currPrompt = promptStack.peek();
+                            errorMsg = "";
                         } else if (currPrompt == null) {
                             // Not back, not a valid number, no prompt or not a valid choice
                             errorMsg = "Invalid input " + input.in();
@@ -105,17 +107,18 @@ class TuiRenderer implements Closeable {
                             var promptResult = (Prompt.PromptResult) res;
                             promptStack.clear();
                             promptStack.push(currPrompt = promptResult.prompt());
-                            errorMsg = promptResult.errorMsg() == null ? errorMsg : promptResult.errorMsg();
+                            errorMsg = promptResult.errorMsg() == null ? "" : promptResult.errorMsg();
                         } else if (res.type() == ChoicePrompt.ResultType.SUBPROMPT) {
                             // Add a new subprompt
                             var promptResult = (Prompt.PromptResult) res;
                             promptStack.push(currPrompt = promptResult.prompt());
-                            errorMsg = promptResult.errorMsg() == null ? errorMsg : promptResult.errorMsg();
+                            errorMsg = promptResult.errorMsg() == null ? "" : promptResult.errorMsg();
                         } else /* if(res.type() == Prompt.ResultType.DONE) */ {
                             // Delete all until we get to the parent
                             while (promptStack.size() > 1)
                                 promptStack.pop();
                             currPrompt = promptStack.peek();
+                            errorMsg = "";
                         }
                     }
                 }
