@@ -326,20 +326,105 @@ class BoardTest {
 
     }
 
-    /*
-     * @Test
-     * void hasFreeSides(){
-     * 
-     * }
-     * 
-     * @Test
-     * void hasCommonSides2(){
-     * 
-     * }
-     * 
-     * @Test
-     * void hasCommonSides3(){
-     * 
-     * }
-     */
+      @Test
+      void hasFreeSides(){
+          var board = new Board(2);
+          Boards.refillBoardRandom(board);
+          List<BoardCoord> bc = new ArrayList<>();
+
+          //no free sides
+          bc.add(new BoardCoord(3, 2));
+          bc.add(new BoardCoord(3, 4));
+          bc.add(new BoardCoord(2, 3));
+          bc.add(new BoardCoord(4, 3));
+          Boards.refillBoardCoord(board, bc);
+          assertFalse(board.hasFreeSide(3,3));
+          Boards.emptyBoard(board);
+          bc.clear();
+
+          //only one free invalid side
+          bc.add(new BoardCoord(6, 4));
+          bc.add(new BoardCoord(6, 5));
+          bc.add(new BoardCoord(7, 3));
+          bc.add(new BoardCoord(6, 5));
+          Boards.refillBoardCoord(board, bc);
+          assertTrue(board.hasFreeSide(6,5));
+      }
+
+      @Test
+      void hasCommonSides2(){
+          var board = new Board(2);
+          Boards.refillBoardRandom(board);
+          List<BoardCoord> bc = new ArrayList<>();
+
+          //2 in a row
+          bc.add(new BoardCoord(1, 3));
+          bc.add(new BoardCoord(1, 4));
+          Boards.refillBoardCoord(board, bc);
+          assertTrue(board.hasCommonSide(1,3,1,4));
+          Boards.emptyBoard(board);
+          bc.clear();
+
+          //2 in a column
+          bc.add(new BoardCoord(1, 3));
+          bc.add(new BoardCoord(2, 3));
+          Boards.refillBoardCoord(board, bc);
+          assertTrue(board.hasCommonSide(1,3,2,3));
+          Boards.emptyBoard(board);
+          bc.clear();
+
+          //2 in diagonal
+          bc.add(new BoardCoord(1, 3));
+          bc.add(new BoardCoord(2, 4));
+          Boards.refillBoardCoord(board, bc);
+          assertFalse(board.hasCommonSide(1,3,2,4));
+          Boards.emptyBoard(board);
+          bc.clear();
+
+      }
+
+      @Test
+      void hasCommonSides3(){
+            var board = new Board(2);
+          Boards.refillBoardRandom(board);
+          List<BoardCoord> bc = new ArrayList<>();
+
+          //3 in a row
+          bc.add(new BoardCoord(2, 3));
+          bc.add(new BoardCoord(2, 4));
+          bc.add(new BoardCoord(2, 5));
+          Boards.refillBoardCoord(board, bc);
+          //coordinates given in order
+          assertTrue(board.hasCommonSide(2,3,2,4,2,5));
+          //coordinates given in  reverse order
+          assertTrue(board.hasCommonSide(2,5,2,4,2,3));
+          //coordinates given from middle one
+          assertTrue(board.hasCommonSide(2,4,2,3,2,5));
+          Boards.emptyBoard(board);
+          bc.clear();
+
+          //3 in a column
+          bc.add(new BoardCoord(3, 2));
+          bc.add(new BoardCoord(4, 2));
+          bc.add(new BoardCoord(5, 2));
+          Boards.refillBoardCoord(board, bc);
+          //coordinates given in order
+          assertTrue(board.hasCommonSide(3,2,4,2,5,2));
+          //coordinates given in  reverse order
+          assertTrue(board.hasCommonSide(5,2,4,2,3,2));
+          //coordinates given from middle one
+          assertTrue(board.hasCommonSide(4,2,3,2,5,2));
+          Boards.emptyBoard(board);
+          bc.clear();
+
+          //3 in a L shape
+          bc.add(new BoardCoord(3, 2));
+          bc.add(new BoardCoord(4, 2));
+          bc.add(new BoardCoord(4, 3));
+          Boards.refillBoardCoord(board, bc);
+          //coordinates given in order
+          assertFalse(board.hasCommonSide(3,2,4,2,4,3));
+          Boards.emptyBoard(board);
+          bc.clear();
+     }
 }
