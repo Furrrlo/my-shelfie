@@ -215,7 +215,7 @@ class TuiRenderer implements Closeable {
         events.add(new SetPromptEvent(prompt));
     }
 
-    private sealed interface Event permits TuiRenderer.InputEvent,SetSceneEvent,SetPromptEvent,RenderEvent {
+    private sealed interface Event permits TuiRenderer.InputEvent, SetSceneEvent, SetPromptEvent, RenderEvent {
     }
 
     private record InputEvent(String in) implements Event {
