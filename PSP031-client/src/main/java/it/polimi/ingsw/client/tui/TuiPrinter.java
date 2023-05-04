@@ -89,6 +89,10 @@ public class TuiPrinter {
 
         @Override
         public void accept(TuiPrintStream out) {
+            new TuiDetailedShelfiePrinter(game.thePlayer().getShelfie()).print(out);
+            try (var ignored = out.translateCursor(30, 500)) {
+                new TuiDetailedPersonalGoalPrinter(game.getPersonalGoal()).print(out);
+            }
         }
 
         @Override
