@@ -87,26 +87,23 @@ class TuiPrompts {
                                         BiFunction<String, Integer, ClientNetManager> netManagerFactory) {
         final String defaultHost = "localhost";
         return promptFactory.input(
-                String.format("Enter server address in <ip:port> form (defaults to %s:%d):", defaultHost, defaultPort),
+                String.format("Enter server address in <ip[:port]> form (defaults to %s:%d):", defaultHost, defaultPort),
                 (renderer, ctx, input) -> {
-                    final String host;
-                    final int port;
-                    if (input.trim().isEmpty()) {
-                        host = defaultHost;
-                        port = defaultPort;
-                    } else {
-                        String[] split = input.split(":", -1);
-                        if (split.length != 2)
-                            return ctx.invalid("Missing semicolon separator");
-
+                    String host = defaultHost;
+                    int port = defaultPort;
+                    if (!input.isEmpty()) {
+                        String[] split = input.split(":", 0);
+                        if (split.length > 2)
+                            return ctx.invalid("Wrong format");
                         host = split[0];
-                        try {
-                            port = Integer.parseInt(split[1]);
-                        } catch (NumberFormatException ex) {
-                            return ctx.invalid("'" + split[1] + "' is not a valid port number");
+                        if (split.length == 2) {
+                            try {
+                                port = Integer.parseInt(split[1]);
+                            } catch (NumberFormatException ex) {
+                                return ctx.invalid("'" + split[1] + "' is not a valid port number");
+                            }
                         }
                     }
-
                     return ctx.prompt(promptNick(renderer, ctx.subPrompt(), netManagerFactory.apply(host, port)));
                 });
     }
