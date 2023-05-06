@@ -51,10 +51,7 @@ public class Shelfie implements ShelfieView {
                 .toArray(Property[][]::new);
     }
 
-    /**
-     * returns true if all the tiles of the shelfie calling the method overlaps with equal not null tiles of the
-     * shelfie (that) passed as a parameter
-     */
+    @Override
     public boolean isOverlapping(Shelfie that) {
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLUMNS; c++) {
@@ -66,6 +63,7 @@ public class Shelfie implements ShelfieView {
         return true;
     }
 
+    @Override
     public int numTilesOverlappingWithPersonalGoal(PersonalGoal personalGoal) {
         int count = 0;
         for (int row = 0; row < ROWS; row++) {
@@ -78,6 +76,7 @@ public class Shelfie implements ShelfieView {
         return count;
     }
 
+    @Override
     public List<List<TileAndCoords<Tile>>> groupsOfTiles() {
         List<List<TileAndCoords<Tile>>> groupsOfTiles = new ArrayList<>();
         int[][] checked = new int[ROWS][COLUMNS];
@@ -91,6 +90,11 @@ public class Shelfie implements ShelfieView {
         return groupsOfTiles;
     }
 
+    /**
+     * returns a list af TileAndCoords of the same type that can be reached from a given position, and updates the
+     * matrix of inspected types( checked[][] ) setting to 1 the elements in the same positions as the tiles added
+     * to the group
+     */
     private List<TileAndCoords<Tile>> groupOfTiles(int row, int col, int[][] checked) {
         List<TileAndCoords<Tile>> reachedTiles = new ArrayList<>();
         reachedTiles.add(new TileAndCoords<Tile>(this.tile(row, col).get(), row, col));
