@@ -116,15 +116,14 @@ class TuiPrompts {
             out.println();
         });
         return promptFactory.input(
-                myNick == null ? "Choose a nickname:" : "Press enter to reconnect",
+                "Choose a nickname:",
                 (renderer0, ctx, nick) -> {
                     try {
                         if (nick.isEmpty())
                             return ctx.invalid("Nick can't be empty");
 
-                        if (myNick == null || myNick.isEmpty())
-                            myNick = nick;
-                        var lobbyAndController = netManager.joinGame(myNick);
+                        myNick = nick;
+                        var lobbyAndController = netManager.joinGame(nick);
                         return ctx.prompt(
                                 promptLobby(renderer, netManager, lobbyAndController.lobby(),
                                         lobbyAndController.controller()));
@@ -143,9 +142,18 @@ class TuiPrompts {
                                       LobbyController controller) {
         final Consumer<Boolean> readyObserver = b -> renderer.rerender();
         lobby.joinedPlayers().registerObserver(players -> {
-            renderer.rerender();
-            // By using always the same readyObserver, we avoid registering dupes, as it's guaranteed by registerObserver
-            players.forEach(player -> player.ready().registerObserver(readyObserver));
+            if (players.stream().noneMatch(p -> p.getNick().equals(myNick))) {
+                renderer.setPrompt(initialPrompt());
+                renderer.setScene(out -> {
+                    printLogo(out);
+                    out.println();
+                    out.println(ConsoleColors.RED + "Disconnected from the server" + ConsoleColors.RESET);
+                });
+            } else {
+                renderer.rerender();
+                // By using always the same readyObserver, we avoid registering dupes, as it's guaranteed by registerObserver
+                players.forEach(player -> player.ready().registerObserver(readyObserver));
+            }
         });
         lobby.joinedPlayers().get().forEach(player -> player.ready().registerObserver(readyObserver));
         lobby.game().registerObserver(g -> renderer.setPrompt(g != null
@@ -215,7 +223,7 @@ class TuiPrompts {
                         return ctx.prompt(promptReady(netManager, lobby, controller));
                     } catch (DisconnectedException e) {
                         return ctx.prompt("Disconnected from the server",
-                                promptNick(renderer0, ctx.rootPrompt(), netManager));
+                                promptReconnect(renderer0, netManager));
                     }
                 });
     }
@@ -232,7 +240,7 @@ class TuiPrompts {
                                 return ctx.done();
                             } catch (DisconnectedException e) {
                                 return ctx.prompt("Disconnected from the server",
-                                        promptNick(renderer0, ctx.rootPrompt(), netManager));
+                                        promptReconnect(renderer0, netManager));
                             }
                         }),
                 new ChoicePrompt.Choice(
@@ -243,7 +251,7 @@ class TuiPrompts {
                                 return ctx.done();
                             } catch (DisconnectedException e) {
                                 return ctx.prompt("Disconnected from the server",
-                                        promptNick(renderer0, ctx.rootPrompt(), netManager));
+                                        promptReconnect(renderer0, netManager));
                             }
                         }),
                 new ChoicePrompt.Choice(
@@ -258,7 +266,7 @@ class TuiPrompts {
                                 return ctx.done();
                             } catch (DisconnectedException e) {
                                 return ctx.prompt("Disconnected from the server",
-                                        promptNick(renderer0, ctx.rootPrompt(), netManager));
+                                        promptReconnect(renderer0, netManager));
                             }
                         },
                         () -> lobby.joinedPlayers().get().get(0).getNick().equals(myNick)
@@ -273,6 +281,38 @@ class TuiPrompts {
                         }));
     }
 
+    private static Prompt promptReconnect(TuiRenderer renderer,
+                                          ClientNetManager netManager) {
+        renderer.setScene(out -> {
+            printLogo(out);
+            out.println();
+            out.println(ConsoleColors.RED + "Disconnected from the server" + ConsoleColors.RESET);
+            out.println();
+            out.println("Server: " + netManager.getHost() + ":" + netManager.getPort());
+            out.println();
+        });
+        return new InputPrompt(
+                "Press enter to reconnect",
+                (renderer0, ctx, ignored) -> {
+                    try {
+                        if (myNick == null || myNick.isEmpty())
+                            return ctx.prompt("Disconnected from the server",
+                                    promptNick(renderer0, ctx.rootPrompt(), netManager));
+
+                        var lobbyAndController = netManager.joinGame(myNick);
+
+                        return ctx.prompt(
+                                promptLobby(renderer, netManager, lobbyAndController.lobby(),
+                                        lobbyAndController.controller()));
+                    } catch (NickNotValidException e) {
+                        return ctx.invalid(Objects.requireNonNull(e.getMessage()));
+                    } catch (Exception ex) {
+                        LOGGER.error("Failed to connect to the server", ex);
+                        return ctx.invalid("Failed to connect to the server");
+                    }
+                });
+    }
+
     private static Prompt promptGame(TuiRenderer renderer,
                                      ClientNetManager netManager,
                                      GameView game,
@@ -285,6 +325,11 @@ class TuiPrompts {
             p.connected().registerObserver(c -> renderer.rerender());
             p.score().registerObserver(c -> renderer.rerender());
             p.getShelfie().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender()));
+        });
+        game.thePlayer().connected().registerObserver(c -> {
+            if (!c) {
+                renderer.setPrompt(promptReconnect(renderer, netManager));
+            }
         });
 
         renderer.setScene(new TuiGameScene(game));
@@ -448,7 +493,7 @@ class TuiPrompts {
                             controller.makeMove(coords, shelfCol);
                         } catch (DisconnectedException e) {
                             return ctx.prompt("Disconnected from the server",
-                                    promptNick(renderer0, ctx.rootPrompt(), netManager));
+                                    promptReconnect(renderer0, netManager));
                         }
                         return ctx.done();
                     }
