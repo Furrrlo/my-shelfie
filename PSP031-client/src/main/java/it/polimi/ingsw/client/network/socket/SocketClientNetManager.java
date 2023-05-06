@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketImpl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +33,15 @@ public class SocketClientNetManager implements ClientNetManager {
 
     private @Nullable ClientSocketManager socketManager;
     private @Nullable Socket socket;
+
+    /**
+     * Socket can't be reconnected after a disconnection or a failed connection.
+     * If the connection fails, {@link Socket#isClosed()} does not return true,
+     * but the {@link SocketImpl} is closed by {@link sun.nio.ch.NioSocketImpl#connect(SocketAddress, int)}
+     * and can't be reconnected.
+     */
+    @SuppressWarnings("JavadocReference")
+    private boolean newSocketNeeded = false;
 
     public SocketClientNetManager(InetSocketAddress serverAddress) {
         this(serverAddress, -1, TimeUnit.MILLISECONDS);
@@ -71,11 +82,28 @@ public class SocketClientNetManager implements ClientNetManager {
     @Override
     public LobbyAndController<Lobby> joinGame(String nick) throws IOException, NickNotValidException {
         if (socketManager == null || socketManager.isClosed()) {
-            if (socket == null || socket.isClosed())
-                socket = new Socket(serverAddress.getAddress(), serverAddress.getPort());
-            else
-                socket.connect(serverAddress);
-            socket.setSoTimeout(22000);
+            //Log socket status
+            if (socket != null) {
+                LOGGER.trace("Socket closed: " + socket.isClosed());
+                LOGGER.trace("Socket connected: " + socket.isConnected());
+                LOGGER.trace("Socket bounded: " + socket.isBound());
+                LOGGER.trace("newSocketNeeded: " + newSocketNeeded);
+            } else {
+                LOGGER.trace("Socket null");
+            }
+
+            //Create a new socket if needed
+            if (socket == null || socket.isClosed() || newSocketNeeded) {
+                socket = new Socket();
+                newSocketNeeded = false;
+            }
+
+            if (!socket.isConnected()) {
+                newSocketNeeded = true;
+                socket.connect(serverAddress, 500);
+                socket.setSoTimeout(10000);
+                newSocketNeeded = false;
+            }
             socketManager = defaultResponseTimeout == -1
                     ? new ClientSocketManagerImpl(socket)
                     : new ClientSocketManagerImpl(socket, defaultResponseTimeout, defaultResponseTimeoutUnit);
