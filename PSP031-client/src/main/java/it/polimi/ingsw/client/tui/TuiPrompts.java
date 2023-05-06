@@ -143,12 +143,7 @@ class TuiPrompts {
         final Consumer<Boolean> readyObserver = b -> renderer.rerender();
         lobby.joinedPlayers().registerObserver(players -> {
             if (players.stream().noneMatch(p -> p.getNick().equals(myNick))) {
-                renderer.setPrompt(initialPrompt());
-                renderer.setScene(out -> {
-                    printLogo(out);
-                    out.println();
-                    out.println(ConsoleColors.RED + "Disconnected from the server" + ConsoleColors.RESET);
-                });
+                renderer.setPrompt(promptReconnect(renderer, netManager));
             } else {
                 renderer.rerender();
                 // By using always the same readyObserver, we avoid registering dupes, as it's guaranteed by registerObserver
@@ -286,7 +281,7 @@ class TuiPrompts {
         renderer.setScene(out -> {
             printLogo(out);
             out.println();
-            out.println(ConsoleColors.RED + "Disconnected from the server" + ConsoleColors.RESET);
+            out.println(ConsoleColors.RED_BOLD_BRIGHT + "Disconnected from the server" + ConsoleColors.RESET);
             out.println();
             out.println("Server: " + netManager.getHost() + ":" + netManager.getPort());
             out.println();
