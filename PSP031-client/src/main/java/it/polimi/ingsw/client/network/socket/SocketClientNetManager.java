@@ -4,6 +4,7 @@ import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.Lobby;
+import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.socket.packets.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -15,6 +16,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketImpl;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -124,8 +127,8 @@ public class SocketClientNetManager implements ClientNetManager {
                             .handle((__, ex) -> {
                                 if (ex == null)
                                     return __;
-                                // TODO: reconnect
                                 LOGGER.error("Uncaught exception in SocketClientHeartbeatHandler", ex);
+                                disconnectPlayer(lobby, nick);
                                 return null;
                             });
                     CompletableFuture.supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
@@ -139,8 +142,8 @@ public class SocketClientNetManager implements ClientNetManager {
                             }).handle((__, ex) -> {
                                 if (ex == null)
                                     return __;
-                                // TODO: reconnect
                                 LOGGER.error("Uncaught exception in SocketClient*Updater", ex);
+                                disconnectPlayer(lobby, nick);
                                 return null;
                             });
                     lobbyCtx.reply(new LobbyReceivedPacket());
@@ -149,5 +152,19 @@ public class SocketClientNetManager implements ClientNetManager {
             }
         }
         throw new RuntimeException("Why is this necessary?");
+    }
+
+    private void disconnectPlayer(Lobby lobby, String nick) {
+        LOGGER.warn("Socket disconnected from the server");
+        var game = lobby.game().get();
+        if (game == null) {
+            lobby.joinedPlayers().update(players -> {
+                List<LobbyPlayer> l = new ArrayList<>(players);
+                l.removeIf(p -> p.getNick().equals(nick));
+                return l;
+            });
+        } else {
+            game.game().thePlayer().connected().set(false);
+        }
     }
 }

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -156,7 +157,8 @@ public class DisconnectionIntegrationTest {
         final AtomicInteger joinedPlayers = new AtomicInteger();
         final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
         final var serverAllJoined = new CompletableFuture<Void>();
-        final var serverPlayerDisconnected = new CompletableFuture<Void>();
+        final var serverPlayerDisconnected = new CompletableFuture<Boolean>();
+        final var client2Connected = new CompletableFuture<Boolean>();
 
         try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
             @Override
@@ -242,10 +244,16 @@ public class DisconnectionIntegrationTest {
             });
 
             serverController.runOnOnlyLobbyLocks(
-                    () -> serverPlayer2.connected().registerObserver(value -> serverPlayerDisconnected.complete(null)));
+                    () -> {
+                        serverPlayer2.connected().registerObserver(serverPlayerDisconnected::complete);
+                        Objects.requireNonNull(lobbyView2.game().get()).game().thePlayer().connected()
+                                .registerObserver(client2Connected::complete);
+                    });
             disconnect.execute();
-            serverPlayerDisconnected.get(10, TimeUnit.SECONDS);
-            assertFalse(serverPlayer2.connected().get());
+            assertFalse(serverPlayerDisconnected.get(10, TimeUnit.SECONDS));
+
+            //TODO: rmi client does not detect disconnection
+            //assertFalse(client2Connected.get(15, TimeUnit.SECONDS));
 
             //Restart player test_2 creating a new client
             clientNetManager2 = clientNetManagerFactory2New.get();
@@ -256,6 +264,9 @@ public class DisconnectionIntegrationTest {
             final var newClient2Game = newClient2GameAndController.game();
 
             assertTrue(serverPlayer2.connected().get());
+
+            //Cast and set connected = true to compare the old game with the new one
+            ((Property<Boolean>) client2Game.thePlayer().connected()).set(true);
 
             assertEquals(newClient2Game, client2Game);
             assertNotSame(newClient2Game, client2Game);
