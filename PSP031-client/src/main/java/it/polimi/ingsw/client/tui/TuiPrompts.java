@@ -252,7 +252,8 @@ class TuiPrompts {
                 new ChoicePrompt.Choice(
                         "Modify required players",
                         (renderer0, ctx) -> ctx.prompt(promptRequiredPlayers(netManager, lobby, controller)),
-                        () -> lobby.joinedPlayers().get().get(0).getNick().equals(myNick)),
+                        () -> lobby.joinedPlayers().get().size() > 0
+                                && lobby.joinedPlayers().get().get(0).getNick().equals(myNick)),
                 new ChoicePrompt.Choice(
                         "Start now",
                         (renderer0, ctx) -> {
@@ -264,7 +265,8 @@ class TuiPrompts {
                                         promptReconnect(renderer0, netManager));
                             }
                         },
-                        () -> lobby.joinedPlayers().get().get(0).getNick().equals(myNick)
+                        () -> lobby.joinedPlayers().get().size() >= 2
+                                && lobby.joinedPlayers().get().get(0).getNick().equals(myNick)
                                 && Objects.requireNonNull(lobby.requiredPlayers().get()) != 0
                                 && lobby.joinedPlayers().get().stream().allMatch(p -> p.ready().get())),
                 new ChoicePrompt.Choice(
