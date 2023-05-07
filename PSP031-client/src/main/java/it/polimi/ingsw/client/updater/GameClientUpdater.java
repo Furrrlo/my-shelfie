@@ -60,6 +60,11 @@ public abstract class GameClientUpdater implements GameUpdater {
     }
 
     @Override
+    public void updateEndGame(Boolean endGame) {
+        game.endGame().set(endGame);
+    }
+
+    @Override
     public void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) {
         findCommonGoalBy(commonGoalType).achieved().set(playersAchieved.stream()
                 .map(this::findPlayerBy)

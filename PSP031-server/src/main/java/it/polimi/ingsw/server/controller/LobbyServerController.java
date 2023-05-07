@@ -171,8 +171,7 @@ public class LobbyServerController {
                                 p -> new ScoreProvider(p, commonGoals, firstFinisher)))
                         .collect(Collectors.toList()),
                 random.nextInt(players.size()),
-                commonGoals,
-                firstFinisher);
+                commonGoals, firstFinisher);
         game.refillBoard();
         return game;
     }

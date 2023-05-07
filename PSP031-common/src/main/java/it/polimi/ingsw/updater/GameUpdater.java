@@ -21,5 +21,7 @@ public interface GameUpdater {
 
     void updateFirstFinisher(@Nullable String nick) throws DisconnectedException;
 
+    void updateEndGame(Boolean endGame) throws DisconnectedException;
+
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws DisconnectedException;
 }

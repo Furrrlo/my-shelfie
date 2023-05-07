@@ -19,6 +19,7 @@ public class Game implements GameView {
     private final PersonalGoal personalGoal;
     private final @Unmodifiable List<CommonGoal> commonGoal;
     private final Property<@Nullable Player> firstFinisher;
+    private final Property<Boolean> endGame;
 
     public Game(int gameID,
                 Board board,
@@ -61,6 +62,7 @@ public class Game implements GameView {
         this.thePlayer = players.get(thePlayerIdx);
         this.startingPlayer = players.get(startingPlayerIdx);
         this.commonGoal = List.copyOf(commonGoalFactory.apply(players));
+        this.endGame = new SerializableProperty<>(false);
     }
 
     public interface PlayerFactory {
@@ -113,6 +115,11 @@ public class Game implements GameView {
     @Override
     public Property<@Nullable Player> firstFinisher() {
         return firstFinisher;
+    }
+
+    @Override
+    public Property<Boolean> endGame() {
+        return endGame;
     }
 
     @Override

@@ -36,4 +36,7 @@ public interface GameView extends Serializable {
 
     /** Return first player completing his shelfie */
     Provider<? extends @Nullable PlayerView> firstFinisher();
+
+    /** Returns endGame */
+    Provider<? extends Boolean> endGame();
 }

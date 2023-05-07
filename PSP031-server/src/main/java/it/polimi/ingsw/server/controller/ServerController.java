@@ -347,6 +347,7 @@ public class ServerController implements Closeable {
                             tileAndCoords.col(),
                             tile)));
         });
+        observableTracker.registerObserver(game.endGame(), gameUpdater::updateEndGame);
         observableTracker.registerObserver(game.currentTurn(), p -> gameUpdater.updateCurrentTurn(p.getNick()));
         observableTracker.registerObserver(game.firstFinisher(),
                 p -> gameUpdater.updateFirstFinisher(p == null ? null : p.getNick()));

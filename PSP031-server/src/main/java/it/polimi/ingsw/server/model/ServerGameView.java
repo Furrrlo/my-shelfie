@@ -37,4 +37,10 @@ public interface ServerGameView {
 
     /** Return first player completing his shelfie */
     Provider<? extends @Nullable ServerPlayerView> firstFinisher();
+
+    /** Returns boolean endGame */
+    Provider<? extends Boolean> endGame();
+
+    /** Returns true if conditions for endGame are achieved */
+    boolean isEndGame();
 }

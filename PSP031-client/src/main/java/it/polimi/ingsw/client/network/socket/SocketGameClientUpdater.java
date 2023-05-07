@@ -42,6 +42,8 @@ public class SocketGameClientUpdater extends GameClientUpdater implements Runnab
                             updatePlayerConnected(packet.nick(), packet.connected());
                         case UpdatePlayerScorePacket packet ->
                             updatePlayerScore(packet.nick(), packet.score());
+                        case UpdateEndGamePacket packet ->
+                            updateEndGame(packet.endGame());
                     }
                 }
             } while (!Thread.interrupted());

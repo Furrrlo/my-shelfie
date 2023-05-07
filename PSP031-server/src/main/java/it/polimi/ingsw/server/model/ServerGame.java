@@ -21,6 +21,7 @@ public class ServerGame implements ServerGameView {
     private final Property<ServerPlayer> currentTurn;
     private final @Unmodifiable List<ServerCommonGoal> commonGoal;
     private final Property<@Nullable ServerPlayer> firstFinisher;
+    private final Property<Boolean> endGame;
 
     /**
      * @param bag the starting bad of tiles, which will be copied by the constructor
@@ -41,6 +42,7 @@ public class ServerGame implements ServerGameView {
         this.currentTurn = new SerializableProperty<>(players.get(startingPlayerIdx));
         this.commonGoal = List.copyOf(commonGoal);
         this.firstFinisher = firstFinisher;
+        this.endGame = new SerializableProperty<>(false);
     }
 
     @Override
@@ -87,6 +89,11 @@ public class ServerGame implements ServerGameView {
         return firstFinisher;
     }
 
+    @Override
+    public Property<Boolean> endGame() {
+        return endGame;
+    }
+
     public void refillBoard() {
         for (int r = 0; r < BoardView.BOARD_ROWS && this.bag.size() > 0; r++) {
             for (int c = 0; c < BoardView.BOARD_COLUMNS && this.bag.size() > 0; c++) {
@@ -97,6 +104,15 @@ public class ServerGame implements ServerGameView {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isEndGame() {
+        // Board is empty, and we can't refill it, end the game
+        if (board.isEmpty() && bag.isEmpty())
+            return true;
+        // If someone already finished, and we reached the player before starting player, the game is over
+        return firstFinisher.get() != null && getPlayers().indexOf(currentTurn().get()) == getPlayers().size();
     }
 
     @Override

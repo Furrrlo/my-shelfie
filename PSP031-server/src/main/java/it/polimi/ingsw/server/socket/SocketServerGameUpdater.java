@@ -72,6 +72,15 @@ public class SocketServerGameUpdater implements GameUpdater {
     }
 
     @Override
+    public void updateEndGame(Boolean endGame) throws DisconnectedException {
+        try {
+            socketManager.send(new UpdateEndGamePacket(endGame));
+        } catch (IOException e) {
+            throw new DisconnectedException(e);
+        }
+    }
+
+    @Override
     public void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws DisconnectedException {
         try {
             socketManager.send(new UpdateAchievedCommonGoalPacket(commonGoalType, playersAchieved));
