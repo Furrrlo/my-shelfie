@@ -54,6 +54,9 @@ public class GameServerController {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
 
+            if (game.endGame().get())
+                throw new IllegalArgumentException("Game is finished");
+
             if (!game.currentTurn().get().equals(player))
                 throw new IllegalArgumentException("It's not this player turn");
 
@@ -80,15 +83,13 @@ public class GameServerController {
 
             // Board is empty, and we can't refill it, end the game
             if (game.getBoard().isEmpty() && game.getBag().isEmpty()) {
-                //TODO: end game
-                //game.endGame();
+                game.endGame().set(true);
             } else {
                 // Change current turn
                 changeCurrentTurn(game);
                 // If someone already finished, and we reached the starting player, the game is over
                 if (game.firstFinisher().get() != null && game.getStartingPlayer().equals(player)) {
-                    //TODO: end game
-                    //game.endGame();
+                    game.endGame().set(true);
                 }
             }
         }
