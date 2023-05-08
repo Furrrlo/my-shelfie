@@ -162,7 +162,7 @@ public class PersonalGoal implements PersonalGoalView {
 
     /** returns true if the shelfie passed as a parameter corresponds to the tiles of the commonGoal */
     @Override
-    public boolean achievedPersonalGoal(Shelfie shelfie) {
+    public boolean achievedPersonalGoal(ShelfieView shelfie) {
         return new Shelfie(PERSONAL_GOALS.get(this.index).personalGoal).isOverlapping(shelfie);
     }
 

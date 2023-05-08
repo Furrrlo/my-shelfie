@@ -25,12 +25,12 @@ public interface ShelfieView extends Serializable {
      * returns true if all the tiles of the shelfie calling the method overlaps with equal not null tiles of the
      * shelfie (that) passed as a parameter
      */
-    boolean isOverlapping(Shelfie that);
+    boolean isOverlapping(ShelfieView that);
 
     /**
      * returns the amount of tiles correctly positioned according to the personal goal passed as parameter
      */
-    int numTilesOverlappingWithPersonalGoal(PersonalGoal personalGoal);
+    int numTilesOverlappingWithPersonalGoal(PersonalGoalView personalGoal);
 
     /**
      * returns a list of sub-lists containing all the distinct group of tiles that can be identified in the calling shelfie

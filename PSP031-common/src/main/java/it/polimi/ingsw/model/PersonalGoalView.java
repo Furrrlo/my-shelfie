@@ -22,7 +22,7 @@ public interface PersonalGoalView extends Serializable {
     @Nullable
     Tile get(int r, int c);
 
-    boolean achievedPersonalGoal(Shelfie shelfie);
+    boolean achievedPersonalGoal(ShelfieView shelfie);
 
     Stream<TileAndCoords<@Nullable Tile>> tiles();
 }

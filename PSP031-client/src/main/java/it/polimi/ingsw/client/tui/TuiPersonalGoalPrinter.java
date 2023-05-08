@@ -1,0 +1,24 @@
+package it.polimi.ingsw.client.tui;
+
+import it.polimi.ingsw.model.PersonalGoalView;
+import it.polimi.ingsw.model.ShelfieView;
+
+public class TuiPersonalGoalPrinter implements TuiPrinter2 {
+
+    private final PersonalGoalView personalGoal;
+
+    public TuiPersonalGoalPrinter(PersonalGoalView personalGoal) {
+        this.personalGoal = personalGoal;
+    }
+
+    @Override
+    public void print(TuiPrintStream out) {
+        TuiShelfiePrinter.printShelfieMatrix(out, personalGoal::get, (row, col) -> false);
+    }
+
+    @Override
+    public TuiSize getSize() {
+        return new TuiSize(ShelfieView.ROWS + 1, ShelfieView.COLUMNS * 3);
+    }
+
+}

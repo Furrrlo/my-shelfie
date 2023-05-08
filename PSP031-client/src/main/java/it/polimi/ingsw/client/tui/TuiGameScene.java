@@ -43,6 +43,36 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
         out.print("terminal size " + terminalSize.cols() + "x" + terminalSize.rows() + ", " +
                 "zoom out to " + detailedSize.cols() + "x" + detailedSize.rows() + " for a detailed view");
 
+        //Draw personal goal
+        var personalGoalRect = out.getAlignedRect(new TuiSize(ROWS + 6, 32),
+                new TuiRect(0, 0, terminalSize),
+                TuiHAlignment.RIGHT,
+                TuiVAlignment.BOTTOM);
+
+        out.cursor(personalGoalRect.row(), personalGoalRect.col());
+        out.println("Personal goal");
+        out.printBox(
+                TuiRect.fromCoords(
+                        personalGoalRect.row() - 1, personalGoalRect.col() - 1,
+                        personalGoalRect.lastRow(), personalGoalRect.lastCol()),
+                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_TOP);
+
+        var personalGoalShelfie = out.printAligned(
+                new TuiPersonalGoalPrinter(game.getPersonalGoal()),
+                TuiRect.fromCoords(personalGoalRect.row() + 2,
+                        personalGoalRect.col(),
+                        personalGoalRect.lastRow() - 3,
+                        personalGoalRect.lastCol()),
+                TuiHAlignment.CENTER, TuiVAlignment.CENTER);
+
+        try (var ignored = out.translateCursor(personalGoalShelfie.lastRow() + 2, personalGoalRect.col())) {
+            if (game.getPersonalGoal().achievedPersonalGoal(game.thePlayer().getShelfie()))
+                out.println(ConsoleColors.GREEN_BOLD_BRIGHT + "You achieved your personal goal!" + ConsoleColors.RESET);
+            else
+                out.println("You matched "
+                        + game.thePlayer().getShelfie().numTilesOverlappingWithPersonalGoal(game.getPersonalGoal())
+                        + " tiles with your\npersonal goal");
+        }
         // Draw board
         var boardRect = out.printAligned(
                 new TuiBoardPrinter(game.getBoard()),
@@ -211,6 +241,7 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
         out.cursor(0, 0);
     }
 
+    //TODO: this method can be removed (?)
     public static void printShelfieMatrix(TuiPrintStream out, BiFunction<Integer, Integer, @Nullable Tile> tiles) {
         for (int row = 0; row < Shelfie.ROWS; row++) {
             StringBuilder msg = new StringBuilder();
@@ -240,6 +271,7 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
         }
     }
 
+    //TODO: this method can be removed (?)
     /** prints the shelfie corresponding to the personal goal whose calling the method */
     public static void printPersonalGoal(TuiPrintStream out, PersonalGoalView personalGoal) {
         out.println("PERSONAL GOAL : " + personalGoal.getIndex());

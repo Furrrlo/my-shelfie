@@ -52,7 +52,7 @@ public class Shelfie implements ShelfieView {
     }
 
     @Override
-    public boolean isOverlapping(Shelfie that) {
+    public boolean isOverlapping(ShelfieView that) {
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLUMNS; c++) {
                 if (this.tile(r, c).get() != null &&
@@ -64,7 +64,7 @@ public class Shelfie implements ShelfieView {
     }
 
     @Override
-    public int numTilesOverlappingWithPersonalGoal(PersonalGoal personalGoal) {
+    public int numTilesOverlappingWithPersonalGoal(PersonalGoalView personalGoal) {
         int count = 0;
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
