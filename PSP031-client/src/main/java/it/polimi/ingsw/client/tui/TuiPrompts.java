@@ -341,8 +341,9 @@ class TuiPrompts {
                             return ctx.prompt(promptBoard(ctx.subPrompt(), netManager, game, controller, List.of()));
                         }),
                 new ChoicePrompt.Choice(
-                        "Zoom shelfie and personal goal",
+                        "Zoom board shelfie and personal goal",
                         (renderer0, ctx) -> ctx.prompt(zoomShelfie(ctx.subPrompt(), renderer, game))),
+                //TODO : it can be removed ? 
                 new ChoicePrompt.Choice(
                         "Zoom board",
                         (renderer0, ctx) -> ctx.prompt(zoomBoard(ctx.subPrompt(), renderer, game))),
@@ -369,6 +370,7 @@ class TuiPrompts {
                 });
     }
 
+    //TODO : zoomBoard can be removed ? 
     private static Prompt zoomBoard(Prompt.Factory promptFactory,
                                     TuiRenderer renderer,
                                     GameView game) {

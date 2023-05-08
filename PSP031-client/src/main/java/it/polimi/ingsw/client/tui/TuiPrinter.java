@@ -86,7 +86,7 @@ public class TuiPrinter {
 
         public TuiShelfiePrinter(GameView game) {
             this.game = game;
-            zoomOut(10);
+            zoomOut(11);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -96,15 +96,22 @@ public class TuiPrinter {
 
         @Override
         public void accept(TuiPrintStream out) {
-            new TuiDetailedShelfiePrinter(game.thePlayer().getShelfie()).print(out);
-            try (var ignored = out.translateCursor(30, 500)) {
-                new TuiDetailedPersonalGoalPrinter(game.getPersonalGoal()).print(out);
+            new TuiDetailedBoardPrinter(game.getBoard(),
+                    List.of(game.getCommonGoals().get(0).getType(), game.getCommonGoals().get(1).getType())).print(out);
+            try (var ignored = out.translateCursor(0, new TuiDetailedBoardPrinter(game.getBoard(),
+                    List.of(game.getCommonGoals().get(0).getType(), game.getCommonGoals().get(1).getType())).getSize().cols()
+                    + 10)) {
+                new TuiDetailedShelfiePrinter(game.thePlayer().getShelfie()).print(out);
+                try (var ignored1 = out.translateCursor(30,
+                        new TuiDetailedShelfiePrinter(game.thePlayer().getShelfie()).getSize().cols() + 10)) {
+                    new TuiDetailedPersonalGoalPrinter(game.getPersonalGoal()).print(out);
+                }
             }
         }
 
         @Override
         public void close() throws IOException {
-            zoomIn(10);
+            zoomIn(11);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
