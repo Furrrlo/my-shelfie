@@ -252,8 +252,7 @@ public class DisconnectionIntegrationTest {
             disconnect.execute();
             assertFalse(serverPlayerDisconnected.get(10, TimeUnit.SECONDS));
 
-            //TODO: rmi client does not detect disconnection
-            //assertFalse(client2Connected.get(15, TimeUnit.SECONDS));
+            assertFalse(client2Connected.get(15, TimeUnit.SECONDS));
 
             //Restart player test_2 creating a new client
             clientNetManager2 = clientNetManagerFactory2New.get();
