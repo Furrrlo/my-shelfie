@@ -44,7 +44,7 @@ class TuiGameScene implements TuiScene {
 
         //Draw personal goal
         var personalGoalRect = out.getAlignedRect(new TuiSize(ROWS + 6, 32),
-                new TuiRect(0, 0, terminalSize),
+                new TuiRect(1, 0, terminalSize),
                 TuiHAlignment.LEFT,
                 TuiVAlignment.TOP);
 
@@ -70,14 +70,17 @@ class TuiGameScene implements TuiScene {
             else
                 out.println("You matched "
                         + game.thePlayer().getShelfie().numTilesOverlappingWithPersonalGoal(game.getPersonalGoal())
-                        + " tiles with your\npersonal goal");
+                        + """
+                                 tiles with your
+                                personal goal
+                                """);
         }
         // Draw CommonGoal 1
-        var commonGoalRect = out.getAlignedRect(new TuiSize(ROWS + 12, 52),
+        var commonGoalRect = out.getAlignedRect(new TuiSize(ROWS + 9, 50),
                 new TuiRect(0, 0, terminalSize),
                 TuiHAlignment.RIGHT, TuiVAlignment.TOP);
 
-        out.cursor(commonGoalRect.row(), commonGoalRect.col());
+        out.cursor(commonGoalRect.row(), commonGoalRect.col() + 4);
         out.println("Common goal : " + game.getCommonGoals().get(0).getType().name().replace('_', ' '));
         out.printBox(
                 TuiRect.fromCoords(
@@ -87,18 +90,18 @@ class TuiGameScene implements TuiScene {
 
         var commonGoal = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(0).getType()),
                 TuiRect.fromCoords(commonGoalRect.row() + 2, commonGoalRect.col(),
-                        commonGoalRect.lastRow() - 5, commonGoalRect.lastCol()),
+                        commonGoalRect.lastRow() - 6, commonGoalRect.lastCol()),
                 TuiHAlignment.CENTER, TuiVAlignment.CENTER);
 
-        try (var ignored = out.translateCursor(commonGoalRect.lastRow() + 2, commonGoalRect.col())) {
+        try (var ignored = out.translateCursor(commonGoal.lastRow() + 2, commonGoalRect.col() + 1)) {
             out.println(game.getCommonGoals().get(0).getType().getDescription());
         }
-        // Draw CommonGoal 1
-        var commonGoalRect2 = out.getAlignedRect(new TuiSize(ROWS + 12, 52),
+        // Draw CommonGoal 2
+        var commonGoalRect2 = out.getAlignedRect(new TuiSize(ROWS + 9, 50),
                 new TuiRect(0, 0, terminalSize),
                 TuiHAlignment.RIGHT, TuiVAlignment.BOTTOM);
 
-        out.cursor(commonGoalRect2.row(), commonGoalRect2.col());
+        out.cursor(commonGoalRect2.row(), commonGoalRect2.col() + 4);
         out.println("Common goal : " + game.getCommonGoals().get(1).getType().name().replace('_', ' '));
         out.printBox(
                 TuiRect.fromCoords(
@@ -108,10 +111,10 @@ class TuiGameScene implements TuiScene {
 
         var commonGoal2 = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(1).getType()),
                 TuiRect.fromCoords(commonGoalRect2.row() + 2, commonGoalRect2.col(),
-                        commonGoalRect2.lastRow() - 5, commonGoalRect2.lastCol()),
+                        commonGoalRect2.lastRow() - 6, commonGoalRect2.lastCol()),
                 TuiHAlignment.CENTER, TuiVAlignment.CENTER);
 
-        try (var ignored = out.translateCursor(commonGoalRect2.lastRow() + 2, commonGoalRect2.col())) {
+        try (var ignored = out.translateCursor(commonGoal2.lastRow() + 2, commonGoalRect2.col() + 1)) {
             out.println(game.getCommonGoals().get(1).getType().getDescription());
         }
 
