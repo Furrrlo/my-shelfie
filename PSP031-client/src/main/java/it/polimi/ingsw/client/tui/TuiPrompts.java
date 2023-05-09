@@ -343,10 +343,6 @@ class TuiPrompts {
                 new ChoicePrompt.Choice(
                         "Zoom board shelfie and personal goal",
                         (renderer0, ctx) -> ctx.prompt(zoomShelfie(ctx.subPrompt(), renderer, game))),
-                //TODO : it can be removed ? 
-                new ChoicePrompt.Choice(
-                        "Zoom board",
-                        (renderer0, ctx) -> ctx.prompt(zoomBoard(ctx.subPrompt(), renderer, game))),
                 new ChoicePrompt.Choice(
                         "Quit",
                         (renderer0, ctx) -> {
@@ -361,19 +357,6 @@ class TuiPrompts {
                                       GameView game) {
 
         renderer.setScene(new TuiZoomedShelfiePrinter(game));
-
-        return promptFactory.input(
-                "",
-                (renderer0, ctx, input) -> {
-                    renderer.setScene(new TuiGameScene(game));
-                    return ctx.done();
-                });
-    }
-
-    private static Prompt zoomBoard(Prompt.Factory promptFactory,
-                                    TuiRenderer renderer,
-                                    GameView game) {
-        renderer.setScene(new TuiZoomedBoardPrinter(game));
 
         return promptFactory.input(
                 "",
