@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 class TuiRenderer implements Closeable {
@@ -23,7 +22,7 @@ class TuiRenderer implements Closeable {
     private final BlockingQueue<Event> events = new LinkedBlockingQueue<>();
 
     private final Deque<Prompt> promptStack;
-    private @Nullable Consumer<TuiPrintStream> scene;
+    private @Nullable TuiScene scene;
 
     private final Thread renderThread;
     private final Thread inputThread;
@@ -41,7 +40,7 @@ class TuiRenderer implements Closeable {
     public TuiRenderer(TuiPrintStream outputStream,
                        Reader inputReader,
                        Prompt initialPrompt,
-                       @Nullable Consumer<TuiPrintStream> scene) {
+                       @Nullable TuiScene scene) {
         this.promptStack = new ArrayDeque<>(List.of(initialPrompt));
         this.scene = scene;
 
@@ -74,8 +73,8 @@ class TuiRenderer implements Closeable {
                             events.remove();
                     }
                     case SetSceneEvent sceneEvent -> {
-                        if (scene instanceof Closeable c)
-                            c.close();
+                        if (scene != null)
+                            scene.close();
                         scene = sceneEvent.scene();
                     }
                     case SetPromptEvent promptEvent -> {
@@ -127,7 +126,7 @@ class TuiRenderer implements Closeable {
                 out.eraseInDisplay();
 
                 if (scene != null)
-                    scene.accept(out);
+                    scene.render(out);
 
                 out.println(ConsoleColors.RED_BOLD_BRIGHT + errorMsg + ConsoleColors.RESET);
                 if (currPrompt != null) {
@@ -198,7 +197,7 @@ class TuiRenderer implements Closeable {
      *
      * @param scene scene to render
      */
-    public void setScene(Consumer<TuiPrintStream> scene) {
+    public void setScene(TuiScene scene) {
         events.add(new SetSceneEvent(scene));
     }
 
@@ -221,7 +220,7 @@ class TuiRenderer implements Closeable {
     private record InputEvent(String in) implements Event {
     }
 
-    private record SetSceneEvent(@Nullable Consumer<TuiPrintStream> scene) implements Event {
+    private record SetSceneEvent(@Nullable TuiScene scene) implements Event {
     }
 
     private record SetPromptEvent(Prompt prompt) implements Event {

@@ -37,7 +37,7 @@ class TuiPrompts {
         return promptNetworkProtocol();
     }
 
-    public static Consumer<TuiPrintStream> initialScene() {
+    public static TuiScene initialScene() {
         return TuiPrompts::printLogo;
     }
 

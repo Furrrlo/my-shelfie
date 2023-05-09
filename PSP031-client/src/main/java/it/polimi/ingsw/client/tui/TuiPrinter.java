@@ -4,10 +4,7 @@ import it.polimi.ingsw.model.GameView;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class TuiPrinter {
 
@@ -49,7 +46,7 @@ public class TuiPrinter {
         }
     }
 
-    static class TuiBoardPrinter implements Consumer<TuiPrintStream>, Closeable {
+    static class TuiBoardPrinter implements TuiScene {
         private final GameView game;
 
         public TuiBoardPrinter(GameView game) {
@@ -63,7 +60,7 @@ public class TuiPrinter {
         }
 
         @Override
-        public void accept(TuiPrintStream out) {
+        public void render(TuiPrintStream out) {
             new TuiDetailedBoardPrinter(game.getBoard(),
                     List.of(game.getCommonGoals().get(0).getType(),
                             game.getCommonGoals().get(1).getType()))
@@ -71,7 +68,7 @@ public class TuiPrinter {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             zoomIn(11);
             try {
                 Thread.sleep(1000);
@@ -81,7 +78,7 @@ public class TuiPrinter {
         }
     }
 
-    static class TuiShelfiePrinter implements Consumer<TuiPrintStream>, Closeable {
+    static class TuiShelfiePrinter implements TuiScene {
         private final GameView game;
 
         public TuiShelfiePrinter(GameView game) {
@@ -95,7 +92,7 @@ public class TuiPrinter {
         }
 
         @Override
-        public void accept(TuiPrintStream out) {
+        public void render(TuiPrintStream out) {
             new TuiDetailedBoardPrinter(game.getBoard(),
                     List.of(game.getCommonGoals().get(0).getType(), game.getCommonGoals().get(1).getType())).print(out);
             try (var ignored = out.translateCursor(0, new TuiDetailedBoardPrinter(game.getBoard(),
@@ -110,7 +107,7 @@ public class TuiPrinter {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             zoomIn(11);
             try {
                 Thread.sleep(1000);

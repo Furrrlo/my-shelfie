@@ -6,13 +6,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
-class TuiGameScene implements Consumer<TuiPrintStream> {
+class TuiGameScene implements TuiScene {
 
     private final GameView game;
 
@@ -21,7 +20,7 @@ class TuiGameScene implements Consumer<TuiPrintStream> {
     }
 
     @Override
-    public void accept(TuiPrintStream out) {
+    public void render(TuiPrintStream out) {
         var terminalSize = out.getTerminalSize();
         var detailedNeededSize = getDetailedOuterRect(out).size();
         var normalNeededSize = new TuiSize(40, 156);
