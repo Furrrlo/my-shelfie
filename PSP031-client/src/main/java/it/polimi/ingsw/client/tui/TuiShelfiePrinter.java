@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.tui;
 
+import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Shelfie;
 import it.polimi.ingsw.model.ShelfieView;
 import it.polimi.ingsw.model.Tile;
@@ -32,6 +33,18 @@ class TuiShelfiePrinter implements TuiPrinter2 {
     static void printShelfieMatrix(TuiPrintStream out,
                                    BiFunction<Integer, Integer, @Nullable Tile> tiles,
                                    BiPredicate<Integer, Integer> highlight) {
+        printShelfieMatrixByColor(out, (row, col) -> {
+            Tile tile = tiles.apply(row, col);
+            if (tile == null)
+                return null;
+            else
+                return tile.getColor();
+        }, highlight);
+    }
+
+    static void printShelfieMatrixByColor(TuiPrintStream out,
+                                          BiFunction<Integer, Integer, @Nullable Color> tiles,
+                                          BiPredicate<Integer, Integer> highlight) {
         for (int row = 0; row < ShelfieView.ROWS; row++) {
             StringBuilder msg = new StringBuilder();
             if (row == 0) {
@@ -41,13 +54,13 @@ class TuiShelfiePrinter implements TuiPrinter2 {
             }
 
             for (int col = 0; col < ShelfieView.COLUMNS; col++) {
-                Tile tile = tiles.apply(row, col);
+                Color tile = tiles.apply(row, col);
                 if (tile == null) {
                     msg.append("│ │");
                     continue;
                 }
 
-                String consoleColor = TuiColorConverter.color(tile.getColor(), highlight.test(row, col));
+                String consoleColor = TuiColorConverter.color(tile, highlight.test(row, col));
                 msg.append(consoleColor).append(pxl).append(ConsoleColors.RESET);
             }
             out.println(msg);

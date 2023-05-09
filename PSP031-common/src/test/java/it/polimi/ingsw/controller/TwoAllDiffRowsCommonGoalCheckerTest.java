@@ -29,12 +29,12 @@ class TwoAllDiffRowsCommonGoalCheckerTest {
     void checkCommonGoal_TWO_TWO_ALL_DIFF_ROWS_normal_true() {
         Color[][] matrix = {
                 //@formatter:off
-                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW    },
-                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.WHITE     },
-                new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN , Color.LIGHTBLUE, Color.WHITE     },
-                new Color[] { Color.BLUE     , Color.YELLOW   , Color.BLUE  , Color.BLUE     , Color.BLUE      },
-                new Color[] { Color.PINK     , Color.YELLOW   , Color.GREEN , Color.WHITE    , Color.LIGHTBLUE },
-                new Color[] { Color.WHITE    , Color.GREEN , Color.WHITE    , Color.WHITE    , null            }
+                new Color[] { Color.YELLOW   , Color.BLUE     , Color.YELLOW   , Color.PINK     , Color.YELLOW    },
+                new Color[] { Color.GREEN    , Color.BLUE     , Color.YELLOW   , Color.PINK     , Color.WHITE     },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE     },
+                new Color[] { Color.BLUE     , Color.YELLOW   , Color.BLUE     , Color.BLUE     , Color.BLUE      },
+                new Color[] { Color.PINK     , Color.YELLOW   , Color.GREEN    , Color.WHITE    , Color.LIGHTBLUE },
+                new Color[] { Color.WHITE    , Color.GREEN    , Color.WHITE    , Color.WHITE    , null            }
                 //@formatter:on
         };
         assertTrue(new TwoAllDiffRowsCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
