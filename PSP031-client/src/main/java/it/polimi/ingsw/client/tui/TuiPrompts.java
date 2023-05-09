@@ -468,7 +468,7 @@ class TuiPrompts {
         return promptFactory.input(
                 "Change the tile order (ex: '" + example + "'):\n" +
                         "Insertion Order (FIFO): " + coordsToDisplayString(game, coords) + "\n" +
-                        "Shelfie column: " + shelfCol + "\n" +
+                        "Shelfie column: " + (shelfCol + 1) + "\n" +
                         "Type 'Done' when satisfied",
                 (renderer0, ctx, input) -> {
                     if (input.equalsIgnoreCase("done")) {
