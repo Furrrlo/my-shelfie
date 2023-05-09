@@ -70,10 +70,14 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
         }
 
         final InterceptingFactory updaterFactory = new InterceptingFactory(unicastRemoteObjects);
+        var heartbeatClientHandler = new RmiHeartbeatClientHandler(
+                () -> disconnectPlayer(updaterFactory.getUpdater().getLobbyAndController().lobby(), nick));
         server.joinGame(
                 nick,
-                unicastRemoteObjects.export(new RmiHeartbeatClientHandler(), 0),
+                unicastRemoteObjects.export(heartbeatClientHandler, 0),
                 unicastRemoteObjects.export(updaterFactory, 0));
+
+        heartbeatClientHandler.start();
         return updaterFactory.getUpdater().getLobbyAndController();
     }
 
