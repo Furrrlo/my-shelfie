@@ -44,7 +44,7 @@ abstract class TuiZoomedScene implements TuiScene {
     @MustBeInvokedByOverriders
     public void render(TuiPrintStream out) {
         if (!hasZoomed) {
-            zoomIn(11);
+            zoomIn(10);
             hasZoomed = true;
         }
     }
@@ -52,8 +52,8 @@ abstract class TuiZoomedScene implements TuiScene {
     private void zoomIn(int n) {
         r.keyPress(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
         for (int i = 0; i < n; i++) {
-            r.keyPress(KeyEvent.VK_PLUS);
-            r.keyRelease(KeyEvent.VK_PLUS);
+            r.keyPress(KeyEvent.VK_MINUS);
+            r.keyRelease(KeyEvent.VK_MINUS);
         }
         r.keyRelease(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
     }
@@ -61,16 +61,20 @@ abstract class TuiZoomedScene implements TuiScene {
     @Override
     @MustBeInvokedByOverriders
     public void close() {
-        zoomOut(11);
+        zoomOut(10);
         hasZoomed = false;
     }
 
     private void zoomOut(int n) {
         r.keyPress(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
-        for (int i = 0; i < n; i++) {
-            r.keyPress(KeyEvent.VK_MINUS);
-            r.keyRelease(KeyEvent.VK_MINUS);
-        }
+        /*
+         * for (int i = 0; i < n; i++) {
+         * r.keyPress(KeyEvent.VK_PLUS);
+         * r.keyRelease(KeyEvent.VK_PLUS);
+         * }
+         */
+        r.keyPress(KeyEvent.VK_NUMPAD0);
+        r.keyRelease(KeyEvent.VK_NUMPAD0);
         r.keyRelease(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
     }
 }
