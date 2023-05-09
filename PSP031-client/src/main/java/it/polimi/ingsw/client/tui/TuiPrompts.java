@@ -360,7 +360,7 @@ class TuiPrompts {
                                       TuiRenderer renderer,
                                       GameView game) {
 
-        renderer.setScene(new TuiPrinter.TuiShelfiePrinter(game));
+        renderer.setScene(new TuiZoomedShelfiePrinter(game));
 
         return promptFactory.input(
                 "",
@@ -370,11 +370,10 @@ class TuiPrompts {
                 });
     }
 
-    //TODO : zoomBoard can be removed ? 
     private static Prompt zoomBoard(Prompt.Factory promptFactory,
                                     TuiRenderer renderer,
                                     GameView game) {
-        renderer.setScene(new TuiPrinter.TuiBoardPrinter(game));
+        renderer.setScene(new TuiZoomedBoardPrinter(game));
 
         return promptFactory.input(
                 "",
