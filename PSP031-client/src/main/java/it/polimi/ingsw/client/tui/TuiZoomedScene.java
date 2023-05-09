@@ -4,10 +4,27 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.Locale;
 
+@SuppressWarnings("SameParameterValue")
 abstract class TuiZoomedScene implements TuiScene {
 
+    private static final boolean IS_MAC_OS;
+    static {
+        var os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+        IS_MAC_OS = os.contains("mac") || os.contains("darwin");
+    }
+
+    private final Robot r;
     private boolean hasZoomed;
+
+    public TuiZoomedScene() {
+        try {
+            r = new Robot();
+        } catch (AWTException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     @MustBeInvokedByOverriders
@@ -18,23 +35,13 @@ abstract class TuiZoomedScene implements TuiScene {
         }
     }
 
-    public static void zoomIn(int n) {
-        try {
-            Robot r = new Robot();
-            r.keyPress(KeyEvent.VK_CONTROL);
-            //r.keyPress(KeyEvent.VK_META);
-            for (int i = 0; i < n; i++) {
-                r.keyPress(KeyEvent.VK_PLUS);
-                //r.keyPress(KeyEvent.VK_EQUALS);
-                r.keyRelease(KeyEvent.VK_PLUS);
-                //r.keyRelease(KeyEvent.VK_EQUALS);
-            }
-
-            r.keyRelease(KeyEvent.VK_CONTROL);
-            //r.keyRelease(KeyEvent.VK_META);
-        } catch (AWTException e) {
-            throw new RuntimeException(e);
+    private void zoomIn(int n) {
+        r.keyPress(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
+        for (int i = 0; i < n; i++) {
+            r.keyPress(KeyEvent.VK_PLUS);
+            r.keyRelease(KeyEvent.VK_PLUS);
         }
+        r.keyRelease(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
     }
 
     @Override
@@ -44,19 +51,12 @@ abstract class TuiZoomedScene implements TuiScene {
         hasZoomed = false;
     }
 
-    public static void zoomOut(int n) {
-        try {
-            Robot r = new Robot();
-            r.keyPress(KeyEvent.VK_CONTROL);
-            //r.keyPress(KeyEvent.VK_META);
-            for (int i = 0; i < n; i++) {
-                r.keyPress(KeyEvent.VK_MINUS);
-                r.keyRelease(KeyEvent.VK_MINUS);
-            }
-            r.keyRelease(KeyEvent.VK_CONTROL);
-            //r.keyRelease(KeyEvent.VK_META);
-        } catch (AWTException e) {
-            throw new RuntimeException(e);
+    private void zoomOut(int n) {
+        r.keyPress(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
+        for (int i = 0; i < n; i++) {
+            r.keyPress(KeyEvent.VK_MINUS);
+            r.keyRelease(KeyEvent.VK_MINUS);
         }
+        r.keyRelease(IS_MAC_OS ? KeyEvent.VK_META : KeyEvent.VK_CONTROL);
     }
 }
