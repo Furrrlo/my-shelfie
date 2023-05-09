@@ -9,10 +9,24 @@ import java.util.Locale;
 @SuppressWarnings("SameParameterValue")
 abstract class TuiZoomedScene implements TuiScene {
 
+    private static final boolean IS_ROBOT_SUPPORTED;
     private static final boolean IS_MAC_OS;
     static {
         var os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
         IS_MAC_OS = os.contains("mac") || os.contains("darwin");
+
+        boolean isRobotSupported = false;
+        try {
+            new Robot();
+            isRobotSupported = true;
+        } catch (AWTException ignored) {
+            // Not supported
+        }
+        IS_ROBOT_SUPPORTED = isRobotSupported;
+    }
+
+    public static boolean isSupported() {
+        return IS_ROBOT_SUPPORTED;
     }
 
     private final Robot r;
