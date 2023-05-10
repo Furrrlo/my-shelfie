@@ -11,7 +11,7 @@ import java.util.function.BiPredicate;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
-class TuiShelfiePrinter implements TuiPrinter2 {
+class TuiShelfiePrinter implements TuiPrinter {
 
     public static TuiShelfiePrinter EMPTY = new TuiShelfiePrinter(new Shelfie()) {
         @Override

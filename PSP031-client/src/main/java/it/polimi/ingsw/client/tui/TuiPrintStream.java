@@ -487,7 +487,7 @@ class TuiPrintStream extends PrintStream {
         }
     }
 
-    public TuiRect printAligned(TuiPrinter2 printer, TuiRect rect, TuiHAlignment hAlign, TuiVAlignment vAlign) {
+    public TuiRect printAligned(TuiPrinter printer, TuiRect rect, TuiHAlignment hAlign, TuiVAlignment vAlign) {
         final var drawnRect = getAlignedRect(printer.getSize(), rect, hAlign, vAlign);
 
         cursor(0, 0);
@@ -512,7 +512,7 @@ class TuiPrintStream extends PrintStream {
                 sizeToPrint);
     }
 
-    public TuiRect printAligned(TuiPrinter2 printer, TuiSize rectSize, TuiHAlignment hAlign, TuiVAlignment vAlign) {
+    public TuiRect printAligned(TuiPrinter printer, TuiSize rectSize, TuiHAlignment hAlign, TuiVAlignment vAlign) {
         final var size = printer.getSize();
         final var cursorPos = getCursorPos();
         final var drawnRect = new TuiRect(

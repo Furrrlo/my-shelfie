@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class TuiCommonGoalPrinter implements TuiPrinter2 {
+public class TuiCommonGoalPrinter implements TuiPrinter {
     private final Type type;
     private static final Color[][] SIX_COUPLES = new Color[][] {
             //@formatter:off

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
-class TuiDetailedTilePrinter implements TuiPrinter2 {
+class TuiDetailedTilePrinter implements TuiPrinter {
 
     /**
      * pxl sets the basic unit for printing complex design, while PXL_FOR_SPRITE, PXL_FOR_NUMBERS and

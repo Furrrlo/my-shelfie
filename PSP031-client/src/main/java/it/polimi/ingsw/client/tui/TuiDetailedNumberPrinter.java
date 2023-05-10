@@ -9,7 +9,7 @@ import java.util.List;
 import static it.polimi.ingsw.client.tui.TuiDetailedTilePrinter.PXL_FOR_SPRITE;
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
-class TuiDetailedNumberPrinter implements TuiPrinter2 {
+class TuiDetailedNumberPrinter implements TuiPrinter {
 
     public static final int PXL_ROWS_FOR_NUMBERS = 5;
     public static final int PXL_COLS_FOR_NUMBERS = PXL_FOR_SPRITE;

@@ -11,7 +11,7 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
-class TuiDetailedShelfiePrinter implements TuiPrinter2 {
+class TuiDetailedShelfiePrinter implements TuiPrinter {
 
     public static final TuiDetailedShelfiePrinter EMPTY = new TuiDetailedShelfiePrinter(new Shelfie()) {
         @Override

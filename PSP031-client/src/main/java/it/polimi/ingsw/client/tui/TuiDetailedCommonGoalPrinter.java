@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
-class TuiDetailedCommonGoalPrinter implements TuiPrinter2 {
+class TuiDetailedCommonGoalPrinter implements TuiPrinter {
     public static final int PXL_FOR_COMMON_GOAL = 24;
     private static final @Unmodifiable List<String> TWO_SQUARES = List.of(
             "RRRRRRRRRRRRRRRRRRRRRRRR", "RWWWWWWWWWWWWWWWWWWWWWWR", "RWWBBBBBBBBBBBBBWWWWWWWR", "RWWBWWWWWBWWWWWBWWWWWWWR",

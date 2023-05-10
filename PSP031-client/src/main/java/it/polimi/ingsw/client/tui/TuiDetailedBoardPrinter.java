@@ -14,7 +14,7 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.BoardView.BOARD_COLUMNS;
 import static it.polimi.ingsw.model.BoardView.BOARD_ROWS;
 
-class TuiDetailedBoardPrinter implements TuiPrinter2 {
+class TuiDetailedBoardPrinter implements TuiPrinter {
 
     public static final TuiDetailedBoardPrinter EMPTY = new TuiDetailedBoardPrinter(new Board(2),
             List.of(Type.FOUR_QUADRIPLETS, Type.SIX_COUPLES)) {

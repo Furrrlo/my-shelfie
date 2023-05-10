@@ -3,7 +3,7 @@ package it.polimi.ingsw.client.tui;
 import it.polimi.ingsw.model.PersonalGoalView;
 import it.polimi.ingsw.model.ShelfieView;
 
-public class TuiPersonalGoalPrinter implements TuiPrinter2 {
+public class TuiPersonalGoalPrinter implements TuiPrinter {
 
     private final PersonalGoalView personalGoal;
 

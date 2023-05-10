@@ -1,6 +1,6 @@
 package it.polimi.ingsw.client.tui;
 
-interface TuiPrinter2 {
+interface TuiPrinter {
 
     void print(TuiPrintStream out);
 

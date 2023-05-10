@@ -4,7 +4,7 @@ import it.polimi.ingsw.model.BoardView;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
-class TuiBoardPrinter implements TuiPrinter2 {
+class TuiBoardPrinter implements TuiPrinter {
 
     private final BoardView board;
 

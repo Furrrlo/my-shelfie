@@ -7,7 +7,7 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
-class TuiDetailedPersonalGoalPrinter implements TuiPrinter2 {
+class TuiDetailedPersonalGoalPrinter implements TuiPrinter {
 
     private static final int PXL_FOR_PERSONAL_GOAL = 12;
 
