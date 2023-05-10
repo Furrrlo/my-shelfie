@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.model.Shelfie;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;

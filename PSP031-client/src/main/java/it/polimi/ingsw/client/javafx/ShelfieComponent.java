@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.model.Shelfie;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.ImageView;

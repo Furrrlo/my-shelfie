@@ -2,6 +2,8 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Tile;
+import org.jetbrains.annotations.Nullable;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -9,7 +11,6 @@ import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import org.jetbrains.annotations.Nullable;
 
 class TileComponent extends Button {
 
