@@ -194,6 +194,9 @@
                 <configuration>
                     <skip>true</skip>
                     <mainClass>none</mainClass>
+                    <options>
+                        <option>--enable-preview</option>
+                    </options>
                 </configuration>
             </plugin>
             <plugin>
@@ -349,6 +352,7 @@
                         <configuration>
                             <options>
                                 <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005</option>
+                                <option>--enable-preview</option>
                             </options>
                         </configuration>
                     </plugin>
