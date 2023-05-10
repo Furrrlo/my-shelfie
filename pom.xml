@@ -230,6 +230,7 @@
                     <excludes>
                         <exclude>org/checkerframework/framework/qual/**/*</exclude>
                         <exclude>it/polimi/ingsw/client/tui/**/*</exclude>
+                        <exclude>it/polimi/ingsw/client/javafx/**/*</exclude>
                         <exclude>it/polimi/ingsw/server/Main.*</exclude>
                     </excludes>
                 </configuration>
