@@ -19,12 +19,31 @@ See [here](CODE_STYLE.md)
 
 ## Running using cmd line/IDE
 
-Execute the compile lifecycle and specify either the `run-server` or `run-client` profile
+To start the server, execute the compile lifecycle and specify either the `run-server` profile
+
+```shell
+mvn compile -Prun-server
+```
+
+To start the TUI client, do the same but with the `run-client` profile
 
 ```shell
 mvn compile -Prun-client
-mvn compile -Prun-server
 ```
+
+To run the JavaFX client, use the IntelliJ 'Run JavaFX' configuration or from the console:
+
+```shell
+mvn compile javafx:run
+```
+
+while to debug it, use the IntelliJ 'Debug JavaFX' configuration or from the console:
+
+```shell
+mvn compile javafx:run -Ddebug-javafx
+```
+
+then attach a remote debugger to port 5005 (IntelliJ will prompt for it automatically).
 
 ## Building and running
 

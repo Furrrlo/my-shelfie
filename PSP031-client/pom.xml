@@ -80,8 +80,8 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
                 <configuration>
+                    <skip>false</skip>
                     <mainClass>it.polimi.ingsw.client.javafx.JfxMain</mainClass>
                 </configuration>
             </plugin>
