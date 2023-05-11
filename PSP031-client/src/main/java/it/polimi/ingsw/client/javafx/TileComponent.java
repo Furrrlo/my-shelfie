@@ -12,7 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 
-class TileComponent extends Button {
+public class TileComponent extends Button {
 
     /** Used instead of null for mapping the tile property, as otherwise the map method discards null tiles */
     private static final Tile NULL_TILE = new Tile(Color.YELLOW);

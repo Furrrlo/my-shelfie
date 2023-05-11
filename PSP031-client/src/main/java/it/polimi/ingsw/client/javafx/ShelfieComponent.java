@@ -10,7 +10,7 @@ import javafx.scene.layout.AnchorPane;
 import java.io.IOException;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
-class ShelfieComponent extends AnchorPane {
+public class ShelfieComponent extends AnchorPane {
     //@formatter:off
     @FXML public ImageView bg;
     @FXML public TileComponent t0x0;
