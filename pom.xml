@@ -195,6 +195,7 @@
                     <skip>true</skip>
                     <executable>${java.home}/bin/java</executable>
                     <mainClass>none</mainClass>
+                    <runtimePathOption>CLASSPATH</runtimePathOption>
                     <options>
                         <option>--enable-preview</option>
                     </options>
