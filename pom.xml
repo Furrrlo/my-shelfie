@@ -193,6 +193,7 @@
                 <version>0.0.8</version>
                 <configuration>
                     <skip>true</skip>
+                    <executable>${java.home}/bin/java</executable>
                     <mainClass>none</mainClass>
                     <options>
                         <option>--enable-preview</option>
