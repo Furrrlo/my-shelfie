@@ -39,7 +39,7 @@ public class TuiStringPrinter implements TuiPrinter {
 
     @Override
     public void print(TuiPrintStream out) {
-        String[] split = string.split(" ");
+        String[] split = string.split("[ \n]");
         StringBuilder stringBuilder = new StringBuilder();
         final int maxCharacters = size.cols() * size.rows();
         int col = 0, row = 0;

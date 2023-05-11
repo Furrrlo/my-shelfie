@@ -89,48 +89,6 @@ class TuiGameScene implements TuiScene {
                             messageSize),
                     TuiHAlignment.CENTER,
                     TuiVAlignment.CENTER);
-        // Draw CommonGoal 1
-        var commonGoalRect = out.getAlignedRect(new TuiSize(ROWS + 9, 50),
-                new TuiRect(0, 0, terminalSize),
-                TuiHAlignment.RIGHT, TuiVAlignment.TOP);
-
-        out.cursor(commonGoalRect.row(), commonGoalRect.col() + 4);
-        out.println("Common goal : " + game.getCommonGoals().get(0).getType().name().replace('_', ' '));
-        out.printBox(
-                TuiRect.fromCoords(
-                        commonGoalRect.row(), commonGoalRect.col() - 1,
-                        commonGoalRect.lastRow() + 1, commonGoalRect.lastCol()),
-                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_BOTTOM);
-
-        var commonGoal = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(0).getType()),
-                TuiRect.fromCoords(commonGoalRect.row() + 2, commonGoalRect.col(),
-                        commonGoalRect.lastRow() - 6, commonGoalRect.lastCol()),
-                TuiHAlignment.CENTER, TuiVAlignment.CENTER);
-
-        try (var ignored = out.translateCursor(commonGoal.lastRow() + 2, commonGoalRect.col() + 1)) {
-            out.print(game.getCommonGoals().get(0).getType().getDescription());
-        }
-        // Draw CommonGoal 2
-        var commonGoalRect2 = out.getAlignedRect(new TuiSize(ROWS + 9, 50),
-                new TuiRect(0, 0, terminalSize),
-                TuiHAlignment.RIGHT, TuiVAlignment.BOTTOM);
-
-        out.cursor(commonGoalRect2.row(), commonGoalRect2.col() + 4);
-        out.println("Common goal : " + game.getCommonGoals().get(1).getType().name().replace('_', ' '));
-        out.printBox(
-                TuiRect.fromCoords(
-                        commonGoalRect2.row() - 1, commonGoalRect2.col() - 1,
-                        commonGoalRect2.lastRow(), commonGoalRect2.lastCol()),
-                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_TOP);
-
-        var commonGoal2 = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(1).getType()),
-                TuiRect.fromCoords(commonGoalRect2.row() + 2, commonGoalRect2.col(),
-                        commonGoalRect2.lastRow() - 6, commonGoalRect2.lastCol()),
-                TuiHAlignment.CENTER, TuiVAlignment.CENTER);
-
-        try (var ignored = out.translateCursor(commonGoal2.lastRow() + 2, commonGoalRect2.col() + 1)) {
-            out.print(game.getCommonGoals().get(1).getType().getDescription());
-        }
 
         // Draw board
         var boardRect = out.printAligned(
@@ -227,6 +185,71 @@ class TuiGameScene implements TuiScene {
                         boardRect.row(), boardRect.lastCol() + 1,
                         boardRect.lastRow(), rightPlayerRect.lastCol()),
                 TuiPrintStream.BOX_RIGHT | TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_TOP);
+
+        // Draw CommonGoal 1
+        var commonGoalCols = Math.min(terminalSize.cols() - rightPlayerRect.lastCol() - 3, 50);
+        var commonGoalRect = out.getAlignedRect(
+                new TuiSize(ROWS + 9, commonGoalCols),
+                new TuiRect(0, 0, terminalSize),
+                TuiHAlignment.RIGHT, TuiVAlignment.TOP);
+
+        out.printAligned(
+                new TuiStringPrinter("Common goal : " + game.getCommonGoals().get(0).getType().name().replace('_', ' '),
+                        commonGoalCols),
+                commonGoalRect,
+                TuiHAlignment.CENTER,
+                TuiVAlignment.TOP);
+
+        out.printBox(
+                TuiRect.fromCoords(
+                        commonGoalRect.row(), commonGoalRect.col() - 1,
+                        commonGoalRect.lastRow() + 1, commonGoalRect.lastCol()),
+                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_BOTTOM);
+
+        var commonGoal = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(0).getType()),
+                TuiRect.fromCoords(commonGoalRect.row() + 2, commonGoalRect.col(),
+                        commonGoalRect.lastRow() - 6, commonGoalRect.lastCol()),
+                TuiHAlignment.CENTER, TuiVAlignment.CENTER);
+
+        var commonGoalDesc = new TuiSize(5, commonGoalCols);
+        out.printAligned(new TuiStringPrinter(
+                game.getCommonGoals().get(0).getType().getDescription(), commonGoalDesc),
+                new TuiRect(commonGoal.lastRow() + 2,
+                        commonGoalRect.col(),
+                        commonGoalDesc),
+                TuiHAlignment.CENTER,
+                TuiVAlignment.CENTER);
+
+        // Draw CommonGoal 2
+        var commonGoalRect2 = out.getAlignedRect(new TuiSize(ROWS + 9, commonGoalCols),
+                new TuiRect(0, 0, terminalSize),
+                TuiHAlignment.RIGHT, TuiVAlignment.BOTTOM);
+
+        out.printAligned(
+                new TuiStringPrinter("Common goal : " + game.getCommonGoals().get(1).getType().name().replace('_', ' '),
+                        commonGoalCols),
+                commonGoalRect2,
+                TuiHAlignment.CENTER,
+                TuiVAlignment.TOP);
+
+        out.printBox(
+                TuiRect.fromCoords(
+                        commonGoalRect2.row() - 1, commonGoalRect2.col() - 1,
+                        commonGoalRect2.lastRow(), commonGoalRect2.lastCol()),
+                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_TOP);
+
+        var commonGoal2 = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(1).getType()),
+                TuiRect.fromCoords(commonGoalRect2.row() + 2, commonGoalRect2.col(),
+                        commonGoalRect2.lastRow() - 6, commonGoalRect2.lastCol()),
+                TuiHAlignment.CENTER, TuiVAlignment.CENTER);
+
+        out.printAligned(new TuiStringPrinter(
+                game.getCommonGoals().get(1).getType().getDescription(), commonGoalDesc),
+                new TuiRect(commonGoal2.lastRow() + 2,
+                        commonGoalRect2.col(),
+                        commonGoalDesc),
+                TuiHAlignment.CENTER,
+                TuiVAlignment.CENTER);
 
         out.cursor(boardRect.row(), boardRect.col());
         out.print("┘");
