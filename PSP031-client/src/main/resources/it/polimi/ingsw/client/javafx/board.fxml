@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import it.polimi.ingsw.client.javafx.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<fx:root type="javafx.scene.layout.AnchorPane"
+         maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+         xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <ImageView fx:id="bg" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <image>
+                <Image url="@assets/boards/livingroom.png"/>
+            </image>
+        </ImageView>
+        <TileComponent fx:id="t0x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t0x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t1x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t1x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t1x5" mnemonicParsing="false"/>
+        <TileComponent fx:id="t2x2" mnemonicParsing="false"/>
+        <TileComponent fx:id="t2x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t2x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t2x5" mnemonicParsing="false"/>
+        <TileComponent fx:id="t2x6" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x1" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x2" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x5" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x6" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x7" mnemonicParsing="false"/>
+        <TileComponent fx:id="t3x8" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x0" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x1" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x2" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x5" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x6" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x7" mnemonicParsing="false"/>
+        <TileComponent fx:id="t4x8" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x0" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x1" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x2" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x5" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x6" mnemonicParsing="false"/>
+        <TileComponent fx:id="t5x7" mnemonicParsing="false"/>
+        <TileComponent fx:id="t6x2" mnemonicParsing="false"/>
+        <TileComponent fx:id="t6x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t6x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t6x5" mnemonicParsing="false"/>
+        <TileComponent fx:id="t6x6" mnemonicParsing="false"/>
+        <TileComponent fx:id="t7x3" mnemonicParsing="false"/>
+        <TileComponent fx:id="t7x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t7x5" mnemonicParsing="false"/>
+        <TileComponent fx:id="t8x4" mnemonicParsing="false"/>
+        <TileComponent fx:id="t8x5" mnemonicParsing="false"/>
+    </children>
+</fx:root>
