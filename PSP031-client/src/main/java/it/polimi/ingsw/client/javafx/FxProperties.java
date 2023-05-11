@@ -5,10 +5,22 @@ import org.jetbrains.annotations.Nullable;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectPropertyBase;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 
 class FxProperties {
 
     private FxProperties() {
+    }
+
+    public static ObservableValue<?> compositeObservableValue(ObservableValue<?>... properties) {
+        if (properties.length == 0)
+            return new SimpleObjectProperty<>();
+
+        ObservableValue<?> currVal = properties[0];
+        for (ObservableValue<?> val : properties)
+            currVal = currVal.flatMap(ignored -> val);
+        return currVal;
     }
 
     public static <T> ReadOnlyObjectProperty<T> toFxProperty(Provider<T> provider) {
