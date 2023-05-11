@@ -23,7 +23,7 @@ class TuiGameScene implements TuiScene {
     public void render(TuiPrintStream out) {
         var terminalSize = out.getTerminalSize();
         var detailedNeededSize = getDetailedOuterRect(out).size();
-        var normalNeededSize = new TuiSize(48, 188);
+        var normalNeededSize = new TuiSize(40, 156);
 
         if (terminalSize.rows() >= detailedNeededSize.rows() && terminalSize.cols() >= detailedNeededSize.cols()) {
             printDetailed(out);
