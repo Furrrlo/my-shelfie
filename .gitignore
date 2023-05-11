@@ -1,5 +1,6 @@
 # Ignore game assets
 assets/*
+PSP031-client/src/main/resources/it/polimi/ingsw/client/javafx/assets/*
 # Ignore logs
 **/logs/*
 
