@@ -1,15 +1,24 @@
 package it.polimi.ingsw.client.javafx;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.model.BoardView;
 import org.jetbrains.annotations.Nullable;
 
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
+
+import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
+import static javafx.beans.binding.BooleanExpression.booleanExpression;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 public class BoardComponent extends AnchorPane {
@@ -63,6 +72,8 @@ public class BoardComponent extends AnchorPane {
     @FXML public TileComponent t8x5;
     //@formatter:on
 
+    private final ListProperty<BoardCoord> pickedTiles = new SimpleListProperty<>(
+            new ObservableListWrapper<>(new ArrayList<>()));
     private final @Nullable TileComponent[][] matrix;
 
     public BoardComponent(BoardView board) {
@@ -85,8 +96,37 @@ public class BoardComponent extends AnchorPane {
                     continue;
 
                 // Bind to the model tile
-                var tileProp = FxProperties.toFxProperty("t" + r + "x" + c, this, board.tile(r, c));
-                tileComponent.tileProperty().bind(tileProp);
+                var boardCoords = new BoardCoord(r, c);
+                tileComponent.tileProperty().bind(FxProperties.toFxProperty("t" + r + "x" + c, this, board.tile(r, c)));
+                var nonPickable = compositeObservableValue(tileComponent.tileProperty(), pickedTiles).map(ignored -> {
+                    // If you already picked it, you can re-pick it to remove it
+                    if (pickedTiles.contains(boardCoords))
+                        return false;
+
+                    final var list = new ArrayList<>(pickedTiles);
+                    list.add(boardCoords);
+                    return !board.checkBoardCoord(list);
+                });
+                var isPickedExpr = booleanExpression(pickedTiles.map(tiles -> tiles.contains(boardCoords)));
+                tileComponent.highlightProperty().bind(tileComponent.disabledProperty().not()
+                        .and(tileComponent.armedProperty()
+                                .or(tileComponent.hoverProperty())
+                                .or(isPickedExpr)));
+                tileComponent.highlightColorProperty().bind(
+                        compositeObservableValue(tileComponent.armedProperty(), tileComponent.hoverProperty(), isPickedExpr)
+                                .map(ignored -> isPickedExpr.get() && tileComponent.isArmed()
+                                        ? Color.GREEN.darker()
+                                        : isPickedExpr.get()
+                                                ? Color.GREEN
+                                                : tileComponent.isArmed() ? Color.WHITE.darker() : Color.WHITE));
+                tileComponent.disableProperty().bind(nonPickable);
+                tileComponent.overlayProperty().bind(nonPickable);
+                tileComponent.setOnMouseClicked(e -> {
+                    if (!pickedTiles.contains(boardCoords))
+                        pickedTiles.add(boardCoords);
+                    else
+                        pickedTiles.remove(boardCoords);
+                });
             }
         }
 
@@ -165,5 +205,9 @@ public class BoardComponent extends AnchorPane {
         t7x5.resizeRelocate(1636.0 * widthScale, 2249.0 * heightScale, 263.0 * widthScale, 263.0 * heightScale);
         t8x4.resizeRelocate(1338.0 * widthScale, 2550.0 * heightScale, 263.0 * widthScale, 263.0 * heightScale);
         t8x5.resizeRelocate(1636.0 * widthScale, 2550.0 * heightScale, 263.0 * widthScale, 263.0 * heightScale);
+    }
+
+    public ListProperty<BoardCoord> pickedTilesProperty() {
+        return pickedTiles;
     }
 }
