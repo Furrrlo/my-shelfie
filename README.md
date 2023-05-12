@@ -47,7 +47,10 @@ then attach a remote debugger to port 5005 (IntelliJ will prompt for it automati
 
 ## Building and running
 
-Execute the package lifecycle:
+To build the JavaFX client, the assets provided by Cranio must be placed in the assets directory
+in the root folder of the project.
+
+Then, execute the package lifecycle:
 
 ```shell
 mvn clean package
