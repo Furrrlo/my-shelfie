@@ -151,16 +151,34 @@ class TuiPrompts {
             }
         });
         lobby.joinedPlayers().get().forEach(player -> player.ready().registerObserver(readyObserver));
-        lobby.game().registerObserver(g -> renderer.setPrompt(g != null
-                ? promptGame(renderer, netManager, g.game(), g.controller())
+        lobby.game().registerObserver(g -> {
+            if (g != null) {
+                registerGameObservers(renderer, netManager, g.game(), g.controller());
+                if (g.game().endGame().get())
+                    renderer.setPrompt(promptEndGame());
+                else if (g.game().suspended().get())
+                    renderer.setPrompt(promptSuspended());
+                else
+                    renderer.setPrompt(promptGame(renderer, netManager, g.game(), g.controller()));
+            } else {
                 // Game is over, we go back to the lobby
-                : doPromptLobby(renderer, netManager, lobby, controller)));
+                renderer.setPrompt(doPromptLobby(renderer, netManager, lobby, controller));
+            }
+        });
         lobby.requiredPlayers().registerObserver(r -> renderer.rerender());
 
         var currGame = lobby.game().get();
-        return currGame != null
-                ? promptGame(renderer, netManager, currGame.game(), currGame.controller())
-                : doPromptLobby(renderer, netManager, lobby, controller);
+
+        if (currGame != null) {
+            registerGameObservers(renderer, netManager, currGame.game(), currGame.controller());
+            if (currGame.game().endGame().get())
+                return promptEndGame();
+            else if (currGame.game().suspended().get())
+                return promptSuspended();
+            else
+                return promptGame(renderer, netManager, currGame.game(), currGame.controller());
+        }
+        return doPromptLobby(renderer, netManager, lobby, controller);
     }
 
     private static Prompt doPromptLobby(TuiRenderer renderer,
@@ -310,10 +328,26 @@ class TuiPrompts {
                 });
     }
 
-    private static Prompt promptGame(TuiRenderer renderer,
-                                     ClientNetManager netManager,
-                                     GameView game,
-                                     GameController controller) {
+    private static Prompt promptSuspended() {
+        return new InputPrompt(
+                """
+                        The game is suspended because
+                        all other player have disconnected.
+                        If no one reconnects within 30 seconds, the game will end.""",
+                (renderer0, ctx, ignored) -> ctx.invalid("Waiting for other players..."));
+    }
+
+    private static Prompt promptEndGame() {
+        //TODO
+        return new InputPrompt(
+                "The game finished.",
+                (renderer0, ctx, ignored) -> ctx.invalid("The game finished."));
+    }
+
+    private static void registerGameObservers(TuiRenderer renderer,
+                                              ClientNetManager netManager,
+                                              GameView game,
+                                              GameController controller) {
         game.getBoard().tiles().forEach(t -> t.tile().registerObserver(c -> renderer.rerender()));
         game.currentTurn().registerObserver(c -> renderer.rerender());
         game.firstFinisher().registerObserver(c -> renderer.rerender());
@@ -328,7 +362,18 @@ class TuiPrompts {
                 renderer.setPrompt(promptReconnect(renderer, netManager));
             }
         });
+        game.suspended().registerObserver(s -> {
+            if (s)
+                renderer.setPrompt(promptSuspended());
+            else
+                renderer.setPrompt(promptGame(renderer, netManager, game, controller));
+        });
+    }
 
+    private static Prompt promptGame(TuiRenderer renderer,
+                                     ClientNetManager netManager,
+                                     GameView game,
+                                     GameController controller) {
         renderer.setScene(new TuiGameScene(game));
 
         final List<ChoicePrompt.Choice> choices = new ArrayList<>();
