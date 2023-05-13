@@ -6,18 +6,29 @@ import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({ "FieldCanBeLocal", "unused" })
 public class GameServerController {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameServerController.class);
     private final LockProtected<ServerGame> game;
+    private final ScheduledExecutorService executor;
+    private volatile @Nullable ScheduledFuture<?> endGameFuture;
 
     public GameServerController(LockProtected<ServerGame> game) {
         this.game = game;
+        this.executor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+                .name("GameServerController-endGame-thread")
+                .factory());
     }
 
     public void onDisconnectPlayer(String nick, Throwable cause) {
@@ -29,9 +40,15 @@ public class GameServerController {
                     .ifPresent(serverPlayer -> {
                         serverPlayer.connected().set(false);
                         //If there is only one player, suspend the game
-                        //TODO: timer
-                        if (game.getPlayers().stream().filter(p -> p.connected().get()).count() <= 1)
+                        if (!game.suspended().get()
+                                && game.getPlayers().stream().filter(p -> p.connected().get()).count() <= 1) {
                             game.suspended().set(true);
+                            endGameFuture = executor.schedule(() -> {
+                                LOGGER.info("Game " + game.getGameID() + " is over because players have disconnected");
+                                //TODO: The only connected player (if any) should win
+                                game.endGame().set(true);
+                            }, 30, TimeUnit.SECONDS);
+                        }
 
                         // If the current player disconnects, skip his turn
                         if (game.currentTurn().get().equals(serverPlayer))
@@ -52,9 +69,10 @@ public class GameServerController {
                         if (!game.currentTurn().get().connected().get())
                             changeCurrentTurn(game);
 
-                        //TODO: stop timer
-                        if (game.suspended().get() && game.getPlayers().stream().filter(p -> p.connected().get()).count() > 1)
+                        if (game.suspended().get() && game.getPlayers().stream().filter(p -> p.connected().get()).count() > 1) {
                             game.suspended().set(false);
+                            Objects.requireNonNull(endGameFuture).cancel(true);
+                        }
                     });
         }
     }
@@ -64,7 +82,10 @@ public class GameServerController {
             var game = gameCloseable.obj();
 
             if (game.endGame().get())
-                throw new IllegalArgumentException("Game is finished");
+                throw new IllegalStateException("Game is finished");
+
+            if (game.suspended().get())
+                throw new IllegalStateException("Game is suspended");
 
             if (!game.currentTurn().get().equals(player))
                 throw new IllegalArgumentException("It's not this player turn");

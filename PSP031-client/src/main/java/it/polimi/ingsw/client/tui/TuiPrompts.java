@@ -340,8 +340,8 @@ class TuiPrompts {
     private static Prompt promptEndGame() {
         //TODO
         return new InputPrompt(
-                "The game finished.",
-                (renderer0, ctx, ignored) -> ctx.invalid("The game finished."));
+                "Game is over.",
+                (renderer0, ctx, ignored) -> ctx.invalid("Game is over."));
     }
 
     private static void registerGameObservers(TuiRenderer renderer,
@@ -367,6 +367,10 @@ class TuiPrompts {
                 renderer.setPrompt(promptSuspended());
             else
                 renderer.setPrompt(promptGame(renderer, netManager, game, controller));
+        });
+        game.endGame().registerObserver(endGame -> {
+            if (endGame)
+                renderer.setPrompt(promptEndGame());
         });
     }
 
