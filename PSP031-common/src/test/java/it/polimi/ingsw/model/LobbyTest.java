@@ -41,7 +41,7 @@ class LobbyTest {
                                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()),
                                         new CommonGoal(Type.CROSS, List.of())),
                                 new PersonalGoal(1),
-                                null),
+                                null, false, false),
                         new EmptyGameController()));
         assertNotEquals(lobby1, lobbyDiffGame, "Instances with different games should not be equals");
     }
@@ -76,7 +76,7 @@ class LobbyTest {
                                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()),
                                         new CommonGoal(Type.CROSS, List.of())),
                                 new PersonalGoal(1),
-                                null),
+                                null, false, false),
                         new EmptyGameController()));
         assertNotEquals(lobby1.hashCode(), lobbyDiffGame.hashCode(), "Instances with different games should not be equals");
     }

@@ -24,7 +24,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         final var game2 = new Game(
                 0,
                 new Board(2),
@@ -38,7 +38,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
 
         assertEquals(game1, game1, "Same instance is not the same");
         assertNotEquals(game1, new Object(), "Different object should not be equals");
@@ -57,7 +57,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1, gameDiffId, "Instances with different ids should not be equals");
 
         final var gameDiffBoard = new Game(
@@ -73,7 +73,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().set(new Tile(Color.BLUE));
         assertNotEquals(game1, gameDiffBoard, "Instances with different boards should not be equals");
 
@@ -89,7 +89,7 @@ class GameTest {
                 1,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1, gameDiffPlayers, "Instances with different players should not be equals");
 
         final var gameDiffThePlayer = new Game(
@@ -105,7 +105,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1, gameDiffThePlayer, "Instances with different thePlayer should not be equals");
 
         final var gameDiffTurn = new Game(
@@ -121,7 +121,7 @@ class GameTest {
                 0,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1, gameDiffTurn, "Instances with different current turn should not be equals");
 
         final var gameDiffStartingPlayer = new Game(
@@ -137,7 +137,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1, gameDiffStartingPlayer, "Instances with different starting player should not be equals");
 
         final var gameDiffCommonGoal = new Game(
@@ -153,7 +153,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.TRIANGLE, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1, gameDiffCommonGoal, "Instances with different common goals should not be equals");
 
         final var gameDiffPersonalGoal = new Game(
@@ -169,7 +169,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(0),
-                null);
+                null, false, false);
         assertNotEquals(game1, gameDiffPersonalGoal, "Instances with different personal goal should not be equals");
 
         final var gameDiffFirstFinisher = new Game(
@@ -185,8 +185,40 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                0);
-        assertNotEquals(game1, gameDiffFirstFinisher, "Instances with different first finisher should not be equals");
+                0, false, false);
+
+        final var gameDiffEndGame = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("thePlayer", new Shelfie(), sp, true, ct, ff, 0)),
+                3,
+                1,
+                2,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, true, false);
+        assertNotEquals(game1, gameDiffEndGame, "Instances with different end game should not be equals");
+
+        final var gameDiffSuspended = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("thePlayer", new Shelfie(), sp, true, ct, ff, 0)),
+                3,
+                1,
+                2,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, true);
+        assertNotEquals(game1, gameDiffSuspended, "Instances with different suspended should not be equals");
+
     }
 
     @Test
@@ -204,7 +236,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         final var game2 = new Game(
                 0,
                 new Board(2),
@@ -218,7 +250,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
 
         assertEquals(game1.hashCode(), game1.hashCode(), "Same instance is not the same");
         assertEquals(game1.hashCode(), game2.hashCode(), "Instances with no differences should be equals");
@@ -236,7 +268,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1.hashCode(), gameDiffId.hashCode(), "Instances with different ids should not be equals");
 
         final var gameDiffBoard = new Game(
@@ -252,7 +284,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         gameDiffBoard.getBoard().tiles().findFirst().orElseThrow().tile().set(new Tile(Color.BLUE));
         assertNotEquals(game1.hashCode(), gameDiffBoard.hashCode(), "Instances with different boards should not be equals");
 
@@ -268,7 +300,7 @@ class GameTest {
                 1,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1.hashCode(), gameDiffPlayers.hashCode(), "Instances with different players should not be equals");
 
         final var gameDiffThePlayer = new Game(
@@ -284,7 +316,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1.hashCode(), gameDiffThePlayer.hashCode(),
                 "Instances with different thePlayer should not be equals");
 
@@ -301,7 +333,7 @@ class GameTest {
                 0,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1.hashCode(), gameDiffTurn.hashCode(),
                 "Instances with different current turn should not be equals");
 
@@ -318,7 +350,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1.hashCode(), gameDiffStartingPlayer.hashCode(),
                 "Instances with different starting player should not be equals");
 
@@ -335,7 +367,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.TRIANGLE, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertNotEquals(game1.hashCode(), gameDiffCommonGoal.hashCode(),
                 "Instances with different common goals should not be equals");
 
@@ -352,7 +384,7 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(0),
-                null);
+                null, false, false);
         assertNotEquals(game1.hashCode(), gameDiffPersonalGoal.hashCode(),
                 "Instances with different personal goal should not be equals");
 
@@ -369,9 +401,43 @@ class GameTest {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                0);
+                0, false, false);
         assertNotEquals(game1.hashCode(), gameDiffFirstFinisher.hashCode(),
                 "Instances with different first finisher should not be equals");
+
+        final var gameDiffEndGame = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("thePlayer", new Shelfie(), sp, true, ct, ff, 0)),
+                3,
+                1,
+                2,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, true, false);
+        assertNotEquals(game1.hashCode(), gameDiffEndGame.hashCode(),
+                "Instances with different end game should not be equals");
+
+        final var gameDiffSuspended = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("thePlayer", new Shelfie(), sp, true, ct, ff, 0)),
+                3,
+                1,
+                2,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, true);
+        assertNotEquals(game1.hashCode(), gameDiffSuspended.hashCode(),
+                "Instances with different suspended should not be equals");
     }
 
     @Test
@@ -387,7 +453,7 @@ class GameTest {
                 0,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null);
+                null, false, false);
         assertDoesNotThrow(game::toString);
     }
 

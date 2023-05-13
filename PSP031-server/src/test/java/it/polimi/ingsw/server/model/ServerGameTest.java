@@ -120,6 +120,21 @@ class ServerGameTest {
                 List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
         gameDiffFirstFinisher.firstFinisher().update(curr -> gameDiffTurn.getPlayers().get(0));
         assertNotEquals(game1, gameDiffFirstFinisher, "Instances with different first finisher should not be equals");
+
+        final var gameDiffEndgame = LobbyServerController.createGame(
+                0,
+                randomFactory.create(seed1),
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
+        gameDiffEndgame.endGame().set(true);
+        assertNotEquals(game1, gameDiffEndgame, "Instances with different end game should not be equals");
+
+        final var gameDiffSuspended = LobbyServerController.createGame(
+                0,
+                randomFactory.create(seed1),
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
+        gameDiffSuspended.suspended().set(true);
+        assertNotEquals(game1, gameDiffSuspended, "Instances with different suspended should not be equals");
+
     }
 
     @Test
@@ -190,6 +205,23 @@ class ServerGameTest {
         gameDiffFirstFinisher.firstFinisher().update(curr -> gameDiffTurn.getPlayers().get(0));
         assertNotEquals(game1.hashCode(), gameDiffFirstFinisher.hashCode(),
                 "Instances with different first finisher should not be equals");
+
+        final var gameDiffEndGame = LobbyServerController.createGame(
+                0,
+                randomFactory.create(seed1),
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
+        gameDiffEndGame.endGame().set(true);
+        assertNotEquals(game1.hashCode(), gameDiffEndGame.hashCode(),
+                "Instances with different end game should not be equals");
+
+        final var gameDiffSuspended = LobbyServerController.createGame(
+                0,
+                randomFactory.create(seed1),
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
+        gameDiffSuspended.suspended().set(true);
+        assertNotEquals(game1.hashCode(), gameDiffSuspended.hashCode(),
+                "Instances with different suspended should not be equals");
+
     }
 
     @Test
