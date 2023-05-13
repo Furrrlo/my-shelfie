@@ -28,9 +28,8 @@ public enum Type implements Serializable {
             """),
     THREE_COLUMNS(new ThreeColumnsCommonGoalChecker(), """
             Three columns each formed by 6 tiles of maximum
-            three different types of maximum three different
-            types. One column can show the same or a
-            different combination of another column.
+            three different types. One column can show the
+            same or a different combination of another column.
             """),
     EIGHT_EQUAL_TILES(new EightEqualTilesCommonGoalChecker(), """
             Eight tiles of the same type. There's no
