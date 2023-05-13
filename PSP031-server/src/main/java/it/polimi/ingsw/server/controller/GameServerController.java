@@ -28,6 +28,11 @@ public class GameServerController {
                     .findFirst()
                     .ifPresent(serverPlayer -> {
                         serverPlayer.connected().set(false);
+                        //If there is only one player, suspend the game
+                        //TODO: timer
+                        if (game.getPlayers().stream().filter(p -> p.connected().get()).count() <= 1)
+                            game.suspended().set(true);
+
                         // If the current player disconnects, skip his turn
                         if (game.currentTurn().get().equals(serverPlayer))
                             changeCurrentTurn(game);
@@ -46,6 +51,10 @@ public class GameServerController {
                         // If the current player is disconnected, we now have a new connected player that can play
                         if (!game.currentTurn().get().connected().get())
                             changeCurrentTurn(game);
+
+                        //TODO: stop timer
+                        if (game.suspended().get() && game.getPlayers().stream().filter(p -> p.connected().get()).count() > 1)
+                            game.suspended().set(false);
                     });
         }
     }

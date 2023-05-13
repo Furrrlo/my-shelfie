@@ -65,6 +65,11 @@ public abstract class GameClientUpdater implements GameUpdater {
     }
 
     @Override
+    public void updateSuspended(boolean suspended) {
+        game.suspended().set(suspended);
+    }
+
+    @Override
     public void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) {
         findCommonGoalBy(commonGoalType).achieved().set(playersAchieved.stream()
                 .map(this::findPlayerBy)

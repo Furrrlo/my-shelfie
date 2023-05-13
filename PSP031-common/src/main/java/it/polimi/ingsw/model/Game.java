@@ -20,6 +20,7 @@ public class Game implements GameView {
     private final @Unmodifiable List<CommonGoal> commonGoal;
     private final Property<@Nullable Player> firstFinisher;
     private final Property<Boolean> endGame;
+    private final Property<Boolean> suspended;
 
     public Game(int gameID,
                 Board board,
@@ -30,7 +31,8 @@ public class Game implements GameView {
                 Function<@Unmodifiable List<Player>, List<CommonGoal>> commonGoalFactory,
                 PersonalGoal personalGoal,
                 @Nullable Integer firstFinisherIdx,
-                boolean endGame) {
+                boolean endGame,
+                boolean suspended) {
         // There's a circular dependency between the players and these properties, create proxies first
         var currentTurnProxy = new PropertyProxy<Player>();
         var firstFinisherProxy = new PropertyProxy<Player>();
@@ -64,6 +66,7 @@ public class Game implements GameView {
         this.startingPlayer = players.get(startingPlayerIdx);
         this.commonGoal = List.copyOf(commonGoalFactory.apply(players));
         this.endGame = new SerializableProperty<>(endGame);
+        this.suspended = new SerializableProperty<>(suspended);
     }
 
     public interface PlayerFactory {
@@ -124,6 +127,11 @@ public class Game implements GameView {
     }
 
     @Override
+    public Property<Boolean> suspended() {
+        return suspended;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -138,13 +146,14 @@ public class Game implements GameView {
                 commonGoal.equals(game.commonGoal) &&
                 Objects.equals(firstFinisher.get(), game.firstFinisher.get()) &&
                 players.equals(game.players) &&
-                endGame.get().equals(game.endGame.get());
+                endGame.get().equals(game.endGame.get()) &&
+                suspended.get().equals(game.suspended.get());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(gameID, board, players, thePlayer, startingPlayer, currentTurn.get(), personalGoal, commonGoal,
-                firstFinisher.get(), endGame.get());
+                firstFinisher.get(), endGame.get(), suspended.get());
     }
 
     @Override
@@ -160,6 +169,7 @@ public class Game implements GameView {
                 ", commonGoal=" + commonGoal +
                 ", firstFinisher=" + firstFinisher +
                 ", endGame=" + endGame +
+                ", suspended=" + suspended +
                 '}';
     }
 }

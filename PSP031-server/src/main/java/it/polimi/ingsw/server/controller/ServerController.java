@@ -332,7 +332,8 @@ public class ServerController implements Closeable {
                                 .toList(),
                         thePlayer.getPersonalGoal(),
                         game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get()),
-                        game.endGame().get()),
+                        game.endGame().get(),
+                        game.suspended().get()),
                 gameControllerFactory.apply(thePlayer, gameController)));
         // Register all listeners to the game model
         game.getBoard().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),
@@ -349,6 +350,7 @@ public class ServerController implements Closeable {
                             tile)));
         });
         observableTracker.registerObserver(game.endGame(), gameUpdater::updateEndGame);
+        observableTracker.registerObserver(game.suspended(), gameUpdater::updateSuspended);
         observableTracker.registerObserver(game.currentTurn(), p -> gameUpdater.updateCurrentTurn(p.getNick()));
         observableTracker.registerObserver(game.firstFinisher(),
                 p -> gameUpdater.updateFirstFinisher(p == null ? null : p.getNick()));

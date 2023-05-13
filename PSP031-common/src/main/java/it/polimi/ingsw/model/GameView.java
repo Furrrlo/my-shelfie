@@ -39,4 +39,6 @@ public interface GameView extends Serializable {
 
     /** Returns endGame */
     Provider<? extends Boolean> endGame();
+
+    Property<Boolean> suspended();
 }

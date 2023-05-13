@@ -23,5 +23,7 @@ public interface GameUpdater {
 
     void updateEndGame(Boolean endGame) throws DisconnectedException;
 
+    void updateSuspended(boolean suspended) throws DisconnectedException;
+
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws DisconnectedException;
 }

@@ -22,6 +22,7 @@ public class ServerGame implements ServerGameView {
     private final @Unmodifiable List<ServerCommonGoal> commonGoal;
     private final Property<@Nullable ServerPlayer> firstFinisher;
     private final Property<Boolean> endGame;
+    private final Property<Boolean> suspended;
 
     /**
      * @param bag the starting bad of tiles, which will be copied by the constructor
@@ -95,6 +96,11 @@ public class ServerGame implements ServerGameView {
         return endGame;
     }
 
+    @Override
+    public Property<Boolean> suspended() {
+        return suspended;
+    }
+
     public void refillBoard() {
         for (int r = 0; r < BoardView.BOARD_ROWS && this.bag.size() > 0; r++) {
             for (int c = 0; c < BoardView.BOARD_COLUMNS && this.bag.size() > 0; c++) {
@@ -121,13 +127,14 @@ public class ServerGame implements ServerGameView {
                 commonGoal.equals(that.commonGoal) &&
                 Objects.equals(firstFinisher.get(), that.firstFinisher.get()) &&
                 players.equals(that.players) &&
-                endGame.get().equals(that.endGame.get());
+                endGame.get().equals(that.endGame.get()) &&
+                suspended.get().equals(that.suspended.get());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(gameID, board, bag, players, startingPlayer, currentTurn.get(), commonGoal, firstFinisher.get(),
-                endGame.get());
+                endGame.get(), suspended.get());
     }
 
     @Override
@@ -142,6 +149,7 @@ public class ServerGame implements ServerGameView {
                 ", commonGoal=" + commonGoal +
                 ", firstFinisher=" + firstFinisher +
                 ", endGame=" + endGame +
+                ", suspended=" + suspended +
                 '}';
     }
 }

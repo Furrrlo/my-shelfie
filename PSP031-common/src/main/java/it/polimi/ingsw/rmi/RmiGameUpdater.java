@@ -27,6 +27,8 @@ public interface RmiGameUpdater extends Remote {
 
     void updateEndGame(Boolean endGame) throws RemoteException;
 
+    void updateSuspended(boolean suspended) throws RemoteException;
+
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws RemoteException;
 
     class Adapter extends RmiAdapter implements GameUpdater, Serializable {
@@ -70,6 +72,11 @@ public interface RmiGameUpdater extends Remote {
         @Override
         public void updateEndGame(Boolean endGame) throws DisconnectedException {
             adapt(() -> updater.updateEndGame(endGame));
+        }
+
+        @Override
+        public void updateSuspended(boolean suspended) throws DisconnectedException {
+            adapt(() -> updater.updateSuspended(suspended));
         }
 
         @Override
