@@ -331,7 +331,8 @@ public class ServerController implements Closeable {
                                         .toList()))
                                 .toList(),
                         thePlayer.getPersonalGoal(),
-                        game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get())),
+                        game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get()),
+                        game.endGame().get()),
                 gameControllerFactory.apply(thePlayer, gameController)));
         // Register all listeners to the game model
         game.getBoard().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),

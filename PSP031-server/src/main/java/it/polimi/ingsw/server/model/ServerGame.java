@@ -43,6 +43,7 @@ public class ServerGame implements ServerGameView {
         this.commonGoal = List.copyOf(commonGoal);
         this.firstFinisher = firstFinisher;
         this.endGame = new SerializableProperty<>(false);
+        this.suspended = new SerializableProperty<>(false);
     }
 
     @Override
@@ -107,15 +108,6 @@ public class ServerGame implements ServerGameView {
     }
 
     @Override
-    public boolean isEndGame() {
-        // Board is empty, and we can't refill it, end the game
-        if (board.isEmpty() && bag.isEmpty())
-            return true;
-        // If someone already finished, and we reached the player before starting player, the game is over
-        return firstFinisher.get() != null && getPlayers().indexOf(currentTurn().get()) == getPlayers().size();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -128,12 +120,14 @@ public class ServerGame implements ServerGameView {
                 currentTurn.get().equals(that.currentTurn.get()) &&
                 commonGoal.equals(that.commonGoal) &&
                 Objects.equals(firstFinisher.get(), that.firstFinisher.get()) &&
-                players.equals(that.players);
+                players.equals(that.players) &&
+                endGame.get().equals(that.endGame.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameID, board, bag, players, startingPlayer, currentTurn.get(), commonGoal, firstFinisher.get());
+        return Objects.hash(gameID, board, bag, players, startingPlayer, currentTurn.get(), commonGoal, firstFinisher.get(),
+                endGame.get());
     }
 
     @Override
@@ -147,7 +141,7 @@ public class ServerGame implements ServerGameView {
                 ", currentTurn=" + currentTurn +
                 ", commonGoal=" + commonGoal +
                 ", firstFinisher=" + firstFinisher +
-
+                ", endGame=" + endGame +
                 '}';
     }
 }

@@ -29,7 +29,8 @@ public class Game implements GameView {
                 int currentTurnIdx,
                 Function<@Unmodifiable List<Player>, List<CommonGoal>> commonGoalFactory,
                 PersonalGoal personalGoal,
-                @Nullable Integer firstFinisherIdx) {
+                @Nullable Integer firstFinisherIdx,
+                boolean endGame) {
         // There's a circular dependency between the players and these properties, create proxies first
         var currentTurnProxy = new PropertyProxy<Player>();
         var firstFinisherProxy = new PropertyProxy<Player>();
@@ -62,7 +63,7 @@ public class Game implements GameView {
         this.thePlayer = players.get(thePlayerIdx);
         this.startingPlayer = players.get(startingPlayerIdx);
         this.commonGoal = List.copyOf(commonGoalFactory.apply(players));
-        this.endGame = new SerializableProperty<>(false);
+        this.endGame = new SerializableProperty<>(endGame);
     }
 
     public interface PlayerFactory {
@@ -136,13 +137,14 @@ public class Game implements GameView {
                 personalGoal.equals(game.personalGoal) &&
                 commonGoal.equals(game.commonGoal) &&
                 Objects.equals(firstFinisher.get(), game.firstFinisher.get()) &&
-                players.equals(game.players);
+                players.equals(game.players) &&
+                endGame.get().equals(game.endGame.get());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(gameID, board, players, thePlayer, startingPlayer, currentTurn.get(), personalGoal, commonGoal,
-                firstFinisher.get());
+                firstFinisher.get(), endGame.get());
     }
 
     @Override
@@ -157,6 +159,7 @@ public class Game implements GameView {
                 ", personalGoal=" + personalGoal +
                 ", commonGoal=" + commonGoal +
                 ", firstFinisher=" + firstFinisher +
+                ", endGame=" + endGame +
                 '}';
     }
 }

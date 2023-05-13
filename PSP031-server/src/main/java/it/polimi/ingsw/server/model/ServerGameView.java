@@ -39,8 +39,6 @@ public interface ServerGameView {
     Provider<? extends @Nullable ServerPlayerView> firstFinisher();
 
     /** Returns boolean endGame */
-    Provider<? extends Boolean> endGame();
+    Provider<Boolean> endGame();
 
-    /** Returns true if conditions for endGame are achieved */
-    boolean isEndGame();
 }
