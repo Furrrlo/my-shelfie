@@ -49,47 +49,6 @@ class TuiGameScene implements TuiScene {
                 TuiHAlignment.CENTER,
                 TuiVAlignment.TOP);
 
-        //Draw personal goal
-        var personalGoalRect = out.getAlignedRect(new TuiSize(ROWS + 6, 32),
-                new TuiRect(0, 0, terminalSize),
-                TuiHAlignment.LEFT,
-                TuiVAlignment.TOP);
-
-        out.cursor(personalGoalRect.row(), personalGoalRect.col());
-        out.println("Personal goal");
-        out.printBox(
-                TuiRect.fromCoords(
-                        personalGoalRect.row(), personalGoalRect.col(),
-                        personalGoalRect.lastRow() + 1, personalGoalRect.lastCol() + 1),
-                TuiPrintStream.BOX_RIGHT | TuiPrintStream.BOX_BOTTOM);
-
-        var personalGoalShelfie = out.printAligned(
-                new TuiPersonalGoalPrinter(game.getPersonalGoal()),
-                TuiRect.fromCoords(personalGoalRect.row() + 2,
-                        personalGoalRect.col(),
-                        personalGoalRect.lastRow() - 3,
-                        personalGoalRect.lastCol()),
-                TuiHAlignment.CENTER, TuiVAlignment.CENTER);
-
-        var messageSize = new TuiSize(2, personalGoalRect.lastCol());
-        if (game.getPersonalGoal().achievedPersonalGoal(game.thePlayer().getShelfie()))
-            out.printAligned(new TuiStringPrinter(
-                    ConsoleColors.GREEN_BOLD_BRIGHT + "You achieved your personal goal!" + ConsoleColors.RESET, messageSize),
-                    new TuiRect(personalGoalShelfie.lastRow() + 2,
-                            personalGoalRect.col(),
-                            messageSize),
-                    TuiHAlignment.CENTER,
-                    TuiVAlignment.CENTER);
-        else
-            out.printAligned(new TuiStringPrinter("You matched "
-                    + game.thePlayer().getShelfie().numTilesOverlappingWithPersonalGoal(game.getPersonalGoal())
-                    + " tiles with your personal goal", messageSize),
-                    new TuiRect(personalGoalShelfie.lastRow() + 2,
-                            personalGoalRect.col(),
-                            messageSize),
-                    TuiHAlignment.CENTER,
-                    TuiVAlignment.CENTER);
-
         // Draw board
         var boardRect = out.printAligned(
                 new TuiBoardPrinter(game.getBoard()),
@@ -187,15 +146,16 @@ class TuiGameScene implements TuiScene {
                 TuiPrintStream.BOX_RIGHT | TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_TOP);
 
         // Draw CommonGoal 1
-        var commonGoalCols = Math.min(terminalSize.cols() - rightPlayerRect.lastCol() - 3, 50);
+        int goalCols = Math.min(terminalSize.cols() - rightPlayerRect.lastCol() - 3, 50);
+        int commonGoalRows = Math.ceilDiv(terminalSize.rows(), 3);
         var commonGoalRect = out.getAlignedRect(
-                new TuiSize(ROWS + 9, commonGoalCols),
+                new TuiSize(commonGoalRows - 1, goalCols),
                 new TuiRect(0, 0, terminalSize),
                 TuiHAlignment.RIGHT, TuiVAlignment.TOP);
 
         out.printAligned(
-                new TuiStringPrinter("Common goal : " + game.getCommonGoals().get(0).getType().name().replace('_', ' '),
-                        commonGoalCols),
+                new TuiStringPrinter("Common goal: " + game.getCommonGoals().get(0).getType().name().replace('_', ' '),
+                        goalCols),
                 commonGoalRect,
                 TuiHAlignment.CENTER,
                 TuiVAlignment.TOP);
@@ -206,50 +166,103 @@ class TuiGameScene implements TuiScene {
                         commonGoalRect.lastRow() + 1, commonGoalRect.lastCol()),
                 TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_BOTTOM);
 
-        var commonGoal = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(0).getType()),
-                TuiRect.fromCoords(commonGoalRect.row() + 2, commonGoalRect.col(),
-                        commonGoalRect.lastRow() - 6, commonGoalRect.lastCol()),
+        int shelfieRows = Math.round((commonGoalRows - 2) * 0.6f);
+        var commonGoalShelfie = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(0).getType()),
+                TuiRect.fromSize(commonGoalRect.row() + 1, commonGoalRect.col(),
+                        shelfieRows, goalCols),
                 TuiHAlignment.CENTER, TuiVAlignment.CENTER);
 
-        var commonGoalDesc = new TuiSize(5, commonGoalCols);
+        var commonGoalDescSize = new TuiSize(5, goalCols);
         out.printAligned(new TuiStringPrinter(
-                game.getCommonGoals().get(0).getType().getDescription(), commonGoalDesc),
-                new TuiRect(commonGoal.lastRow() + 2,
+                game.getCommonGoals().get(0).getType().getDescription(), commonGoalDescSize),
+                TuiRect.fromCoords(commonGoalShelfie.lastRow() + 1,
                         commonGoalRect.col(),
-                        commonGoalDesc),
+                        commonGoalRect.lastRow(),
+                        commonGoalRect.lastCol()),
                 TuiHAlignment.CENTER,
                 TuiVAlignment.CENTER);
 
         // Draw CommonGoal 2
-        var commonGoalRect2 = out.getAlignedRect(new TuiSize(ROWS + 9, commonGoalCols),
-                new TuiRect(0, 0, terminalSize),
-                TuiHAlignment.RIGHT, TuiVAlignment.BOTTOM);
+        var commonGoalRect2 = out.getAlignedRect(new TuiSize(commonGoalRows - 1, goalCols),
+                new TuiRect(commonGoalRect.lastRow() + 2, 0, terminalSize),
+                TuiHAlignment.RIGHT, TuiVAlignment.TOP);
 
         out.printAligned(
-                new TuiStringPrinter("Common goal : " + game.getCommonGoals().get(1).getType().name().replace('_', ' '),
-                        commonGoalCols),
+                new TuiStringPrinter("Common goal: " + game.getCommonGoals().get(1).getType().name().replace('_', ' '),
+                        goalCols),
                 commonGoalRect2,
                 TuiHAlignment.CENTER,
                 TuiVAlignment.TOP);
 
         out.printBox(
                 TuiRect.fromCoords(
-                        commonGoalRect2.row() - 1, commonGoalRect2.col() - 1,
-                        commonGoalRect2.lastRow(), commonGoalRect2.lastCol()),
-                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_TOP);
+                        commonGoalRect2.row(), commonGoalRect2.col() - 1,
+                        commonGoalRect2.lastRow() + 1, commonGoalRect2.lastCol()),
+                TuiPrintStream.BOX_LEFT | TuiPrintStream.BOX_BOTTOM);
 
-        var commonGoal2 = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(1).getType()),
-                TuiRect.fromCoords(commonGoalRect2.row() + 2, commonGoalRect2.col(),
-                        commonGoalRect2.lastRow() - 6, commonGoalRect2.lastCol()),
+        var commonGoal2Shelfie = out.printAligned(new TuiCommonGoalPrinter(game.getCommonGoals().get(1).getType()),
+                TuiRect.fromSize(commonGoalRect2.row() + 1, commonGoalRect2.col(),
+                        shelfieRows, goalCols),
                 TuiHAlignment.CENTER, TuiVAlignment.CENTER);
 
         out.printAligned(new TuiStringPrinter(
-                game.getCommonGoals().get(1).getType().getDescription(), commonGoalDesc),
-                new TuiRect(commonGoal2.lastRow() + 2,
+                game.getCommonGoals().get(1).getType().getDescription(), commonGoalDescSize),
+                TuiRect.fromCoords(commonGoal2Shelfie.lastRow() + 1,
                         commonGoalRect2.col(),
-                        commonGoalDesc),
+                        commonGoalRect2.lastRow(),
+                        commonGoalRect2.lastCol()),
                 TuiHAlignment.CENTER,
                 TuiVAlignment.CENTER);
+
+        //Draw personal goal
+        int personaGoalRows = terminalSize.rows() - 2 * commonGoalRows;
+        var personalGoalRect = out.getAlignedRect(new TuiSize(personaGoalRows, goalCols),
+                new TuiRect(commonGoalRect2.lastRow() + 2, 0, terminalSize),
+                TuiHAlignment.RIGHT,
+                TuiVAlignment.TOP);
+
+        out.cursor(personalGoalRect.row(), personalGoalRect.col());
+        out.printAligned(new TuiStringPrinter("Personal goal:", goalCols),
+                personalGoalRect,
+                TuiHAlignment.CENTER,
+                TuiVAlignment.TOP);
+
+        out.printBox(
+                TuiRect.fromCoords(
+                        personalGoalRect.row(), personalGoalRect.col() - 1,
+                        personalGoalRect.lastRow(), personalGoalRect.lastCol()),
+                TuiPrintStream.BOX_LEFT);
+
+        int personalShelfieRows = Math.round((personaGoalRows - 2) * 0.6f);
+        var personalGoalShelfie = out.printAligned(
+                new TuiPersonalGoalPrinter(game.getPersonalGoal()),
+                TuiRect.fromSize(personalGoalRect.row() + 1,
+                        personalGoalRect.col(),
+                        personalShelfieRows,
+                        goalCols),
+                TuiHAlignment.CENTER,
+                TuiVAlignment.CENTER);
+
+        var messageSize = new TuiSize(2, goalCols);
+        if (game.getPersonalGoal().achievedPersonalGoal(game.thePlayer().getShelfie()))
+            out.printAligned(new TuiStringPrinter(
+                    ConsoleColors.GREEN_BOLD_BRIGHT + "You achieved your personal goal!" + ConsoleColors.RESET, messageSize),
+                    TuiRect.fromCoords(personalGoalShelfie.lastRow() + 1,
+                            personalGoalRect.col(),
+                            personalGoalRect.lastRow(),
+                            personalGoalRect.lastCol()),
+                    TuiHAlignment.CENTER,
+                    TuiVAlignment.CENTER);
+        else
+            out.printAligned(new TuiStringPrinter("You matched "
+                    + game.thePlayer().getShelfie().numTilesOverlappingWithPersonalGoal(game.getPersonalGoal())
+                    + " tiles with your personal goal", messageSize),
+                    TuiRect.fromCoords(personalGoalShelfie.lastRow() + 1,
+                            personalGoalRect.col(),
+                            personalGoalRect.lastRow(),
+                            personalGoalRect.lastCol()),
+                    TuiHAlignment.CENTER,
+                    TuiVAlignment.CENTER);
 
         out.cursor(boardRect.row(), boardRect.col());
         out.print("┘");
@@ -259,6 +272,10 @@ class TuiGameScene implements TuiScene {
         out.print("┐");
         out.cursor(boardRect.lastRow(), boardRect.lastCol());
         out.print("┌");
+        out.cursor(commonGoalRect.lastRow() + 1, commonGoalRect.col() - 1);
+        out.print("├");
+        out.cursor(commonGoalRect2.lastRow() + 1, commonGoalRect2.col() - 1);
+        out.print("├");
 
         out.cursor(boardRect.lastRow() + 2, 0);
     }
