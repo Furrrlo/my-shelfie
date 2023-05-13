@@ -30,33 +30,38 @@ public class TuiStringPrinter implements TuiPrinter {
      * going on a new line if necessary to fit the given size
      *
      * @param string string to print
-     * @param size size
+     * @param maxSize size
      */
-    public TuiStringPrinter(String string, TuiSize size) {
-        this.string = string;
-        this.size = size;
+    public TuiStringPrinter(String string, TuiSize maxSize) {
+        this.string = getSplit(string, maxSize);
+        this.size = new TuiSize(Math.min(maxSize.rows(), (int) this.string.codePoints().filter(c -> c == '\n').count() + 1),
+                maxSize.cols());
     }
 
     @Override
     public void print(TuiPrintStream out) {
+        out.print(string);
+    }
+
+    private String getSplit(String string, TuiSize maxSize) {
         String[] split = string.split("[ \n]");
         StringBuilder stringBuilder = new StringBuilder();
         int col = 0, row = 0;
         for (String s : split) {
-            if (col + s.length() < size.cols()) {
+            if (col + s.length() < maxSize.cols()) {
                 //There is enough space on this line: add a space if it isn't the first word
                 if (col != 0) {
                     stringBuilder.append(' ');
                     col++;
                 }
-            } else if (row + 1 < size.rows()) {
+            } else if (row + 1 < maxSize.rows()) {
                 //There is no enough space on this line, go on new line
                 stringBuilder.append('\n');
                 row++;
                 col = 0;
             } else {
                 //there is no enough space on this line, and we have no more lines.
-                int remainingCharacters = size.cols() - col;
+                int remainingCharacters = maxSize.cols() - col;
                 if (remainingCharacters >= 3) {
                     //We have at least 3 free spaces
                     stringBuilder.append("...");
@@ -70,7 +75,7 @@ public class TuiStringPrinter implements TuiPrinter {
             stringBuilder.append(s);
             col += s.length();
         }
-        out.print(stringBuilder);
+        return stringBuilder.toString();
     }
 
     @Override

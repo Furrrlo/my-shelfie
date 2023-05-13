@@ -175,7 +175,7 @@ class TuiGameScene implements TuiScene {
         var commonGoalDescSize = new TuiSize(5, goalCols);
         out.printAligned(new TuiStringPrinter(
                 game.getCommonGoals().get(0).getType().getDescription(), commonGoalDescSize),
-                TuiRect.fromCoords(commonGoalShelfie.lastRow() + 1,
+                TuiRect.fromCoords(commonGoalRect.row() + 1 + shelfieRows,
                         commonGoalRect.col(),
                         commonGoalRect.lastRow(),
                         commonGoalRect.lastCol()),
@@ -207,7 +207,7 @@ class TuiGameScene implements TuiScene {
 
         out.printAligned(new TuiStringPrinter(
                 game.getCommonGoals().get(1).getType().getDescription(), commonGoalDescSize),
-                TuiRect.fromCoords(commonGoal2Shelfie.lastRow() + 1,
+                TuiRect.fromCoords(commonGoalRect2.row() + 1 + shelfieRows,
                         commonGoalRect2.col(),
                         commonGoalRect2.lastRow(),
                         commonGoalRect2.lastCol()),
@@ -233,7 +233,7 @@ class TuiGameScene implements TuiScene {
                         personalGoalRect.lastRow(), personalGoalRect.lastCol()),
                 TuiPrintStream.BOX_LEFT);
 
-        int personalShelfieRows = Math.round((personaGoalRows - 2) * 0.6f);
+        int personalShelfieRows = Math.round((personaGoalRows - 2) * 0.7f);
         var personalGoalShelfie = out.printAligned(
                 new TuiPersonalGoalPrinter(game.getPersonalGoal()),
                 TuiRect.fromSize(personalGoalRect.row() + 1,
@@ -247,7 +247,7 @@ class TuiGameScene implements TuiScene {
         if (game.getPersonalGoal().achievedPersonalGoal(game.thePlayer().getShelfie()))
             out.printAligned(new TuiStringPrinter(
                     ConsoleColors.GREEN_BOLD_BRIGHT + "You achieved your personal goal!" + ConsoleColors.RESET, messageSize),
-                    TuiRect.fromCoords(personalGoalShelfie.lastRow() + 1,
+                    TuiRect.fromCoords(personalGoalRect.row() + 1 + personalShelfieRows,
                             personalGoalRect.col(),
                             personalGoalRect.lastRow(),
                             personalGoalRect.lastCol()),
@@ -257,7 +257,7 @@ class TuiGameScene implements TuiScene {
             out.printAligned(new TuiStringPrinter("You matched "
                     + game.thePlayer().getShelfie().numTilesOverlappingWithPersonalGoal(game.getPersonalGoal())
                     + " tiles with your personal goal", messageSize),
-                    TuiRect.fromCoords(personalGoalShelfie.lastRow() + 1,
+                    TuiRect.fromCoords(personalGoalRect.row() + 1 + personalShelfieRows,
                             personalGoalRect.col(),
                             personalGoalRect.lastRow(),
                             personalGoalRect.lastCol()),
