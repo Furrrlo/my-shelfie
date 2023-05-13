@@ -7,7 +7,7 @@ public class TuiStringPrinter implements TuiPrinter {
     /**
      * Creates a printer that can print strings.
      * If the string cannot fit one line, it will go on new line
-     * 
+     *
      * @param string string to print
      */
     public TuiStringPrinter(String string) {
@@ -41,7 +41,6 @@ public class TuiStringPrinter implements TuiPrinter {
     public void print(TuiPrintStream out) {
         String[] split = string.split("[ \n]");
         StringBuilder stringBuilder = new StringBuilder();
-        final int maxCharacters = size.cols() * size.rows();
         int col = 0, row = 0;
         for (String s : split) {
             if (col + s.length() < size.cols()) {
@@ -57,12 +56,14 @@ public class TuiStringPrinter implements TuiPrinter {
                 col = 0;
             } else {
                 //there is no enough space on this line, and we have no more lines.
-                if (maxCharacters - ((col + 1) * (row + 1)) >= 3) {
+                int remainingCharacters = size.cols() - col;
+                if (remainingCharacters >= 3) {
                     //We have at least 3 free spaces
                     stringBuilder.append("...");
-                } else {
-                    //There is no space for 3 character: replace the last ones.
-                    stringBuilder.replace(maxCharacters - 3, maxCharacters, "...");
+                } else if (stringBuilder.length() >= 3 - remainingCharacters) {
+                    //There is no space for 3 character: replace the last ones (if any).
+                    stringBuilder.replace(stringBuilder.length() - (3 - remainingCharacters),
+                            stringBuilder.length() + remainingCharacters, "...");
                 }
                 break;
             }
