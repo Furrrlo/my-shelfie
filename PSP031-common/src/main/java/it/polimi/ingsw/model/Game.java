@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -21,7 +22,7 @@ public class Game implements GameView {
     private final Property<@Nullable Player> firstFinisher;
     private final Property<Boolean> endGame;
     private final Property<Boolean> suspended;
-    private final Property<List<UserMessage>> messageList;
+    private final Property<List<@Nullable UserMessage>> messageList;
 
     public Game(int gameID,
                 Board board,
@@ -68,7 +69,7 @@ public class Game implements GameView {
         this.commonGoal = List.copyOf(commonGoalFactory.apply(players));
         this.endGame = new SerializableProperty<>(endGame);
         this.suspended = new SerializableProperty<>(suspended);
-        this.messageList = new SerializableProperty<>(null);
+        this.messageList = new SerializableProperty<>(new ArrayList<>());
     }
 
     public interface PlayerFactory {
@@ -134,7 +135,7 @@ public class Game implements GameView {
     }
 
     @Override
-    public Property<List<UserMessage>> messageList() {
+    public Property<List<@Nullable UserMessage>> messageList() {
         return messageList;
     }
 

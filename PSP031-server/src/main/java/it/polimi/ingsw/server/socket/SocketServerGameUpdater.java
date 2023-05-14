@@ -3,6 +3,7 @@ package it.polimi.ingsw.server.socket;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.model.Type;
+import it.polimi.ingsw.model.UserMessage;
 import it.polimi.ingsw.socket.packets.*;
 import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
@@ -84,6 +85,15 @@ public class SocketServerGameUpdater implements GameUpdater {
     public void updateSuspended(boolean suspended) throws DisconnectedException {
         try {
             socketManager.send(new UpdateSuspendedPacket(suspended));
+        } catch (IOException e) {
+            throw new DisconnectedException(e);
+        }
+    }
+
+    @Override
+    public void updateMessage(@Nullable UserMessage message) throws DisconnectedException {
+        try {
+            socketManager.send(new UpdateMessagePacket(message));
         } catch (IOException e) {
             throw new DisconnectedException(e);
         }

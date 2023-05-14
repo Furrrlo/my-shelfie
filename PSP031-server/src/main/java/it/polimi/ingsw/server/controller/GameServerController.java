@@ -143,5 +143,12 @@ public class GameServerController {
     }
 
     //TODO : sendMessage(String nick,String message)
-    // game.message().set(new UserMessage(nick,message);
+    /*
+     * public void sendMessage(ServerPlayer sendingPlayer, List<String> receivingPlayersNick, String message) {
+     * try (var gameCloseable = game.use()) {
+     * var game = gameCloseable.obj();
+     * 
+     * }
+     * }
+     */
 }

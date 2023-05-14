@@ -30,7 +30,7 @@ public interface RmiGameUpdater extends Remote {
 
     void updateSuspended(boolean suspended) throws RemoteException;
 
-    void updateMessage(UserMessage message) throws RemoteException;
+    void updateMessage(@Nullable UserMessage message) throws RemoteException;
 
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws RemoteException;
 
@@ -83,7 +83,7 @@ public interface RmiGameUpdater extends Remote {
         }
 
         @Override
-        public void updateMessage(UserMessage message) throws DisconnectedException {
+        public void updateMessage(@Nullable UserMessage message) throws DisconnectedException {
             adapt(() -> updater.updateMessage(message));
         }
 

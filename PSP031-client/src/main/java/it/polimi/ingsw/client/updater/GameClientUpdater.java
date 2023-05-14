@@ -5,6 +5,7 @@ import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,10 +67,10 @@ public abstract class GameClientUpdater implements GameUpdater {
     }
 
     @Override
-    public void updateMessage(UserMessage message) {
+    public void updateMessage(@Nullable UserMessage message) {
         var newMessageList = new ArrayList<>(game.messageList().get());
         newMessageList.add(message);
-        game.messageList().set(newMessageList);
+        game.messageList().set(Collections.unmodifiableList(newMessageList));
     }
 
     @Override

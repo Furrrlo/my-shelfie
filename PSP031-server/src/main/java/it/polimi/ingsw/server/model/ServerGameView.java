@@ -3,6 +3,7 @@ package it.polimi.ingsw.server.model;
 import it.polimi.ingsw.model.BoardView;
 import it.polimi.ingsw.model.Provider;
 import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.UserMessage;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -41,7 +42,7 @@ public interface ServerGameView {
     /** Returns boolean endGame */
     Provider<Boolean> endGame();
 
-    Provider<? extends UserMessage> message();
+    Provider<? extends @Nullable UserMessage> message();
 
     /** Returns whether the game is suspended */
     Provider<Boolean> suspended();
