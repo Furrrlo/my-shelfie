@@ -46,6 +46,8 @@ public class SocketGameClientUpdater extends GameClientUpdater implements Runnab
                             updateEndGame(packet.endGame());
                         case UpdateSuspendedPacket packet ->
                             updateSuspended(packet.suspended());
+                        case UpdateMessagePacket packet ->
+                            updateMessage(packet.message());
                     }
                 }
             } while (!Thread.interrupted());

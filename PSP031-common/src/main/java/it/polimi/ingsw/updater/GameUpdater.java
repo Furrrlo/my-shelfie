@@ -3,6 +3,7 @@ package it.polimi.ingsw.updater;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.model.Type;
+import it.polimi.ingsw.model.UserMessage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public interface GameUpdater {
     void updateEndGame(Boolean endGame) throws DisconnectedException;
 
     void updateSuspended(boolean suspended) throws DisconnectedException;
+
+    void updateMessage(UserMessage message) throws DisconnectedException;
 
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws DisconnectedException;
 }

@@ -21,6 +21,7 @@ public class Game implements GameView {
     private final Property<@Nullable Player> firstFinisher;
     private final Property<Boolean> endGame;
     private final Property<Boolean> suspended;
+    private final Property<List<UserMessage>> messageList;
 
     public Game(int gameID,
                 Board board,
@@ -67,6 +68,7 @@ public class Game implements GameView {
         this.commonGoal = List.copyOf(commonGoalFactory.apply(players));
         this.endGame = new SerializableProperty<>(endGame);
         this.suspended = new SerializableProperty<>(suspended);
+        this.messageList = new SerializableProperty<>(null);
     }
 
     public interface PlayerFactory {
@@ -132,6 +134,11 @@ public class Game implements GameView {
     }
 
     @Override
+    public Property<List<UserMessage>> messageList() {
+        return messageList;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -147,13 +154,14 @@ public class Game implements GameView {
                 Objects.equals(firstFinisher.get(), game.firstFinisher.get()) &&
                 players.equals(game.players) &&
                 endGame.get().equals(game.endGame.get()) &&
-                suspended.get().equals(game.suspended.get());
+                suspended.get().equals(game.suspended.get()) &&
+                messageList.get().equals(game.messageList.get());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(gameID, board, players, thePlayer, startingPlayer, currentTurn.get(), personalGoal, commonGoal,
-                firstFinisher.get(), endGame.get(), suspended.get());
+                firstFinisher.get(), endGame.get(), suspended.get(), messageList.get());
     }
 
     @Override
@@ -170,6 +178,7 @@ public class Game implements GameView {
                 ", firstFinisher=" + firstFinisher +
                 ", endGame=" + endGame +
                 ", suspended=" + suspended +
+                ", messageList=" + messageList +
                 '}';
     }
 }

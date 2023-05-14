@@ -23,6 +23,7 @@ public class ServerGame implements ServerGameView {
     private final Property<@Nullable ServerPlayer> firstFinisher;
     private final Property<Boolean> endGame;
     private final Property<Boolean> suspended;
+    private final Property<UserMessage> message;
 
     /**
      * @param bag the starting bad of tiles, which will be copied by the constructor
@@ -45,6 +46,7 @@ public class ServerGame implements ServerGameView {
         this.firstFinisher = firstFinisher;
         this.endGame = new SerializableProperty<>(false);
         this.suspended = new SerializableProperty<>(false);
+        this.message = new SerializableProperty<>(null);
     }
 
     @Override
@@ -94,6 +96,11 @@ public class ServerGame implements ServerGameView {
     @Override
     public Property<Boolean> endGame() {
         return endGame;
+    }
+
+    @Override
+    public Property<UserMessage> message() {
+        return message;
     }
 
     @Override

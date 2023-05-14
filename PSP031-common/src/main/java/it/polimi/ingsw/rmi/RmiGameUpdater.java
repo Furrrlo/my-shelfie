@@ -3,6 +3,7 @@ package it.polimi.ingsw.rmi;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.model.Type;
+import it.polimi.ingsw.model.UserMessage;
 import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,8 @@ public interface RmiGameUpdater extends Remote {
     void updateEndGame(Boolean endGame) throws RemoteException;
 
     void updateSuspended(boolean suspended) throws RemoteException;
+
+    void updateMessage(UserMessage message) throws RemoteException;
 
     void updateAchievedCommonGoal(Type commonGoalType, List<String> playersAchieved) throws RemoteException;
 
@@ -77,6 +80,11 @@ public interface RmiGameUpdater extends Remote {
         @Override
         public void updateSuspended(boolean suspended) throws DisconnectedException {
             adapt(() -> updater.updateSuspended(suspended));
+        }
+
+        @Override
+        public void updateMessage(UserMessage message) throws DisconnectedException {
+            adapt(() -> updater.updateMessage(message));
         }
 
         @Override

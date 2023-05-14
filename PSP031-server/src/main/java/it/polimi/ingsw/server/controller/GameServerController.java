@@ -141,4 +141,7 @@ public class GameServerController {
             }
         }
     }
+
+    //TODO : sendMessage(String nick,String message)
+    // game.message().set(new UserMessage(nick,message);
 }

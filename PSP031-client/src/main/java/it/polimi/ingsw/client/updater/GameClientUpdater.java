@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.updater.GameUpdater;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,13 @@ public abstract class GameClientUpdater implements GameUpdater {
     @Override
     public void updateEndGame(Boolean endGame) {
         game.endGame().set(endGame);
+    }
+
+    @Override
+    public void updateMessage(UserMessage message) {
+        var newMessageList = new ArrayList<>(game.messageList().get());
+        newMessageList.add(message);
+        game.messageList().set(newMessageList);
     }
 
     @Override
