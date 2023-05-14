@@ -38,7 +38,8 @@ public interface GameView extends Serializable {
     Provider<? extends @Nullable PlayerView> firstFinisher();
 
     /** Returns endGame */
-    Provider<? extends Boolean> endGame();
+    Provider<Boolean> endGame();
 
-    Property<Boolean> suspended();
+    /** Returns whether the game is suspended */
+    Provider<Boolean> suspended();
 }
