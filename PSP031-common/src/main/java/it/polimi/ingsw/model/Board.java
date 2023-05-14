@@ -1,6 +1,5 @@
 package it.polimi.ingsw.model;
 
-import it.polimi.ingsw.BoardCoord;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -153,7 +152,7 @@ public class Board implements BoardView {
     }
 
     @Override
-    public boolean checkBoardCoord(List<BoardCoord> selected) {
+    public boolean checkBoardCoord(List<? extends Coord> selected) {
         if (selected.size() == 0 || selected.size() > 3)
             return false;
 
@@ -161,7 +160,7 @@ public class Board implements BoardView {
         if (selected.stream().distinct().count() != selected.size())
             return false;
 
-        for (BoardCoord coord : selected) {
+        for (Coord coord : selected) {
             if (!isValidTile(coord.row(), coord.col()))
                 return false;
             if (tile(coord.row(), coord.col()).get() == null)
