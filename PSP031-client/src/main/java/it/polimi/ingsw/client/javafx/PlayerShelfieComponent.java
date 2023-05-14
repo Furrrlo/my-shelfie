@@ -1,0 +1,84 @@
+package it.polimi.ingsw.client.javafx;
+
+import it.polimi.ingsw.model.PlayerView;
+import it.polimi.ingsw.model.Provider;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+
+public class PlayerShelfieComponent extends Pane {
+
+    private final NickLabel label;
+    private final ShelfieComponent shelfieComponent;
+    private final Pane chair;
+
+    public PlayerShelfieComponent(PlayerView player) {
+        this(player, false, false);
+    }
+
+    public PlayerShelfieComponent(PlayerView player, boolean disabled, boolean showScore) {
+        getChildren().add(this.shelfieComponent = new ShelfieComponent(player.getShelfie()));
+        this.shelfieComponent.setDisable(disabled);
+
+        getChildren().add(this.label = new NickLabel(player.getNick(), player.score(), showScore));
+
+        final var chairImgView = new ImageView(new Image(FxResources.getResourceAsStream(
+                "assets/misc/firstplayertoken.png")));
+        getChildren().add(this.chair = new AnchorPane(chairImgView));
+        AnchorPane.setTopAnchor(chairImgView, 0.0);
+        AnchorPane.setBottomAnchor(chairImgView, 0.0);
+        AnchorPane.setLeftAnchor(chairImgView, 0.0);
+        AnchorPane.setRightAnchor(chairImgView, 0.0);
+        chairImgView.fitWidthProperty().bind(chair.widthProperty());
+        chairImgView.fitHeightProperty().bind(chair.heightProperty());
+
+        this.chair.setVisible(player.isStartingPlayer());
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+
+        double scale = Math.min(getWidth() / 180d, getHeight() / 194d);
+
+        double labelWidth = Math.min(300, getWidth() - 2 * 28 * scale);
+        this.label.resizeRelocate((getWidth() - labelWidth) / 2d, 0, labelWidth, Math.min(30, 21 * scale));
+
+        double shelfieOffsetY = Math.min(20, 14 * scale);
+        double shelfieWidth = 180d * scale;
+        this.shelfieComponent.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
+                getHeight() - shelfieOffsetY);
+
+        double chairWidth = 35 * scale, chairHeight = 33 * scale;
+        this.chair.resizeRelocate(getWidth() - chairWidth, getHeight() - chairHeight, chairWidth, chairHeight);
+    }
+
+    private static class NickLabel extends HBox {
+
+        public NickLabel(String nick, Provider<Integer> score, boolean showScore) {
+            backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                    Color.WHITE,
+                    new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                    new Insets(1)))));
+            borderProperty().bind(widthProperty().map(width -> new Border(new BorderStroke(
+                    Color.rgb(129, 33, 0),
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                    BorderStroke.THICK))));
+
+            setAlignment(Pos.CENTER);
+
+            var label = new Label();
+            if (showScore)
+                label.textProperty().bind(FxProperties.toFxProperty(score).map(s -> nick + ": " + s + " pt"));
+            else
+                label.setText(nick);
+            getChildren().add(label);
+        }
+    }
+}

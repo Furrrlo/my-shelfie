@@ -1,9 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.model.Board;
-import it.polimi.ingsw.model.Color;
-import it.polimi.ingsw.model.Property;
-import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 
 import javafx.application.Application;
@@ -21,23 +18,35 @@ public class JfxApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-
-        //        Parent root = FXMLLoader.load(getClass().getResource("scene.fxml"));
-        var pane = new AnchorPane();
         var b = new Board(4);
         refillBoardRandom(b);
-        var board = new BoardComponent(b);
-        pane.getChildren().add(board);
-        AnchorPane.setLeftAnchor(board, 0.0D);
-        AnchorPane.setRightAnchor(board, 0.0D);
-        AnchorPane.setTopAnchor(board, 0.0D);
-        AnchorPane.setBottomAnchor(board, 0.0D);
+        var gamePane = new GamePane(new Game(
+                0,
+                b,
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("thePlayer", new Shelfie(), sp, true, ct, ff, 0)),
+                3,
+                1,
+                2,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null));
 
-        Scene scene = new Scene(pane);
+        AnchorPane.setLeftAnchor(gamePane, 0.0D);
+        AnchorPane.setRightAnchor(gamePane, 0.0D);
+        AnchorPane.setTopAnchor(gamePane, 0.0D);
+        AnchorPane.setBottomAnchor(gamePane, 0.0D);
+
+        Scene scene = new Scene(gamePane);
 
         stage.setTitle("My Shelfie");
         stage.setScene(scene);
-        stage.setWidth(500);
+        stage.setMinWidth(1000);
+        stage.setWidth(1000);
+        stage.setMinHeight(500);
         stage.setHeight(500);
         stage.show();
     }

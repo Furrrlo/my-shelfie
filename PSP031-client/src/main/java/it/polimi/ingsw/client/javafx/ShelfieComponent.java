@@ -1,6 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.model.Shelfie;
+import it.polimi.ingsw.model.ShelfieView;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -47,7 +47,7 @@ public class ShelfieComponent extends AnchorPane {
 
     private final TileComponent[][] matrix;
 
-    public ShelfieComponent(Shelfie shelfie) {
+    public ShelfieComponent(ShelfieView shelfie) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("shelfie.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);

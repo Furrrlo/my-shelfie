@@ -5,6 +5,8 @@ import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.model.BoardView;
 import org.jetbrains.annotations.Nullable;
 
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.fxml.FXML;
@@ -12,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -132,6 +135,16 @@ public class BoardComponent extends AnchorPane {
 
         bg.fitWidthProperty().bind(widthProperty());
         bg.fitHeightProperty().bind(heightProperty());
+
+        if (Platform.isSupported(ConditionalFeature.SHAPE_CLIP)) {
+            bg.clipProperty().bind(bg.layoutBoundsProperty().map(bounds -> {
+                var radius = Math.min(20, 20 * Math.min(bounds.getWidth() / 460d, bounds.getHeight() / 460d));
+                Rectangle clip = new Rectangle(bounds.getWidth(), bounds.getHeight());
+                clip.setArcWidth(radius);
+                clip.setArcHeight(radius);
+                return clip;
+            }));
+        }
     }
 
     @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
