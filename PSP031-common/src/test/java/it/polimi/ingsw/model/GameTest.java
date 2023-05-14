@@ -186,6 +186,7 @@ class GameTest {
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
                 0, false, false);
+        assertNotEquals(game1, gameDiffFirstFinisher, "Instances with different first finisher should not be equals");
 
         final var gameDiffEndGame = new Game(
                 0,

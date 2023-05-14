@@ -41,5 +41,6 @@ public interface ServerGameView {
     /** Returns boolean endGame */
     Provider<Boolean> endGame();
 
+    /** Returns whether the game is suspended */
     Provider<Boolean> suspended();
 }
