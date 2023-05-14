@@ -33,7 +33,9 @@ public class JfxApplication extends Application {
                 2,
                 players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
                 new PersonalGoal(1),
-                null));
+                null,
+                false,
+                false));
 
         AnchorPane.setLeftAnchor(gamePane, 0.0D);
         AnchorPane.setRightAnchor(gamePane, 0.0D);
