@@ -34,6 +34,7 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
         getChildren().add(this.board = new BoardComponent(game.getBoard()));
         getChildren().add(this.pickedTilesPane = new PickedTilesPane());
+        this.pickedTilesPane.tilesProperty().bindBidirectional(this.board.pickedTilesProperty());
 
         final var otherPlayers = new ArrayList<>(game.getPlayers());
         otherPlayers.remove(game.thePlayer());

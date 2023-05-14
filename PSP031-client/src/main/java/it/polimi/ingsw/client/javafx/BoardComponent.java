@@ -1,8 +1,9 @@
 package it.polimi.ingsw.client.javafx;
 
 import com.sun.javafx.collections.ObservableListWrapper;
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.model.BoardView;
+import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.TileAndCoords;
 import org.jetbrains.annotations.Nullable;
 
 import javafx.application.ConditionalFeature;
@@ -13,7 +14,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class BoardComponent extends AnchorPane {
     @FXML public TileComponent t8x5;
     //@formatter:on
 
-    private final ListProperty<BoardCoord> pickedTiles = new SimpleListProperty<>(
+    private final ListProperty<TileAndCoords<Tile>> pickedTiles = new SimpleListProperty<>(
             new ObservableListWrapper<>(new ArrayList<>()));
     private final @Nullable TileComponent[][] matrix;
 
@@ -94,14 +94,18 @@ public class BoardComponent extends AnchorPane {
 
         for (int r = 0; r < board.getRows(); r++) {
             for (int c = 0; c < board.getCols(); c++) {
+                final int row = r, col = c;
+
                 TileComponent tileComponent = Objects.requireNonNull(matrix)[r][c]; // NullAway requires this :I
                 if (tileComponent == null || !board.isValidTile(r, c))
                     continue;
 
-                // Bind to the model tile
-                var boardCoords = new BoardCoord(r, c);
                 tileComponent.tileProperty().bind(FxProperties.toFxProperty("t" + r + "x" + c, this, board.tile(r, c)));
-                var nonPickable = compositeObservableValue(tileComponent.tileProperty(), pickedTiles).map(ignored -> {
+
+                var tilesAndCoords = tileComponent.tileProperty()
+                        .map(t -> TileAndCoords.nullable(tileComponent.getTile(), row, col));
+                var nonPickable = compositeObservableValue(tilesAndCoords, pickedTiles).map(ignored -> {
+                    var boardCoords = tilesAndCoords.getValue();
                     // If you already picked it, you can re-pick it to remove it
                     if (pickedTiles.contains(boardCoords))
                         return false;
@@ -110,21 +114,15 @@ public class BoardComponent extends AnchorPane {
                     list.add(boardCoords);
                     return !board.checkBoardCoord(list);
                 });
-                var isPickedExpr = booleanExpression(pickedTiles.map(tiles -> tiles.contains(boardCoords)));
-                tileComponent.highlightProperty().bind(tileComponent.disabledProperty().not()
-                        .and(tileComponent.armedProperty()
-                                .or(tileComponent.hoverProperty())
-                                .or(isPickedExpr)));
-                tileComponent.highlightColorProperty().bind(
-                        compositeObservableValue(tileComponent.armedProperty(), tileComponent.hoverProperty(), isPickedExpr)
-                                .map(ignored -> isPickedExpr.get() && tileComponent.isArmed()
-                                        ? Color.GREEN.darker()
-                                        : isPickedExpr.get()
-                                                ? Color.GREEN
-                                                : tileComponent.isArmed() ? Color.WHITE.darker() : Color.WHITE));
                 tileComponent.disableProperty().bind(nonPickable);
                 tileComponent.overlayProperty().bind(nonPickable);
-                tileComponent.setOnMouseClicked(e -> {
+
+                var isPickedExpr = booleanExpression(compositeObservableValue(tilesAndCoords, pickedTiles)
+                        .map(ignored -> pickedTiles.contains(tilesAndCoords.getValue())));
+                tileComponent.visibleProperty().bind(isPickedExpr.not());
+
+                tileComponent.setOnAction(e -> {
+                    var boardCoords = tilesAndCoords.getValue();
                     if (!pickedTiles.contains(boardCoords))
                         pickedTiles.add(boardCoords);
                     else
@@ -220,7 +218,7 @@ public class BoardComponent extends AnchorPane {
         t8x5.resizeRelocate(1636.0 * widthScale, 2550.0 * heightScale, 263.0 * widthScale, 263.0 * heightScale);
     }
 
-    public ListProperty<BoardCoord> pickedTilesProperty() {
+    public ListProperty<TileAndCoords<Tile>> pickedTilesProperty() {
         return pickedTiles;
     }
 }
