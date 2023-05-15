@@ -264,6 +264,59 @@ class TuiGameScene implements TuiScene {
                     TuiHAlignment.CENTER,
                     TuiVAlignment.CENTER);
 
+        //Draw chat
+        int chatCols = Math.min(leftPlayerRect.col() - 3, 50);
+        int chatRows = Math.ceilDiv(terminalSize.rows(), 2);
+        var chatRect = out.getAlignedRect(new TuiSize(chatRows, chatCols),
+                new TuiRect(0, 0, terminalSize),
+                TuiHAlignment.LEFT,
+                TuiVAlignment.TOP);
+        out.printAligned(new TuiStringPrinter("Chat", chatCols),
+                chatRect,
+                TuiHAlignment.CENTER,
+                TuiVAlignment.TOP);
+        out.printBox(TuiRect.fromCoords(chatRect.row(), chatRect.col(), chatRect.lastRow() + 1, chatRect.lastCol() + 1),
+                TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_RIGHT);
+
+        List<UserMessage> messages = game.messageList().get();
+
+        //TODO: remove this when we can send messages
+        messages.addAll(List.of(new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", "")));
+        var remainingSize = chatRect.size().reduce(1, 0);
+        TuiSize printedSize;
+        //loop the message list starting from the most recent message
+        for (UserMessage m : messages) {
+            printedSize = out.printAligned(new TuiStringPrinter(m.toString(), remainingSize),
+                    new TuiRect(1, 0, remainingSize),
+                    TuiHAlignment.LEFT,
+                    TuiVAlignment.BOTTOM).size();
+
+            remainingSize = remainingSize.reduce(printedSize.rows(), 0);
+            if (remainingSize.rows() <= 0)
+                break;
+        }
+
         out.cursor(boardRect.row(), boardRect.col());
         out.print("┘");
         out.cursor(boardRect.row(), boardRect.lastCol());

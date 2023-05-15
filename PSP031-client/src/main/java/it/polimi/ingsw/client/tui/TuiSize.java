@@ -5,4 +5,8 @@ record TuiSize(int rows, int cols) {
     public TuiSize expand(int rows, int cols) {
         return new TuiSize(this.rows + rows, this.cols + cols);
     }
+
+    public TuiSize reduce(int rows, int cols) {
+        return expand(-rows, -cols);
+    }
 }
