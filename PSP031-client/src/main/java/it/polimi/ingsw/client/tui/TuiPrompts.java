@@ -426,6 +426,7 @@ class TuiPrompts {
                                         GameView game,
                                         GameController controller) {
 
+        renderer.setScene(new TuiGameScene(game));
         final List<ChoicePrompt.Choice> choices = new ArrayList<>();
         for (int i = 0; i < game.getPlayers().size(); i++)
             if (!game.thePlayer().equals(game.getPlayers().get(i))) {
