@@ -6,8 +6,10 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 public class SerializableProperty<T> implements Property<T>, Serializable {
@@ -15,6 +17,7 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
     private T val;
 
     private final transient Set<Consumer<? super T>> observers = new LinkedHashSet<>();
+    private final transient Set<Consumer<? super T>> weakObservers = Collections.newSetFromMap(new WeakHashMap<>());
 
     @SuppressWarnings("NullAway") // NullAway sadly doesn't implement generics properly yet
     public static <T> SerializableProperty<@Nullable T> nullableProperty(@Nullable T prop) {
@@ -48,6 +51,7 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
     public void set(T val) {
         this.val = val;
         observers.forEach(o -> o.accept(val));
+        weakObservers.forEach(o -> o.accept(val));
     }
 
     @VisibleForTesting
@@ -61,8 +65,14 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
     }
 
     @Override
+    public void registerWeakObserver(Consumer<? super T> o) {
+        weakObservers.add(o);
+    }
+
+    @Override
     public void unregisterObserver(Consumer<? super T> o) {
         observers.remove(o);
+        weakObservers.remove(o);
     }
 
     @Override
@@ -70,6 +80,7 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
         return "PropertyImpl{" +
                 "value=" + val +
                 ", observers=" + observers +
+                ", weakObservers=" + weakObservers +
                 '}';
     }
 }

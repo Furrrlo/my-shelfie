@@ -131,6 +131,11 @@ class ScoreProvider implements Provider<Integer>, Serializable {
     }
 
     @Override
+    public void registerWeakObserver(Consumer<? super Integer> o) {
+        scoreProperty.registerWeakObserver(o);
+    }
+
+    @Override
     public void unregisterObserver(Consumer<? super Integer> o) {
         scoreProperty.unregisterObserver(o);
     }

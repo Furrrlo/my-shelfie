@@ -46,6 +46,11 @@ public class PropertyProxy<T> implements Property<T>, Serializable {
     }
 
     @Override
+    public void registerWeakObserver(Consumer<? super T> o) {
+        getProxied().registerWeakObserver(o);
+    }
+
+    @Override
     public void unregisterObserver(Consumer<? super T> o) {
         getProxied().unregisterObserver(o);
     }

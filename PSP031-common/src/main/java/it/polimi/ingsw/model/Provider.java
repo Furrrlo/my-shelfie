@@ -15,6 +15,8 @@ public interface Provider<T> {
      */
     void registerObserver(Consumer<? super T> o);
 
+    void registerWeakObserver(Consumer<? super T> o);
+
     void unregisterObserver(Consumer<? super T> o);
 
     default <T1> Provider<T1> map(SerializableFunction<T, T1> mapper) {
