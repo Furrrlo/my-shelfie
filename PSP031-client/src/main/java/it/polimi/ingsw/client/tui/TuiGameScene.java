@@ -284,7 +284,7 @@ class TuiGameScene implements TuiScene {
         var remainingSize = chatRect.size().reduce(2, 0);
         TuiSize printedSize;
         //loop the message list starting from the most recent message
-        for (int i = messages.size() - 1; i > 0; i--) {
+        for (int i = messages.size() - 1; i >= 0; i--) {
             var m = messages.get(i);
             printedSize = out.printAligned(new TuiStringPrinter(m.toString(), remainingSize),
                     new TuiRect(1, 0, remainingSize),
@@ -292,7 +292,7 @@ class TuiGameScene implements TuiScene {
                     TuiVAlignment.BOTTOM).size();
 
             remainingSize = remainingSize.reduce(printedSize.rows(), 0);
-            if (remainingSize.rows() <= 0)
+            if (remainingSize.rows() <= 2)
                 break;
         }
 
