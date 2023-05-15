@@ -3,6 +3,7 @@ package it.polimi.ingsw.server.controller;
 import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.UserMessage;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -145,7 +146,7 @@ public class GameServerController {
     public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer) {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
-            //TODO : implement method sendMessage
+            game.message().set(new UserMessage(nickSendingPlayer, message, nickReceivingPlayer));
         }
     }
 }
