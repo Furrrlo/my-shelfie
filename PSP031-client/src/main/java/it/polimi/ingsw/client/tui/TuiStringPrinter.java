@@ -31,8 +31,11 @@ public class TuiStringPrinter implements TuiPrinter {
      *
      * @param string string to print
      * @param maxSize size
+     * @throws IllegalArgumentException if size is negative or 0
      */
     public TuiStringPrinter(String string, TuiSize maxSize) {
+        if (maxSize.rows() <= 0 || maxSize.cols() <= 0)
+            throw new IllegalArgumentException("Size must be positive");
         this.string = getSplit(string, maxSize);
         this.size = new TuiSize(Math.min(maxSize.rows(), (int) this.string.codePoints().filter(c -> c == '\n').count() + 1),
                 maxSize.cols());

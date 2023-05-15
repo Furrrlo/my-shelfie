@@ -278,10 +278,9 @@ class TuiGameScene implements TuiScene {
         out.printBox(TuiRect.fromCoords(chatRect.row(), chatRect.col(), chatRect.lastRow() + 1, chatRect.lastCol() + 1),
                 TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_RIGHT);
 
-        List<UserMessage> messages = game.messageList().get();
-
+        //List<UserMessage> messages = game.messageList().get();
         //TODO: remove this when we can send messages
-        messages.addAll(List.of(new UserMessage("p1", "Ciaooo", ""),
+        List<UserMessage> messages = List.of(new UserMessage("p1", "Ciaooo", ""),
                 new UserMessage("p1", "Ciaooo", ""),
                 new UserMessage("p1", "Ciaooo", ""),
                 new UserMessage("p1", "Ciaooo", ""),
@@ -302,7 +301,7 @@ class TuiGameScene implements TuiScene {
                 new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
                 new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
                 new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""),
-                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", "")));
+                new UserMessage("p1", "Ciaoooooooooooo oooooooooooooo oooooooooooooooooo ooooooooooooooooo", ""));
         var remainingSize = chatRect.size().reduce(1, 0);
         TuiSize printedSize;
         //loop the message list starting from the most recent message
