@@ -351,8 +351,13 @@ public class ServerController implements Closeable {
         });
         observableTracker.registerObserver(game.endGame(), gameUpdater::updateEndGame);
         observableTracker.registerObserver(game.suspended(), gameUpdater::updateSuspended);
-        //TODO : check
-        observableTracker.registerObserver(game.message(), gameUpdater::updateMessage);
+
+        //updating message only if message nickReceivingPlayer == nick, or "all"
+        observableTracker.registerObserver(game.message(), m -> {
+            if (Objects.requireNonNull(m).nickReceivingPlayer().equals(nick) || m.nickReceivingPlayer().equals("all"))
+                gameUpdater.updateMessage(m);
+        });
+
         observableTracker.registerObserver(game.currentTurn(), p -> gameUpdater.updateCurrentTurn(p.getNick()));
         observableTracker.registerObserver(game.firstFinisher(),
                 p -> gameUpdater.updateFirstFinisher(p == null ? null : p.getNick()));
