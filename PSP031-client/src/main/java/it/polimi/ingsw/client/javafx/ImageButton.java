@@ -26,6 +26,9 @@ public class ImageButton extends Button {
     private final RemappableObjectProperty<Effect> remappableEffect;
 
     public ImageButton() {
+        // Change style class to prevent picking up stuff from the default css
+        getStyleClass().setAll("image-button");
+
         remappableEffect = new RemappableObjectProperty<>(effectProperty());
 
         setPadding(Insets.EMPTY);
