@@ -69,6 +69,8 @@ public abstract class GameClientUpdater implements GameUpdater {
     @Override
     public void updateMessage(@Nullable UserMessage message) {
         var newMessageList = new ArrayList<>(game.messageList().get());
+        if(newMessageList.size()>=99)
+            newMessageList.remove(0);
         newMessageList.add(message);
         game.messageList().set(Collections.unmodifiableList(newMessageList));
     }
