@@ -133,8 +133,8 @@ public class ShelfieComponent extends AnchorPane {
         t1x3.resizeRelocate(730.0 * widthScale, 259.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
         t1x4.resizeRelocate(928.0 * widthScale, 259.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
         t2x0.resizeRelocate(150.0 * widthScale, 426.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
-        t2x1.resizeRelocate(537.0 * widthScale, 426.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
-        t2x2.resizeRelocate(342.0 * widthScale, 426.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
+        t2x1.resizeRelocate(342.0 * widthScale, 426.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
+        t2x2.resizeRelocate(537.0 * widthScale, 426.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
         t2x3.resizeRelocate(730.0 * widthScale, 426.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
         t2x4.resizeRelocate(924.0 * widthScale, 426.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
         t3x0.resizeRelocate(154.0 * widthScale, 592.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
