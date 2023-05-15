@@ -1,11 +1,27 @@
 package it.polimi.ingsw.client.javafx;
 
+import it.polimi.ingsw.BoardCoord;
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.GameView;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class GamePane extends AnchorPane {
 
@@ -19,7 +35,22 @@ public class GamePane extends AnchorPane {
     private final Pane player2Shelfie;
     private final Pane player3Shelfie;
 
-    public GamePane(GameView game) {
+    private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
+
+    private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
+
+        private final AtomicInteger n = new AtomicInteger();
+
+        @Override
+        public Thread newThread(@NotNull Runnable r) {
+            var th = new Thread(r);
+            th.setName("jfx-controller-executor-" + n.getAndIncrement());
+            th.setDaemon(false);
+            return th;
+        }
+    });
+
+    public GamePane(GameView game, GameController controller) {
         setBackground(new Background(new BackgroundImage(
                 new Image(FxResources.getResourceAsStream("assets/misc/sfondo parquet.jpg")),
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
@@ -34,7 +65,36 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
         getChildren().add(this.board = new BoardComponent(game.getBoard()));
         getChildren().add(this.pickedTilesPane = new PickedTilesPane());
-        this.pickedTilesPane.tilesProperty().bindBidirectional(this.board.pickedTilesProperty());
+
+        final BooleanProperty isMakingMove = new SimpleBooleanProperty();
+        final var isCurrentTurn = BooleanExpression.booleanExpression(FxProperties.toFxProperty(
+                "isCurrentTurn", this, game.thePlayer().isCurrentTurn())).and(isMakingMove.not());
+        board.disableProperty().bind(isCurrentTurn.not());
+        pickedTilesPane.tilesProperty().bindBidirectional(board.pickedTilesProperty());
+        var canSelectColumn = isCurrentTurn.and(
+                BooleanExpression.booleanExpression(pickedTilesPane.tilesProperty().map(t -> !t.isEmpty())));
+        thePlayerShelfie.mouseTransparentProperty().bind(canSelectColumn.not());
+        thePlayerShelfie.columnSelectionModeProperty().bind(canSelectColumn);
+        thePlayerShelfie.onTileActionProperty()
+                .bind(thePlayerShelfie.columnSelectionModeProperty().map(columnMode -> !columnMode ? null : (tileAndCoords -> {
+                    isMakingMove.set(true);
+
+                    var choosenCoords = pickedTilesPane.getTiles().stream()
+                            .map(t -> new BoardCoord(t.row(), t.col()))
+                            .toList();
+                    pickedTilesPane.tilesProperty().clear();
+                    threadPool.submit(() -> {
+                        try {
+                            controller.makeMove(choosenCoords, tileAndCoords.col());
+                        } catch (DisconnectedException e) {
+                            var disc = onDisconnect.get();
+                            if (disc != null)
+                                disc.accept(e);
+                        } finally {
+                            Platform.runLater(() -> isMakingMove.set(false));
+                        }
+                    });
+                })));
 
         final var otherPlayers = new ArrayList<>(game.getPlayers());
         otherPlayers.remove(game.thePlayer());
@@ -63,5 +123,17 @@ public class GamePane extends AnchorPane {
         this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 182.0 * scale, 194.0 * scale);
         this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 182.0 * scale, 194.0 * scale);
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
+    }
+
+    public Consumer<@Nullable Throwable> getOnDisconnect() {
+        return onDisconnect.get();
+    }
+
+    public ObjectProperty<Consumer<@Nullable Throwable>> onDisconnectProperty() {
+        return onDisconnect;
+    }
+
+    public void setOnDisconnect(Consumer<@Nullable Throwable> onDisconnect) {
+        this.onDisconnect.set(onDisconnect);
     }
 }
