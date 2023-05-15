@@ -142,13 +142,10 @@ public class GameServerController {
         }
     }
 
-    //TODO : sendMessage(String nick,String message)
-    /*
-     * public void sendMessage(ServerPlayer sendingPlayer, List<String> receivingPlayersNick, String message) {
-     * try (var gameCloseable = game.use()) {
-     * var game = gameCloseable.obj();
-     * 
-     * }
-     * }
-     */
+    public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer) {
+        try (var gameCloseable = game.use()) {
+            var game = gameCloseable.obj();
+            //TODO : implement method sendMessage
+        }
+    }
 }

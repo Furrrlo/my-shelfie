@@ -5,6 +5,7 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.socket.packets.MakeMovePacket;
+import it.polimi.ingsw.socket.packets.SendMessagePacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,10 @@ public class SocketServerGameController implements GameController, Runnable {
                     final MakeMovePacket p = ctx.getPacket();
                     makeMove(p.selected(), p.shelfCol());
                 }
+                try (var ctx = socketManager.receive(SendMessagePacket.class)) {
+                    final SendMessagePacket p = ctx.getPacket();
+                    sendMessage(p.message(), p.nickReceivingPlayer());
+                }
             } while (!Thread.currentThread().isInterrupted());
         } catch (InterruptedIOException ignored) {
             // Thread was interrupted to stop, normal control flow
@@ -49,5 +54,10 @@ public class SocketServerGameController implements GameController, Runnable {
     @Override
     public void makeMove(List<BoardCoord> selected, int shelfCol) {
         controller.makeMove(player, selected, shelfCol);
+    }
+
+    @Override
+    public void sendMessage(String message, String nickReceivingPlayer) {
+        controller.sendMessage(player.getNick(), message, nickReceivingPlayer);
     }
 }

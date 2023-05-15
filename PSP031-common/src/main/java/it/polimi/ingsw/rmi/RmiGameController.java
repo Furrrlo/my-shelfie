@@ -13,6 +13,8 @@ public interface RmiGameController extends Remote {
 
     void makeMove(List<BoardCoord> selected, int shelfCol) throws RemoteException;
 
+    void sendMessage(String message, String nickReceivingPlayer) throws RemoteException;
+
     class Adapter extends RmiAdapter implements GameController, Serializable {
 
         private final RmiGameController controller;
@@ -24,6 +26,11 @@ public interface RmiGameController extends Remote {
         @Override
         public void makeMove(List<BoardCoord> selected, int shelfCol) throws DisconnectedException {
             adapt(() -> controller.makeMove(selected, shelfCol));
+        }
+
+        @Override
+        public void sendMessage(String message, String nickReceivingPlayer) throws DisconnectedException {
+            adapt(() -> controller.sendMessage(message, nickReceivingPlayer));
         }
     }
 }

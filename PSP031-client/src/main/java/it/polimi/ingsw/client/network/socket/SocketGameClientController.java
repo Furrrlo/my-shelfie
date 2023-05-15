@@ -4,6 +4,7 @@ import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.socket.packets.MakeMovePacket;
+import it.polimi.ingsw.socket.packets.SendMessagePacket;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,6 +20,15 @@ public class SocketGameClientController implements GameController {
     public void makeMove(List<BoardCoord> selected, int shelfCol) throws DisconnectedException {
         try {
             socketManager.send(new MakeMovePacket(selected, shelfCol));
+        } catch (IOException e) {
+            throw new DisconnectedException(e);
+        }
+    }
+
+    @Override
+    public void sendMessage(String message, String nickReceivingPlayer) throws DisconnectedException {
+        try {
+            socketManager.send(new SendMessagePacket(message, nickReceivingPlayer));
         } catch (IOException e) {
             throw new DisconnectedException(e);
         }

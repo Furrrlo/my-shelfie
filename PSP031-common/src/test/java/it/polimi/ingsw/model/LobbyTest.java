@@ -92,5 +92,9 @@ class LobbyTest {
         @Override
         public void makeMove(List<BoardCoord> selected, int shelfCol) {
         }
+
+        @Override
+        public void sendMessage(String message, String nickReceivingPlayer) {
+        }
     }
 }

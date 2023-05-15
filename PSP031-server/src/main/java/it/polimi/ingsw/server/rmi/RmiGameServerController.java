@@ -22,4 +22,9 @@ public class RmiGameServerController implements RmiGameController {
     public void makeMove(List<BoardCoord> selected, int shelfCol) throws RemoteException {
         controller.makeMove(player, selected, shelfCol);
     }
+
+    @Override
+    public void sendMessage(String message, String nickReceivingPlayer) throws RemoteException {
+        controller.sendMessage(player.getNick(), message, nickReceivingPlayer);
+    }
 }
