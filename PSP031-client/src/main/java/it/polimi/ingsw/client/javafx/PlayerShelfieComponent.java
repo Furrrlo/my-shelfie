@@ -28,9 +28,9 @@ public class PlayerShelfieComponent extends Pane {
         this(player, false, false);
     }
 
-    public PlayerShelfieComponent(PlayerView player, boolean disabled, boolean showScore) {
+    public PlayerShelfieComponent(PlayerView player, boolean mouseTransparent, boolean showScore) {
         getChildren().add(this.shelfieComponent = new ShelfieComponent(player.getShelfie()));
-        this.shelfieComponent.setDisable(disabled);
+        setMouseTransparent(mouseTransparent);
 
         getChildren().add(this.label = new NickLabel(player.getNick(), player.score(), showScore));
 

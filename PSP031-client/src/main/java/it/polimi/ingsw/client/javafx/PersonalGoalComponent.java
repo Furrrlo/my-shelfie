@@ -27,7 +27,15 @@ public class PersonalGoalComponent extends ImageButton {
             }));
         }
 
-        if (Platform.isSupported(ConditionalFeature.EFFECT))
-            setEffect(new DropShadow(5, Color.WHITE));
+        if (Platform.isSupported(ConditionalFeature.EFFECT)) {
+            remappableEffectProperty().bind(remappableEffectProperty().remapNullable(e -> {
+                var dropShadow = new DropShadow(5, Color.WHITE);
+                if (e == null)
+                    return dropShadow;
+
+                dropShadow.setInput(e);
+                return dropShadow;
+            }));
+        }
     }
 }

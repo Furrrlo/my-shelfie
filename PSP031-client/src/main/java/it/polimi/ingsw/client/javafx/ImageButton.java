@@ -1,11 +1,16 @@
 package it.polimi.ingsw.client.javafx;
 
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -18,7 +23,11 @@ public class ImageButton extends Button {
     private final BooleanProperty highlight = new SimpleBooleanProperty(this, "highlight");
     private final ObjectProperty<Color> highlightColor = new SimpleObjectProperty<>(this, "highlightColor");
 
+    private final RemappableObjectProperty<Effect> remappableEffect;
+
     public ImageButton() {
+        remappableEffect = new RemappableObjectProperty<>(effectProperty());
+
         setPadding(Insets.EMPTY);
         backgroundProperty().bind(FxProperties.compositeObservableValue(image, layoutBoundsProperty()).map(ignored -> {
             var img = image.get();
@@ -46,6 +55,17 @@ public class ImageButton extends Button {
                         ? new Border(new BorderStroke(getHighlightColor(), BorderStrokeStyle.SOLID,
                                 new CornerRadii(2), new BorderWidths(4)))
                         : Border.EMPTY));
+
+        if (Platform.isSupported(ConditionalFeature.EFFECT)) {
+            remappableEffectProperty().bind(disabledProperty().map(o -> {
+                if (!o)
+                    return null;
+
+                var colorAdjust = new ColorAdjust(0, 0, -0.3f, 0);
+                colorAdjust.setInput(new GaussianBlur(3.5));
+                return colorAdjust;
+            }));
+        }
 
         this.textProperty().set("");
         this.ellipsisStringProperty().set("");
@@ -85,5 +105,9 @@ public class ImageButton extends Button {
 
     public void setHighlightColor(Color highlightColor) {
         this.highlightColor.set(highlightColor);
+    }
+
+    public RemappableObjectProperty<Effect> remappableEffectProperty() {
+        return remappableEffect;
     }
 }

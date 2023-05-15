@@ -71,7 +71,6 @@ public class PickedTilesPane extends Pane {
             if (tiles.size() >= 3)
                 tiles.remove(2);
         });
-        System.out.println("prcd");
 
         var tileDataFormat = new DataFormat("my-shelfie/swap-tile-n-coords");
         BiConsumer<TileComponent, Integer> installDnD = (component, tileIdx) -> {

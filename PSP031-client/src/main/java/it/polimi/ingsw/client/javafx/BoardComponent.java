@@ -116,8 +116,7 @@ public class BoardComponent extends AnchorPane {
                             list.add(boardCoords);
                             return !board.checkBoardCoord(list);
                         }));
-                tileComponent.disableProperty().bind(disableProperty().or(nonPickable));
-                tileComponent.overlayProperty().bind(disableProperty().not().and(nonPickable));
+                tileComponent.disableProperty().bind(disabledProperty().or(nonPickable));
 
                 var isPickedExpr = booleanExpression(compositeObservableValue(tilesAndCoords, pickedTiles)
                         .map(ignored -> pickedTiles.contains(tilesAndCoords.getValue())));

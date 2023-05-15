@@ -5,9 +5,9 @@ import org.jetbrains.annotations.Nullable;
 
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
-import javafx.beans.property.*;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.GaussianBlur;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
@@ -17,7 +17,6 @@ public class TileComponent extends ImageButton {
     private static final Tile NULL_TILE = new Tile(it.polimi.ingsw.model.Color.YELLOW);
 
     private final ObjectProperty<@Nullable Tile> tile = new SimpleObjectProperty<>(this, "tile");
-    private final BooleanProperty overlay = new SimpleBooleanProperty(this, "overlay");
 
     public TileComponent() {
         this(null);
@@ -47,15 +46,6 @@ public class TileComponent extends ImageButton {
                 return clip;
             }));
         }
-
-        effectProperty().bind(overlayProperty().map(o -> {
-            if (!o)
-                return null;
-
-            var colorAdjust = new ColorAdjust(0, 0, -0.3f, 0);
-            colorAdjust.setInput(new GaussianBlur(3.5));
-            return colorAdjust;
-        }));
     }
 
     public @Nullable Tile getTile() {
@@ -68,17 +58,5 @@ public class TileComponent extends ImageButton {
 
     public void setTile(@Nullable Tile tile) {
         this.tile.set(tile);
-    }
-
-    public boolean isOverlay() {
-        return overlay.get();
-    }
-
-    public BooleanProperty overlayProperty() {
-        return overlay;
-    }
-
-    public void setOverlay(boolean overlay) {
-        this.overlay.set(overlay);
     }
 }
