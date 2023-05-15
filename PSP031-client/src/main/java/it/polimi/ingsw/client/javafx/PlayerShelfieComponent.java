@@ -2,7 +2,12 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.model.PlayerView;
 import it.polimi.ingsw.model.Provider;
+import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.TileAndCoords;
+import org.jetbrains.annotations.Nullable;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -10,6 +15,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+
+import java.util.function.Consumer;
 
 public class PlayerShelfieComponent extends Pane {
 
@@ -56,6 +63,30 @@ public class PlayerShelfieComponent extends Pane {
 
         double chairWidth = 35 * scale, chairHeight = 33 * scale;
         this.chair.resizeRelocate(getWidth() - chairWidth, getHeight() - chairHeight, chairWidth, chairHeight);
+    }
+
+    public boolean isColumnSelectionMode() {
+        return shelfieComponent.isColumnSelectionMode();
+    }
+
+    public BooleanProperty columnSelectionModeProperty() {
+        return shelfieComponent.columnSelectionModeProperty();
+    }
+
+    public void setColumnSelectionMode(boolean columnSelectionMode) {
+        shelfieComponent.setColumnSelectionMode(columnSelectionMode);
+    }
+
+    public @Nullable Consumer<TileAndCoords<@Nullable Tile>> getOnTileAction() {
+        return shelfieComponent.getOnTileAction();
+    }
+
+    public ObjectProperty<@Nullable Consumer<TileAndCoords<@Nullable Tile>>> onTileActionProperty() {
+        return shelfieComponent.onTileActionProperty();
+    }
+
+    public void setOnTileAction(@Nullable Consumer<TileAndCoords<@Nullable Tile>> onTileAction) {
+        shelfieComponent.setOnTileAction(onTileAction);
     }
 
     private static class NickLabel extends HBox {

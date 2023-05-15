@@ -1,13 +1,22 @@
 package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.model.ShelfieView;
+import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.TileAndCoords;
+import org.jetbrains.annotations.Nullable;
 
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 public class ShelfieComponent extends AnchorPane {
@@ -46,6 +55,9 @@ public class ShelfieComponent extends AnchorPane {
     //@formatter:on
 
     private final TileComponent[][] matrix;
+    private final BooleanProperty columnSelectionMode = new SimpleBooleanProperty(this, "columnSelectionMode");
+    private final ObjectProperty<@Nullable Consumer<TileAndCoords<@Nullable Tile>>> onTileAction = new SimpleObjectProperty<>(
+            this, "onTileAction");
 
     public ShelfieComponent(ShelfieView shelfie) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("shelfie.fxml"));
@@ -67,12 +79,31 @@ public class ShelfieComponent extends AnchorPane {
                 new TileComponent[] { t5x0, t5x1, t5x2, t5x3, t5x4 },
         };
 
-        for (int r = 0; r < matrix.length; r++) {
-            for (int c = 0; c < matrix[r].length; c++) {
+        for (int c = 0; c < ShelfieView.COLUMNS; c++) {
+            BooleanExpression colHovered = new SimpleBooleanProperty(false);
+            for (TileComponent[] tileComponents : matrix) {
+                TileComponent tileComponent = tileComponents[c];
+                colHovered = colHovered.or(tileComponent.hoverProperty());
+            }
+
+            colHovered = columnSelectionMode.and(colHovered);
+            for (int r = 0; r < matrix.length; r++) {
+                final int row = r, col = c;
+
                 TileComponent tileComponent = matrix[r][c];
                 // Bind to the model tile
                 var tileProp = FxProperties.toFxProperty("t" + r + "x" + c, this, shelfie.tile(r, c));
                 tileComponent.tileProperty().bind(tileProp);
+                // Enable col selection mode
+                tileComponent.highlightProperty().bind(disabledProperty().not()
+                        .and(tileComponent.armedProperty().or(tileComponent.hoverProperty()).or(colHovered)));
+                tileComponent.setOnAction(e -> {
+                    var action = onTileAction.get();
+                    if (action == null)
+                        return;
+
+                    action.accept(TileAndCoords.nullable(tileComponent.tileProperty().getValue(), row, col));
+                });
             }
         }
 
@@ -121,5 +152,29 @@ public class ShelfieComponent extends AnchorPane {
         t5x2.resizeRelocate(537.0 * widthScale, 917.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
         t5x3.resizeRelocate(730.0 * widthScale, 917.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
         t5x4.resizeRelocate(915.0 * widthScale, 917.0 * heightScale, 144.0 * widthScale, 144.0 * heightScale);
+    }
+
+    public boolean isColumnSelectionMode() {
+        return columnSelectionMode.get();
+    }
+
+    public BooleanProperty columnSelectionModeProperty() {
+        return columnSelectionMode;
+    }
+
+    public void setColumnSelectionMode(boolean columnSelectionMode) {
+        this.columnSelectionMode.set(columnSelectionMode);
+    }
+
+    public @Nullable Consumer<TileAndCoords<@Nullable Tile>> getOnTileAction() {
+        return onTileAction.get();
+    }
+
+    public ObjectProperty<@Nullable Consumer<TileAndCoords<@Nullable Tile>>> onTileActionProperty() {
+        return onTileAction;
+    }
+
+    public void setOnTileAction(@Nullable Consumer<TileAndCoords<@Nullable Tile>> onTileAction) {
+        this.onTileAction.set(onTileAction);
     }
 }
