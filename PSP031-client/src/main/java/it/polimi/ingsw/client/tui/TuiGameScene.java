@@ -279,12 +279,13 @@ class TuiGameScene implements TuiScene {
                 TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_RIGHT);
 
         List<UserMessage> messages = game.messageList().get();
-        //TODO: print message in opposite directions
+        //TODO: verify why first message does not print
 
-        var remainingSize = chatRect.size().reduce(1, 0);
+        var remainingSize = chatRect.size().reduce(2, 0);
         TuiSize printedSize;
         //loop the message list starting from the most recent message
-        for (UserMessage m : messages) {
+        for (int i = messages.size() - 1; i > 0; i--) {
+            var m = messages.get(i);
             printedSize = out.printAligned(new TuiStringPrinter(m.toString(), remainingSize),
                     new TuiRect(1, 0, remainingSize),
                     TuiHAlignment.LEFT,
