@@ -4,6 +4,7 @@ import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.UserMessage;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -70,5 +71,24 @@ class GameServerControllerTest {
         assertThrows(IllegalArgumentException.class, () -> gsc.makeMove(game.getStartingPlayer(), selected1, 0),
                 "It's not this player turn");
 
+    }
+
+    @Test
+    void sendMessage() {
+        //TODO : complete testing sendMessage
+        final var randomFactory = RandomGeneratorFactory.getDefault();
+        final long seed1 = randomFactory.create().nextLong();
+        final var game = LobbyServerController.createGame(0, randomFactory.create(seed1),
+                List.of(new LobbyPlayer("example_player_1"),
+                        new LobbyPlayer("example_player_2")));
+        GameServerController gsc = new GameServerController(new LockProtected<>(game));
+
+        //at the beginning of the game, message is set to null
+        assertNull(game.message().get());
+
+        //if specified player, sends message, game.message().get() should be equals to the message that was sent
+        var message = new UserMessage("example_player_1", "example", "example_player_2");
+        gsc.sendMessage("example_player_1", "example", "example_player_2");
+        assertEquals(message, game.message().get());
     }
 }
