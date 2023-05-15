@@ -48,7 +48,7 @@ public class TuiStringPrinter implements TuiPrinter {
         StringBuilder stringBuilder = new StringBuilder();
         int col = 0, row = 0;
         for (String s : split) {
-            if (col + s.length() < maxSize.cols()) {
+            if (col + s.length() + ((col != 0) ? 1 : 0) <= maxSize.cols()) {
                 //There is enough space on this line: add a space if it isn't the first word
                 if (col != 0) {
                     stringBuilder.append(' ');
