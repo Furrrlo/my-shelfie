@@ -75,7 +75,7 @@ public class PlayerShelfieComponent extends Pane {
 
             var label = new Label();
             if (showScore)
-                label.textProperty().bind(FxProperties.toFxProperty(score).map(s -> nick + ": " + s + " pt"));
+                label.textProperty().bind(FxProperties.toFxProperty("score", this, score).map(s -> nick + ": " + s + " pt"));
             else
                 label.setText(nick);
             getChildren().add(label);

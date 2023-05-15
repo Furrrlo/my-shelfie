@@ -25,7 +25,7 @@ public class PlayerPointsComponent extends HBox {
         setAlignment(Pos.CENTER);
 
         var label = new Label();
-        label.textProperty().bind(FxProperties.toFxProperty(score).map(s -> s + " pt"));
+        label.textProperty().bind(FxProperties.toFxProperty("score", this, score).map(s -> s + " pt"));
         getChildren().add(label);
     }
 }
