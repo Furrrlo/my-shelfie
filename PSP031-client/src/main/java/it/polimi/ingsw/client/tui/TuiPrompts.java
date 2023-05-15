@@ -394,6 +394,9 @@ class TuiPrompts {
                     (renderer0, ctx) -> ctx.prompt(zoomShelfie(ctx.subPrompt(), renderer, game))));
         }
         choices.add(new ChoicePrompt.Choice(
+                "Send message",
+                (renderer0, ctx) -> ctx.prompt(promptMessage(netManager, renderer, game, controller))));
+        choices.add(new ChoicePrompt.Choice(
                 "Quit",
                 (renderer0, ctx) -> {
                     // TODO: should quit more gracefully
@@ -414,6 +417,49 @@ class TuiPrompts {
                 (renderer0, ctx, input) -> {
                     renderer.setScene(new TuiGameScene(game));
                     return ctx.done();
+                });
+    }
+
+    private static Prompt promptMessage(
+                                        ClientNetManager netManager,
+                                        TuiRenderer renderer,
+                                        GameView game,
+                                        GameController controller) {
+
+        final List<ChoicePrompt.Choice> choices = new ArrayList<>();
+        for (int i = 0; i < game.getPlayers().size(); i++)
+            if (!game.thePlayer().equals(game.getPlayers().get(i))) {
+                var receivingPlayer = game.getPlayers().get(i);
+                choices.add(new ChoicePrompt.Choice(receivingPlayer.getNick(),
+                        (renderer0, ctx) -> ctx
+                                .prompt(promptWriteMessage(ctx.subPrompt(), netManager, controller,
+                                        receivingPlayer.getNick()))));
+            }
+        choices.add(new ChoicePrompt.Choice("Send to everyone",
+                (renderer0, ctx) -> ctx.prompt(promptWriteMessage(ctx.subPrompt(), netManager, controller, "all"))));
+        choices.add(new ChoicePrompt.Choice("Go back",
+                (renderer0, ctx) -> ctx.prompt(promptGame(renderer, netManager, game, controller))));
+        return new ChoicePrompt("Select player to send message:", choices.toArray(new ChoicePrompt.Choice[0]));
+    }
+
+    private static Prompt promptWriteMessage(Prompt.Factory promptFactory,
+                                             ClientNetManager netManager,
+                                             GameController controller,
+                                             String nickReceivingPlayer) {
+
+        return promptFactory.input("Write text message (ex. Hello): ",
+                (renderer0, ctx, input) -> {
+                    if (input.equals(""))
+                        return ctx.invalid("You have to write something");
+                    else {
+                        try {
+                            controller.sendMessage(input, nickReceivingPlayer);
+                        } catch (DisconnectedException e) {
+                            return ctx.prompt("Disconnected from the server",
+                                    promptReconnect(renderer0, netManager));
+                        }
+                        return ctx.done();
+                    }
                 });
     }
 
