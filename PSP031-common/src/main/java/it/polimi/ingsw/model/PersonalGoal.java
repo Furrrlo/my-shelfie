@@ -15,111 +15,111 @@ public class PersonalGoal implements PersonalGoalView {
     /** Immutable list containing all possible personal goals assignable to players */
     public static final List<PersonalGoal> PERSONAL_GOALS = List.of(new PersonalGoal(0, new Color[][] {
             //@formatter:off
-            new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
-            new Color[]{null           , null           , null           , null           , null           },
-            new Color[]{null           , Color.YELLOW   , null           , null           , null           },
-            new Color[]{null           , null           , null           , Color.WHITE    , null           },
-            new Color[]{null           , null           , null           , null           , Color.GREEN    },
             new Color[]{Color.PINK     , null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.GREEN    },
+            new Color[]{null           , null           , null           , Color.WHITE    , null           },
+            new Color[]{null           , Color.YELLOW   , null           , null           , null           },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
             //@formatter:on
     }), new PersonalGoal(1, new Color[][] {
             //@formatter:off
-            new Color[]{null           , null           , null           , null           , Color.BLUE     },
-            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
-            new Color[]{null           , null           , null           , null           , Color.WHITE    },
-            new Color[]{Color.GREEN    , null           , Color.YELLOW   , null           , null           },
-            new Color[]{null           , Color.PINK     , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , Color.PINK     , null           , null           , null           },
+            new Color[]{Color.GREEN    , null           , Color.YELLOW   , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.WHITE    },
+            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
+            new Color[]{null           , null           , null           , null           , Color.BLUE     },
             //@formatter:on 
     }), new PersonalGoal(2, new Color[][] {
             //@formatter:off
-            new Color[]{Color.WHITE    , null           , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
-            new Color[]{null           , Color.GREEN    , null           , null           , Color.LIGHTBLUE},
-            new Color[]{null           , null           , Color.PINK     , null           , null           },
             new Color[]{Color.BLUE     , null           , null           , Color.YELLOW   , null           },
+            new Color[]{null           , null           , Color.PINK     , null           , null           },
+            new Color[]{null           , Color.GREEN    , null           , null           , Color.LIGHTBLUE},
             new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{Color.WHITE    , null           , null           , null           , null           },
             //@formatter:on
     }), new PersonalGoal(3, new Color[][] {
         //@formatter:off
-            new Color[]{null           , null           , null           , null           , null           },
-            new Color[]{null           , Color.WHITE    , Color.GREEN    , null           , null           },
-            new Color[]{null           , null           , null           , Color.PINK     , null           },
-            new Color[]{Color.LIGHTBLUE, null           , Color.BLUE     , null           , null           },
-            new Color[]{null           , null           , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , Color.YELLOW   },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{Color.LIGHTBLUE, null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , Color.PINK     , null           },
+            new Color[]{null           , Color.WHITE    , Color.GREEN    , null           , null           },
+            new Color[]{null           , null           , null           , null           , null           },
         //@formatter:on
     }), new PersonalGoal(4, new Color[][] {
             //@formatter:off
-            new Color[]{Color.YELLOW   , null           , null           , Color.GREEN    , null           },
-            new Color[]{null           , null           , null           , null           , Color.PINK     },
-            new Color[]{null           , Color.BLUE     , Color.WHITE    , null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
             new Color[]{null           , Color.LIGHTBLUE, null           , null           , null           },
             new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , Color.BLUE     , Color.WHITE    , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.PINK     },
+            new Color[]{Color.YELLOW   , null           , null           , Color.GREEN    , null           },
             //@formatter:on
     }), new PersonalGoal(5, new Color[][] {
             //@formatter:off
-            new Color[]{Color.PINK     , null           , null           , null           , null           },
-            new Color[]{null           , Color.YELLOW   , null           , Color.BLUE     , null           },
+            new Color[]{null           , null           , Color.LIGHTBLUE, null           , Color.GREEN    },
             new Color[]{null           , null           , null           , null           , null           },
             new Color[]{null           , null           , null           , Color.WHITE    , null           },
             new Color[]{null           , null           , null           , null           , null           },
-            new Color[]{null           , null           , Color.LIGHTBLUE, null           , Color.GREEN    },
+            new Color[]{null           , Color.YELLOW   , null           , Color.BLUE     , null           },
+            new Color[]{Color.PINK     , null           , null           , null           , null           },
             //@formatter:on
     }), new PersonalGoal(6, new Color[][] {
             //@formatter:off
-            new Color[]{null           , null           , Color.WHITE    , null           , null           },
-            new Color[]{null           , null           , null           , null           , Color.YELLOW   },
-            new Color[]{Color.LIGHTBLUE, null           , null           , null           , null           },
-            new Color[]{null           , Color.PINK     , null           , null           , null           },
-            new Color[]{null           , null           , null           , Color.BLUE     , null           },
             new Color[]{Color.GREEN    , null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.BLUE     , null           },
+            new Color[]{null           , Color.PINK     , null           , null           , null           },
+            new Color[]{Color.LIGHTBLUE, null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.YELLOW   },
+            new Color[]{null           , null           , Color.WHITE    , null           , null           },
             //@formatter:on
     }), new PersonalGoal(7, new Color[][] {
             //@formatter:off
-            new Color[]{null           , null           , null           , Color.YELLOW   , null           },
-            new Color[]{null           , null           , null           , Color.WHITE    , null           },
-            new Color[]{Color.PINK     , null           , null           , null           , null           },
-            new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
-            new Color[]{null           , Color.GREEN    , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , Color.BLUE     },
+            new Color[]{null           , Color.GREEN    , null           , null           , null           },
+            new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
+            new Color[]{Color.PINK     , null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.WHITE    , null           },
+            new Color[]{null           , null           , null           , Color.YELLOW   , null           },
             //@formatter:on
     }), new PersonalGoal(8, new Color[][] {
             //@formatter:off
-            new Color[]{Color.BLUE     , null           , null           , null           , null           },
-            new Color[]{null           , Color.LIGHTBLUE, null           , null           , Color.PINK     },
-            new Color[]{null           , null           , null           , null           , Color.WHITE    },
-            new Color[]{null           , null           , Color.GREEN    , null           , null           },
-            new Color[]{null           , null           , null           , null           , null           },
             new Color[]{null           , null           , Color.YELLOW   , null           , null           },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , null           , Color.GREEN    , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.WHITE    },
+            new Color[]{null           , Color.LIGHTBLUE, null           , null           , Color.PINK     },
+            new Color[]{Color.BLUE     , null           , null           , null           , null           },
             //@formatter:on
     }), new PersonalGoal(9, new Color[][] {
             //@formatter:off
-            new Color[]{null           , null           , null           , Color.PINK     , null           },
-            new Color[]{null           , Color.BLUE     , null           , null           , null           },
-            new Color[]{null           , null           , null           , Color.GREEN    , null           },
-            new Color[]{Color.WHITE    , null           , null           , null           , null           },
-            new Color[]{null           , Color.YELLOW   , null           , null           , null           },
             new Color[]{null           , null           , null           , null           , Color.LIGHTBLUE},
+            new Color[]{null           , Color.YELLOW   , null           , null           , null           },
+            new Color[]{Color.WHITE    , null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.GREEN    , null           },
+            new Color[]{null           , Color.BLUE     , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.PINK     , null           },
             //@formatter:on
     }), new PersonalGoal(10, new Color[][] {
             //@formatter:off
-            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
-            new Color[]{null           , null           , null           , null           , Color.GREEN    },
-            new Color[]{null           , null           , Color.BLUE     , null           , null           },
-            new Color[]{Color.YELLOW   , null           , null           , null           , null           },
-            new Color[]{null           , Color.WHITE    , null           , null           , null           },
             new Color[]{null           , null           , Color.PINK     , null           , null           },
+            new Color[]{null           , Color.WHITE    , null           , null           , null           },
+            new Color[]{Color.YELLOW   , null           , null           , null           , null           },
+            new Color[]{null           , null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.GREEN    },
+            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
             //@formatter:on
     }), new PersonalGoal(11, new Color[][] {
             //@formatter:off
-            new Color[]{Color.GREEN    , null           , null           , null           , null           },
-            new Color[]{null           , null           , null           , null           , Color.YELLOW   },
-            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
-            new Color[]{null           , null           , Color.BLUE     , null           , null           },
-            new Color[]{null           , Color.PINK     , null           , null           , null           },
             new Color[]{null           , null           , Color.WHITE    , null           , null           },
+            new Color[]{null           , Color.PINK     , null           , null           , null           },
+            new Color[]{null           , null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
+            new Color[]{null           , null           , null           , null           , Color.YELLOW   },
+            new Color[]{Color.GREEN    , null           , null           , null           , null           },
             //@formatter:on
     }));
 
