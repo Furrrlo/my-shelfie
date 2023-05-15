@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.fxml.FXML;
@@ -104,18 +105,19 @@ public class BoardComponent extends AnchorPane {
 
                 var tilesAndCoords = tileComponent.tileProperty()
                         .map(t -> TileAndCoords.nullable(tileComponent.getTile(), row, col));
-                var nonPickable = compositeObservableValue(tilesAndCoords, pickedTiles).map(ignored -> {
-                    var boardCoords = tilesAndCoords.getValue();
-                    // If you already picked it, you can re-pick it to remove it
-                    if (pickedTiles.contains(boardCoords))
-                        return false;
+                var nonPickable = BooleanExpression
+                        .booleanExpression(compositeObservableValue(tilesAndCoords, pickedTiles).map(ignored -> {
+                            var boardCoords = tilesAndCoords.getValue();
+                            // If you already picked it, you can re-pick it to remove it
+                            if (pickedTiles.contains(boardCoords))
+                                return false;
 
-                    final var list = new ArrayList<>(pickedTiles);
-                    list.add(boardCoords);
-                    return !board.checkBoardCoord(list);
-                });
-                tileComponent.disableProperty().bind(nonPickable);
-                tileComponent.overlayProperty().bind(nonPickable);
+                            final var list = new ArrayList<>(pickedTiles);
+                            list.add(boardCoords);
+                            return !board.checkBoardCoord(list);
+                        }));
+                tileComponent.disableProperty().bind(disableProperty().or(nonPickable));
+                tileComponent.overlayProperty().bind(disableProperty().not().and(nonPickable));
 
                 var isPickedExpr = booleanExpression(compositeObservableValue(tilesAndCoords, pickedTiles)
                         .map(ignored -> pickedTiles.contains(tilesAndCoords.getValue())));
