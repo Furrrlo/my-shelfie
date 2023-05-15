@@ -4,6 +4,7 @@ import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.model.ServerPlayer;
+import it.polimi.ingsw.socket.packets.GameActionPacket;
 import it.polimi.ingsw.socket.packets.MakeMovePacket;
 import it.polimi.ingsw.socket.packets.SendMessagePacket;
 import org.slf4j.Logger;
@@ -35,13 +36,11 @@ public class SocketServerGameController implements GameController, Runnable {
         LOGGER.info("[Server] Started game controller");
         try {
             do {
-                try (var ctx = socketManager.receive(MakeMovePacket.class)) {
-                    final MakeMovePacket p = ctx.getPacket();
-                    makeMove(p.selected(), p.shelfCol());
-                }
-                try (var ctx = socketManager.receive(SendMessagePacket.class)) {
-                    final SendMessagePacket p = ctx.getPacket();
-                    sendMessage(p.message(), p.nickReceivingPlayer());
+                try (var ctx = socketManager.receive(GameActionPacket.class)) {
+                    switch (ctx.getPacket()) {
+                        case MakeMovePacket p -> makeMove(p.selected(), p.shelfCol());
+                        case SendMessagePacket p -> sendMessage(p.message(), p.nickReceivingPlayer());
+                    }
                 }
             } while (!Thread.currentThread().isInterrupted());
         } catch (InterruptedIOException ignored) {
