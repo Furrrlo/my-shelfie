@@ -51,12 +51,12 @@ class ShelfieTest {
     void numTilesOverlappingWithPersonalGoal() {
         Shelfie shelfie = new Shelfie(new Color[][] {
                 //@formatter:off
-                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
-                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
-                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
-                new Color[] { Color.BLUE     , Color.YELLOW, Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.WHITE    , Color.GREEN , Color.WHITE    , Color.WHITE    , Color.YELLOW },
                 new Color[] { Color.PINK     , Color.YELLOW, Color.YELLOW   , Color.YELLOW   , Color.GREEN  },
-                new Color[] { Color.WHITE    , Color.GREEN , Color.WHITE    , Color.WHITE    , Color.YELLOW }
+                new Color[] { Color.BLUE     , Color.YELLOW, Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
                 //@formatter:on
         });
         var pg1 = new PersonalGoal(0);
