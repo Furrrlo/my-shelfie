@@ -2,6 +2,8 @@ package it.polimi.ingsw.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShelfieTest {
@@ -49,6 +51,82 @@ class ShelfieTest {
 
     @Test
     void checkColumnSpace() {
+        final var shelfie = new Shelfie(new Color[][] {
+                //@formatter:off
+                new Color[] { null           , null        , null           , Color.WHITE    , Color.YELLOW },
+                new Color[] { null           , null        , Color.YELLOW   , Color.YELLOW   , Color.GREEN  },
+                new Color[] { Color.BLUE     , null        , Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
+                //@formatter:on
+        });
+        //first column: should return true for group of 1 and 2 tiles, but false for three 
+        assertTrue(shelfie.checkColumnSpace(0, 1));
+        assertTrue(shelfie.checkColumnSpace(0, 2));
+        assertFalse(shelfie.checkColumnSpace(0, 3));
+        //second columns: should always return true 
+        assertTrue(shelfie.checkColumnSpace(1, 1));
+        assertTrue(shelfie.checkColumnSpace(1, 2));
+        assertTrue(shelfie.checkColumnSpace(1, 3));
+        //third column: should return true only for groups of single tile 
+        assertTrue(shelfie.checkColumnSpace(2, 1));
+        assertFalse(shelfie.checkColumnSpace(2, 2));
+        assertFalse(shelfie.checkColumnSpace(2, 3));
+        //fourth column: should always return false 
+        assertFalse(shelfie.checkColumnSpace(3, 1));
+        assertFalse(shelfie.checkColumnSpace(3, 2));
+        assertFalse(shelfie.checkColumnSpace(3, 3));
+        //fifth column: should always return false 
+        assertFalse(shelfie.checkColumnSpace(4, 1));
+        assertFalse(shelfie.checkColumnSpace(4, 2));
+        assertFalse(shelfie.checkColumnSpace(4, 3));
+    }
+
+    @Test
+    void isFull() {
+        final var shelfie = new Shelfie(new Color[][] {
+                //@formatter:off
+                new Color[] { null           , null        , null           , Color.WHITE    , Color.YELLOW },
+                new Color[] { null           , null        , Color.YELLOW   , Color.YELLOW   , Color.GREEN  },
+                new Color[] { Color.BLUE     , null        , Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
+                //@formatter:on
+        });
+        assertFalse(shelfie.isFull());
+        Shelfie shelfie1 = new Shelfie(new Color[][] {
+                //@formatter:off
+                new Color[] { Color.WHITE    , Color.GREEN , Color.WHITE    , Color.WHITE    , Color.YELLOW },
+                new Color[] { Color.PINK     , Color.YELLOW, Color.YELLOW   , Color.YELLOW   , Color.GREEN  },
+                new Color[] { Color.BLUE     , Color.YELLOW, Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
+                //@formatter:on
+        });
+        assertTrue(shelfie1.isFull());
+    }
+
+    @Test
+    void placeTiles() {
+        final var shelfie = new Shelfie(new Color[][] {
+                //@formatter:off
+                new Color[] { null           , null        , null           , Color.WHITE    , Color.YELLOW },
+                new Color[] { null           , null        , Color.YELLOW   , Color.YELLOW   , Color.GREEN  },
+                new Color[] { Color.BLUE     , null        , Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
+                //@formatter:on
+        });
+        final var selected = List.of(new Tile(Color.GREEN), new Tile(Color.BLUE));
+        shelfie.placeTiles(selected, 0);
+        assertEquals(new Tile(Color.GREEN), shelfie.tile(1, 0).get());
+        assertEquals(new Tile(Color.BLUE), shelfie.tile(0, 0).get());
+        assertNotEquals(new Tile(Color.BLUE), shelfie.tile(1, 0).get());
+        assertNotEquals(new Tile(Color.GREEN), shelfie.tile(0, 0).get());
     }
 
     @Test
