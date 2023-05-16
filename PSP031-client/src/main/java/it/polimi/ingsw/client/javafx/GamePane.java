@@ -71,10 +71,18 @@ public class GamePane extends AnchorPane {
                 "isCurrentTurn", this, game.thePlayer().isCurrentTurn())).and(isMakingMove.not());
         board.disableProperty().bind(isCurrentTurn.not());
         pickedTilesPane.tilesProperty().bindBidirectional(board.pickedTilesProperty());
-        var canSelectColumn = isCurrentTurn.and(
+        pickedTilesPane.setIsTileRemovable(tileAndCoords -> {
+            final var list = new ArrayList<>(pickedTilesPane.getTiles());
+            list.remove(tileAndCoords);
+            return list.size() == 0 || game.getBoard().checkBoardCoord(list);
+        });
+
+        var canSelectColumns = isCurrentTurn.and(
                 BooleanExpression.booleanExpression(pickedTilesPane.tilesProperty().map(t -> !t.isEmpty())));
-        thePlayerShelfie.mouseTransparentProperty().bind(canSelectColumn.not());
-        thePlayerShelfie.columnSelectionModeProperty().bind(canSelectColumn);
+        thePlayerShelfie.mouseTransparentProperty().bind(canSelectColumns.not());
+        thePlayerShelfie.columnSelectionModeProperty().bind(canSelectColumns);
+        thePlayerShelfie.isColumnSelectableProperty().bind(pickedTilesPane.tilesProperty()
+                .map(pickedTiles -> c -> game.thePlayer().getShelfie().checkColumnSpace(c, pickedTiles.size())));
         thePlayerShelfie.onTileActionProperty()
                 .bind(thePlayerShelfie.columnSelectionModeProperty().map(columnMode -> !columnMode ? null : (tileAndCoords -> {
                     isMakingMove.set(true);

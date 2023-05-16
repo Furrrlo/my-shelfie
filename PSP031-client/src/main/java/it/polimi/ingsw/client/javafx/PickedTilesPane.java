@@ -6,7 +6,9 @@ import it.polimi.ingsw.model.TileAndCoords;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,10 +23,13 @@ import javafx.scene.shape.Rectangle;
 
 import java.util.Collections;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 public class PickedTilesPane extends Pane {
 
     private final ListProperty<TileAndCoords<Tile>> tiles = new SimpleListProperty<>(this, "tiles");
+    private final ObjectProperty<Predicate<TileAndCoords<Tile>>> isTileRemovable = new SimpleObjectProperty<>(this,
+            "isTileRemovable", __ -> false);
     private final TileComponent tile1;
     private final TileBorder tile1Border;
     private final TileComponent tile2;
@@ -52,7 +57,7 @@ public class PickedTilesPane extends Pane {
         getChildren().add(this.tile1 = new TileComponent());
         this.tile1.tileProperty().bind(tiles.map(tiles -> tiles.size() >= 1 ? tiles.get(0).tile() : null));
         this.tile1.setOnAction(e -> {
-            if (tiles.size() >= 1)
+            if (tiles.size() >= 1 && isTileRemovable.get().test(tiles.get(0)))
                 tiles.remove(0);
         });
 
@@ -60,7 +65,7 @@ public class PickedTilesPane extends Pane {
         getChildren().add(this.tile2 = new TileComponent());
         this.tile2.tileProperty().bind(tiles.map(tiles -> tiles.size() >= 2 ? tiles.get(1).tile() : null));
         this.tile2.setOnAction(e -> {
-            if (tiles.size() >= 2)
+            if (tiles.size() >= 2 && isTileRemovable.get().test(tiles.get(1)))
                 tiles.remove(1);
         });
 
@@ -68,7 +73,7 @@ public class PickedTilesPane extends Pane {
         getChildren().add(this.tile3 = new TileComponent());
         this.tile3.tileProperty().bind(tiles.map(tiles -> tiles.size() >= 3 ? tiles.get(2).tile() : null));
         this.tile3.setOnAction(e -> {
-            if (tiles.size() >= 3)
+            if (tiles.size() >= 3 && isTileRemovable.get().test(tiles.get(2)))
                 tiles.remove(2);
         });
 
@@ -151,6 +156,18 @@ public class PickedTilesPane extends Pane {
 
     public ListProperty<TileAndCoords<Tile>> tilesProperty() {
         return tiles;
+    }
+
+    public Predicate<TileAndCoords<Tile>> getIsTileRemovable() {
+        return isTileRemovable.get();
+    }
+
+    public ObjectProperty<Predicate<TileAndCoords<Tile>>> isTileRemovableProperty() {
+        return isTileRemovable;
+    }
+
+    public void setIsTileRemovable(Predicate<TileAndCoords<Tile>> isTileRemovable) {
+        this.isTileRemovable.set(isTileRemovable);
     }
 
     private static class TileBorder extends Pane {

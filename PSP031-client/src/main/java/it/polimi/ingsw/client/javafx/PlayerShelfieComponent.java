@@ -17,6 +17,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 
 public class PlayerShelfieComponent extends Pane {
 
@@ -75,6 +76,18 @@ public class PlayerShelfieComponent extends Pane {
 
     public void setColumnSelectionMode(boolean columnSelectionMode) {
         shelfieComponent.setColumnSelectionMode(columnSelectionMode);
+    }
+
+    public IntPredicate getIsColumnSelectable() {
+        return shelfieComponent.getIsColumnSelectable();
+    }
+
+    public ObjectProperty<IntPredicate> isColumnSelectableProperty() {
+        return shelfieComponent.isColumnSelectableProperty();
+    }
+
+    public void setIsColumnSelectable(IntPredicate isColumnSelectable) {
+        shelfieComponent.setIsColumnSelectable(isColumnSelectable);
     }
 
     public @Nullable Consumer<TileAndCoords<@Nullable Tile>> getOnTileAction() {

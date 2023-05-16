@@ -10,13 +10,19 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
+
+import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 public class ShelfieComponent extends AnchorPane {
@@ -56,6 +62,8 @@ public class ShelfieComponent extends AnchorPane {
 
     private final TileComponent[][] matrix;
     private final BooleanProperty columnSelectionMode = new SimpleBooleanProperty(this, "columnSelectionMode");
+    private final ObjectProperty<IntPredicate> isColumnSelectable = new SimpleObjectProperty<>(this, "isColumnSelectable",
+            __ -> true);
     private final ObjectProperty<@Nullable Consumer<TileAndCoords<@Nullable Tile>>> onTileAction = new SimpleObjectProperty<>(
             this, "onTileAction");
 
@@ -80,15 +88,24 @@ public class ShelfieComponent extends AnchorPane {
         };
 
         for (int c = 0; c < ShelfieView.COLUMNS; c++) {
+            final int col = c;
+
+            List<ObservableValue<?>> columnTilesObservable = new ArrayList<>();
             BooleanExpression colHovered = new SimpleBooleanProperty(false);
             for (TileComponent[] tileComponents : matrix) {
                 TileComponent tileComponent = tileComponents[c];
                 colHovered = colHovered.or(tileComponent.hoverProperty());
+                columnTilesObservable.add(tileComponent.tileProperty());
             }
+            var isColumnSelectable = BooleanExpression.booleanExpression(
+                    // We need to also bind to all the tiles in this column as when 1 tile change,
+                    // the column itself might not be selectable anymore, so we need to fire an update
+                    compositeObservableValue(columnTilesObservable, isColumnSelectableProperty())
+                            .map(ignored -> getIsColumnSelectable().test(col)));
 
-            colHovered = columnSelectionMode.and(colHovered);
+            colHovered = isColumnSelectable.and(colHovered);
             for (int r = 0; r < matrix.length; r++) {
-                final int row = r, col = c;
+                final int row = r;
 
                 TileComponent tileComponent = matrix[r][c];
                 // Bind to the model tile
@@ -96,7 +113,11 @@ public class ShelfieComponent extends AnchorPane {
                 tileComponent.tileProperty().bind(tileProp);
                 // Enable col selection mode
                 tileComponent.highlightProperty().bind(disabledProperty().not()
-                        .and(tileComponent.armedProperty().or(tileComponent.hoverProperty()).or(colHovered)));
+                        .and(tileComponent.armedProperty()
+                                .or(columnSelectionMode.not().and(tileComponent.hoverProperty()))
+                                .or(columnSelectionMode.and(colHovered))));
+                tileComponent.mouseTransparentProperty().bind(mouseTransparentProperty()
+                        .or(columnSelectionMode.and(isColumnSelectable.not())));
                 tileComponent.setOnAction(e -> {
                     var action = onTileAction.get();
                     if (action == null)
@@ -164,6 +185,18 @@ public class ShelfieComponent extends AnchorPane {
 
     public void setColumnSelectionMode(boolean columnSelectionMode) {
         this.columnSelectionMode.set(columnSelectionMode);
+    }
+
+    public IntPredicate getIsColumnSelectable() {
+        return isColumnSelectable.get();
+    }
+
+    public ObjectProperty<IntPredicate> isColumnSelectableProperty() {
+        return isColumnSelectable;
+    }
+
+    public void setIsColumnSelectable(IntPredicate isColumnSelectable) {
+        this.isColumnSelectable.set(isColumnSelectable);
     }
 
     public @Nullable Consumer<TileAndCoords<@Nullable Tile>> getOnTileAction() {
