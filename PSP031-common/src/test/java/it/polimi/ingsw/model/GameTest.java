@@ -41,6 +41,8 @@ class GameTest {
                 null, false, false);
 
         assertEquals(game1, game1, "Same instance is not the same");
+        assertEquals(game1.getGameID(), game2.getGameID(), "Same game should have same id");
+        assertEquals(game1.getStartingPlayer(), game2.getStartingPlayer(), "Same game should have same starting player");
         assertNotEquals(game1, new Object(), "Different object should not be equals");
         assertEquals(game1, game2, "Instances with no differences should be equals");
 
@@ -439,6 +441,79 @@ class GameTest {
                 null, false, true);
         assertNotEquals(game1.hashCode(), gameDiffSuspended.hashCode(),
                 "Instances with different suspended should not be equals");
+    }
+
+    @Test
+    void messageList() {
+        final var game = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        final var messageList = List.of(new UserMessage("player1", "", "ex",
+                "player2", ""),
+                new UserMessage("player1", "", "ex",
+                        "player2", ""));
+        game.messageList().set(messageList);
+        assertEquals(messageList, game.messageList().get());
+    }
+
+    @Test
+    void endGame() {
+        final var game = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertInstanceOf(Boolean.class, game.endGame().get());
+    }
+
+    @Test
+    void suspended() {
+        final var game = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertInstanceOf(Boolean.class, game.suspended().get());
+    }
+
+    @Test
+    void personalGoal() {
+        final var game = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertInstanceOf(PersonalGoal.class, game.getPersonalGoal());
     }
 
     @Test

@@ -36,6 +36,22 @@ class GameServerControllerTest {
          * 7 { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
          * 8 { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
          */
+        //selection list for board refill triggering :
+        //(1,3),(1,4) -> (2,3),(2,4),(2,5) -> (4,1),(5,1) -> (3,2),(4,2),(5,2)
+        //(7,4),(7,5)-> (6,3),(6,4),(6,5)->(4,3),(5,3)->(3,4),(3,5),(3,6)->(4,7)->(5,4),(5,5),(5,6)->(4,4),(4,5),(4,6)
+        /*
+         * valid positions for 2 players board
+         * /*****0**1**2**3**4**5**6**7**8
+         * 0 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+         * 1 { 0, 0, 0, E, E, 0, 0, 0, 0 },
+         * 2 { 0, 0, 0, E, E, E, 0, 0, 0 },
+         * 3 { 0, 0, E, 1, E, E, E, 1, 0 },
+         * 4 { 0, E, E, E, E, E, E, E, 0 },
+         * 5 { 0, E, E, E, E, E, E, 0, 0 },
+         * 6 { 0, 0, 0, E, E, E, 0, 0, 0 },
+         * 7 { 0, 0, 0, 0, E, E, 0, 0, 0 },
+         * 8 { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+         */
 
         //expects throw of IllegalArgumentException("Invalid move") if selected tiles are invalid
         List<BoardCoord> selectedWrong = new ArrayList<>();
