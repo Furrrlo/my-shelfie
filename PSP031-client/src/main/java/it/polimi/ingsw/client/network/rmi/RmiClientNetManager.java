@@ -15,7 +15,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
 
