@@ -44,9 +44,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                                                      String remoteName,
                                                      ServerController controller)
             throws RemoteException {
-        return bind(registry, remoteName, controller,
-                new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS),
-                null);
+        return bind(registry, remoteName, controller, new RMITimeoutClientSocketFactory(), null);
     }
 
     @VisibleForTesting

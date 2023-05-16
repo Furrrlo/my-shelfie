@@ -9,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is needed to set a connection timeout, in order to detect client disconnections
@@ -18,17 +17,13 @@ public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Se
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RMITimeoutClientSocketFactory.class);
 
-    protected final long connectTimeoutMillis;
-
-    public RMITimeoutClientSocketFactory(long connectTimeout, TimeUnit connectTimeoutUnit) {
-        this.connectTimeoutMillis = connectTimeoutUnit.toMillis(connectTimeout);
-    }
+    protected static final long CONNECT_TIMEOUT_MILLIS = Long.getLong("sun.rmi.transport.tcp.readTimeout", 5000);
 
     @Override
     public Socket createSocket(String host, int port) throws IOException {
         LOGGER.trace("Creating new socket for RMI. Remote IP {}:{}", host, port);
         Socket s = doCreateNonConnectedSocket();
-        s.connect(new InetSocketAddress(host, port), (int) connectTimeoutMillis);
+        s.connect(new InetSocketAddress(host, port), (int) CONNECT_TIMEOUT_MILLIS);
         return s;
     }
 
@@ -42,18 +37,18 @@ public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Se
             return true;
         if (!(o instanceof RMITimeoutClientSocketFactory that))
             return false;
-        return getClass().equals(that.getClass()) && connectTimeoutMillis == that.connectTimeoutMillis;
+        return getClass().equals(that.getClass());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getClass(), connectTimeoutMillis);
+        return Objects.hash(getClass());
     }
 
     @Override
     public String toString() {
         return "RMITimeoutSocketFactory{" +
-                "connectTimeoutMillis=" + connectTimeoutMillis +
+                "connectTimeoutMillis=" + CONNECT_TIMEOUT_MILLIS +
                 "} " + super.toString();
     }
 }

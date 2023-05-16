@@ -57,7 +57,7 @@ public class RmiDisconnectionTest {
 
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
-        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
+        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory);
         try {
             DisconnectionIntegrationTest.doTestDisconnection_clientCloseInEmptyLobby(
                     serverController -> {
@@ -91,11 +91,11 @@ public class RmiDisconnectionTest {
 
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
-        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
+        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory);
         try {
             Supplier<ClientNetManager> defaultSocketSupplier = () -> new RmiClientNetManager(null,
                     rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
-                    new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS), null);
+                    new RMITimeoutClientSocketFactory(), null);
             DisconnectionIntegrationTest.doTestDisconnection_clientCloseInLobby(
                     serverController -> {
                         try {
@@ -131,11 +131,11 @@ public class RmiDisconnectionTest {
 
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
-        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory, 500, TimeUnit.MILLISECONDS);
+        final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory);
         try {
             Supplier<ClientNetManager> defaultSocketSupplier = () -> new RmiClientNetManager(null,
                     rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
-                    new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS), null);
+                    new RMITimeoutClientSocketFactory(), null);
             DisconnectionIntegrationTest.doTestDisconnection_clientCloseInGame(
                     serverController -> {
                         try {
@@ -171,9 +171,7 @@ public class RmiDisconnectionTest {
         private transient final AtomicBoolean closed = new AtomicBoolean(false);
         private transient final Set<Socket> sockets = ConcurrentHashMap.newKeySet();
 
-        private DisconnectingSocketFactory(String testName, Supplier<Socket> socketFactory, long connectTimeout,
-                                           TimeUnit connectTimeoutUnit) {
-            super(connectTimeout, connectTimeoutUnit);
+        private DisconnectingSocketFactory(String testName, Supplier<Socket> socketFactory) {
             this.testName = testName;
             this.socketFactory = socketFactory;
 

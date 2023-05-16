@@ -35,9 +35,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
 
     @VisibleForTesting
     public RmiClientNetManager(@Nullable String host, int port, String remoteName) {
-        this(host, port, remoteName,
-                new RMITimeoutClientSocketFactory(500, TimeUnit.MILLISECONDS),
-                null);
+        this(host, port, remoteName, new RMITimeoutClientSocketFactory(), null);
     }
 
     @VisibleForTesting
