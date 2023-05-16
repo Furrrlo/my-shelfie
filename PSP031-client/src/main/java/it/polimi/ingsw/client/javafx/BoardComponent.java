@@ -109,7 +109,7 @@ public class BoardComponent extends AnchorPane {
                         .booleanExpression(compositeObservableValue(tilesAndCoords, pickedTiles).map(ignored -> {
                             var boardCoords = tilesAndCoords.getValue();
                             // If you already picked it, you can re-pick it to remove it
-                            if (pickedTiles.contains(boardCoords))
+                            if (boardCoords == null || pickedTiles.contains(boardCoords))
                                 return false;
 
                             final var list = new ArrayList<>(pickedTiles);

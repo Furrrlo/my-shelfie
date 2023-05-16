@@ -9,6 +9,7 @@ import javafx.beans.property.ReadOnlyObjectPropertyBase;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 class FxProperties {
@@ -16,13 +17,42 @@ class FxProperties {
     private FxProperties() {
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static ObservableValue<?> compositeObservableValue(List<ObservableValue<?>> properties) {
+        if (properties.size() == 0)
+            return new SimpleObjectProperty<>();
+
+        final var nullMarker = new Object();
+        ObservableValue<?> currVal = ((ObservableValue) properties.get(0)).orElse(nullMarker);
+        for (ObservableValue<?> val : properties)
+            currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+        return currVal;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static ObservableValue<?> compositeObservableValue(ObservableValue<?>... properties) {
         if (properties.length == 0)
             return new SimpleObjectProperty<>();
 
-        ObservableValue<?> currVal = properties[0];
+        final var nullMarker = new Object();
+        ObservableValue<?> currVal = ((ObservableValue) properties[0]).orElse(nullMarker);
         for (ObservableValue<?> val : properties)
-            currVal = currVal.flatMap(ignored -> val);
+            currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+        return currVal;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static ObservableValue<?> compositeObservableValue(List<ObservableValue<?>> properties,
+                                                              ObservableValue<?>... additional) {
+        if (properties.size() == 0 && additional.length == 0)
+            return new SimpleObjectProperty<>();
+
+        final var nullMarker = new Object();
+        ObservableValue<?> currVal = ((ObservableValue) properties.get(0)).orElse(nullMarker);
+        for (ObservableValue<?> val : properties)
+            currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+        for (ObservableValue<?> val : additional)
+            currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
         return currVal;
     }
 
