@@ -279,7 +279,6 @@ class TuiGameScene implements TuiScene {
                 TuiPrintStream.BOX_BOTTOM | TuiPrintStream.BOX_RIGHT);
 
         List<UserMessage> messages = game.messageList().get();
-        //TODO: verify why first message does not print
 
         var remainingSize = chatRect.size().reduce(3, 0);
         TuiSize printedSize;

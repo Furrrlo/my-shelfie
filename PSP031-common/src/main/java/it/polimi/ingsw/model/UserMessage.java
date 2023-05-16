@@ -5,6 +5,11 @@ import java.io.Serializable;
 public record UserMessage(String nickSendingPlayer, String message, String nickReceivingPlayer) implements Serializable {
     @Override
     public String toString() {
-        return '[' + nickSendingPlayer + "]: " + message;
+        if (nickReceivingPlayer.equals("all")) {
+            return '[' + nickSendingPlayer + "]: " + message;
+        } else {
+            return '[' + nickSendingPlayer + " to " + nickReceivingPlayer + "]: " + message;
+        }
+
     }
 }
