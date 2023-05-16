@@ -61,6 +61,10 @@ class ShelfieTest {
                 new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
                 //@formatter:on
         });
+        //if selected column<0 or > COL -1 should return false
+        assertFalse(shelfie.checkColumnSpace(-1, 1));
+        assertFalse(shelfie.checkColumnSpace(5, 1));
+
         //first column: should return true for group of 1 and 2 tiles, but false for three 
         assertTrue(shelfie.checkColumnSpace(0, 1));
         assertTrue(shelfie.checkColumnSpace(0, 2));
@@ -127,6 +131,25 @@ class ShelfieTest {
         assertEquals(new Tile(Color.BLUE), shelfie.tile(0, 0).get());
         assertNotEquals(new Tile(Color.BLUE), shelfie.tile(1, 0).get());
         assertNotEquals(new Tile(Color.GREEN), shelfie.tile(0, 0).get());
+    }
+
+    @Test
+    void getColumnFreeSpace() {
+        final var shelfie = new Shelfie(new Color[][] {
+                //@formatter:off
+                new Color[] { null           , null        , null           , Color.WHITE    , Color.YELLOW },
+                new Color[] { null           , null        , Color.YELLOW   , Color.YELLOW   , Color.GREEN  },
+                new Color[] { Color.BLUE     , null        , Color.BLUE     , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.GREEN    , Color.BLUE  , Color.YELLOW   , Color.GREEN    , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW   , Color.PINK     , Color.YELLOW },
+                //@formatter:on
+        });
+        assertEquals(2, shelfie.getColumnFreeSpace(0));
+        assertEquals(3, shelfie.getColumnFreeSpace(1));
+        assertEquals(1, shelfie.getColumnFreeSpace(2));
+        assertEquals(0, shelfie.getColumnFreeSpace(3));
+        assertEquals(0, shelfie.getColumnFreeSpace(4));
     }
 
     @Test

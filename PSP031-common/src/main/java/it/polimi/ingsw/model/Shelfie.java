@@ -117,12 +117,14 @@ public class Shelfie implements ShelfieView {
                     reachedTiles.add(new TileAndCoords<Tile>(curr.tile(), curr.row(), curr.col() + 1));
                     checked[curr.row()][curr.col() + 1] = 1;
                 }
-                if (curr.row() > 0
-                        && Objects.equals(tile(curr.row() - 1, curr.col()).get(), tile(curr.row(), curr.col()).get())
-                        && !reachedTiles.contains(new TileAndCoords<Tile>(curr.tile(), curr.row() - 1, curr.col()))) {
-                    reachedTiles.add(new TileAndCoords<Tile>(curr.tile(), curr.row() - 1, curr.col()));
-                    checked[curr.row() - 1][curr.col()] = 1;
-                }
+                //check already covered by always checking first the tile over the one being analysed, therefore never entering
+                //if second condition ( it is always already contained if it is equal )
+                // if (curr.row() > 0
+                //        && Objects.equals(tile(curr.row() - 1, curr.col()).get(), tile(curr.row(), curr.col()).get())
+                //        && !reachedTiles.contains(new TileAndCoords<Tile>(curr.tile(), curr.row() - 1, curr.col()))) {
+                //    reachedTiles.add(new TileAndCoords<Tile>(curr.tile(), curr.row() - 1, curr.col()));
+                //    checked[curr.row() - 1][curr.col()] = 1;
+                //}
                 if (curr.col() > 0
                         && Objects.equals(tile(curr.row(), curr.col() - 1).get(), curr.tile())
                         && !reachedTiles.contains(new TileAndCoords<Tile>(curr.tile(), curr.row(), curr.col() - 1))) {
@@ -170,12 +172,8 @@ public class Shelfie implements ShelfieView {
     public void placeTiles(List<Tile> selectedTiles, int shelfCol) {
         //place tiles in the selected column from the bottom and first free space
         for (Tile tile : selectedTiles) {
-            for (int r = ROWS - 1; r >= 0; r--) {
-                if (shelfie[r][shelfCol].get() == null) {
-                    shelfie[r][shelfCol].set(tile);
-                    break;
-                }
-            }
+            if (shelfie[getColumnFreeSpace(shelfCol) - 1][shelfCol].get() == null)
+                shelfie[getColumnFreeSpace(shelfCol) - 1][shelfCol].set(tile);
         }
     }
 
