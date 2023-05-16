@@ -7,24 +7,35 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class RmiGameServerController implements RmiGameController {
 
     private final ServerPlayer player;
     private final GameServerController controller;
+    private final Consumer<Throwable> disconnectHandler;
 
-    public RmiGameServerController(ServerPlayer player, GameServerController controller) {
+    public RmiGameServerController(ServerPlayer player, GameServerController controller, Consumer<Throwable> disconnectHandler) {
         this.player = player;
         this.controller = controller;
+        this.disconnectHandler = disconnectHandler;
     }
 
     @Override
     public void makeMove(List<BoardCoord> selected, int shelfCol) throws RemoteException {
-        controller.makeMove(player, selected, shelfCol);
+        try {
+            controller.makeMove(player, selected, shelfCol);
+        } catch (Throwable t) {
+            disconnectHandler.accept(t);
+        }
     }
 
     @Override
     public void sendMessage(String message, String nickReceivingPlayer) throws RemoteException {
-        controller.sendMessage(player.getNick(), message, nickReceivingPlayer);
+        try {
+            controller.sendMessage(player.getNick(), message, nickReceivingPlayer);
+        } catch (Throwable t) {
+            disconnectHandler.accept(t);
+        }
     }
 }

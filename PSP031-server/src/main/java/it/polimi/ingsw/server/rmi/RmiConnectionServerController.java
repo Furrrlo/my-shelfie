@@ -85,7 +85,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                     new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
                     controller -> {
                         try {
-                            var lobbyController = new RmiLobbyServerController(nick, controller);
+                            var lobbyController = new RmiLobbyServerController(nick, controller, connection::disconnectPlayer);
                             connection.lobbyControllerRemote = lobbyController;
                             return new RmiLobbyController.Adapter(unicastRemoteObjects.export(lobbyController, 0));
                         } catch (RemoteException e) {
@@ -94,15 +94,13 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                     },
                     (player, game) -> {
                         try {
-                            var gameController = new RmiGameServerController(player, game);
+                            var gameController = new RmiGameServerController(player, game, connection::disconnectPlayer);
                             connection.gameControllerRemote = gameController;
                             return new RmiGameController.Adapter(unicastRemoteObjects.export(gameController, 0));
                         } catch (RemoteException e) {
                             throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                         }
                     });
-        } catch (DisconnectedException e) {
-            connection.disconnectPlayer(e);
         } catch (NickNotValidException e) {
             try {
                 connection.close();
@@ -110,6 +108,8 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                 LOGGER.error("Failed to close player", ex);
             }
             throw e;
+        } catch (Throwable e) {
+            connection.disconnectPlayer(e);
         }
     }
 
