@@ -343,9 +343,6 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         @Override
         @SuppressWarnings({ "unchecked", "resource" }) // We don't care about acknowledging a SimpleAckPacket
         public void reply(ACK_OUT p) throws IOException {
-            if (hasAcked.getAndSet(true))
-                throw new IllegalStateException("Packet " + packet + " has already been acked");
-
             reply(p, (Class<ACK_IN>) SimpleAckPacket.class);
         }
 
