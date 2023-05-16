@@ -18,11 +18,26 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller that handle the game, allowing to make a move and send messages.
+ */
 @SuppressWarnings({ "FieldCanBeLocal", "unused" })
 public class GameServerController {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameServerController.class);
+
+    /**
+     * Reference to the game, protected by a lock
+     */
     private final LockProtected<ServerGame> game;
+
+    /**
+     * Executes the {@link #endGameFuture}
+     */
     private final ScheduledExecutorService executor;
+
+    /**
+     * Future that ends the game if less than 2 players are connected
+     */
     private volatile @Nullable ScheduledFuture<?> endGameFuture;
 
     public GameServerController(LockProtected<ServerGame> game) {
@@ -32,6 +47,13 @@ public class GameServerController {
                 .factory());
     }
 
+    /**
+     * Method called when a player disconnects.
+     * Mark the player as disconnected and suspend the game if remain only 1 player.
+     * 
+     * @param nick nick of the disconnecting player
+     * @param cause cause of disconnection
+     */
     public void onDisconnectPlayer(String nick, Throwable cause) {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
@@ -58,6 +80,12 @@ public class GameServerController {
         }
     }
 
+    /**
+     * Method called when disconnected a player reconnects.
+     * Mark the player as connected and resume the game if it is suspended.
+     * 
+     * @param nick nick of the reconnecting player
+     */
     public void onReconnectedPlayer(String nick) {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
@@ -78,6 +106,15 @@ public class GameServerController {
         }
     }
 
+    /**
+     * Removes tiles from board and inserts in tiles
+     * 
+     * @param player player who is making the move
+     * @param selected list of selected tiles
+     * @param shelfCol shelfie column where to put selected tiles
+     * @throws IllegalArgumentException if the move is not valid
+     * @throws IllegalStateException if you can't make move at this time
+     */
     public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) throws IllegalArgumentException {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
@@ -126,6 +163,13 @@ public class GameServerController {
         }
     }
 
+    /**
+     * Change the current turn to the next player,
+     * skipping disconnected players.
+     * If no player is connected, do nothing.
+     * 
+     * @param game game
+     */
     private void changeCurrentTurn(ServerGame game) {
         int nextPlayerIdx = game.getPlayers().indexOf(game.currentTurn().get());
         // Try for all the remaining players
@@ -143,6 +187,14 @@ public class GameServerController {
         }
     }
 
+    /**
+     * Send a message to the given player
+     * 
+     * @param nickSendingPlayer nick of the sender
+     * @param message text of the message
+     * @param nickReceivingPlayer nick of the recipient
+     * @throws IllegalArgumentException if message is empty or nicks are not valid
+     */
     public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer)
             throws IllegalArgumentException {
         try (var gameCloseable = game.use()) {
