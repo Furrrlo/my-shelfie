@@ -102,6 +102,7 @@ public class SocketClientNetManager implements ClientNetManager {
                 newSocketNeeded = true;
                 socket.connect(serverAddress, 500);
                 socket.setSoTimeout(10000);
+                socket.setTcpNoDelay(true);
                 newSocketNeeded = false;
             }
             socketManager = defaultResponseTimeout == -1

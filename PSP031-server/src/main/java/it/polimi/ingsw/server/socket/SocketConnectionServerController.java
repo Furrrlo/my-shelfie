@@ -85,6 +85,7 @@ public class SocketConnectionServerController implements Closeable {
         try {
             do {
                 final Socket socket = socketServer.accept();
+                socket.setTcpNoDelay(true);
                 if (readTimeout != -1)
                     socket.setSoTimeout((int) readTimeoutUnit.toMillis(readTimeout));
                 LOGGER.info("[Server] New socket client connected: {}", socket.getRemoteSocketAddress());
