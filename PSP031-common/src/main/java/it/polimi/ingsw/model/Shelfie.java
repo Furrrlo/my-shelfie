@@ -118,7 +118,7 @@ public class Shelfie implements ShelfieView {
                     checked[curr.row()][curr.col() + 1] = 1;
                 }
                 if (curr.row() > 0
-                        && tile(curr.row() - 1, curr.col()) == tile(curr.row(), curr.col())
+                        && Objects.equals(tile(curr.row() - 1, curr.col()).get(), tile(curr.row(), curr.col()).get())
                         && !reachedTiles.contains(new TileAndCoords<Tile>(curr.tile(), curr.row() - 1, curr.col()))) {
                     reachedTiles.add(new TileAndCoords<Tile>(curr.tile(), curr.row() - 1, curr.col()));
                     checked[curr.row() - 1][curr.col()] = 1;

@@ -48,6 +48,10 @@ class ShelfieTest {
     }
 
     @Test
+    void checkColumnSpace() {
+    }
+
+    @Test
     void numTilesOverlappingWithPersonalGoal() {
         Shelfie shelfie = new Shelfie(new Color[][] {
                 //@formatter:off
@@ -144,5 +148,30 @@ class ShelfieTest {
          * 21 -> yellow
          */
         assertEquals(21, shelfie.groupsOfTiles().size());
+
+        Shelfie shelfie2 = new Shelfie(new Color[][] {
+        //@formatter:off
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.PINK      },
+                new Color[] { Color.PINK     , Color.PINK     , Color.BLUE     , Color.BLUE     , Color.PINK      },
+                new Color[] { Color.PINK     , Color.PINK     , Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW    },
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.YELLOW    },
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, Color.GREEN    , Color.GREEN    , Color.WHITE     },
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, Color.GREEN    , Color.GREEN    , Color.PINK      },
+        //@formatter:on
+        });
+        /*
+         * 1 -> pink x 4
+         * 2 -> lightblue x 6
+         * 3 -> lightblue x 2
+         * 4 -> green x 4
+         * 5 -> yellow x 5
+         * 6 -> white
+         * 7 -> pink
+         * 8 -> blue x 2
+         * 9 -> yellow x 2
+         * 10 -> pink x 2
+         * 11 -> lightblue
+         */
+        assertEquals(11, shelfie2.groupsOfTiles().size());
     }
 }
