@@ -143,9 +143,17 @@ public class GameServerController {
         }
     }
 
-    public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer) {
+    public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer)
+            throws IllegalArgumentException {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
+            if (game.getPlayers().stream().filter(p -> p.getNick().equals(nickSendingPlayer)).toList().isEmpty())
+                throw new IllegalArgumentException("Sending player: " + nickSendingPlayer + " is not valid player");
+            if (game.getPlayers().stream().filter(p -> p.getNick().equals(nickReceivingPlayer)).toList().isEmpty()
+                    && !nickReceivingPlayer.equals("all"))
+                throw new IllegalArgumentException("Sending player: " + nickReceivingPlayer + " is not valid player");
+            if (message.equals(""))
+                throw new IllegalArgumentException("No text written for message to be sent");
             game.message().set(new UserMessage(nickSendingPlayer, message, nickReceivingPlayer));
         }
     }
