@@ -173,13 +173,11 @@ public class Board implements BoardView {
             return true;
         if (selected.size() == 2)
             return hasCommonSide(selected.get(0).row(), selected.get(0).col(), selected.get(1).row(), selected.get(1).col());
-        if (selected.size() == 3)
+        else
             return hasCommonSide(
                     selected.get(0).row(), selected.get(0).col(),
                     selected.get(1).row(), selected.get(1).col(),
                     selected.get(2).row(), selected.get(2).col());
-        return true;
-
     }
 
     @Override

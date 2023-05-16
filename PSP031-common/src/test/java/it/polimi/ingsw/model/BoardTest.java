@@ -71,29 +71,59 @@ class BoardTest {
     }
 
     @Test
-    void testBoardException1() {
+    void isValidTIle() {
+        final var board = new Board(2);
+        /*
+         * TWO_PLAYERS_MATRIX
+         ***** 0**1**2**3**4**5**6**7**8
+         * 0 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+         * 1 { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+         * 2 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 3 { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+         * 4 { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+         * 5 { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
+         * 6 { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+         * 7 { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+         * 9 { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+         * };
+         */
+        //testing board firs row 
+        assertFalse(board.isValidTile(0, 0));
+        assertFalse(board.isValidTile(0, 1));
+        assertFalse(board.isValidTile(0, 2));
+        assertFalse(board.isValidTile(0, 3));
+        assertFalse(board.isValidTile(0, 4));
+        assertFalse(board.isValidTile(0, 5));
+        assertFalse(board.isValidTile(0, 6));
+        assertFalse(board.isValidTile(0, 7));
+        assertFalse(board.isValidTile(0, 8));
+        //testing board second row 
+        assertFalse(board.isValidTile(1, 0));
+        assertFalse(board.isValidTile(1, 1));
+        assertFalse(board.isValidTile(1, 2));
+        assertTrue(board.isValidTile(1, 3));
+        assertTrue(board.isValidTile(1, 4));
+        assertFalse(board.isValidTile(1, 5));
+        assertFalse(board.isValidTile(1, 6));
+        assertFalse(board.isValidTile(1, 7));
+        assertFalse(board.isValidTile(1, 8));
+
+        //if r<0 or r >= BOARD.ROWS should return false
+        assertFalse(board.isValidTile(-1, 0));
+        assertFalse(board.isValidTile(9, 0));
+        //if c<0 or c >= BOARD.COLUMNS should return false
+        assertFalse(board.isValidTile(2, -1));
+        assertFalse(board.isValidTile(2, 9));
+    }
+
+    @Test
+    void testBoardException() {
         assertThrows(UnsupportedOperationException.class, () -> new Board(5),
                 "Invalid player number (min: 2, max: 4): " + 5);
-    }
-
-    @Test
-    void testBoardException2() {
         assertThrows(UnsupportedOperationException.class, () -> new Board(1),
                 "Invalid player number (min: 2, max: 4): " + 1);
-    }
-
-    @Test
-    void testBoardException3() {
         assertDoesNotThrow(() -> new Board(2));
-    }
-
-    @Test
-    void testBoardException4() {
         assertDoesNotThrow(() -> new Board(3));
-    }
-
-    @Test
-    void testBoardException5() {
         assertDoesNotThrow(() -> new Board(4));
     }
 
@@ -163,7 +193,7 @@ class BoardTest {
     @Test
     void needsRefill_ifTilesAreNotLinked_False() {
         /*
-         * private final static int[][] TWO_PLAYERS_MATRIX = new int[][] {
+         * TWO_PLAYERS_MATRIX
          ****** 0**1**2**3**4**5**6**7**8
          * 0 { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
          * 1 { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
