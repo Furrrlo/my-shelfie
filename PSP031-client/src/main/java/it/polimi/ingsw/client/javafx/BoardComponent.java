@@ -106,16 +106,19 @@ public class BoardComponent extends AnchorPane {
                 var tilesAndCoords = tileComponent.tileProperty()
                         .map(t -> TileAndCoords.nullable(tileComponent.getTile(), row, col));
                 var nonPickable = BooleanExpression
-                        .booleanExpression(compositeObservableValue(tilesAndCoords, pickedTiles).map(ignored -> {
-                            var boardCoords = tilesAndCoords.getValue();
-                            // If you already picked it, you can re-pick it to remove it
-                            if (boardCoords == null || pickedTiles.contains(boardCoords))
-                                return false;
+                        // Instead of listening to neighbors for updates from the server,
+                        // we listen to the un-disabling of the board, 'cause it's re-enabled once it's your turn
+                        .booleanExpression(
+                                compositeObservableValue(disabledProperty(), tilesAndCoords, pickedTiles).map(ignored -> {
+                                    var boardCoords = tilesAndCoords.getValue();
+                                    // If you already picked it, you can re-pick it to remove it
+                                    if (boardCoords == null || pickedTiles.contains(boardCoords))
+                                        return false;
 
-                            final var list = new ArrayList<>(pickedTiles);
-                            list.add(boardCoords);
-                            return !board.checkBoardCoord(list);
-                        }));
+                                    final var list = new ArrayList<>(pickedTiles);
+                                    list.add(boardCoords);
+                                    return !board.checkBoardCoord(list);
+                                }));
                 tileComponent.disableProperty().bind(disabledProperty().or(nonPickable));
 
                 var isPickedExpr = booleanExpression(compositeObservableValue(tilesAndCoords, pickedTiles)
