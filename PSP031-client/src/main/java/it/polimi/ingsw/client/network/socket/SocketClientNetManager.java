@@ -115,7 +115,14 @@ public class SocketClientNetManager implements ClientNetManager {
         try (var lobbyCtx = socketManager.send(new JoinGamePacket(nick), JoinResponsePacket.class)) {
             switch (lobbyCtx.getPacket()) {
                 case NickNotValidPacket p -> {
-                    lobbyCtx.reply(new LobbyReceivedPacket());
+                    try {
+                        lobbyCtx.reply(new LobbyReceivedPacket());
+                    } catch (IOException ignored) {
+                        // We ignore exceptions on the last ack receival, because the socket may
+                        // be closed before we are able to read out the last ack packet
+                        // We don't care about whether the server has received this anyway,
+                        // we can just hope it did and go on
+                    }
                     socketManager.close();
                     throw new NickNotValidException(p.message());
                 }
