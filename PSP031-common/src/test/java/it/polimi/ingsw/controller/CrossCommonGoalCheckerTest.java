@@ -2,14 +2,22 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Shelfie;
+import it.polimi.ingsw.model.Type;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CrossCommonGoalCheckerTest {
 
     /** testing Type.CROSS.checkCommonGoal() */
+    @Test
+    void getDescription() {
+        final String description = """
+                Five tiles of the same type forming an X
+                """;
+        assertEquals(description, Type.CROSS.getDescription());
+    }
+
     @Test
     void checkCommonGoal_CROSS_allNull() {
         Color[][] matrix = {

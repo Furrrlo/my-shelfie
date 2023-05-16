@@ -2,14 +2,23 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Shelfie;
+import it.polimi.ingsw.model.Type;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AllCornersCommonGoalCheckerTest {
 
     /** testing Type.ALL_CORNERS.checkCommonGoal() **/
+    @Test
+    void getDescription() {
+        final String description = """
+                Four tiles of the same type in the four corners
+                of the bookshelf.
+                """;
+        assertEquals(description, Type.ALL_CORNERS.getDescription());
+    }
+
     @Test
     void checkCommonGoal_ALL_CORNERS_normal_true() {
         Color[][] matrix = {

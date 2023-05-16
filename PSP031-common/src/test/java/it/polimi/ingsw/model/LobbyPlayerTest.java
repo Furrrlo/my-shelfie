@@ -14,6 +14,7 @@ class LobbyPlayerTest {
 
         assertEquals(player1, player1, "Same instance is not the same");
         assertNotEquals(player1, new Object(), "Different object should not be equals");
+        assertNotEquals(player1, null, "instance should not be equal to null");
         assertEquals(player1, player2, "Instances with no differences should be equals");
 
         final var playerDiffNick = new LobbyPlayer("test_player_2", true);
