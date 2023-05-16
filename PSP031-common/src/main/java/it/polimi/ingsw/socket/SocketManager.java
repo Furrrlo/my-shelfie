@@ -92,15 +92,14 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
         void ack() throws IOException;
 
         /**
-         * call {@link #ack()}
+         * Replies with a simple ack packet, as {@link #ack()} would do, only
+         * if none were already sent
          *
          * @throws IOException if sending fails
          * @throws InterruptedIOException if interrupted while sending
          */
         @Override
-        default void close() throws IOException {
-            ack();
-        }
+        void close() throws IOException;
 
         /**
          * Reply with the given packet

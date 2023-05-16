@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
@@ -302,6 +303,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private class PacketReplyContextImpl<T extends Packet> implements PacketReplyContext<ACK_IN, ACK_OUT, T> {
 
         private final SeqPacket packet;
+        private final AtomicBoolean hasAcked = new AtomicBoolean(false);
 
         PacketReplyContextImpl(SeqPacket packet) {
             this.packet = packet;
@@ -315,6 +317,19 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
         @Override
         public void ack() throws IOException {
+            if (hasAcked.getAndSet(true))
+                throw new IllegalStateException("Packet " + packet + " has already been acked");
+
+            doAck();
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (!hasAcked.getAndSet(true))
+                doAck();
+        }
+
+        private void doAck() throws IOException {
             try {
                 doSend(new SeqAckPacket(new SimpleAckPacket(), -1, packet.seqN())).get();
             } catch (InterruptedException | ExecutionException e) {
@@ -328,12 +343,18 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         @Override
         @SuppressWarnings({ "unchecked", "resource" }) // We don't care about acknowledging a SimpleAckPacket
         public void reply(ACK_OUT p) throws IOException {
+            if (hasAcked.getAndSet(true))
+                throw new IllegalStateException("Packet " + packet + " has already been acked");
+
             reply(p, (Class<ACK_IN>) SimpleAckPacket.class);
         }
 
         @Override
         public <R1 extends ACK_IN> PacketReplyContext<ACK_IN, ACK_OUT, R1> reply(ACK_OUT p, Class<R1> replyType)
                 throws IOException {
+            if (hasAcked.getAndSet(true))
+                throw new IllegalStateException("Packet " + packet + " has already been acked");
+
             long seqN = seq.getAndIncrement();
             return doSendAndWaitResponse(new SeqAckPacket(p, seqN, packet.seqN()), replyType);
         }
