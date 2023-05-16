@@ -102,10 +102,10 @@ class GameServerControllerTest {
 
         //if receiving player is not present between playing players should rise IllegalArgumentException
         assertThrows(IllegalArgumentException.class,
-                ()-> gsc.sendMessage("example_player_1","message","wrong_nick"));
+                () -> gsc.sendMessage("example_player_1", "message", "wrong_nick"));
 
         //if no text has been written in the message field should rise IllegalArgumentException
         assertThrows(IllegalArgumentException.class,
-                ()-> gsc.sendMessage("example_player_1","","example_player_2"));
+                () -> gsc.sendMessage("example_player_1", "", "example_player_2"));
     }
 }
