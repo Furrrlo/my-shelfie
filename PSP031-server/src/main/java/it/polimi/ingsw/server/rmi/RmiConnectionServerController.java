@@ -1,6 +1,5 @@
 package it.polimi.ingsw.server.rmi;
 
-import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.rmi.*;
 import it.polimi.ingsw.server.controller.BaseServerConnection;

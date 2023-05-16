@@ -15,7 +15,8 @@ public class RmiGameServerController implements RmiGameController {
     private final GameServerController controller;
     private final Consumer<Throwable> disconnectHandler;
 
-    public RmiGameServerController(ServerPlayer player, GameServerController controller, Consumer<Throwable> disconnectHandler) {
+    public RmiGameServerController(ServerPlayer player, GameServerController controller,
+                                   Consumer<Throwable> disconnectHandler) {
         this.player = player;
         this.controller = controller;
         this.disconnectHandler = disconnectHandler;
