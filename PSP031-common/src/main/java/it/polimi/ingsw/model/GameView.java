@@ -40,7 +40,7 @@ public interface GameView extends Serializable {
     /** Returns endGame */
     Provider<Boolean> endGame();
 
-    Provider<? extends List< UserMessage>> messageList();
+    Provider<? extends List<UserMessage>> messageList();
 
     /** Returns whether the game is suspended */
     Provider<Boolean> suspended();

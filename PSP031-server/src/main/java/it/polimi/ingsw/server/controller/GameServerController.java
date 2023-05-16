@@ -206,7 +206,41 @@ public class GameServerController {
                 throw new IllegalArgumentException("Sending player: " + nickReceivingPlayer + " is not valid player");
             if (message.equals(""))
                 throw new IllegalArgumentException("No text written for message to be sent");
-            game.message().set(new UserMessage(nickSendingPlayer, message, nickReceivingPlayer));
+
+            game.message().set(new UserMessage(nickSendingPlayer, getPlayerColor(nickSendingPlayer), message,
+                    nickReceivingPlayer, getPlayerColor(nickReceivingPlayer)));
+        }
+    }
+
+    private String getPlayerColor(String nick) {
+        if (nick.equals("all"))
+            return "";
+        try (var gameCloseable = game.use()) {
+            var game = gameCloseable.obj();
+            int index = 0;
+            for (ServerPlayer player : game.getPlayers()) {
+                if (player.getNick().equals(nick)) {
+                    index = game.getPlayers().indexOf(player);
+                }
+            }
+            switch (index) {
+                case 0 -> {
+                    return "\033[0;31m";//RED
+                }
+                case 1 -> {
+                    return "\033[0;32m"; // GREEN
+                }
+                case 2 -> {
+                    return "\033[0;33m"; // YELLOW
+                }
+                case 3 -> {
+                    return "\033[0;36m"; // CYAN
+                }
+                default -> {
+                    return "";
+                }
+            }
+
         }
     }
 }
