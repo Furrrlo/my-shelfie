@@ -30,13 +30,17 @@ public class Lobby implements LobbyView {
     public void disconnectThePlayer(String nick) {
         var game = game().get();
         if (game == null) {
-            joinedPlayers().update(players -> {
-                List<LobbyPlayer> l = new ArrayList<>(players);
-                l.removeIf(p -> p.getNick().equals(nick));
-                return l;
-            });
+            // Only trigger an observer update if necessary
+            if (joinedPlayers().get().stream().anyMatch(p -> p.getNick().equals(nick)))
+                joinedPlayers().update(players -> {
+                    List<LobbyPlayer> l = new ArrayList<>(players);
+                    l.removeIf(p -> p.getNick().equals(nick));
+                    return l;
+                });
         } else {
-            game.game().thePlayer().connected().set(false);
+            // Only trigger an observer update if necessary
+            if (game.game().thePlayer().connected().get())
+                game.game().thePlayer().connected().set(false);
         }
     }
 
