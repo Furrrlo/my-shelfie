@@ -10,6 +10,7 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
+import it.polimi.ingsw.model.PlayerView;
 import it.polimi.ingsw.model.TileAndCoords;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -23,6 +24,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
@@ -158,7 +160,7 @@ class TuiPrompts {
             if (g != null) {
                 registerGameObservers(renderer, netManager, g.game(), g.controller());
                 if (g.game().endGame().get())
-                    renderer.setPrompt(promptEndGame());
+                    renderer.setPrompt(promptEndGame(renderer, netManager, g.game()));
                 else if (g.game().suspended().get())
                     renderer.setPrompt(promptSuspended());
                 else
@@ -175,7 +177,7 @@ class TuiPrompts {
         if (currGame != null) {
             registerGameObservers(renderer, netManager, currGame.game(), currGame.controller());
             if (currGame.game().endGame().get())
-                return promptEndGame();
+                return promptEndGame(renderer, netManager, currGame.game());
             else if (currGame.game().suspended().get())
                 return promptSuspended();
             else
@@ -352,11 +354,49 @@ class TuiPrompts {
                 (renderer0, ctx, ignored) -> ctx.invalid("Waiting for other players..."));
     }
 
-    private static Prompt promptEndGame() {
-        //TODO
-        return new InputPrompt(
-                "Game is over.",
-                (renderer0, ctx, ignored) -> ctx.invalid("Game is over."));
+    private static Prompt promptEndGame(TuiRenderer renderer,
+                                        ClientNetManager netManager,
+                                        GameView game) {
+        renderer.setScene(new TuiGameScene(game));
+
+        var scoreSortedPlayers = game.getPlayers().stream()
+                .sorted(Comparator.<PlayerView> comparingInt(p -> p.score().get()).reversed())
+                .toList();
+        var scoreboard = IntStream.range(0, scoreSortedPlayers.size())
+                .mapToObj(i -> {
+                    var p = scoreSortedPlayers.get(i);
+                    return (i + 1) + ". " + p.getNick() + ": " + p.score().get() + "pt";
+                })
+                .collect(Collectors.joining("\n"));
+        return new ChoicePrompt(
+                "Game is over, the final score is:\n"
+                        + scoreboard + "\n\n"
+                        + "What do you want to do now?",
+                new ChoicePrompt.Choice("Connect to a new game", (renderer0, ctx) -> {
+                    try {
+                        var lobbyAndController = netManager.joinGame();
+
+                        return ctx.prompt(
+                                promptLobby(renderer, netManager, lobbyAndController.lobby(),
+                                        lobbyAndController.controller()));
+                    } catch (NickNotValidException e) {
+                        return ctx.invalid(Objects.requireNonNull(e.getMessage()));
+                    } catch (Exception ex) {
+                        return ctx.prompt("Disconnected from the server",
+                                promptReconnect(renderer0, netManager, ex));
+                    }
+                }),
+                new ChoicePrompt.Choice("Quit", (renderer0, ctx) -> {
+                    try {
+                        netManager.close();
+                        System.exit(0);
+                    } catch (IOException ex) {
+                        LOGGER.error("Failed to disconnect from the server while closing", ex);
+                        System.exit(-1);
+                    }
+
+                    throw new AssertionError("Should never be reached");
+                }));
     }
 
     private static void registerGameObservers(TuiRenderer renderer,
@@ -385,7 +425,7 @@ class TuiPrompts {
         });
         game.endGame().registerObserver(endGame -> {
             if (endGame)
-                renderer.setPrompt(promptEndGame());
+                renderer.setPrompt(promptEndGame(renderer, netManager, game));
         });
         game.messageList().registerObserver(messageList -> {
             renderer.rerender();
