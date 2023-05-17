@@ -1,6 +1,9 @@
 package it.polimi.ingsw.updater;
 
-import it.polimi.ingsw.*;
+import it.polimi.ingsw.CloseablesTracker;
+import it.polimi.ingsw.DelegatingLobbyUpdater;
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.*;
@@ -18,14 +21,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UpdatersIntegrationTest {
 
     public static void doTestUpdaters(Function<ServerController, Closeable> bindServerController,
-                                      Supplier<ClientNetManager> clientNetManagerFactory)
+                                      Function<String, ClientNetManager> clientNetManagerFactory)
             throws Exception {
         final String nick = "test_nickname";
         final var rnd = new Random();
@@ -48,7 +50,6 @@ public class UpdatersIntegrationTest {
 
             @Override
             public LobbyView joinGame(String nick,
-                                      HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
@@ -63,20 +64,17 @@ public class UpdatersIntegrationTest {
                         return gameUpdater;
                     }
                 };
-                LobbyView lobby = null;
-                try {
-                    lobby = super.joinGame(nick, heartbeatHandler, observableTracker, wrappedFactory, lobbyControllerFactory,
-                            gameControllerFactory);
-                } catch (NickNotValidException e) {
-                    throw new RuntimeException(e);
-                }
+                LobbyView lobby = super.joinGame(nick, observableTracker, wrappedFactory, lobbyControllerFactory,
+                        gameControllerFactory);
                 serverJoinedNick.complete(nick);
                 serverLobbyToSerialize.complete(lobby);
                 return lobby;
             }
-        }; Closeable ignored = bindServerController.apply(serverController)) {
+        };
+             Closeable ignored = bindServerController.apply(serverController);
+             var closeables = new CloseablesTracker()) {
 
-            LobbyView lobbyView = clientNetManagerFactory.get().joinGame(nick).lobby();
+            LobbyView lobbyView = closeables.register(clientNetManagerFactory.apply(nick)).joinGame().lobby();
             assertEquals(
                     nick,
                     serverJoinedNick.get(500, TimeUnit.MILLISECONDS));

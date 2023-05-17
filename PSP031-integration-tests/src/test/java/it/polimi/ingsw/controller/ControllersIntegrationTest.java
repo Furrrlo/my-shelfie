@@ -1,6 +1,7 @@
 package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.BoardCoord;
+import it.polimi.ingsw.CloseablesTracker;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyPlayer;
@@ -20,14 +21,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ControllersIntegrationTest {
 
     public static void doTestControllers(Function<ServerController, Closeable> bindServerController,
-                                         Supplier<ClientNetManager> clientNetManagerFactory)
+                                         Function<String, ClientNetManager> clientNetManagerFactory)
             throws Throwable {
         final var nick = "test_nickname";
 
@@ -49,9 +49,11 @@ public class ControllersIntegrationTest {
                             }
                         });
             }
-        }; Closeable ignored = bindServerController.apply(serverController)) {
+        };
+             Closeable ignored = bindServerController.apply(serverController);
+             var closeables = new CloseablesTracker()) {
 
-            var lobbyAndController = clientNetManagerFactory.get().joinGame(nick);
+            var lobbyAndController = closeables.register(clientNetManagerFactory.apply(nick)).joinGame();
             LobbyController lobbyController = lobbyAndController.controller();
 
             final var gameAndControllerPromise = new CompletableFuture<GameAndController<?>>();

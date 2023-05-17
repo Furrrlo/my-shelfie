@@ -70,36 +70,17 @@ public class RmiConnectionServerController implements RmiConnectionController, C
     }
 
     @Override
-    public void joinGame(String nick,
-                         RmiHeartbeatHandler handler,
-                         RmiLobbyUpdaterFactory updaterFactory)
-            throws NickNotValidException {
+    public RmiConnectionController.ConnectedController doConnect(String nick, RmiHeartbeatHandler handler)
+            throws RemoteException, NickNotValidException {
+
         var connection = new PlayerConnection(controller, nick);
         connections.add(connection);
         try {
-            controller.joinGame(
-                    nick,
-                    new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer),
-                    connection,
-                    new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
-                    controller -> {
-                        try {
-                            var lobbyController = new RmiLobbyServerController(nick, controller, connection::disconnectPlayer);
-                            connection.lobbyControllerRemote = lobbyController;
-                            return new RmiLobbyController.Adapter(unicastRemoteObjects.export(lobbyController, 0));
-                        } catch (RemoteException e) {
-                            throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
-                        }
-                    },
-                    (player, game) -> {
-                        try {
-                            var gameController = new RmiGameServerController(player, game, connection::disconnectPlayer);
-                            connection.gameControllerRemote = gameController;
-                            return new RmiGameController.Adapter(unicastRemoteObjects.export(gameController, 0));
-                        } catch (RemoteException e) {
-                            throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
-                        }
-                    });
+            controller.connectPlayer(nick, new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer));
+
+            var connectedController = new ConnectedControllerImpl(connection);
+            connection.connectedControllerRemote = connectedController;
+            return unicastRemoteObjects.export(connectedController, 0);
         } catch (NickNotValidException e) {
             try {
                 connection.close();
@@ -109,6 +90,49 @@ public class RmiConnectionServerController implements RmiConnectionController, C
             throw e;
         } catch (Throwable e) {
             connection.disconnectPlayer(e);
+            throw new IllegalStateException("Internal server error");
+        }
+    }
+
+    private class ConnectedControllerImpl implements RmiConnectionController.ConnectedController {
+
+        private final PlayerConnection connection;
+
+        public ConnectedControllerImpl(PlayerConnection connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public void joinGame(RmiLobbyUpdaterFactory updaterFactory) throws RemoteException {
+            var nick = connection.getNick();
+
+            try {
+                controller.joinGame(
+                        nick,
+                        connection,
+                        new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
+                        controller -> {
+                            try {
+                                var lobbyController = new RmiLobbyServerController(nick, controller,
+                                        connection::disconnectPlayer);
+                                connection.lobbyControllerRemote = lobbyController;
+                                return new RmiLobbyController.Adapter(unicastRemoteObjects.export(lobbyController, 0));
+                            } catch (RemoteException e) {
+                                throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
+                            }
+                        },
+                        (player, game) -> {
+                            try {
+                                var gameController = new RmiGameServerController(player, game, connection::disconnectPlayer);
+                                connection.gameControllerRemote = gameController;
+                                return new RmiGameController.Adapter(unicastRemoteObjects.export(gameController, 0));
+                            } catch (RemoteException e) {
+                                throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
+                            }
+                        });
+            } catch (Throwable e) {
+                connection.disconnectPlayer(e);
+            }
         }
     }
 
@@ -133,6 +157,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
 
     private class PlayerConnection extends BaseServerConnection {
 
+        volatile @Nullable Remote connectedControllerRemote;
         volatile @Nullable Remote lobbyControllerRemote;
         volatile @Nullable Remote gameControllerRemote;
 
@@ -147,6 +172,9 @@ public class RmiConnectionServerController implements RmiConnectionController, C
             try {
                 // Un-exporting multiple times throws exceptions
                 if (!unexported.getAndSet(true)) {
+                    var joinGameRemote = this.connectedControllerRemote;
+                    if (joinGameRemote != null)
+                        UnicastRemoteObject.unexportObject(joinGameRemote, true);
                     var lobbyControllerRemote = this.lobbyControllerRemote;
                     if (lobbyControllerRemote != null)
                         UnicastRemoteObject.unexportObject(lobbyControllerRemote, true);

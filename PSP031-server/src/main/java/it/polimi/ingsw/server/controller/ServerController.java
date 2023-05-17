@@ -170,18 +170,21 @@ public class ServerController implements Closeable {
         }
     }
 
+    public void connectPlayer(String nick, HeartbeatHandler heartbeatHandler)
+            throws NickNotValidException {
+        if (nick.isEmpty())
+            throw new NickNotValidException("Nick can't be empty");
+        if (heartbeats.putIfAbsent(nick, heartbeatHandler) != null)
+            throw new NickNotValidException("This nick is already in use");
+    }
+
     public LobbyView joinGame(String nick,
-                              HeartbeatHandler heartbeatHandler,
                               PlayerObservableTracker observableTracker,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
                               LobbyControllerFactory lobbyControllerFactory,
                               BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
-            throws DisconnectedException, NickNotValidException {
-        if (nick.isEmpty())
-            throw new NickNotValidException("Nick can't be empty");
-        if (heartbeats.putIfAbsent(nick, heartbeatHandler) != null) {
-            throw new NickNotValidException("This nick is already in use");
-        }
+            throws DisconnectedException {
+        // TODO: check if this player is already in a lobby
 
         do {
             final var serverLobbyAndController = getOrCreateLobby(nick);

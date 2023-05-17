@@ -60,6 +60,16 @@ public class ClientSocketManagerImpl
     }
 
     @Override
+    public long getDefaultResponseTimeout() {
+        return defaultResponseTimeout;
+    }
+
+    @Override
+    public TimeUnit getDefaultResponseTimeoutUnit() {
+        return defaultResponseTimeoutUnit;
+    }
+
+    @Override
     public void close() throws IOException {
         super.close();
 

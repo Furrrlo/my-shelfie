@@ -90,13 +90,20 @@ public class SocketConnectionServerController implements Closeable {
                     socket.setSoTimeout((int) readTimeoutUnit.toMillis(readTimeout));
                 LOGGER.info("[Server] New socket client connected: {}", socket.getRemoteSocketAddress());
                 threadPool.submit(ThreadPools.giveNameToTask(n -> n + "[doJoin]", () -> {
+                    PlayerConnection connection;
                     try {
-                        doJoin(responseTimeout == -1
+                        connection = doConnect(responseTimeout == -1
                                 ? new ServerSocketManagerImpl(threadPool, socket)
                                 : new ServerSocketManagerImpl(threadPool, socket, responseTimeout, responseTimeoutUnit));
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Failed to connect player", e);
                     }
+
+                    if (connection != null)
+                        connection.joinGameTask = CompletableFuture.runAsync(ThreadPools.giveNameToTask(
+                                n -> n + "[" + connection.getNick() + ":joinGameLoop]",
+                                () -> joinGameLoop(connection)),
+                                threadPool);
                 }));
             } while (!Thread.interrupted());
         } catch (InterruptedIOException ignored) {
@@ -121,8 +128,8 @@ public class SocketConnectionServerController implements Closeable {
         threadPool.shutdown();
     }
 
-    private void doJoin(ServerSocketManager socketManager) throws IOException {
-        final var joinCtx = socketManager.receive(JoinGamePacket.class);
+    private @Nullable PlayerConnection doConnect(ServerSocketManager socketManager) throws IOException {
+        final var joinCtx = socketManager.receive(JoinPacket.class);
         final var nick = joinCtx.getPacket().nick();
         LOGGER.info("[Server] {} is joining...", nick);
         socketManager.setNick(nick);
@@ -130,10 +137,41 @@ public class SocketConnectionServerController implements Closeable {
         final var connection = new PlayerConnection(controller, socketManager, nick);
         connections.add(connection);
         try {
+            controller.connectPlayer(
+                    nick,
+                    new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer));
+            joinCtx.reply(new JoinedPacket());
+            return connection;
+        } catch (NickNotValidException e) {
+            joinCtx.reply(new NickNotValidPacket(Objects.requireNonNull(e.getMessage())), LobbyReceivedPacket.class).ack();
+            connection.close();
+        } catch (Throwable e) {
+            connection.disconnectPlayer(e);
+        }
+
+        return null;
+    }
+
+    private void joinGameLoop(PlayerConnection connection) {
+        try {
+            do {
+                doJoinGame(connection);
+            } while (!Thread.currentThread().isInterrupted());
+        } catch (InterruptedIOException ignored) {
+            // Thread was interrupted to stop, normal control flow
+        } catch (IOException | DisconnectedException ex) {
+            connection.disconnectPlayer(ex);
+        }
+    }
+
+    private void doJoinGame(PlayerConnection connection) throws IOException, DisconnectedException {
+        var nick = connection.getNick();
+        var socketManager = connection.getSocketManager();
+
+        try (var joinCtx = connection.getSocketManager().receive(JoinGamePacket.class)) {
             var lobbyCtx = new AtomicReference<SocketManager.PacketReplyContext<C2SAckPacket, S2CAckPacket, LobbyReceivedPacket>>();
             controller.joinGame(
                     nick,
-                    new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer),
                     connection,
                     l -> {
                         try {
@@ -173,17 +211,13 @@ public class SocketConnectionServerController implements Closeable {
                         return socketController;
                     });
             Objects.requireNonNull(lobbyCtx.get(), "Lobby was somehow not sent to the player").ack();
-        } catch (NickNotValidException e) {
-            joinCtx.reply(new NickNotValidPacket(Objects.requireNonNull(e.getMessage())), LobbyReceivedPacket.class).ack();
-            connection.close();
-        } catch (Throwable e) {
-            connection.disconnectPlayer(e);
         }
     }
 
     private class PlayerConnection extends BaseServerConnection {
 
         private final ServerSocketManager socketManager;
+        volatile @Nullable Future<?> joinGameTask;
         volatile @Nullable Future<?> lobbyControllerTask;
         volatile @Nullable Future<?> gameControllerTask;
 
@@ -194,9 +228,16 @@ public class SocketConnectionServerController implements Closeable {
             this.socketManager = socketManager;
         }
 
+        public ServerSocketManager getSocketManager() {
+            return socketManager;
+        }
+
         @Override
         public void close() throws IOException {
             try {
+                var joinGameTask = this.joinGameTask;
+                if (joinGameTask != null)
+                    joinGameTask.cancel(true);
                 var lobbyControllerTask = this.lobbyControllerTask;
                 if (lobbyControllerTask != null)
                     lobbyControllerTask.cancel(true);

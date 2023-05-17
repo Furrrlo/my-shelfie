@@ -29,8 +29,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
     /** Maximum time to wait for a response in {@link #defaultResponseTimeoutUnit}, or -1 to wait indefinitely */
-    private final long defaultResponseTimeout;
-    private final TimeUnit defaultResponseTimeoutUnit;
+    protected final long defaultResponseTimeout;
+    protected final TimeUnit defaultResponseTimeoutUnit;
     private final BlockingDeque<QueuedOutput> outPacketQueue = new LinkedBlockingDeque<>();
     private final NBlockingQueue<Object> inPacketQueue = new NBlockingQueue<>();
 

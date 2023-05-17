@@ -2,6 +2,7 @@ package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.DisconnectionIntegrationTest;
 import it.polimi.ingsw.ImproperShutdownSocket;
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
@@ -18,6 +19,7 @@ import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.UncheckedIOException;
 import java.net.Socket;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.Map;
@@ -25,6 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -69,8 +72,15 @@ public class RmiDisconnectionTest {
                             throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
                         }
                     },
-                    () -> new RmiClientNetManager(null, rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
-                            rmiClientSocketFactory, null),
+                    nick -> {
+                        try {
+                            return RmiClientNetManager.connect(
+                                    null, rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                                    rmiClientSocketFactory, null, nick);
+                        } catch (RemoteException | NotBoundException | NickNotValidException e) {
+                            throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                        }
+                    },
                     rmiClientSocketFactory::close);
         } finally {
             for (Socket s : rmiClientSocketFactory.sockets)
@@ -92,9 +102,15 @@ public class RmiDisconnectionTest {
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
         final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory);
         try {
-            Supplier<ClientNetManager> defaultSocketSupplier = () -> new RmiClientNetManager(null,
-                    rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
-                    new RMITimeoutClientSocketFactory(), null);
+            Function<String, ClientNetManager> defaultSocketSupplier = nick -> {
+                try {
+                    return RmiClientNetManager.connect(null,
+                            rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                            new RMITimeoutClientSocketFactory(), null, nick);
+                } catch (RemoteException | NotBoundException | NickNotValidException e) {
+                    throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                }
+            };
             DisconnectionIntegrationTest.doTestDisconnection_clientCloseInLobby(
                     serverController -> {
                         try {
@@ -106,9 +122,15 @@ public class RmiDisconnectionTest {
                             throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
                         }
                     },
-                    () -> new RmiClientNetManager(null,
-                            rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
-                            rmiClientSocketFactory, null),
+                    nick -> {
+                        try {
+                            return RmiClientNetManager.connect(null,
+                                    rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                                    rmiClientSocketFactory, null, nick);
+                        } catch (RemoteException | NotBoundException | NickNotValidException e) {
+                            throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                        }
+                    },
                     defaultSocketSupplier,
                     defaultSocketSupplier,
                     rmiClientSocketFactory::close);
@@ -132,9 +154,15 @@ public class RmiDisconnectionTest {
         final var rmiServerSocketFactory = new RMIPortCapturingServerSocketFactory();
         final var rmiClientSocketFactory = new DisconnectingSocketFactory(testName, socketFactory);
         try {
-            Supplier<ClientNetManager> defaultSocketSupplier = () -> new RmiClientNetManager(null,
-                    rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
-                    new RMITimeoutClientSocketFactory(), null);
+            Function<String, ClientNetManager> defaultSocketSupplier = nick -> {
+                try {
+                    return RmiClientNetManager.connect(null,
+                            rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                            new RMITimeoutClientSocketFactory(), null, nick);
+                } catch (RemoteException | NotBoundException | NickNotValidException e) {
+                    throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                }
+            };
             DisconnectionIntegrationTest.doTestDisconnection_clientCloseInGame(
                     serverController -> {
                         try {
@@ -147,9 +175,15 @@ public class RmiDisconnectionTest {
                         }
                     },
                     defaultSocketSupplier,
-                    () -> new RmiClientNetManager(null,
-                            rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
-                            rmiClientSocketFactory, null),
+                    nick -> {
+                        try {
+                            return RmiClientNetManager.connect(null,
+                                    rmiServerSocketFactory.getFirstCapturedPort(), remoteName,
+                                    rmiClientSocketFactory, null, nick);
+                        } catch (RemoteException | NotBoundException | NickNotValidException e) {
+                            throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                        }
+                    },
                     defaultSocketSupplier,
                     rmiClientSocketFactory::close,
                     defaultSocketSupplier);

@@ -1,11 +1,13 @@
 package it.polimi.ingsw.rmi;
 
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.controller.ControllersIntegrationTest;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.updater.UpdatersIntegrationTest;
 import org.junit.jupiter.api.Test;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 
@@ -26,8 +28,15 @@ public class RmiIntegrationTest {
                         throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
                     }
                 },
-                () -> new RmiClientNetManager(null, portCapturingServerSocketFactory.getFirstCapturedPort(),
-                        remoteName));
+                nick -> {
+                    try {
+                        return RmiClientNetManager.connect(
+                                null, portCapturingServerSocketFactory.getFirstCapturedPort(),
+                                remoteName, nick);
+                    } catch (RemoteException | NotBoundException | NickNotValidException e) {
+                        throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                    }
+                });
     }
 
     @Test
@@ -45,7 +54,14 @@ public class RmiIntegrationTest {
                         throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
                     }
                 },
-                () -> new RmiClientNetManager(null, portCapturingServerSocketFactory.getFirstCapturedPort(),
-                        remoteName));
+                nick -> {
+                    try {
+                        return RmiClientNetManager.connect(
+                                null, portCapturingServerSocketFactory.getFirstCapturedPort(),
+                                remoteName, nick);
+                    } catch (NotBoundException | RemoteException | NickNotValidException e) {
+                        throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                    }
+                });
     }
 }

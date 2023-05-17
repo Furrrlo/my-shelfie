@@ -9,8 +9,11 @@ public interface RmiConnectionController extends Remote {
 
     String REMOTE_NAME = "my_shelfie_rmi";
 
-    void joinGame(String nick,
-                  RmiHeartbeatHandler heartbeatHandler,
-                  RmiLobbyUpdaterFactory updaterFactory)
+    ConnectedController doConnect(String nick, RmiHeartbeatHandler heartbeatHandler)
             throws RemoteException, NickNotValidException;
+
+    interface ConnectedController extends Remote {
+
+        void joinGame(RmiLobbyUpdaterFactory updaterFactory) throws RemoteException;
+    }
 }

@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static it.polimi.ingsw.updater.UpdatersIntegrationTest.ensurePropertyUpdated;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +29,7 @@ public class DisconnectionIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DisconnectionIntegrationTest.class);
 
     public static void doTestDisconnection_clientCloseInEmptyLobby(Function<ServerController, Closeable> bindServerController,
-                                                                   Supplier<ClientNetManager> clientNetManagerFactory,
+                                                                   Function<String, ClientNetManager> clientNetManagerFactory,
                                                                    Executable close)
             throws Throwable {
 
@@ -50,22 +49,22 @@ public class DisconnectionIntegrationTest {
 
             @Override
             public LobbyView joinGame(String nick,
-                                      HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
-                    throws DisconnectedException, NickNotValidException {
+                    throws DisconnectedException {
                 LOGGER.trace("joining");
-                var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
-                        lobbyControllerFactory,
+                var lobby = super.joinGame(nick, observableTracker, lobbyUpdaterFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 serverJoined.complete(null);
                 return lobby;
             }
-        }; var ignored = bindServerController.apply(serverController)) {
-            ClientNetManager clientNetManager = clientNetManagerFactory.get();
-            LobbyView lobbyView = clientNetManager.joinGame(nick).lobby();
+        };
+             var ignored = bindServerController.apply(serverController);
+             var clientNetManager = clientNetManagerFactory.apply(nick)) {
+
+            LobbyView lobbyView = clientNetManager.joinGame().lobby();
             ServerLobby serverLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
             serverJoined.get(500, TimeUnit.MILLISECONDS);
 
@@ -79,9 +78,9 @@ public class DisconnectionIntegrationTest {
     }
 
     public static void doTestDisconnection_clientCloseInLobby(Function<ServerController, Closeable> bindServerController,
-                                                              Supplier<ClientNetManager> clientNetManagerFactory1,
-                                                              Supplier<ClientNetManager> clientNetManagerFactory2,
-                                                              Supplier<ClientNetManager> clientNetManagerFactory3,
+                                                              Function<String, ClientNetManager> clientNetManagerFactory1,
+                                                              Function<String, ClientNetManager> clientNetManagerFactory2,
+                                                              Function<String, ClientNetManager> clientNetManagerFactory3,
                                                               Executable disconnect)
             throws Throwable {
         final String testNickname = "test_nickname";
@@ -103,28 +102,28 @@ public class DisconnectionIntegrationTest {
 
             @Override
             public LobbyView joinGame(String nick,
-                                      HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
-                    throws DisconnectedException, NickNotValidException {
-                var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
-                        lobbyControllerFactory,
+                    throws DisconnectedException {
+                var lobby = super.joinGame(nick, observableTracker, lobbyUpdaterFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 serverJoined.countDown();
                 return lobby;
             }
-        }; var ignored = bindServerController.apply(serverController)) {
-            ClientNetManager clientManager1 = clientNetManagerFactory1.get();
-            var player1 = clientManager1.joinGame(testNickname);
+        }; var ignored = bindServerController.apply(serverController);
+             var closeables = new CloseablesTracker()) {
+
+            ClientNetManager clientManager1 = closeables.register(clientNetManagerFactory1.apply(testNickname));
+            var player1 = clientManager1.joinGame();
             player1.controller().setRequiredPlayers(0);
 
-            ClientNetManager clientManager2 = clientNetManagerFactory2.get();
-            LobbyView lobbyView2 = clientManager2.joinGame("p2").lobby();
+            ClientNetManager clientManager2 = closeables.register(clientNetManagerFactory2.apply("p2"));
+            LobbyView lobbyView2 = clientManager2.joinGame().lobby();
 
-            ClientNetManager clientManager3 = clientNetManagerFactory3.get();
-            LobbyView lobbyView3 = clientManager3.joinGame("p3").lobby();
+            ClientNetManager clientManager3 = closeables.register(clientNetManagerFactory3.apply("p3"));
+            LobbyView lobbyView3 = clientManager3.joinGame().lobby();
 
             assertTrue(serverJoined.await(500, TimeUnit.MILLISECONDS));
 
@@ -146,11 +145,11 @@ public class DisconnectionIntegrationTest {
     }
 
     public static void doTestDisconnection_clientCloseInGame(Function<ServerController, Closeable> bindServerController,
-                                                             Supplier<ClientNetManager> clientNetManagerFactory1,
-                                                             Supplier<ClientNetManager> clientNetManagerFactory2,
-                                                             Supplier<ClientNetManager> clientNetManagerFactory3,
+                                                             Function<String, ClientNetManager> clientNetManagerFactory1,
+                                                             Function<String, ClientNetManager> clientNetManagerFactory2,
+                                                             Function<String, ClientNetManager> clientNetManagerFactory3,
                                                              Executable disconnect,
-                                                             Supplier<ClientNetManager> clientNetManagerFactory2New)
+                                                             Function<String, ClientNetManager> clientNetManagerFactory2New)
             throws Throwable {
         final var rnd = new Random();
 
@@ -170,29 +169,30 @@ public class DisconnectionIntegrationTest {
 
             @Override
             public LobbyView joinGame(String nick,
-                                      HeartbeatHandler heartbeatHandler,
                                       PlayerObservableTracker observableTracker,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
-                    throws DisconnectedException, NickNotValidException {
-                var lobby = super.joinGame(nick, heartbeatHandler, observableTracker, lobbyUpdaterFactory,
-                        lobbyControllerFactory,
+                    throws DisconnectedException {
+                var lobby = super.joinGame(nick, observableTracker, lobbyUpdaterFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 if (joinedPlayers.incrementAndGet() >= 3)
                     serverAllJoined.complete(null);
                 return lobby;
             }
-        }; var ignored = bindServerController.apply(serverController)) {
+        };
+             var ignored = bindServerController.apply(serverController);
+             var closeables = new CloseablesTracker()) {
 
             //Connect 3 client
-            var player1 = clientNetManagerFactory1.get().joinGame("test_1");
+
+            var player1 = closeables.register(clientNetManagerFactory1.apply("test_1")).joinGame();
             player1.controller().setRequiredPlayers(0);
 
-            ClientNetManager clientNetManager2 = clientNetManagerFactory2.get();
-            LobbyView lobbyView2 = clientNetManager2.joinGame("test_2").lobby();
+            var clientNetManager2 = closeables.register(clientNetManagerFactory2.apply("test_2"));
+            LobbyView lobbyView2 = clientNetManager2.joinGame().lobby();
 
-            LobbyView lobbyView3 = clientNetManagerFactory3.get().joinGame("test_3").lobby();
+            LobbyView lobbyView3 = closeables.register(clientNetManagerFactory3.apply("test_3")).joinGame().lobby();
 
             var lockedServerLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
             serverAllJoined.get(500, TimeUnit.MILLISECONDS);
@@ -251,12 +251,11 @@ public class DisconnectionIntegrationTest {
                     });
             disconnect.execute();
             assertFalse(serverPlayerDisconnected.get(10, TimeUnit.SECONDS));
-
             assertFalse(client2Connected.get(15, TimeUnit.SECONDS));
 
             //Restart player test_2 creating a new client
-            clientNetManager2 = clientNetManagerFactory2New.get();
-            LobbyView lobbyView2_new = clientNetManager2.joinGame("test_2").lobby();
+            clientNetManager2 = closeables.register(clientNetManagerFactory2New.apply("test_2"));
+            LobbyView lobbyView2_new = clientNetManager2.joinGame().lobby();
 
             final var newClient2GameAndController = lobbyView2_new.game().get();
             assertNotNull(newClient2GameAndController);

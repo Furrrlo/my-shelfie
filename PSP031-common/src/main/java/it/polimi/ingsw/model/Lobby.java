@@ -4,6 +4,7 @@ import it.polimi.ingsw.GameAndController;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +25,19 @@ public class Lobby implements LobbyView {
         this.requiredPlayers = SerializableProperty.nullableProperty(requiredPlayers);
         this.joinedPlayers = new SerializableProperty<>(List.copyOf(joinedPlayers));
         this.game = SerializableProperty.nullableProperty(game);
+    }
+
+    public void disconnectThePlayer(String nick) {
+        var game = game().get();
+        if (game == null) {
+            joinedPlayers().update(players -> {
+                List<LobbyPlayer> l = new ArrayList<>(players);
+                l.removeIf(p -> p.getNick().equals(nick));
+                return l;
+            });
+        } else {
+            game.game().thePlayer().connected().set(false);
+        }
     }
 
     @Override

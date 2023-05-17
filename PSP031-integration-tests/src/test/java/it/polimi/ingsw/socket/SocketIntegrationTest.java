@@ -1,5 +1,6 @@
 package it.polimi.ingsw.socket;
 
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.ControllersIntegrationTest;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
@@ -29,11 +30,12 @@ public class SocketIntegrationTest {
                         throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                     }
                 },
-                () -> {
+                nick -> {
                     try {
-                        return new SocketClientNetManager(new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                1, TimeUnit.SECONDS);
-                    } catch (IOException e) {
+                        return SocketClientNetManager.connect(
+                                new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                                1, TimeUnit.SECONDS, nick);
+                    } catch (IOException | NickNotValidException e) {
                         throw new RuntimeException("Failed to create SocketClientNetManager", e);
                     }
                 });
@@ -54,11 +56,12 @@ public class SocketIntegrationTest {
                         throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
                     }
                 },
-                () -> {
+                nick -> {
                     try {
-                        return new SocketClientNetManager(new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                1, TimeUnit.SECONDS);
-                    } catch (IOException e) {
+                        return SocketClientNetManager.connect(
+                                new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                                1, TimeUnit.SECONDS, nick);
+                    } catch (IOException | NickNotValidException e) {
                         throw new RuntimeException("Failed to create SocketClientNetManager", e);
                     }
                 });
