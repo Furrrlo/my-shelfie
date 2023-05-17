@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -34,6 +35,11 @@ public class JfxApplication extends Application {
         Scene scene = new JfxGameScene(gameAndController.game(), gameAndController.controller());
 
         stage.setTitle("My Shelfie");
+
+        // Let jfx pick the best fit
+        stage.getIcons().add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Icon 50x50px.png")));
+        stage.getIcons().add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Box 280x280px.png")));
+
         stage.setScene(scene);
         stage.setMinWidth(800);
         stage.setWidth(800);
