@@ -453,7 +453,7 @@ class TuiPrompts {
         }
         choices.add(new ChoicePrompt.Choice(
                 "Send message",
-                (renderer0, ctx) -> ctx.prompt(promptMessage(netManager, renderer, game, controller))));
+                (renderer0, ctx) -> ctx.prompt(promptMessage(ctx.subPrompt(), netManager, game, controller))));
         choices.add(new ChoicePrompt.Choice(
                 "Quit",
                 (renderer0, ctx) -> {
@@ -484,9 +484,8 @@ class TuiPrompts {
                 });
     }
 
-    private static Prompt promptMessage(
+    private static Prompt promptMessage(Prompt.Factory promptFactory,
                                         ClientNetManager netManager,
-                                        TuiRenderer renderer,
                                         GameView game,
                                         GameController controller) {
 
@@ -501,9 +500,7 @@ class TuiPrompts {
             }
         choices.add(new ChoicePrompt.Choice("Send to everyone",
                 (renderer0, ctx) -> ctx.prompt(promptWriteMessage(ctx.subPrompt(), netManager, controller, "all"))));
-        choices.add(new ChoicePrompt.Choice("Go back",
-                (renderer0, ctx) -> ctx.prompt(promptGame(renderer, netManager, game, controller))));
-        return new ChoicePrompt("Select player to send message:", choices.toArray(new ChoicePrompt.Choice[0]));
+        return promptFactory.choice("Select player to send message:", choices.toArray(new ChoicePrompt.Choice[0]));
     }
 
     private static Prompt promptWriteMessage(Prompt.Factory promptFactory,
