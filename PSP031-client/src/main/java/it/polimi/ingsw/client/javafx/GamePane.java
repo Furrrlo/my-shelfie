@@ -13,8 +13,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.image.Image;
-import javafx.scene.layout.*;
+import javafx.geometry.Orientation;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -51,12 +52,6 @@ public class GamePane extends AnchorPane {
     });
 
     public GamePane(GameView game, GameController controller) {
-        setBackground(new Background(new BackgroundImage(
-                new Image(FxResources.getResourceAsStream("assets/misc/sfondo parquet.jpg")),
-                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.DEFAULT,
-                new BackgroundSize(100, 100, true, true, false, true))));
-
         getChildren()
                 .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
@@ -115,6 +110,21 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.player3Shelfie = otherPlayers.size() >= 3
                 ? new PlayerShelfieComponent(otherPlayers.get(2), true, true)
                 : new Pane());
+    }
+
+    @Override
+    public Orientation getContentBias() {
+        return Orientation.HORIZONTAL;
+    }
+
+    @Override
+    protected double computePrefWidth(double height) {
+        return 1040d * (height == -1 ? 1 : height / 585d);
+    }
+
+    @Override
+    protected double computePrefHeight(double width) {
+        return 585d * (width == -1 ? 1 : width / 1040d);
     }
 
     @Override

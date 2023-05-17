@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -32,19 +31,12 @@ public class JfxApplication extends Application {
             gameAndController = gameAndControllerFuture.get();
         }
 
-        var gamePane = new GamePane(gameAndController.game(), gameAndController.controller());
-
-        AnchorPane.setLeftAnchor(gamePane, 0.0D);
-        AnchorPane.setRightAnchor(gamePane, 0.0D);
-        AnchorPane.setTopAnchor(gamePane, 0.0D);
-        AnchorPane.setBottomAnchor(gamePane, 0.0D);
-
-        Scene scene = new Scene(gamePane);
+        Scene scene = new JfxGameScene(gameAndController.game(), gameAndController.controller());
 
         stage.setTitle("My Shelfie");
         stage.setScene(scene);
-        stage.setMinWidth(1000);
-        stage.setWidth(1000);
+        stage.setMinWidth(800);
+        stage.setWidth(800);
         stage.setMinHeight(500);
         stage.setHeight(500);
         stage.show();
