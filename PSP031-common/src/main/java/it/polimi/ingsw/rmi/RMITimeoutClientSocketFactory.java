@@ -23,6 +23,7 @@ public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Se
     public Socket createSocket(String host, int port) throws IOException {
         LOGGER.trace("Creating new socket for RMI. Remote IP {}:{}", host, port);
         Socket s = doCreateNonConnectedSocket();
+        s.setTcpNoDelay(true);
         s.connect(new InetSocketAddress(host, port), (int) CONNECT_TIMEOUT_MILLIS);
         return s;
     }
