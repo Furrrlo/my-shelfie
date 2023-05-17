@@ -38,6 +38,7 @@ public class DisconnectionIntegrationTest {
         final var serverLobbyPromise = new CompletableFuture<ServerLobby>();
         final var serverJoined = new CompletableFuture<Void>();
         final var serverPlayerRemoved = new CompletableFuture<Void>();
+        final var clientDisconnected = new CompletableFuture<Void>();
 
         try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
             @Override
@@ -71,9 +72,15 @@ public class DisconnectionIntegrationTest {
             assertSame(1, serverLobby.joinedPlayers().get().size());
             serverController.runOnOnlyLobbyLocks(
                     () -> serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null)));
+            lobbyView.joinedPlayers().registerObserver(players -> {
+                if (players.stream().noneMatch(p -> p.getNick().equals(nick)))
+                    clientDisconnected.complete(null);
+            });
             close.execute();
             serverPlayerRemoved.get(10, TimeUnit.SECONDS);
             assertSame(0, serverLobby.joinedPlayers().get().size());
+
+            clientDisconnected.get(10, TimeUnit.SECONDS);
         }
     }
 
@@ -89,6 +96,7 @@ public class DisconnectionIntegrationTest {
         final var serverLobbyCount = new CountDownLatch(3);
         final var serverJoined = new CountDownLatch(3);
         final var serverPlayerRemoved = new CompletableFuture<Void>();
+        final var clientDisconnected = new CompletableFuture<Void>();
 
         try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
             @Override
@@ -133,6 +141,10 @@ public class DisconnectionIntegrationTest {
 
             serverController.runOnOnlyLobbyLocks(
                     () -> serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null)));
+            player1.lobby().joinedPlayers().registerObserver(players -> {
+                if (players.stream().noneMatch(p -> p.getNick().equals(testNickname)))
+                    clientDisconnected.complete(null);
+            });
             disconnect.execute();
 
             serverPlayerRemoved.get(10, TimeUnit.SECONDS);
@@ -140,6 +152,8 @@ public class DisconnectionIntegrationTest {
             assertTrue(serverLobby.joinedPlayers().get().stream()
                     .map(LobbyPlayer::getNick)
                     .noneMatch(s -> s.equals(testNickname)));
+
+            clientDisconnected.get(10, TimeUnit.SECONDS);
         }
 
     }
