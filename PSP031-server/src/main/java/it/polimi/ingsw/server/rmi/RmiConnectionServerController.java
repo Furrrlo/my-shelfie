@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.IOException;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -21,7 +20,6 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RmiConnectionServerController implements RmiConnectionController, Closeable {
 
@@ -30,7 +28,7 @@ public class RmiConnectionServerController implements RmiConnectionController, C
     private final ServerController controller;
     private final Registry registry;
     private final String remoteName;
-    private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
+    private final UnicastRemoteObjects.Exporter underlyingUnicastRemoteObjects;
     private final Set<PlayerConnection> connections = ConcurrentHashMap.newKeySet();
 
     public static RmiConnectionServerController bind(ServerController controller) throws RemoteException {
@@ -66,26 +64,24 @@ public class RmiConnectionServerController implements RmiConnectionController, C
         this.controller = controller;
         this.registry = registry;
         this.remoteName = remoteName;
-        this.unicastRemoteObjects = unicastRemoteObjects;
+        this.underlyingUnicastRemoteObjects = unicastRemoteObjects;
     }
 
     @Override
     public RmiConnectionController.ConnectedController doConnect(String nick, RmiHeartbeatHandler handler)
             throws RemoteException, NickNotValidException {
 
-        var connection = new PlayerConnection(controller, nick);
+        var connection = new PlayerConnection(controller, nick,
+                UnicastRemoteObjects.createTrackingExporter(underlyingUnicastRemoteObjects));
         connections.add(connection);
         try {
             controller.connectPlayer(nick, new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer));
-
-            var connectedController = new ConnectedControllerImpl(connection);
-            connection.connectedControllerRemote = connectedController;
-            return unicastRemoteObjects.export(connectedController, 0);
+            return connection.unicastRemoteObjects().export(new ConnectedControllerImpl(connection), 0);
         } catch (NickNotValidException e) {
             try {
                 connection.close();
-            } catch (IOException ex) {
-                LOGGER.error("Failed to close player", ex);
+            } catch (Throwable t) {
+                LOGGER.error("Failed to close player", t);
             }
             throw e;
         } catch (Throwable e) {
@@ -113,19 +109,16 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                         new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
                         controller -> {
                             try {
-                                var lobbyController = new RmiLobbyServerController(nick, controller,
-                                        connection::disconnectPlayer);
-                                connection.lobbyControllerRemote = lobbyController;
-                                return new RmiLobbyController.Adapter(unicastRemoteObjects.export(lobbyController, 0));
+                                return new RmiLobbyController.Adapter(connection.unicastRemoteObjects().export(
+                                        new RmiLobbyServerController(nick, controller, connection::disconnectPlayer), 0));
                             } catch (RemoteException e) {
                                 throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                             }
                         },
                         (player, game) -> {
                             try {
-                                var gameController = new RmiGameServerController(player, game, connection::disconnectPlayer);
-                                connection.gameControllerRemote = gameController;
-                                return new RmiGameController.Adapter(unicastRemoteObjects.export(gameController, 0));
+                                return new RmiGameController.Adapter(connection.unicastRemoteObjects
+                                        .export(new RmiGameServerController(player, game, connection::disconnectPlayer), 0));
                             } catch (RemoteException e) {
                                 throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
                             }
@@ -141,8 +134,8 @@ public class RmiConnectionServerController implements RmiConnectionController, C
         for (PlayerConnection connection : connections) {
             try {
                 connection.close();
-            } catch (IOException ex) {
-                LOGGER.error("Failed to close player RMI objects", ex);
+            } catch (Throwable t) {
+                LOGGER.error("Failed to close player RMI objects", t);
             }
         }
 
@@ -157,31 +150,22 @@ public class RmiConnectionServerController implements RmiConnectionController, C
 
     private class PlayerConnection extends BaseServerConnection {
 
-        volatile @Nullable Remote connectedControllerRemote;
-        volatile @Nullable Remote lobbyControllerRemote;
-        volatile @Nullable Remote gameControllerRemote;
+        private final UnicastRemoteObjects.TrackingExporter unicastRemoteObjects;
 
-        private final AtomicBoolean unexported = new AtomicBoolean();
-
-        public PlayerConnection(ServerController controller, String nick) {
+        public PlayerConnection(ServerController controller, String nick,
+                                UnicastRemoteObjects.TrackingExporter unicastRemoteObjects) {
             super(controller, nick);
+            this.unicastRemoteObjects = unicastRemoteObjects;
+        }
+
+        public UnicastRemoteObjects.TrackingExporter unicastRemoteObjects() {
+            return unicastRemoteObjects;
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             try {
-                // Un-exporting multiple times throws exceptions
-                if (!unexported.getAndSet(true)) {
-                    var joinGameRemote = this.connectedControllerRemote;
-                    if (joinGameRemote != null)
-                        UnicastRemoteObject.unexportObject(joinGameRemote, true);
-                    var lobbyControllerRemote = this.lobbyControllerRemote;
-                    if (lobbyControllerRemote != null)
-                        UnicastRemoteObject.unexportObject(lobbyControllerRemote, true);
-                    var gameControllerRemote = this.gameControllerRemote;
-                    if (gameControllerRemote != null)
-                        UnicastRemoteObject.unexportObject(gameControllerRemote, true);
-                }
+                unicastRemoteObjects.unexportAll(true);
             } finally {
                 connections.remove(this);
             }
