@@ -14,6 +14,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,7 +25,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
     private final String remoteName;
     private final String nick;
     private final RmiConnectionController.ConnectedController server;
-    private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
+    private final UnicastRemoteObjects.TrackingExporter unicastRemoteObjects;
 
     private volatile @Nullable Lobby lobby;
 
@@ -53,25 +54,32 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
     private static RmiClientNetManager connect(@Nullable String host,
                                                int port,
                                                String remoteName,
-                                               UnicastRemoteObjects.Exporter unicastRemoteObjects,
+                                               UnicastRemoteObjects.Exporter unicastRemoteObjectsIn,
                                                String nick)
             throws RemoteException, NotBoundException, NickNotValidException {
+        var unicastRemoteObjects = UnicastRemoteObjects.createTrackingExporter(unicastRemoteObjectsIn);
+
         final Registry registry = LocateRegistry.getRegistry(host, port);
         final var server = (RmiConnectionController) registry.lookup(remoteName);
 
         AtomicReference<RmiClientNetManager> netManagerRef = new AtomicReference<>();
         var heartbeatClientHandler = new RmiHeartbeatClientHandler(() -> {
-            Lobby lobby;
             var netManager = netManagerRef.get();
-            if (netManager != null && (lobby = netManager.lobby) != null)
-                lobby.disconnectThePlayer(nick);
+            if (netManager != null)
+                netManager.close();
         });
-        var connectedServer = server.doConnect(nick, unicastRemoteObjects.export(heartbeatClientHandler, 0));
-        heartbeatClientHandler.start();
+        RmiHeartbeatHandler exportedHeartbeatHandler = unicastRemoteObjects.export(heartbeatClientHandler, 0);
+        try {
+            var connectedServer = server.doConnect(nick, exportedHeartbeatHandler);
+            heartbeatClientHandler.start();
 
-        var netManager = new RmiClientNetManager(host, port, remoteName, nick, connectedServer, unicastRemoteObjects);
-        netManagerRef.set(netManager);
-        return netManager;
+            var netManager = new RmiClientNetManager(host, port, remoteName, nick, connectedServer, unicastRemoteObjects);
+            netManagerRef.set(netManager);
+            return netManager;
+        } catch (Throwable t) {
+            unicastRemoteObjects.unexportAll(true);
+            throw t;
+        }
     }
 
     @VisibleForTesting
@@ -80,7 +88,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
                                 String remoteName,
                                 String nick,
                                 RmiConnectionController.ConnectedController server,
-                                UnicastRemoteObjects.Exporter unicastRemoteObjects) {
+                                UnicastRemoteObjects.TrackingExporter unicastRemoteObjects) {
         this.port = port;
         this.server = server;
         this.remoteName = remoteName;
@@ -91,7 +99,7 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
 
     @Override
     public ClientNetManager recreateAndReconnect() throws NotBoundException, RemoteException, NickNotValidException {
-        return RmiClientNetManager.connect(host, port, remoteName, unicastRemoteObjects, nick);
+        return RmiClientNetManager.connect(host, port, remoteName, unicastRemoteObjects.getUnderlyingExporter(), nick);
     }
 
     @Override
@@ -112,11 +120,21 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
     @Override
     public LobbyAndController<Lobby> joinGame() throws RemoteException {
         final InterceptingFactory updaterFactory = new InterceptingFactory(unicastRemoteObjects);
-        server.joinGame(unicastRemoteObjects.export(updaterFactory, 0));
+        server.joinGame(unicastRemoteObjects.export(updaterFactory, 0, false));
+        UnicastRemoteObject.unexportObject(updaterFactory, true);
 
         var lobbyAndController = updaterFactory.getUpdater().getLobbyAndController();
         lobby = lobbyAndController.lobby();
         return lobbyAndController;
+    }
+
+    @Override
+    public void close() {
+        unicastRemoteObjects.unexportAll(true);
+
+        var lobby = this.lobby;
+        if (lobby != null)
+            lobby.disconnectThePlayer(nick);
     }
 
     private static class InterceptingFactory implements RmiLobbyUpdaterFactory {

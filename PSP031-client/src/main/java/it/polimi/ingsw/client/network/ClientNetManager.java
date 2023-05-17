@@ -5,7 +5,6 @@ import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.model.LobbyView;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 public interface ClientNetManager extends Closeable {
 
@@ -26,11 +25,6 @@ public interface ClientNetManager extends Closeable {
      * @throws Exception implementation-specific connection exceptions
      */
     ClientNetManager recreateAndReconnect() throws Exception;
-
-    @Override
-    default void close() throws IOException {
-        // TODO: override and implement this
-    }
 
     interface Factory {
 

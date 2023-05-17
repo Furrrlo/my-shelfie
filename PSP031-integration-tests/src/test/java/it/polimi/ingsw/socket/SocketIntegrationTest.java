@@ -1,6 +1,7 @@
 package it.polimi.ingsw.socket;
 
 import it.polimi.ingsw.NickNotValidException;
+import it.polimi.ingsw.client.ClientNetManagerCloseTest;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.ControllersIntegrationTest;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
@@ -45,6 +46,32 @@ public class SocketIntegrationTest {
     void testSocketControllers() throws Throwable {
         final AtomicInteger choosenPort = new AtomicInteger();
         ControllersIntegrationTest.doTestControllers(
+                serverController -> {
+                    try {
+                        final ServerSocket serverSocket = new ServerSocket(0);
+                        choosenPort.set(serverSocket.getLocalPort());
+                        return new SocketConnectionServerController(serverController, serverSocket,
+                                -1, TimeUnit.MILLISECONDS,
+                                1, TimeUnit.SECONDS);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to bind SocketConnectionServerController", e);
+                    }
+                },
+                nick -> {
+                    try {
+                        return SocketClientNetManager.connect(
+                                new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
+                                1, TimeUnit.SECONDS, nick);
+                    } catch (IOException | NickNotValidException e) {
+                        throw new RuntimeException("Failed to create SocketClientNetManager", e);
+                    }
+                });
+    }
+
+    @Test
+    void testClientNetManagerSubsequentCloses() throws Throwable {
+        final AtomicInteger choosenPort = new AtomicInteger();
+        ClientNetManagerCloseTest.doTestSubsequentCloses(
                 serverController -> {
                     try {
                         final ServerSocket serverSocket = new ServerSocket(0);

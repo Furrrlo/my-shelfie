@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class SocketClientNetManager implements ClientNetManager {
 
@@ -27,6 +24,9 @@ public class SocketClientNetManager implements ClientNetManager {
     private final InetSocketAddress serverAddress;
     private final ClientSocketManager socketManager;
     private final String nick;
+
+    private volatile @Nullable Future<?> heartbeatHandlerTask;
+    private volatile @Nullable Future<?> updaterTask;
     private volatile @Nullable Lobby lobby;
 
     public static ClientNetManager connect(InetSocketAddress serverAddress, String nick)
@@ -101,27 +101,39 @@ public class SocketClientNetManager implements ClientNetManager {
         try (var lobbyCtx = socketManager.send(new JoinPacket(nick), JoinResponsePacket.class)) {
             switch (lobbyCtx.getPacket()) {
                 case NickNotValidPacket p -> {
+                    var nickException = new NickNotValidException(p.message());
+
                     try {
                         lobbyCtx.reply(new LobbyReceivedPacket());
-                    } catch (IOException ignored) {
+                    } catch (IOException ex) {
                         // We ignore exceptions on the last ack receival, because the socket may
                         // be closed before we are able to read out the last ack packet
                         // We don't care about whether the server has received this anyway,
                         // we can just hope it did and go on
+                        ex.addSuppressed(new IOException("Failed to send last LobbyReceivedPacket ack", ex));
                     }
-                    socketManager.close();
-                    throw new NickNotValidException(p.message());
+
+                    try {
+                        close();
+                    } catch (IOException e) {
+                        nickException.addSuppressed(new IOException("Failed to close socket", e));
+                    }
+
+                    throw nickException;
                 }
-                case JoinedPacket ignored -> CompletableFuture
+                case JoinedPacket ignored -> heartbeatHandlerTask = CompletableFuture
                         .runAsync(new SocketClientHeartbeatHandler(socketManager), threadPool)
                         .handle((__, ex) -> {
                             if (ex == null)
                                 return __;
+
+                            try {
+                                close();
+                            } catch (IOException e) {
+                                ex.addSuppressed(new IOException("Failed to close SocketClientNetManager", e));
+                            }
+
                             LOGGER.error("Uncaught exception in SocketClientHeartbeatHandler", ex);
-                            LOGGER.error("Socket: connection lost");
-                            var lobby = this.lobby;
-                            if (lobby != null)
-                                lobby.disconnectThePlayer(nick);
                             return null;
                         });
             }
@@ -148,7 +160,12 @@ public class SocketClientNetManager implements ClientNetManager {
         try (var lobbyCtx = socketManager.send(new JoinGamePacket(), LobbyPacket.class)) {
             final var lobby = lobbyCtx.getPacket().lobby();
             this.lobby = lobby;
-            CompletableFuture.supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
+
+            var updaterTask = this.updaterTask;
+            if (updaterTask != null)
+                updaterTask.cancel(true);
+            this.updaterTask = CompletableFuture
+                    .supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
                     .thenAccept(clientUpdater -> {
                         LOGGER.info("[Client] [" + nick + "] shut down lobby updater");
 
@@ -159,13 +176,33 @@ public class SocketClientNetManager implements ClientNetManager {
                     }).handle((__, ex) -> {
                         if (ex == null)
                             return __;
+
+                        try {
+                            close();
+                        } catch (IOException e) {
+                            ex.addSuppressed(new IOException("Failed to close SocketClientNetManager", e));
+                        }
+
                         LOGGER.error("Uncaught exception in SocketClient*Updater", ex);
-                        LOGGER.error("Socket: connection lost");
-                        lobby.disconnectThePlayer(nick);
                         return null;
                     });
             lobbyCtx.reply(new LobbyReceivedPacket());
             return new LobbyAndController<>(lobby, new SocketLobbyController(socketManager));
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        var heartbeatHandlerTask = this.heartbeatHandlerTask;
+        if (heartbeatHandlerTask != null)
+            heartbeatHandlerTask.cancel(true);
+        var updaterTask = this.updaterTask;
+        if (updaterTask != null)
+            updaterTask.cancel(true);
+        socketManager.close();
+
+        var lobby = this.lobby;
+        if (lobby != null)
+            lobby.disconnectThePlayer(nick);
     }
 }

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.NickNotValidException;
+import it.polimi.ingsw.client.ClientNetManagerCloseTest;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.controller.ControllersIntegrationTest;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
@@ -44,6 +45,32 @@ public class RmiIntegrationTest {
         final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
         final RMIPortCapturingServerSocketFactory portCapturingServerSocketFactory = new RMIPortCapturingServerSocketFactory();
         ControllersIntegrationTest.doTestControllers(
+                serverController -> {
+                    try {
+                        return RmiConnectionServerController.bind(
+                                LocateRegistry.createRegistry(0, null, portCapturingServerSocketFactory),
+                                remoteName,
+                                serverController);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException("Failed to bind RmiConnectionServerController", e);
+                    }
+                },
+                nick -> {
+                    try {
+                        return RmiClientNetManager.connect(
+                                null, portCapturingServerSocketFactory.getFirstCapturedPort(),
+                                remoteName, nick);
+                    } catch (NotBoundException | RemoteException | NickNotValidException e) {
+                        throw new RuntimeException("Failed to connect RmiClientNetManager", e);
+                    }
+                });
+    }
+
+    @Test
+    void testClientNetManagerSubsequentCloses() throws Throwable {
+        final String remoteName = "rmi_e2e_" + System.currentTimeMillis();
+        final RMIPortCapturingServerSocketFactory portCapturingServerSocketFactory = new RMIPortCapturingServerSocketFactory();
+        ClientNetManagerCloseTest.doTestSubsequentCloses(
                 serverController -> {
                     try {
                         return RmiConnectionServerController.bind(
