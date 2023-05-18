@@ -11,7 +11,7 @@ public class TuiStringPrinter implements TuiPrinter {
      * @param string string to print
      */
     public TuiStringPrinter(String string) {
-        this(string, string.length());
+        this(string, getPrintableLength(string));
     }
 
     /**
@@ -22,7 +22,7 @@ public class TuiStringPrinter implements TuiPrinter {
      * @param maxCols max num of columns that can be used
      */
     public TuiStringPrinter(String string, int maxCols) {
-        this(string, new TuiSize(1, Math.min(maxCols, string.length())));
+        this(string, new TuiSize(1, Math.min(maxCols, getPrintableLength(string))));
     }
 
     /**
@@ -47,11 +47,11 @@ public class TuiStringPrinter implements TuiPrinter {
     }
 
     private String getSplit(String string, TuiSize maxSize) {
-        String[] split = string.split("[ \n]");
+        String[] split = string.split("(?<=\\G.{" + maxSize.cols() + "})|\\s+");
         StringBuilder stringBuilder = new StringBuilder();
         int col = 0, row = 0;
         for (String s : split) {
-            if (col + s.length() + ((col != 0) ? 1 : 0) <= maxSize.cols()) {
+            if (col + getPrintableLength(s) + ((col != 0) ? 1 : 0) <= maxSize.cols()) {
                 //There is enough space on this line: add a space if it isn't the first word
                 if (col != 0) {
                     stringBuilder.append(' ');
@@ -68,17 +68,28 @@ public class TuiStringPrinter implements TuiPrinter {
                 if (remainingCharacters >= 3) {
                     //We have at least 3 free spaces
                     stringBuilder.append("...");
-                } else if (stringBuilder.length() >= 3 - remainingCharacters) {
+                } else if (getPrintableLength(stringBuilder.toString()) >= 3 - remainingCharacters) {
                     //There is no space for 3 character: replace the last ones (if any).
-                    stringBuilder.replace(stringBuilder.length() - (3 - remainingCharacters),
-                            stringBuilder.length() + remainingCharacters, "...");
+                    stringBuilder.replace(getPrintableLength(stringBuilder.toString()) - (3 - remainingCharacters),
+                            getPrintableLength(stringBuilder.toString()) + remainingCharacters, "...");
                 }
                 break;
             }
             stringBuilder.append(s);
-            col += s.length();
+            col += getPrintableLength(s);
         }
         return stringBuilder.toString();
+    }
+
+    private static int getPrintableLength(String s) {
+        int length = s.length();
+        int index = s.indexOf(TuiPrintStream.CSI);
+        while (index >= 0) {
+            int end = s.indexOf('m', index) + 1;
+            length -= (end - index);
+            index = s.indexOf(TuiPrintStream.CSI, index + 1);
+        }
+        return length;
     }
 
     @Override
