@@ -108,8 +108,8 @@ class GameServerControllerTest {
      * assertEquals(message, game.message().get());
      * 
      * //if another player send another message, game.message() should change to the new sent message
-     * var message1 = new UserMessage("example_player_2", "", "example", "all", "");
-     * gsc.sendMessage("example_player_2", "example", "all");
+     * var message1 = new UserMessage("example_player_2", "", "example", UserMessage.EVERYONE_RECIPIENT, "");
+     * gsc.sendMessage("example_player_2", "example", UserMessage.EVERYONE_RECIPIENT);
      * assertEquals(message1, game.message().get());
      * 
      * //if sending player is not present between playing players should rise IllegalArgumentException

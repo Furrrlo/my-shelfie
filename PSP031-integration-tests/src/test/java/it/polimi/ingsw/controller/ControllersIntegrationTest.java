@@ -5,6 +5,7 @@ import it.polimi.ingsw.CloseablesTracker;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyPlayer;
+import it.polimi.ingsw.model.UserMessage;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.controller.LobbyServerController;
 import it.polimi.ingsw.server.controller.LockProtected;
@@ -104,8 +105,8 @@ public class ControllersIntegrationTest {
                     makeMovePromise);
             assertControllerMethodCalled(
                     "sendMessage",
-                    () -> gameController.sendMessage("test message", "all"),
-                    Arguments.of(nick, "test message", "all"),
+                    () -> gameController.sendMessage("test message", UserMessage.EVERYONE_RECIPIENT),
+                    Arguments.of(nick, "test message", UserMessage.EVERYONE_RECIPIENT),
                     sendMessagePromise);
         }
     }

@@ -205,20 +205,20 @@ public class UpdatersIntegrationTest {
 
             ensurePropertyUpdated(
                     "message",
-                    new UserMessage(nick, "", "test message", "all", ""),
-                    List.of(new UserMessage(nick, "", "test message", "all", "")),
+                    UserMessage.forEveryone(nick, "", "test message"),
+                    List.of(UserMessage.forEveryone(nick, "", "test message")),
                     serverController,
                     serverGame.message(),
                     clientGame.messageList());
 
             for (int i = 0; i < GameClientUpdater.MAX_MESSAGES_HISTORY + 10; i++)
                 serverController.runOnOnlyLobbyLocks(() -> serverGame.message()
-                        .set(new UserMessage(nick, "", "test message", "all", "")));
+                        .set(UserMessage.forEveryone(nick, "", "test message")));
             ensurePropertyUpdated(
                     "maxMessages",
-                    new UserMessage(nick, "", "test message", "all", ""),
+                    UserMessage.forEveryone(nick, "", "test message"),
                     IntStream.range(0, GameClientUpdater.MAX_MESSAGES_HISTORY)
-                            .mapToObj(i -> new UserMessage(nick, "", "test message", "all", ""))
+                            .mapToObj(i -> UserMessage.forEveryone(nick, "", "test message"))
                             .toList(),
                     serverController,
                     serverGame.message(),

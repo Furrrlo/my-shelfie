@@ -8,10 +8,7 @@ import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
-import it.polimi.ingsw.model.GameView;
-import it.polimi.ingsw.model.LobbyView;
-import it.polimi.ingsw.model.PlayerView;
-import it.polimi.ingsw.model.TileAndCoords;
+import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
@@ -499,7 +496,8 @@ class TuiPrompts {
                                         receivingPlayer.getNick()))));
             }
         choices.add(new ChoicePrompt.Choice("Send to everyone",
-                (renderer0, ctx) -> ctx.prompt(promptWriteMessage(ctx.subPrompt(), netManager, controller, "all"))));
+                (renderer0, ctx) -> ctx
+                        .prompt(promptWriteMessage(ctx.subPrompt(), netManager, controller, UserMessage.EVERYONE_RECIPIENT))));
         return promptFactory.choice("Select player to send message:", choices.toArray(new ChoicePrompt.Choice[0]));
     }
 

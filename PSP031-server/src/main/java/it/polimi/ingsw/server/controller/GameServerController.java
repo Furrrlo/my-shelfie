@@ -7,6 +7,7 @@ import it.polimi.ingsw.model.UserMessage;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,52 +196,43 @@ public class GameServerController {
      * @param nickReceivingPlayer nick of the recipient
      * @throws IllegalArgumentException if message is empty or nicks are not valid
      */
-    public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer)
-            throws IllegalArgumentException {
+    public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer) {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
-            if (game.getPlayers().stream().filter(p -> p.getNick().equals(nickSendingPlayer)).toList().isEmpty())
+            if (game.getPlayers().stream().noneMatch(p -> p.getNick().equals(nickSendingPlayer)))
                 throw new IllegalArgumentException("Sending player: " + nickSendingPlayer + " is not valid player");
-            if (game.getPlayers().stream().filter(p -> p.getNick().equals(nickReceivingPlayer)).toList().isEmpty()
-                    && !nickReceivingPlayer.equals("all"))
+
+            final var isForEveryone = nickReceivingPlayer.equals(UserMessage.EVERYONE_RECIPIENT);
+            if (!isForEveryone && game.getPlayers().stream().noneMatch(p -> p.getNick().equals(nickReceivingPlayer)))
                 throw new IllegalArgumentException("Sending player: " + nickReceivingPlayer + " is not valid player");
+
             if (message.equals(""))
                 throw new IllegalArgumentException("No text written for message to be sent");
 
-            game.message().set(new UserMessage(nickSendingPlayer, getPlayerColor(nickSendingPlayer), message,
-                    nickReceivingPlayer, getPlayerColor(nickReceivingPlayer)));
+            var ps = game.getPlayers();
+            game.message().set(
+                    isForEveryone
+                            ? UserMessage.forEveryone(nickSendingPlayer, getPlayerColor(nickSendingPlayer, ps), message)
+                            : new UserMessage(
+                                    nickSendingPlayer, getPlayerColor(nickSendingPlayer, ps),
+                                    message,
+                                    nickReceivingPlayer, getPlayerColor(nickReceivingPlayer, ps)));
         }
     }
 
-    private String getPlayerColor(String nick) {
-        if (nick.equals("all"))
-            return "";
-        try (var gameCloseable = game.use()) {
-            var game = gameCloseable.obj();
-            int index = 0;
-            for (ServerPlayer player : game.getPlayers()) {
-                if (player.getNick().equals(nick)) {
-                    index = game.getPlayers().indexOf(player);
-                }
+    private String getPlayerColor(String nick, @Unmodifiable List<ServerPlayer> players) {
+        int index = 0;
+        for (ServerPlayer player : players) {
+            if (player.getNick().equals(nick)) {
+                index = players.indexOf(player);
             }
-            switch (index) {
-                case 0 -> {
-                    return "\033[0;31m";//RED
-                }
-                case 1 -> {
-                    return "\033[0;32m"; // GREEN
-                }
-                case 2 -> {
-                    return "\033[0;33m"; // YELLOW
-                }
-                case 3 -> {
-                    return "\033[0;36m"; // CYAN
-                }
-                default -> {
-                    return "";
-                }
-            }
-
         }
+        return switch (index) {
+            case 0 -> "\033[0;31m"; // RED
+            case 1 -> "\033[0;32m"; // GREEN
+            case 2 -> "\033[0;33m"; // YELLOW
+            case 3 -> "\033[0;36m"; // CYAN
+            default -> "";
+        };
     }
 }

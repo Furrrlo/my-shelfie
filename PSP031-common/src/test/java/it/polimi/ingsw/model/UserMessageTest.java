@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class UserMessageTest {
     @Test
-    void testToString() {
+    void testToConsoleString() {
         final var message = new UserMessage("p1", "", "message", "p2", "");
-        assertDoesNotThrow(message::toString);
-        final var message1 = new UserMessage("p1", "", "message", "all", "");
-        assertDoesNotThrow(message1::toString);
+        assertDoesNotThrow(message::toConsoleString);
+        final var message1 = new UserMessage("p1", "", "message", UserMessage.EVERYONE_RECIPIENT, "");
+        assertDoesNotThrow(message1::toConsoleString);
     }
 
     @Test

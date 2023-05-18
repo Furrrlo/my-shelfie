@@ -2,16 +2,28 @@ package it.polimi.ingsw.model;
 
 import java.io.Serializable;
 
-public record UserMessage(String nickSendingPlayer, String sendingColor, String message, String nickReceivingPlayer,
+public record UserMessage(String nickSendingPlayer,
+        String sendingColor,
+        String message,
+        String nickReceivingPlayer,
         String receivingColor) implements Serializable {
-    @Override
-    public String toString() {
-        if (nickReceivingPlayer.equals("all")) {
+
+    public static final String EVERYONE_RECIPIENT = "all";
+
+    public static UserMessage forEveryone(String nickSendingPlayer, String sendingColor, String message) {
+        return new UserMessage(nickSendingPlayer, sendingColor, message, EVERYONE_RECIPIENT, "");
+    }
+
+    public boolean isForEveryone() {
+        return nickReceivingPlayer.equals(EVERYONE_RECIPIENT);
+    }
+
+    public String toConsoleString() {
+        if (isForEveryone()) {
             return '[' + sendingColor + nickSendingPlayer + "\033[0m" + "]: " + message;
         } else {
             return '[' + sendingColor + nickSendingPlayer + "\033[0m" + " to " + receivingColor + nickReceivingPlayer
                     + "\033[0m" + "]: " + message;
         }
-
     }
 }

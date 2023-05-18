@@ -285,7 +285,7 @@ class TuiGameScene implements TuiScene {
         //loop the message list starting from the most recent message
         for (int i = messages.size() - 1; i >= 0; i--) {
             var m = messages.get(i);
-            printedSize = out.printAligned(new TuiStringPrinter(m.toString(), remainingSize),
+            printedSize = out.printAligned(new TuiStringPrinter(m.toConsoleString(), remainingSize),
                     new TuiRect(2, 0, remainingSize),
                     TuiHAlignment.LEFT,
                     TuiVAlignment.BOTTOM).size();
