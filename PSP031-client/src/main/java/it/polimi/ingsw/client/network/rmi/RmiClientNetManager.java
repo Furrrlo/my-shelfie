@@ -10,8 +10,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -73,14 +71,9 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
         // To work around this, either run the JVM with the parameter -Djava.rmi.server.hostname=<server address> or
         // we ask the server to give back the remote client address.
         if (System.getProperty("java.rmi.server.hostname") == null) {
-            try {
-                var addrStr = server.getClientAddressHost();
-                var addr = InetAddress.getByName(addrStr);
-                if (addr.isLoopbackAddress())
-                    System.setProperty("java.rmi.server.hostname", addrStr);
-            } catch (UnknownHostException e) {
-                LOGGER.error("Failed to try fixing 'java.rmi.server.hostname'", e);
-            }
+            var addrStr = server.getClientAddressHost();
+            System.setProperty("java.rmi.server.hostname", addrStr);
+            LOGGER.info("Detected java.rmi.server.hostname='{}'", addrStr);
         }
 
         AtomicReference<RmiClientNetManager> netManagerRef = new AtomicReference<>();

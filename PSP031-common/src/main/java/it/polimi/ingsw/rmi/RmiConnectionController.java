@@ -9,7 +9,7 @@ public interface RmiConnectionController extends Remote {
 
     String REMOTE_NAME = "my_shelfie_rmi";
 
-    String getClientAddressHost();
+    String getClientAddressHost() throws RemoteException;
 
     ConnectedController doConnect(String nick, RmiHeartbeatHandler heartbeatHandler)
             throws RemoteException, NickNotValidException;
