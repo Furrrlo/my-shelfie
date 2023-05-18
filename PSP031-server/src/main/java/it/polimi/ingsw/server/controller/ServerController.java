@@ -208,7 +208,7 @@ public class ServerController implements Closeable {
                 final LobbyUpdater lobbyUpdater;
                 try {
                     lobbyUpdater = lobbyUpdaterFactory.create(lobbyAndController = new LobbyAndController<>(
-                            new Lobby(serverLobby.requiredPlayers().get(), serverLobby.joinedPlayers().get()),
+                            new Lobby(serverLobby.requiredPlayers().get(), serverLobby.joinedPlayers().get(), nick),
                             lobbyControllerFactory.create(serverLobbyAndController.controller())));
                 } catch (DisconnectedException e) {
                     throw new IllegalStateException("Player disconnected during handshake process");

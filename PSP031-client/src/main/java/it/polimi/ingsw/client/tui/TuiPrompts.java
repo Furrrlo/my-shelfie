@@ -146,14 +146,14 @@ class TuiPrompts {
                                       LobbyView lobby,
                                       LobbyController controller) {
         final Consumer<Boolean> readyObserver = b -> renderer.rerender();
-        lobby.joinedPlayers().registerObserver(players -> {
-            if (players.stream().noneMatch(p -> p.getNick().equals(netManager.getNick()))) {
+        lobby.thePlayerConnected().registerObserver(connected -> {
+            if (!connected)
                 renderer.setPrompt(promptReconnect(renderer, netManager, null));
-            } else {
-                renderer.rerender();
-                // By using always the same readyObserver, we avoid registering dupes, as it's guaranteed by registerObserver
-                players.forEach(player -> player.ready().registerObserver(readyObserver));
-            }
+        });
+        lobby.joinedPlayers().registerObserver(players -> {
+            renderer.rerender();
+            // By using always the same readyObserver, we avoid registering dupes, as it's guaranteed by registerObserver
+            players.forEach(player -> player.ready().registerObserver(readyObserver));
         });
         lobby.joinedPlayers().get().forEach(player -> player.ready().registerObserver(readyObserver));
         lobby.game().registerObserver(g -> {

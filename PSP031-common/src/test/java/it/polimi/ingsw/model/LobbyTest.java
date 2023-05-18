@@ -14,22 +14,23 @@ class LobbyTest {
     @Test
     @SuppressWarnings("EqualsWithItself")
     void testEquals() {
-        final var lobby1 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")));
-        final var lobby2 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")));
+        final var lobby1 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")), "test_player_1");
+        final var lobby2 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")), "test_player_1");
 
         assertEquals(lobby1, lobby1, "Same instance is not the same");
         assertNotEquals(lobby1, new Object(), "Different object should not be equals");
         assertEquals(lobby1, lobby2, "Instances with no differences should be equals");
 
-        final var lobbyDiffReqPlayers = new Lobby(2, List.of(new LobbyPlayer("test_player_1")));
+        final var lobbyDiffReqPlayers = new Lobby(2, List.of(new LobbyPlayer("test_player_1")), "test_player_1");
         assertNotEquals(lobby1, lobbyDiffReqPlayers, "Instances with different required players should not be equals");
 
-        final var lobbyDiffJoinedPlayers = new Lobby(4, List.of(new LobbyPlayer("test_player_2")));
+        final var lobbyDiffJoinedPlayers = new Lobby(4, List.of(new LobbyPlayer("test_player_2")), "test_player_2");
         assertNotEquals(lobby1, lobbyDiffJoinedPlayers, "Instances with different joined players should not be equals");
 
         final var lobbyDiffGame = new Lobby(
                 4,
                 List.of(new LobbyPlayer("test_player_1")),
+                "test_player_1",
                 new GameAndController<>(
                         new Game(
                                 0,
@@ -48,23 +49,24 @@ class LobbyTest {
 
     @Test
     void testHashCode() {
-        final var lobby1 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")));
-        final var lobby2 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")));
+        final var lobby1 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")), "test_player_1");
+        final var lobby2 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")), "test_player_1");
 
         assertEquals(lobby1.hashCode(), lobby1.hashCode(), "Same instance is not the same");
         assertEquals(lobby1.hashCode(), lobby2.hashCode(), "Instances with no differences should be equals");
 
-        final var lobbyDiffReqPlayers = new Lobby(2, List.of(new LobbyPlayer("test_player_1")));
+        final var lobbyDiffReqPlayers = new Lobby(2, List.of(new LobbyPlayer("test_player_1")), "test_player_1");
         assertNotEquals(lobby1.hashCode(), lobbyDiffReqPlayers.hashCode(),
                 "Instances with different required players should not be equals");
 
-        final var lobbyDiffJoinedPlayers = new Lobby(4, List.of(new LobbyPlayer("test_player_2")));
+        final var lobbyDiffJoinedPlayers = new Lobby(4, List.of(new LobbyPlayer("test_player_2")), "test_player_2");
         assertNotEquals(lobby1.hashCode(), lobbyDiffJoinedPlayers.hashCode(),
                 "Instances with different joined players should not be equals");
 
         final var lobbyDiffGame = new Lobby(
                 4,
                 List.of(new LobbyPlayer("test_player_1")),
+                "test_player_1",
                 new GameAndController<>(
                         new Game(
                                 0,
@@ -83,7 +85,7 @@ class LobbyTest {
 
     @Test
     void testToString() {
-        final var lobby = new Lobby(4, List.of(new LobbyPlayer("test_player")));
+        final var lobby = new Lobby(4, List.of(new LobbyPlayer("test_player")), "test_player");
         assertDoesNotThrow(lobby::toString);
     }
 

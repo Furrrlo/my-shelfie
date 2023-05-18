@@ -72,8 +72,8 @@ public class DisconnectionIntegrationTest {
             assertSame(1, serverLobby.joinedPlayers().get().size());
             serverController.runOnOnlyLobbyLocks(
                     () -> serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null)));
-            lobbyView.joinedPlayers().registerObserver(players -> {
-                if (players.stream().noneMatch(p -> p.getNick().equals(nick)))
+            lobbyView.thePlayerConnected().registerObserver(connected -> {
+                if (!connected)
                     clientDisconnected.complete(null);
             });
             close.execute();
@@ -141,8 +141,8 @@ public class DisconnectionIntegrationTest {
 
             serverController.runOnOnlyLobbyLocks(
                     () -> serverLobby.joinedPlayers().registerObserver(value -> serverPlayerRemoved.complete(null)));
-            player1.lobby().joinedPlayers().registerObserver(players -> {
-                if (players.stream().noneMatch(p -> p.getNick().equals(testNickname)))
+            player1.lobby().thePlayerConnected().registerObserver(connected -> {
+                if (!connected)
                     clientDisconnected.complete(null);
             });
             disconnect.execute();
