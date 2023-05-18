@@ -153,7 +153,7 @@ class TuiRenderer implements Closeable {
         final var sc = new Scanner(reader);
         try {
             while (!Thread.currentThread().isInterrupted() && sc.hasNextLine())
-                events.add(new InputEvent(sc.nextLine().trim()));
+                events.add(new InputEvent(sc.nextLine().strip()));
         } catch (Throwable t) {
             LOGGER.error("Uncaught exception in TuiRenderer render thread", t);
         }
