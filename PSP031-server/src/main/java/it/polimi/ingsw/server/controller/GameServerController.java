@@ -206,6 +206,7 @@ public class GameServerController {
             if (!isForEveryone && game.getPlayers().stream().noneMatch(p -> p.getNick().equals(nickReceivingPlayer)))
                 throw new IllegalArgumentException("Sending player: " + nickReceivingPlayer + " is not valid player");
 
+            message = message.strip();
             if (message.equals(""))
                 throw new IllegalArgumentException("No text written for message to be sent");
 
