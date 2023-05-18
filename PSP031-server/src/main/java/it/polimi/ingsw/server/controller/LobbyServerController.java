@@ -160,6 +160,14 @@ public class LobbyServerController {
         final var firstFinisher = SerializableProperty.<ServerPlayer> nullableProperty(null);
 
         final List<ServerPlayer> players;
+        final var personalGoalIndexes = new ArrayList<Integer>();
+        int temp;
+        for (int i = 0; i < lobbyPlayers.size(); i++) {
+            temp = random.nextInt(PersonalGoal.PERSONAL_GOALS.size());
+            while (personalGoalIndexes.contains(temp))
+                temp = random.nextInt(PersonalGoal.PERSONAL_GOALS.size());
+            personalGoalIndexes.add(temp);
+        }
         var game = new ServerGame(
                 gameId,
                 new Board(lobbyPlayers.size()),
@@ -167,7 +175,7 @@ public class LobbyServerController {
                 players = lobbyPlayers.stream()
                         .map(n -> new ServerPlayer(
                                 n.getNick(),
-                                new PersonalGoal(random.nextInt(PersonalGoal.PERSONAL_GOALS.size())),
+                                new PersonalGoal(personalGoalIndexes.remove(random.nextInt(personalGoalIndexes.size()))),
                                 p -> new ScoreProvider(p, commonGoals, firstFinisher)))
                         .collect(Collectors.toList()),
                 random.nextInt(players.size()),
