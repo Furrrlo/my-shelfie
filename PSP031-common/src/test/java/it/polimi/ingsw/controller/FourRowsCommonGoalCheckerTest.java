@@ -69,4 +69,19 @@ class FourRowsCommonGoalCheckerTest {
         };
         assertFalse(new FourRowsCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
     }
+
+    @Test
+    void checkCommonGoal_FOUR_ROWS_false() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.PINK     , Color.BLUE  , Color.YELLOW, Color.PINK     , Color.YELLOW },
+                new Color[] { Color.YELLOW   , Color.BLUE  , Color.YELLOW, null           , Color.YELLOW },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE , Color.GREEN , Color.LIGHTBLUE, Color.WHITE  },
+                new Color[] { Color.BLUE     , Color.YELLOW, Color.BLUE  , Color.BLUE     , Color.BLUE   },
+                new Color[] { Color.GREEN   , null        , Color.YELLOW, Color.YELLOW   , Color.GREEN  },
+                new Color[] { null           , null        , null        , null           , null         }
+                //@formatter:on
+        };
+        assertFalse(new FourRowsCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
 }

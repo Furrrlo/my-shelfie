@@ -77,4 +77,19 @@ class CrossCommonGoalCheckerTest {
         };
         assertFalse(new CrossCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
     }
+
+    @Test
+    void checkCommonGoal_CROSS_false() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.WHITE     },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.PINK     , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.WHITE    , Color.WHITE    , Color.PINK     , Color.PINK     , null            },
+                new Color[] { Color.WHITE    , Color.GREEN    , Color.WHITE    , Color.PINK     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.PINK     , Color.YELLOW   , Color.PINK      },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
+                //@formatter:on
+        };
+        assertFalse(new CrossCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
 }

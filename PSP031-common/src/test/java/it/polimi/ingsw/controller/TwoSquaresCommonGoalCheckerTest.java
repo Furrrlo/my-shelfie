@@ -56,4 +56,20 @@ class TwoSquaresCommonGoalCheckerTest {
         };
         assertTrue(new TwoSquaresCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
     }
+
+    @Test
+    void checkCommonGoal_TWO_SQUARES() {
+
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.GREEN    , Color.GREEN    , null           , null           , null           },
+                new Color[] { Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.BLUE     , null           },
+                new Color[] { Color.GREEN    , Color.GREEN    , Color.BLUE     , Color.BLUE     , Color.PINK     },
+                new Color[] { null           , null           , Color.BLUE     , Color.BLUE     , Color.PINK     },
+                new Color[] { null           , null           , null           , Color.PINK     , Color.PINK     },
+                new Color[] { null           , null           , null           , Color.PINK     , Color.PINK     }
+                //@formatter:on
+        };
+        assertTrue(new TwoSquaresCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
 }

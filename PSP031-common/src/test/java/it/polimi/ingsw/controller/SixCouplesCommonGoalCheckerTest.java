@@ -84,4 +84,19 @@ class SixCouplesCommonGoalCheckerTest {
         };
         assertFalse(new SixCouplesCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
     }
+
+    @Test
+    void checkCommonGoal_SIX_COUPLES() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { null           , Color.WHITE    , Color.WHITE    , null           , Color.PINK      },
+                new Color[] { Color.BLUE     , null           , null           , null           , Color.PINK      },
+                new Color[] { Color.BLUE     , null           , Color.YELLOW   , null           , null            },
+                new Color[] { null           , null           , Color.YELLOW   , null           , null            },
+                new Color[] { null           , null           , null           , null           , Color.YELLOW    },
+                new Color[] { null           , Color.WHITE    , Color.WHITE    , null           , Color.YELLOW    }
+                //@formatter:on
+        };
+        assertTrue(new SixCouplesCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+    }
 }
