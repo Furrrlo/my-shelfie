@@ -15,15 +15,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class RmiHeartbeatClientHandler implements RmiHeartbeatHandler, Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmiHeartbeatClientHandler.class);
 
-    private final Property<Duration> ping = new SerializableProperty<>(Duration.ZERO);
     private final Clock clock;
     private final Runnable onDisconnect;
     private final ScheduledExecutorService heartbeatExecutor;
+    private final AtomicBoolean closed = new AtomicBoolean();
+
+    private final Property<Duration> ping = new SerializableProperty<>(Duration.ZERO);
     private volatile Instant lastPing;
 
     public RmiHeartbeatClientHandler(Runnable onDisconnect) {
@@ -51,7 +54,7 @@ class RmiHeartbeatClientHandler implements RmiHeartbeatHandler, Closeable {
     }
 
     private void checkLastPing() {
-        if (lastPing.plus(10, ChronoUnit.SECONDS).isBefore(Instant.now(clock))) {
+        if (!closed.get() && lastPing.plus(10, ChronoUnit.SECONDS).isBefore(Instant.now(clock))) {
             LOGGER.error("RMI: connection lost");
 
             //TODO: find a better way to get the lobby (?)
@@ -70,6 +73,9 @@ class RmiHeartbeatClientHandler implements RmiHeartbeatHandler, Closeable {
 
     @Override
     public void close() {
+        if (closed.getAndSet(true))
+            return;
+
         heartbeatExecutor.shutdown();
     }
 }
