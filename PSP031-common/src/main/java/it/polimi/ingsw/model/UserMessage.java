@@ -26,4 +26,20 @@ public record UserMessage(String nickSendingPlayer,
                     + "\033[0m" + "]: " + message;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        UserMessage that = (UserMessage) o;
+        return nickSendingPlayer.equals(that.nickSendingPlayer) && message.equals(that.message)
+                && nickReceivingPlayer.equals(that.nickReceivingPlayer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nickSendingPlayer, message, nickReceivingPlayer);
+    }
 }
