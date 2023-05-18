@@ -45,6 +45,21 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     }
 
     @Override
+    public abstract void close() throws IOException;
+
+    public void onGameOver() {
+        controller.runOnLocks(nick, this::unregisterObservers);
+
+        try {
+            doClosePlayerGame();
+        } catch (IOException e) {
+            LOGGER.error("Failed to disconnect player {}", nick, e);
+        }
+    }
+
+    protected abstract void doClosePlayerGame() throws IOException;
+
+    @Override
     public <T> Consumer<T> registerObserver(Provider<T> toObserve, PlayerObservableTracker.ThrowingConsumer<T> observer) {
         return controller.supplyOnLocks(nick, () -> {
             final var observers = observablesToObservers
@@ -64,7 +79,10 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     protected void unregisterObservers() {
-        controller.runOnLocks(nick, () -> observablesToObservers.forEach((provider, observers) -> observers
-                .forEach(o -> ((Provider) provider).unregisterObserver(o))));
+        controller.runOnLocks(nick, () -> {
+            observablesToObservers.forEach((provider, observers) -> observers
+                    .forEach(o -> ((Provider) provider).unregisterObserver(o)));
+            observablesToObservers.clear();
+        });
     }
 }

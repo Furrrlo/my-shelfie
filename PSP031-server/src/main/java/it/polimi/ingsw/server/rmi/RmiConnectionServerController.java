@@ -86,6 +86,7 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
             throws RemoteException, NickNotValidException {
 
         var connection = new PlayerConnection(controller, nick,
+                UnicastRemoteObjects.createTrackingExporter(underlyingUnicastRemoteObjects),
                 UnicastRemoteObjects.createTrackingExporter(underlyingUnicastRemoteObjects));
         connections.add(connection);
         try {
@@ -120,10 +121,11 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
                 controller.joinGame(
                         nick,
                         connection,
+                        connection::onGameOver,
                         new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
                         controller -> {
                             try {
-                                return new RmiLobbyController.Adapter(connection.unicastRemoteObjects().export(
+                                return new RmiLobbyController.Adapter(connection.gameUnicastRemoteObjects().export(
                                         new RmiLobbyServerController(nick, controller, connection::disconnectPlayer), 0));
                             } catch (RemoteException e) {
                                 throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
@@ -131,7 +133,7 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
                         },
                         (player, game) -> {
                             try {
-                                return new RmiGameController.Adapter(connection.unicastRemoteObjects
+                                return new RmiGameController.Adapter(connection.gameUnicastRemoteObjects()
                                         .export(new RmiGameServerController(player, game, connection::disconnectPlayer), 0));
                             } catch (RemoteException e) {
                                 throw new IllegalStateException("Unexpectedly failed to export RmiGameServerController", e);
@@ -165,24 +167,37 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
     private class PlayerConnection extends BaseServerConnection {
 
         private final UnicastRemoteObjects.TrackingExporter unicastRemoteObjects;
+        private final UnicastRemoteObjects.TrackingExporter gameUnicastRemoteObjects;
 
         public PlayerConnection(ServerController controller, String nick,
-                                UnicastRemoteObjects.TrackingExporter unicastRemoteObjects) {
+                                UnicastRemoteObjects.TrackingExporter unicastRemoteObjects,
+                                UnicastRemoteObjects.TrackingExporter gameUnicastRemoteObjects) {
             super(controller, nick);
             this.unicastRemoteObjects = unicastRemoteObjects;
+            this.gameUnicastRemoteObjects = gameUnicastRemoteObjects;
         }
 
         public UnicastRemoteObjects.TrackingExporter unicastRemoteObjects() {
             return unicastRemoteObjects;
         }
 
+        public UnicastRemoteObjects.TrackingExporter gameUnicastRemoteObjects() {
+            return gameUnicastRemoteObjects;
+        }
+
         @Override
         public void close() {
             try {
+                gameUnicastRemoteObjects.unexportAll(true);
                 unicastRemoteObjects.unexportAll(true);
             } finally {
                 connections.remove(this);
             }
+        }
+
+        @Override
+        protected void doClosePlayerGame() {
+            gameUnicastRemoteObjects.unexportAll(true);
         }
     }
 }

@@ -51,12 +51,13 @@ public class DisconnectionIntegrationTest {
             @Override
             public LobbyView joinGame(String nick,
                                       PlayerObservableTracker observableTracker,
+                                      Runnable onGameOver,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
                 LOGGER.trace("joining");
-                var lobby = super.joinGame(nick, observableTracker, lobbyUpdaterFactory, lobbyControllerFactory,
+                var lobby = super.joinGame(nick, observableTracker, onGameOver, lobbyUpdaterFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 serverJoined.complete(null);
                 return lobby;
@@ -111,11 +112,12 @@ public class DisconnectionIntegrationTest {
             @Override
             public LobbyView joinGame(String nick,
                                       PlayerObservableTracker observableTracker,
+                                      Runnable onGameOver,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
-                var lobby = super.joinGame(nick, observableTracker, lobbyUpdaterFactory, lobbyControllerFactory,
+                var lobby = super.joinGame(nick, observableTracker, onGameOver, lobbyUpdaterFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 serverJoined.countDown();
                 return lobby;
@@ -184,11 +186,12 @@ public class DisconnectionIntegrationTest {
             @Override
             public LobbyView joinGame(String nick,
                                       PlayerObservableTracker observableTracker,
+                                      Runnable onGameOver,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
                     throws DisconnectedException {
-                var lobby = super.joinGame(nick, observableTracker, lobbyUpdaterFactory, lobbyControllerFactory,
+                var lobby = super.joinGame(nick, observableTracker, onGameOver, lobbyUpdaterFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 if (joinedPlayers.incrementAndGet() >= 3)
                     serverAllJoined.complete(null);

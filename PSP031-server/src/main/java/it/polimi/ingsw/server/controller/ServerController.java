@@ -72,9 +72,7 @@ public class ServerController implements Closeable {
                         .submit(() -> heartbeatHandler.sendHeartbeat(Instant.now(clock))));
     }
 
-    @VisibleForTesting
-    protected @Nullable ServerLobbyAndController<ServerLobby> getLobbyFor(String nick) {
-        // TODO: like search a game
+    private @Nullable ServerLobbyAndController<ServerLobby> getLobbyFor(String nick) {
         for (var lobby : lobbies) {
             for (LobbyPlayer p : lobby.lobby().getUnsafe().joinedPlayers().get())
                 if (p.getNick().equals(nick))
@@ -180,12 +178,11 @@ public class ServerController implements Closeable {
 
     public LobbyView joinGame(String nick,
                               PlayerObservableTracker observableTracker,
+                              Runnable onGameOver,
                               LobbyUpdaterFactory lobbyUpdaterFactory,
                               LobbyControllerFactory lobbyControllerFactory,
                               BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
             throws DisconnectedException {
-        // TODO: check if this player is already in a lobby
-
         do {
             final var serverLobbyAndController = getOrCreateLobby(nick);
             final var lockedServerLobby = serverLobbyAndController.lobby();
@@ -239,15 +236,17 @@ public class ServerController implements Closeable {
                         // TODO: unregister observers
                         playersRegisteredObservers.entrySet().removeIf(e -> !newLobbyPlayers.contains(e.getKey()));
                     });
-                    observableTracker.registerObserver(serverLobby.game(), game -> {
-                        if (game != null) {
-                            try (var serverLobbyCloseable0 = lockedServerLobby.use()) {
-                                var game0 = serverLobbyCloseable0.obj().game().get();
+                    observableTracker.registerObserver(serverLobby.game(), game0 -> {
+                        try (var serverLobbyCloseable0 = lockedServerLobby.use()) {
+                            var game = serverLobbyCloseable0.obj().game().get();
+                            if (game != null) {
                                 updateGameForPlayer(
                                         nick,
-                                        game0.game(),
-                                        game0.controller(),
+                                        serverLobbyAndController,
+                                        game.game(),
+                                        game.controller(),
                                         observableTracker,
+                                        onGameOver,
                                         lobbyUpdater,
                                         gameControllerFactory);
                             }
@@ -270,9 +269,11 @@ public class ServerController implements Closeable {
                     if (currGameAndController != null)
                         updateGameForPlayer(
                                 nick,
+                                serverLobbyAndController,
                                 Objects.requireNonNull(currGame, "Controller is not null but game is null?"),
                                 currGameAndController.controller(),
                                 observableTracker,
+                                onGameOver,
                                 lobbyUpdater,
                                 gameControllerFactory);
                 } catch (DisconnectedException ex) {
@@ -285,9 +286,11 @@ public class ServerController implements Closeable {
     }
 
     private void updateGameForPlayer(String nick,
+                                     ServerLobbyAndController<ServerLobby> serverLobbyAndController,
                                      ServerGame game,
                                      GameServerController gameController,
                                      PlayerObservableTracker observableTracker,
+                                     Runnable onGameOver,
                                      LobbyUpdater lobbyUpdater,
                                      BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
             throws DisconnectedException {
@@ -371,6 +374,13 @@ public class ServerController implements Closeable {
                 players -> gameUpdater.updateAchievedCommonGoal(goal.getType(), players.stream()
                         .map(ServerPlayer::getNick)
                         .collect(Collectors.toList()))));
+        observableTracker.registerObserver(game.endGame(), gameOver -> {
+            if (!gameOver)
+                return;
+
+            onGameOver.run();
+            lobbies.remove(serverLobbyAndController);
+        });
     }
 
     public void onDisconnectPlayer(String nick, Throwable cause) {

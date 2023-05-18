@@ -53,6 +53,7 @@ public class UpdatersIntegrationTest {
             @Override
             public LobbyView joinGame(String nick,
                                       PlayerObservableTracker observableTracker,
+                                      Runnable onGameOver,
                                       LobbyUpdaterFactory lobbyUpdaterFactory,
                                       LobbyControllerFactory lobbyControllerFactory,
                                       BiFunction<ServerPlayer, GameServerController, GameController> gameControllerFactory)
@@ -66,7 +67,7 @@ public class UpdatersIntegrationTest {
                         return gameUpdater;
                     }
                 };
-                LobbyView lobby = super.joinGame(nick, observableTracker, wrappedFactory, lobbyControllerFactory,
+                LobbyView lobby = super.joinGame(nick, observableTracker, onGameOver, wrappedFactory, lobbyControllerFactory,
                         gameControllerFactory);
                 serverJoinedNick.complete(nick);
                 serverLobbyToSerialize.complete(lobby);

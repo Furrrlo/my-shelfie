@@ -173,6 +173,7 @@ public class SocketConnectionServerController implements Closeable {
             controller.joinGame(
                     nick,
                     connection,
+                    connection::onGameOver,
                     l -> {
                         try {
                             lobbyCtx.set(joinCtx.reply(new LobbyPacket(l.lobby()), LobbyReceivedPacket.class));
@@ -182,9 +183,8 @@ public class SocketConnectionServerController implements Closeable {
                         }
                     },
                     lobbyController -> {
-                        //TODO: SocketServerLobbyController will wait indefinitely for ReadyPacket when the game is started. Should we stop it?
                         var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
-                        connection.lobbyControllerTask = CompletableFuture
+                        connection.lobbyControllerTask.set(CompletableFuture
                                 .runAsync(ThreadPools.giveNameToTask(n -> n + "[" + nick + ":lobbyController]",
                                         socketController), threadPool)
                                 .handle((__, ex) -> {
@@ -193,12 +193,12 @@ public class SocketConnectionServerController implements Closeable {
 
                                     connection.disconnectPlayer(ex);
                                     return __;
-                                });
+                                }));
                         return socketController;
                     },
                     (serverPlayer, game) -> {
                         var socketController = new SocketServerGameController(socketManager, serverPlayer, game);
-                        connection.gameControllerTask = CompletableFuture
+                        connection.gameControllerTask.set(CompletableFuture
                                 .runAsync(ThreadPools.giveNameToTask(n -> n + "[" + nick + ":gameController]",
                                         socketController), threadPool)
                                 .handle((__, ex) -> {
@@ -207,7 +207,7 @@ public class SocketConnectionServerController implements Closeable {
 
                                     connection.disconnectPlayer(ex);
                                     return __;
-                                });
+                                }));
                         return socketController;
                     });
             Objects.requireNonNull(lobbyCtx.get(), "Lobby was somehow not sent to the player").ack();
@@ -218,8 +218,8 @@ public class SocketConnectionServerController implements Closeable {
 
         private final ServerSocketManager socketManager;
         volatile @Nullable Future<?> joinGameTask;
-        volatile @Nullable Future<?> lobbyControllerTask;
-        volatile @Nullable Future<?> gameControllerTask;
+        final AtomicReference<@Nullable Future<?>> lobbyControllerTask = new AtomicReference<>();
+        final AtomicReference<@Nullable Future<?>> gameControllerTask = new AtomicReference<>();
 
         public PlayerConnection(ServerController controller,
                                 ServerSocketManager socketManager,
@@ -238,16 +238,26 @@ public class SocketConnectionServerController implements Closeable {
                 var joinGameTask = this.joinGameTask;
                 if (joinGameTask != null)
                     joinGameTask.cancel(true);
-                var lobbyControllerTask = this.lobbyControllerTask;
+                var lobbyControllerTask = this.lobbyControllerTask.getAndSet(null);
                 if (lobbyControllerTask != null)
                     lobbyControllerTask.cancel(true);
-                var gameControllerTask = this.gameControllerTask;
+                var gameControllerTask = this.gameControllerTask.getAndSet(null);
                 if (gameControllerTask != null)
                     gameControllerTask.cancel(true);
                 socketManager.close();
             } finally {
                 connections.remove(this);
             }
+        }
+
+        @Override
+        protected void doClosePlayerGame() {
+            var lobbyControllerTask = this.lobbyControllerTask.getAndSet(null);
+            if (lobbyControllerTask != null)
+                lobbyControllerTask.cancel(true);
+            var gameControllerTask = this.gameControllerTask.getAndSet(null);
+            if (gameControllerTask != null)
+                gameControllerTask.cancel(true);
         }
     }
 }
