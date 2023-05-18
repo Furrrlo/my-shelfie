@@ -20,7 +20,10 @@ public class TwoSquaresCommonGoalChecker implements CommonGoalChecker {
         int count = 0;
         for (int r = 0; r < ROWS - 1; r++) {
             for (int c = 0; c < COLUMNS - 1; c++) {
-                if (checked[r][c] == 0 && checked[r + 1][c] == 0 && checked[r][c + 1] == 0 && checked[r + 1][c + 1] == 0) {
+                if (checked[r][c] == 0 && /* checked[r + 1][c] == 0 && */ checked[r][c + 1] == 0 /*
+                                                                                                  * && checked[r + 1][c + 1] ==
+                                                                                                  * 0
+                                                                                                  */) {
                     if (shelfie.tile(r, c).get() != null &&
                             Objects.equals(shelfie.tile(r + 1, c).get(), shelfie.tile(r, c).get()) &&
                             Objects.equals(shelfie.tile(r, c + 1).get(), shelfie.tile(r, c).get()) &&
