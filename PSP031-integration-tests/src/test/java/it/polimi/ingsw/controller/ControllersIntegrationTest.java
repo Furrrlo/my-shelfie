@@ -65,6 +65,7 @@ public class ControllersIntegrationTest {
                     readyPromise);
 
             final var makeMovePromise = new CompletableFuture<Arguments>();
+            final var sendMessagePromise = new CompletableFuture<Arguments>();
 
             final ServerGame serverGame;
             final var lockedServerLobby = serverLobbyPromise.get(500, TimeUnit.MILLISECONDS);
@@ -82,6 +83,11 @@ public class ControllersIntegrationTest {
                             public void makeMove(ServerPlayer player, List<BoardCoord> selected, int shelfCol) {
                                 makeMovePromise.complete(Arguments.of(player, selected, shelfCol));
                             }
+
+                            @Override
+                            public void sendMessage(String nickSendingPlayer, String message, String nickReceivingPlayer) {
+                                sendMessagePromise.complete(Arguments.of(nickSendingPlayer, message, nickReceivingPlayer));
+                            }
                         }));
             }
             final var thePlayer = serverGame.getPlayers().stream()
@@ -96,6 +102,11 @@ public class ControllersIntegrationTest {
                     () -> gameController.makeMove(List.of(new BoardCoord(0, 0), new BoardCoord(5, 5)), 0),
                     Arguments.of(thePlayer, List.of(new BoardCoord(0, 0), new BoardCoord(5, 5)), 0),
                     makeMovePromise);
+            assertControllerMethodCalled(
+                    "sendMessage",
+                    () -> gameController.sendMessage("test message", "all"),
+                    Arguments.of(nick, "test message", "all"),
+                    sendMessagePromise);
         }
     }
 

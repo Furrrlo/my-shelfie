@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public abstract class GameClientUpdater implements GameUpdater {
 
+    public static final int MAX_MESSAGES_HISTORY = 100;
+
     protected final Game game;
 
     public GameClientUpdater(Game game) {
@@ -69,7 +71,7 @@ public abstract class GameClientUpdater implements GameUpdater {
     @Override
     public void updateMessage(@Nullable UserMessage message) {
         var newMessageList = new ArrayList<>(game.messageList().get());
-        if (newMessageList.size() >= 99)
+        if (newMessageList.size() >= MAX_MESSAGES_HISTORY)
             newMessageList.remove(0);
         newMessageList.add(message);
         game.messageList().set(Collections.unmodifiableList(newMessageList));

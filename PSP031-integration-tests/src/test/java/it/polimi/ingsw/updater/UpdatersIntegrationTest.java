@@ -5,6 +5,7 @@ import it.polimi.ingsw.DelegatingLobbyUpdater;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
+import it.polimi.ingsw.client.updater.GameClientUpdater;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.controller.*;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -200,6 +202,40 @@ public class UpdatersIntegrationTest {
                         serverCommonGoal.achieved(),
                         clientCommonGoal.achieved());
             }
+
+            ensurePropertyUpdated(
+                    "message",
+                    new UserMessage(nick, "", "test message", "all", ""),
+                    List.of(new UserMessage(nick, "", "test message", "all", "")),
+                    serverController,
+                    serverGame.message(),
+                    clientGame.messageList());
+
+            for (int i = 0; i < GameClientUpdater.MAX_MESSAGES_HISTORY + 10; i++)
+                serverController.runOnOnlyLobbyLocks(() -> serverGame.message()
+                        .set(new UserMessage(nick, "", "test message", "all", "")));
+            ensurePropertyUpdated(
+                    "maxMessages",
+                    new UserMessage(nick, "", "test message", "all", ""),
+                    IntStream.range(0, GameClientUpdater.MAX_MESSAGES_HISTORY)
+                            .mapToObj(i -> new UserMessage(nick, "", "test message", "all", ""))
+                            .toList(),
+                    serverController,
+                    serverGame.message(),
+                    clientGame.messageList());
+
+            ensurePropertyUpdated(
+                    "suspended",
+                    true,
+                    serverController,
+                    serverGame.suspended(),
+                    clientGame.suspended());
+            ensurePropertyUpdated(
+                    "endGame",
+                    true,
+                    serverController,
+                    serverGame.endGame(),
+                    clientGame.endGame());
         }
     }
 
