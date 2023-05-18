@@ -50,6 +50,54 @@ class AllCornersCommonGoalCheckerTest {
     }
 
     @Test
+    void checkCommonGoal_ALL_CORNERS1() {
+        Color[][] matrix1 = {
+                //@formatter:off
+                new Color[] { Color.GREEN, null, null, null, null },
+                new Color[] { null       , null, null, null, null },
+                new Color[] { null       , null, null, null, null },
+                new Color[] { null       , null, null, null, null },
+                new Color[] { null       , null, null, null, null },
+                new Color[] { null       , null, null, null, null }
+                //@formatter:on
+        };
+        assertFalse(new AllCornersCommonGoalChecker().checkCommonGoal(new Shelfie(matrix1)));
+        Color[][] matrix2 = {
+                //@formatter:off
+                new Color[] { Color.GREEN, null, null, null, Color.GREEN },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        }
+                //@formatter:on
+        };
+        assertFalse(new AllCornersCommonGoalChecker().checkCommonGoal(new Shelfie(matrix2)));
+        Color[][] matrix3 = {
+                //@formatter:off
+                new Color[] { Color.GREEN, null, null, null, Color.GREEN },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { Color.GREEN, null, null, null, null        }
+                //@formatter:on
+        };
+        assertFalse(new AllCornersCommonGoalChecker().checkCommonGoal(new Shelfie(matrix3)));
+        Color[][] matrix4 = {
+                //@formatter:off
+                new Color[] { Color.GREEN, null, null, null, Color.GREEN },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { null       , null, null, null, null        },
+                new Color[] { Color.GREEN, null, null, null, Color.GREEN }
+                //@formatter:on
+        };
+        assertTrue(new AllCornersCommonGoalChecker().checkCommonGoal(new Shelfie(matrix4)));
+    }
+
+    @Test
     void checkCommonGoal_ALL_CORNERS_normal_false() {
         Color[][] matrix = {
                 //@formatter:off
