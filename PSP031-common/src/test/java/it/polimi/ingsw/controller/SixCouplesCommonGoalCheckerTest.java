@@ -99,4 +99,44 @@ class SixCouplesCommonGoalCheckerTest {
         };
         assertTrue(new SixCouplesCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
     }
+
+    @Test
+    void sixCouplesOnRandomGenerated() {
+        Color[][] matrix = {
+                //@formatter:off
+                new Color[] { Color.GREEN    , Color.GREEN    , Color.PINK     , Color.WHITE    , Color.PINK      },
+                new Color[] { Color.PINK     , Color.GREEN    , Color.LIGHTBLUE, Color.BLUE     , Color.WHITE     },
+                new Color[] { Color.BLUE     , Color.GREEN    , Color.GREEN    , Color.WHITE    , Color.LIGHTBLUE },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.YELLOW    },
+                new Color[] { Color.WHITE    , Color.WHITE    , Color.GREEN    , Color.WHITE    , Color.BLUE      },
+                new Color[] { Color.LIGHTBLUE, Color.GREEN    , Color.YELLOW   , Color.BLUE     , Color.GREEN     },
+                //@formatter:on
+        };
+        assertFalse(new SixCouplesCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+
+        Color[][] matrix1 = {
+                //@formatter:off
+                new Color[] { Color.LIGHTBLUE, Color.YELLOW   , Color.BLUE     , Color.GREEN    , Color.PINK      },
+                new Color[] { Color.BLUE     , Color.WHITE    , Color.YELLOW   , Color.BLUE     , Color.LIGHTBLUE },
+                new Color[] { Color.GREEN    , Color.PINK     , Color.LIGHTBLUE, Color.LIGHTBLUE, Color.YELLOW    },
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, Color.PINK     , Color.LIGHTBLUE, Color.YELLOW    },
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, Color.YELLOW   , Color.YELLOW   , Color.GREEN     },
+                new Color[] { Color.PINK     , Color.PINK     , Color.BLUE     , Color.BLUE     , Color.WHITE     },
+                //@formatter:on
+        };
+        assertTrue(new SixCouplesCommonGoalChecker().checkCommonGoal(new Shelfie(matrix1)));
+
+        Color[][] matrix2 = {
+                //@formatter:off
+                new Color[] { Color.GREEN    , Color.GREEN    , Color.LIGHTBLUE, Color.PINK     , Color.BLUE      },
+                new Color[] { Color.YELLOW   , Color.PINK     , Color.WHITE    , Color.WHITE    , Color.LIGHTBLUE },
+                new Color[] { Color.YELLOW   , Color.BLUE     , Color.PINK     , Color.GREEN    , Color.YELLOW    },
+                new Color[] { Color.PINK     , Color.GREEN    , Color.LIGHTBLUE, Color.PINK     , Color.PINK      },
+                new Color[] { Color.PINK     , Color.WHITE    , Color.BLUE     , Color.PINK     , Color.YELLOW    },
+                new Color[] { Color.PINK     , Color.GREEN    , Color.LIGHTBLUE, Color.GREEN    , Color.GREEN     },
+                //@formatter:on
+        };
+        assertTrue(new SixCouplesCommonGoalChecker().checkCommonGoal(new Shelfie(matrix2)));
+
+    }
 }

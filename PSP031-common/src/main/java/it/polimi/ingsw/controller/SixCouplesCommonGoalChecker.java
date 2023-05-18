@@ -35,7 +35,7 @@ public class SixCouplesCommonGoalChecker implements CommonGoalChecker {
                 }
                 if (r < ROWS - 1 && shelfie.tile(r, c).get() != null
                         && Objects.equals(shelfie.tile(r + 1, c).get(), shelfie.tile(r, c).get()) &&
-                        checked[r][c] == 0 && checked[r + 1][c] == 0) {
+                        checked[r][c] == 0 /* && checked[r + 1][c] == 0 */) {
                     count++;
                     checked[r][c] = count;
                     checked[r + 1][c] = count;

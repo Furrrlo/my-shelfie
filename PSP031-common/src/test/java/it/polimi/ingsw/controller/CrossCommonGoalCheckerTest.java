@@ -76,6 +76,28 @@ class CrossCommonGoalCheckerTest {
                 //@formatter:on
         };
         assertFalse(new CrossCommonGoalChecker().checkCommonGoal(new Shelfie(matrix)));
+        Color[][] matrix1 = {
+                //@formatter:off
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.YELLOW   , Color.BLUE     , Color.WHITE     },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.WHITE    , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.YELLOW   , Color.YELLOW   , Color.PINK     , Color.PINK     , null            },
+                new Color[] { Color.WHITE    , Color.GREEN    , Color.PINK     , Color.PINK     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.PINK     , Color.YELLOW   , Color.PINK      },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
+                //@formatter:on
+        };
+        assertFalse(new CrossCommonGoalChecker().checkCommonGoal(new Shelfie(matrix1)));
+        Color[][] matrix2 = {
+                //@formatter:off
+                new Color[] { Color.YELLOW   , Color.GREEN    , Color.YELLOW   , Color.BLUE     , Color.PINK      },
+                new Color[] { Color.WHITE    , Color.YELLOW   , Color.WHITE    , Color.PINK     , Color.BLUE      },
+                new Color[] { Color.YELLOW   , Color.YELLOW   , Color.PINK     , Color.PINK     , Color.PINK      },
+                new Color[] { Color.WHITE    , Color.GREEN    , Color.PINK     , Color.PINK     , Color.YELLOW    },
+                new Color[] { Color.YELLOW   , Color.LIGHTBLUE, Color.PINK     , Color.YELLOW   , Color.PINK      },
+                new Color[] { Color.BLUE     , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
+                //@formatter:on
+        };
+        assertTrue(new CrossCommonGoalChecker().checkCommonGoal(new Shelfie(matrix2)));
     }
 
     @Test
