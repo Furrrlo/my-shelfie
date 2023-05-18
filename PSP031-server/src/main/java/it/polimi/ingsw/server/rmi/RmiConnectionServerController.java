@@ -17,11 +17,12 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RmiConnectionServerController implements RmiConnectionController, Closeable {
+public class RmiConnectionServerController extends UnicastRemoteObject implements RmiConnectionController, Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmiConnectionServerController.class);
 
@@ -51,20 +52,33 @@ public class RmiConnectionServerController implements RmiConnectionController, C
                                                      @Nullable RMIServerSocketFactory ssf)
             throws RemoteException {
         RmiConnectionServerController rmiController;
-        final var exporter = UnicastRemoteObjects.createExporter(csf, ssf);
-        registry.rebind(remoteName, exporter
-                .export(rmiController = new RmiConnectionServerController(controller, registry, remoteName, exporter), 0));
+        registry.rebind(remoteName,
+                rmiController = new RmiConnectionServerController(0, csf, ssf, controller, registry, remoteName));
         return rmiController;
     }
 
-    private RmiConnectionServerController(ServerController controller,
-                                          Registry registry,
-                                          String remoteName,
-                                          UnicastRemoteObjects.Exporter unicastRemoteObjects) {
+    protected RmiConnectionServerController(int port,
+                                            @Nullable RMIClientSocketFactory csf,
+                                            @Nullable RMIServerSocketFactory ssf,
+                                            ServerController controller,
+                                            Registry registry,
+                                            String remoteName)
+            throws RemoteException {
+        super(port, csf, ssf);
         this.controller = controller;
         this.registry = registry;
         this.remoteName = remoteName;
-        this.underlyingUnicastRemoteObjects = unicastRemoteObjects;
+        this.underlyingUnicastRemoteObjects = UnicastRemoteObjects.createExporter(csf, ssf);
+    }
+
+    @Override
+    public String getClientAddressHost() {
+        try {
+            return getClientHost();
+        } catch (ServerNotActiveException e) {
+            LOGGER.error("Somehow the server was not active", e);
+            throw new IllegalStateException("Internal server error");
+        }
     }
 
     @Override

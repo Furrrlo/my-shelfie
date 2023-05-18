@@ -7,7 +7,11 @@ import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.rmi.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -19,6 +23,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmiClientNetManager.class);
 
     private final @Nullable String host;
     private final int port;
@@ -61,6 +67,21 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
 
         final Registry registry = LocateRegistry.getRegistry(host, port);
         final var server = (RmiConnectionController) registry.lookup(remoteName);
+
+        // If the client has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
+        // @see https://bugs.openjdk.org/browse/JDK-8042232
+        // To work around this, either run the JVM with the parameter -Djava.rmi.server.hostname=<server address> or
+        // we ask the server to give back the remote client address.
+        if (System.getProperty("java.rmi.server.hostname") == null) {
+            try {
+                var addrStr = server.getClientAddressHost();
+                var addr = InetAddress.getByName(addrStr);
+                if (addr.isLoopbackAddress())
+                    System.setProperty("java.rmi.server.hostname", addrStr);
+            } catch (UnknownHostException e) {
+                LOGGER.error("Failed to try fixing 'java.rmi.server.hostname'", e);
+            }
+        }
 
         AtomicReference<RmiClientNetManager> netManagerRef = new AtomicReference<>();
         var heartbeatClientHandler = new RmiHeartbeatClientHandler(() -> {
