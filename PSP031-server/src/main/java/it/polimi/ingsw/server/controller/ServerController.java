@@ -305,7 +305,9 @@ public class ServerController implements Closeable {
                                 p.connected().get(),
                                 isCurrentTurnFactory,
                                 isFirstFinisherFactory,
-                                p.score().get())));
+                                p.getNick().equals(nick)
+                                        ? p.privateScore().get()
+                                        : p.publicScore().get())));
         final ServerPlayer thePlayer = game.getPlayers().stream()
                 .filter(p -> p.getNick().equals(nick))
                 .findFirst()
@@ -347,7 +349,23 @@ public class ServerController implements Closeable {
         game.getPlayers().forEach(p -> {
             observableTracker.registerObserver(p.connected(),
                     connected -> gameUpdater.updatePlayerConnected(p.getNick(), connected));
-            observableTracker.registerObserver(p.score(), score -> gameUpdater.updatePlayerScore(p.getNick(), score));
+
+            if (p.getNick().equals(nick)) {
+                observableTracker.registerObserver(p.privateScore(),
+                        score -> gameUpdater.updatePlayerScore(p.getNick(), score));
+            } else {
+                // If the game is not over, send the public score
+                observableTracker.registerObserver(p.publicScore(), score -> {
+                    if (!game.endGame().get())
+                        gameUpdater.updatePlayerScore(p.getNick(), score);
+                });
+                // If the game is over, send the private score
+                observableTracker.registerObserver(p.privateScore(), score -> {
+                    if (game.endGame().get())
+                        gameUpdater.updatePlayerScore(p.getNick(), score);
+                });
+            }
+
             p.getShelfie().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),
                     tile -> gameUpdater.updatePlayerShelfieTile(
                             p.getNick(),
@@ -355,7 +373,6 @@ public class ServerController implements Closeable {
                             tileAndCoords.col(),
                             tile)));
         });
-        observableTracker.registerObserver(game.endGame(), gameUpdater::updateEndGame);
         observableTracker.registerObserver(game.suspended(), gameUpdater::updateSuspended);
 
         // updating message only if message nickReceivingPlayer == nick, or if it's for everyone
@@ -375,11 +392,18 @@ public class ServerController implements Closeable {
                         .map(ServerPlayer::getNick)
                         .collect(Collectors.toList()))));
         observableTracker.registerObserver(game.endGame(), gameOver -> {
-            if (!gameOver)
-                return;
+            // Update all scores to the private ones
+            if (gameOver) {
+                for (ServerPlayer p : game.getPlayers())
+                    gameUpdater.updatePlayerScore(p.getNick(), p.privateScore().get());
+            }
 
-            onGameOver.run();
-            lobbies.remove(serverLobbyAndController);
+            gameUpdater.updateEndGame(gameOver);
+
+            if (gameOver) {
+                onGameOver.run();
+                lobbies.remove(serverLobbyAndController);
+            }
         });
     }
 

@@ -11,7 +11,8 @@ public class ServerPlayer implements ServerPlayerView {
     private final Shelfie shelfie;
     private final PersonalGoal personalGoal;
     private final Property<Boolean> connected;
-    private final Provider<Integer> score;
+    private final Provider<Integer> publicScore;
+    private final Provider<Integer> privateScore;
 
     /**
      * @implNote requires a scoreProviderFactory so that it can resolve a circular dependency
@@ -20,12 +21,14 @@ public class ServerPlayer implements ServerPlayerView {
      */
     public ServerPlayer(String nick,
                         PersonalGoal personalGoal,
-                        Function<ServerPlayer, Provider<Integer>> scoreProviderFactory) {
+                        Function<ServerPlayer, Provider<Integer>> publicScoreProviderFactory,
+                        Function<ServerPlayer, Provider<Integer>> privateScoreProviderFactory) {
         this.nick = nick;
         this.personalGoal = personalGoal;
         this.shelfie = new Shelfie();
         this.connected = new SerializableProperty<>(true);
-        this.score = scoreProviderFactory.apply(this);
+        this.publicScore = publicScoreProviderFactory.apply(this);
+        this.privateScore = privateScoreProviderFactory.apply(this);
     }
 
     @Override
@@ -49,8 +52,13 @@ public class ServerPlayer implements ServerPlayerView {
     }
 
     @Override
-    public Provider<Integer> score() {
-        return score;
+    public Provider<Integer> publicScore() {
+        return publicScore;
+    }
+
+    @Override
+    public Provider<Integer> privateScore() {
+        return privateScore;
     }
 
     @Override
@@ -63,12 +71,13 @@ public class ServerPlayer implements ServerPlayerView {
                 shelfie.equals(that.shelfie) &&
                 personalGoal.equals(that.personalGoal) &&
                 connected.get().equals(that.connected.get()) &&
-                score.get().equals(that.score.get());
+                publicScore.get().equals(that.publicScore.get()) &&
+                privateScore.get().equals(that.privateScore.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nick, shelfie, personalGoal, connected.get(), score.get());
+        return Objects.hash(nick, shelfie, personalGoal, connected.get(), publicScore.get(), privateScore.get());
     }
 
     @Override
@@ -78,7 +87,8 @@ public class ServerPlayer implements ServerPlayerView {
                 ", shelfie=" + shelfie +
                 ", personalGoal=" + personalGoal +
                 ", connected=" + connected +
-                ", score=" + score +
+                ", publicScore=" + publicScore +
+                ", privateScore=" + privateScore +
                 '}';
     }
 }

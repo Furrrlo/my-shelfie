@@ -18,6 +18,9 @@ public interface ServerPlayerView {
     /** Returns true if the player is connected */
     Provider<Boolean> connected();
 
-    /** Returns the player current score */
-    Provider<Integer> score();
+    /** Returns the player current score, as seen by the other players */
+    Provider<Integer> publicScore();
+
+    /** Returns the player current score, as seen by the player itself */
+    Provider<Integer> privateScore();
 }

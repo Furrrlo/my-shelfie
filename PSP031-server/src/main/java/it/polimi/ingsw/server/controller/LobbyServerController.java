@@ -176,7 +176,8 @@ public class LobbyServerController {
                         .map(n -> new ServerPlayer(
                                 n.getNick(),
                                 new PersonalGoal(personalGoalIndexes.remove(random.nextInt(personalGoalIndexes.size()))),
-                                p -> new ScoreProvider(p, commonGoals, firstFinisher)))
+                                p -> new PublicScoreProvider(p, commonGoals, firstFinisher),
+                                PrivateScoreProvider::new))
                         .collect(Collectors.toList()),
                 random.nextInt(players.size()),
                 commonGoals, firstFinisher);

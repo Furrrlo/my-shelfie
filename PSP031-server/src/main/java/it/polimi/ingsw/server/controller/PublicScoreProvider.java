@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-class ScoreProvider implements Provider<Integer>, Serializable {
+class PublicScoreProvider implements Provider<Integer>, Serializable {
 
     private final List<Integer> COMMON_GOAL_SCORE_BY_POS = List.of(8, 6, 4, 2);
 
@@ -28,9 +28,9 @@ class ScoreProvider implements Provider<Integer>, Serializable {
     private final List<ServerCommonGoal> commonGoals;
     private final Provider<? extends @Nullable ServerPlayerView> firstFinisher;
 
-    public ScoreProvider(ServerPlayer player,
-                         List<ServerCommonGoal> commonGoals,
-                         Provider<? extends @Nullable ServerPlayerView> firstFinisher) {
+    public PublicScoreProvider(ServerPlayer player,
+                               List<ServerCommonGoal> commonGoals,
+                               Provider<? extends @Nullable ServerPlayerView> firstFinisher) {
         this.player = player;
         this.commonGoals = commonGoals;
         this.firstFinisher = firstFinisher;
@@ -51,20 +51,7 @@ class ScoreProvider implements Provider<Integer>, Serializable {
     }
 
     private int calculateScore() {
-        return getPersonalGoalScore() + getCommonGoalsScore() + getGroupsScore() + getFirstFinisherScore();
-    }
-
-    private int getPersonalGoalScore() {
-        return switch (player.getShelfie().numTilesOverlappingWithPersonalGoal(player.getPersonalGoal())) {
-            case 0 -> 0;
-            case 1 -> 1;
-            case 2 -> 2;
-            case 3 -> 4;
-            case 4 -> 6;
-            case 5 -> 9;
-            case 6 -> 12;
-            default -> throw new IllegalStateException("Unexpected value during personalGoal score check");
-        };
+        return getCommonGoalsScore() + getGroupsScore() + getFirstFinisherScore();
     }
 
     private int getCommonGoalsScore() {
