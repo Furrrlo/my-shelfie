@@ -9,11 +9,9 @@ import org.jetbrains.annotations.Nullable;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
@@ -35,6 +33,8 @@ public class GamePane extends AnchorPane {
     private final Pane player1Shelfie;
     private final Pane player2Shelfie;
     private final Pane player3Shelfie;
+    private final Button chatBtn;
+    private final ChatComponent chatPane;
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
 
@@ -110,6 +110,11 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.player3Shelfie = otherPlayers.size() >= 3
                 ? new PlayerShelfieComponent(otherPlayers.get(2), true, true)
                 : new Pane());
+
+        getChildren().add(this.chatBtn = new Button("C"));
+        getChildren().add(this.chatPane = new ChatComponent());
+        this.chatPane.messagesProperty().bind(FxProperties
+                .toFxProperty("messages", this, game.messageList()));
     }
 
     @Override
@@ -141,6 +146,13 @@ public class GamePane extends AnchorPane {
         this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 182.0 * scale, 194.0 * scale);
         this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 182.0 * scale, 194.0 * scale);
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
+        final var btnSize = 45 * scale;
+        final var chatPaneWidth = 200.0 * scale;
+        if (chatPane.isVisible())
+            this.chatBtn.resizeRelocate(getWidth() - chatPaneWidth - btnSize, getHeight() - btnSize, btnSize, btnSize);
+        else
+            this.chatBtn.resizeRelocate(getWidth() - btnSize, getHeight() - btnSize, btnSize, btnSize);
+        this.chatPane.resizeRelocate(getWidth() - chatPaneWidth, 0, chatPaneWidth, getHeight());
     }
 
     public Consumer<@Nullable Throwable> getOnDisconnect() {
