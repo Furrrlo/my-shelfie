@@ -1,6 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
@@ -25,7 +25,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
 
 public class JfxMainMenuScene extends Scene {
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuScene.class);
@@ -79,7 +78,7 @@ public class JfxMainMenuScene extends Scene {
         mainPane.setAlignment(Pos.CENTER);
 
         //ip validation
-        Label isIpValid = new Label("");
+        Label errorLabel = new Label("");
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             String ipText = ipTextField.getText();
             String portText = portTextField.getText();
@@ -89,24 +88,28 @@ public class JfxMainMenuScene extends Scene {
             try {
                 ClientNetManager netManager;
                 if (connectionType.equals("RMI")) {
+                    if (ipText.equals("")) {
+                        ipText = "localhost";
+                    }
+                    if (portText.equals("")) {
+                        portText = "1099";
+                    }
                     netManager = RmiClientNetManager.connect(ipText, Integer.parseInt(portText), usernameText);
                 } else if (connectionType.equals("Socket")) {
+                    if (ipText.equals("")) {
+                        ipText = "localhost";
+                    }
+                    if (portText.equals("")) {
+                        portText = "1234";
+                    }
                     netManager = SocketClientNetManager.connect(new InetSocketAddress(ipText, Integer.parseInt(portText)),
                             usernameText);
                 } else {
                     throw new RuntimeException();
                 }
                 var lobbyAndController = netManager.joinGame();
-                lobbyAndController.controller().ready(true);
 
-                GameAndController<?> gameAndController;
-                if ((gameAndController = lobbyAndController.lobby().game().get()) == null) {
-                    final CompletableFuture<GameAndController<?>> gameAndControllerFuture = new CompletableFuture<>();
-                    lobbyAndController.lobby().game().registerObserver(gameAndControllerFuture::complete);
-                    gameAndController = gameAndControllerFuture.get();
-                }
-
-                Scene scene = new JfxGameScene(gameAndController.game(), gameAndController.controller());
+                Scene scene = new JfxLobbyScene(stage, lobbyAndController);
 
                 stage.setTitle("My Shelfie");
 
@@ -135,7 +138,12 @@ public class JfxMainMenuScene extends Scene {
                     System.exit(exitCode);
                 });
 
-            } catch (Exception ignored) {
+            } catch (NickNotValidException ex) {
+                errorLabel.setText(ex.getMessage());
+
+            } catch (Exception ex) {
+                errorLabel.setText("Failed to connect to the server. Check IpP and port");
+                LOGGER.error("Failed to connect", ex);
             }
         };
 
@@ -147,7 +155,7 @@ public class JfxMainMenuScene extends Scene {
         VBox vbox = new VBox();
         vbox.setPadding(new Insets(10, 10, 10, 10));
         vbox.setSpacing(10);
-        vbox.getChildren().addAll(titleView, mainPane, startButton, isIpValid);
+        vbox.getChildren().addAll(titleView, mainPane, startButton, errorLabel);
         vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(10d);
 
