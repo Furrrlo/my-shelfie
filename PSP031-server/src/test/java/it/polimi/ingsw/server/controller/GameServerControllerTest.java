@@ -2,6 +2,8 @@ package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.model.ServerGameView;
+import it.polimi.ingsw.server.model.ServerPlayerView;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -129,6 +131,34 @@ class GameServerControllerTest {
         //we expect at this point board to be full ( 29 tiles on the board )
         //and we expect tiles in position (3,3) and (3,7) to have not changed
         assertEquals(29, game.getBoard().tiles().mapToInt(t -> 1).sum());
+    }
+
+    private String getPlayerColor(String nick, ServerGameView game) {
+        if (nick.equals("all"))
+            return "";
+        int index = 0;
+        for (ServerPlayerView player : game.getPlayers()) {
+            if (player.getNick().equals(nick)) {
+                index = game.getPlayers().indexOf(player);
+            }
+        }
+        switch (index) {
+            case 0 -> {
+                return "\033[0;31m";//RED
+            }
+            case 1 -> {
+                return "\033[0;32m"; // GREEN
+            }
+            case 2 -> {
+                return "\033[0;33m"; // YELLOW
+            }
+            case 3 -> {
+                return "\033[0;36m"; // CYAN
+            }
+            default -> {
+                return "";
+            }
+        }
     }
 
     @Test
