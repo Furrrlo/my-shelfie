@@ -71,7 +71,8 @@ public class GameServerController {
                                 LOGGER.info("Game " + game.getGameID() + " is over because players have disconnected");
                                 //TODO: The only connected player (if any) should win
                                 game.endGame().set(true);
-                            }, 30, TimeUnit.SECONDS);
+                            }, 120, TimeUnit.SECONDS);
+                            //TODO: remember to bring back to 30 second
                         }
 
                         // If the current player disconnects, skip his turn
