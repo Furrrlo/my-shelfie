@@ -4,6 +4,7 @@ import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.GameView;
+import it.polimi.ingsw.model.PlayerView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -117,12 +118,13 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.chatBtn = new Button("C"));
         getChildren().add(this.chatPane = new ChatComponent(
                 game.getPlayers()
-                        .stream().map(p -> p.getNick())
+                        .stream().map(PlayerView::getNick)
                         .filter(nick -> !nick.equals(game.thePlayer().getNick()))
                         .toList(),
                 game.thePlayer().getNick(), controller));
         this.chatPane.messagesProperty().bind(FxProperties
                 .toFxProperty("messages", this, game.messageList()));
+        this.chatPane.setVisible(false);
         //change visibility of chatPane when chatBtn is pressed
         this.chatBtn.setOnAction(e -> {
             this.chatPane.setVisible(!this.chatPane.isVisible());
