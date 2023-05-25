@@ -1,15 +1,20 @@
 package it.polimi.ingsw.client.javafx;
 
+import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.UserMessage;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -21,14 +26,23 @@ public class ChatComponent extends VBox {
 
     private final ChatScrollComponent chatScrollComponent;
 
-    public ChatComponent() {
+    public ChatComponent(List<String> recipients, String thePlayer, GameController controller) {
         setBackground(Background.fill(Color.WHITE));
 
-        this.chatScrollComponent = new ChatScrollComponent();
+        this.chatScrollComponent = new ChatScrollComponent(thePlayer);
+
+        ChoiceBox<String> recipient = new ChoiceBox<>();
+        recipient.getItems().add("all");
+        recipient.getItems().addAll(recipients);
+        recipient.getSelectionModel().selectFirst();
+        recipient.prefWidthProperty().bind(chatScrollComponent.widthProperty());
+        recipient.minWidth(USE_PREF_SIZE);
+        recipient.maxWidth(USE_PREF_SIZE);
 
         TextArea text = new TextArea();
 
         Button send = new Button();
+
         var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/paper-plane.png")));
         imgView.setPreserveRatio(true);
         imgView.setFitWidth(25);
@@ -46,6 +60,7 @@ public class ChatComponent extends VBox {
 
         setVgrow(chatScrollComponent, Priority.SOMETIMES);
         getChildren().add(chatScrollComponent);
+        getChildren().add(recipient);
         setVgrow(hbox, Priority.ALWAYS);
         text.setWrapText(true);
         text.prefRowCountProperty()
