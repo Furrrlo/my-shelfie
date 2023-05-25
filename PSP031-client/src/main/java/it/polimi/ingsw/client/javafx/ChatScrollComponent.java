@@ -9,10 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -54,16 +51,21 @@ public class ChatScrollComponent extends ScrollPane {
             messages.addListener((obs, old, newList) -> {
                 var newComponents = new ArrayList<Node>();
                 for (UserMessage msg : newList) {
+                    var hbox = new HBox();
+                    //if msg is from the player we align to the right, else to the left
+                    if (msg.nickSendingPlayer().equals(thePlayer))
+                        hbox.setAlignment(Pos.TOP_RIGHT);
+                    else
+                        hbox.setAlignment(Pos.TOP_LEFT);
                     var m = new MessageComponent(msg, thePlayer);
                     var text = new Text(m.getText());
                     text.setFont(m.getFont());
                     var textWidth = text.getLayoutBounds().getWidth();
                     m.maxWidthProperty().bind(widthProperty()
-                            .map(vboxWidth -> Math.min(vboxWidth.doubleValue() / 3d, textWidth)));
-                    newComponents.add(m);
-
+                            .map(vboxWidth -> Math.min(vboxWidth.doubleValue() / 2d, textWidth)));
+                    hbox.getChildren().add(m);
+                    newComponents.add(hbox);
                 }
-
                 getChildren().setAll(newComponents);
             });
 
@@ -80,14 +82,12 @@ public class ChatScrollComponent extends ScrollPane {
                         Color.LIGHTGRAY,
                         new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
                         new Insets(-2)))));
-                setAlignment(Pos.TOP_LEFT);
                 setText("[" + message.nickSendingPlayer() + "] : " + message.message());
             } else {
                 backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                         Color.LIGHTSEAGREEN,
                         new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
                         new Insets(-2)))));
-                setAlignment(Pos.TOP_RIGHT);
                 setText(message.message());
             }
         }
