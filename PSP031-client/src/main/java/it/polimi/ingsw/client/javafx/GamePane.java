@@ -9,7 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
@@ -112,9 +115,18 @@ public class GamePane extends AnchorPane {
                 : new Pane());
 
         getChildren().add(this.chatBtn = new Button("C"));
-        getChildren().add(this.chatPane = new ChatComponent());
+        getChildren().add(this.chatPane = new ChatComponent(/*
+                                                             * game.getPlayers()
+                                                             * .stream().map(PlayerView::getNick)
+                                                             * .filter(nick -> !nick.equals(game.thePlayer().getNick()))
+                                                             * .toList(), game.thePlayer().getNick(), controller
+                                                             */));
         this.chatPane.messagesProperty().bind(FxProperties
                 .toFxProperty("messages", this, game.messageList()));
+        //change visibility of chatPane when chatBtn is pressed
+        this.chatBtn.setOnAction(e -> {
+            this.chatPane.setVisible(!this.chatPane.isVisible());
+        });
     }
 
     @Override
