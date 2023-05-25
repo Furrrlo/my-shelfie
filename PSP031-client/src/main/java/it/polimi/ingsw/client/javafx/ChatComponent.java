@@ -33,7 +33,7 @@ public class ChatComponent extends VBox {
         this.chatScrollComponent = new ChatScrollComponent(thePlayer);
 
         ChoiceBox<String> recipient = new ChoiceBox<>();
-        recipient.getItems().add("all");
+        recipient.getItems().add(UserMessage.EVERYONE_RECIPIENT);
         recipient.getItems().addAll(recipients);
         recipient.getSelectionModel().selectFirst();
         recipient.prefWidthProperty().bind(chatScrollComponent.widthProperty());
@@ -56,7 +56,7 @@ public class ChatComponent extends VBox {
                 if (message.equals(""))
                     throw new IllegalArgumentException();
                 String nickRecipient = recipient.getValue();
-                if (!recipients.contains(nickRecipient))
+                if (!recipients.contains(nickRecipient) && !nickRecipient.equals(UserMessage.EVERYONE_RECIPIENT))
                     throw new IllegalArgumentException("There is no such a player");
 
                 controller.sendMessage(message, nickRecipient);
