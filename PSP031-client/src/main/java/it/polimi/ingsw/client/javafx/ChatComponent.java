@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
+import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.UserMessage;
 
@@ -48,6 +49,24 @@ public class ChatComponent extends VBox {
         imgView.setFitWidth(25);
         imgView.setFitHeight(25);
         send.setGraphic(imgView);
+
+        send.setOnAction(event -> {
+            try {
+                String message = text.getText();
+                if (message.equals(""))
+                    throw new IllegalArgumentException();
+                String nickRecipient = recipient.getValue();
+                if (!recipients.contains(nickRecipient))
+                    throw new IllegalArgumentException("There is no such a player");
+
+                controller.sendMessage(message, nickRecipient);
+
+                //restores TextArea after message is sent
+                text.setText("");
+            } catch (DisconnectedException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         var hbox = new HBox();
         hbox.setAlignment(Pos.BOTTOM_CENTER);

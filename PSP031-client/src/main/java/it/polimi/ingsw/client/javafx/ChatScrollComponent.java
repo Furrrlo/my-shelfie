@@ -23,8 +23,8 @@ public class ChatScrollComponent extends ScrollPane {
 
     private final MessageVBox messagesVBox;
 
-    public ChatScrollComponent() {
-        setContent(this.messagesVBox = new MessageVBox());
+    public ChatScrollComponent(String thePlayer) {
+        setContent(this.messagesVBox = new MessageVBox(thePlayer));
         setHbarPolicy(ScrollBarPolicy.NEVER);
         setVbarPolicy(ScrollBarPolicy.NEVER);
         setFitToWidth(true);
@@ -47,15 +47,15 @@ public class ChatScrollComponent extends ScrollPane {
 
         private final ObjectProperty<List<UserMessage>> messages = new SimpleObjectProperty<>(this, "messages");
 
-        public MessageVBox() {
+        public MessageVBox(String thePlayer) {
             setPadding(new Insets(10));
             setBackground(Background.EMPTY);
 
             messages.addListener((obs, old, newList) -> {
                 var newComponents = new ArrayList<Node>();
                 for (UserMessage msg : newList) {
-                    var m = new MessageComponent(msg.message());
-                    var text = new Text(msg.message());
+                    var m = new MessageComponent(msg, thePlayer);
+                    var text = new Text(m.getText());
                     text.setFont(m.getFont());
                     var textWidth = text.getLayoutBounds().getWidth();
                     m.maxWidthProperty().bind(widthProperty()
@@ -73,14 +73,23 @@ public class ChatScrollComponent extends ScrollPane {
 
     private static class MessageComponent extends Label {
 
-        public MessageComponent(String s) {
+        public MessageComponent(UserMessage message, String thePlayer) {
             setWrapText(true);
-            backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                    Color.LIGHTGRAY,
-                    new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
-                    new Insets(-2)))));
-            setAlignment(Pos.TOP_LEFT);
-            setText(s);
+            if (!message.nickSendingPlayer().equals(thePlayer)) {
+                backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                        Color.LIGHTGRAY,
+                        new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
+                        new Insets(-2)))));
+                setAlignment(Pos.TOP_LEFT);
+                setText("[" + message.nickSendingPlayer() + "] : " + message.message());
+            } else {
+                backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                        Color.LIGHTSEAGREEN,
+                        new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
+                        new Insets(-2)))));
+                setAlignment(Pos.TOP_RIGHT);
+                setText(message.message());
+            }
         }
 
     }

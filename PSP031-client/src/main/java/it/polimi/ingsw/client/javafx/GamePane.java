@@ -115,12 +115,12 @@ public class GamePane extends AnchorPane {
                 : new Pane());
 
         getChildren().add(this.chatBtn = new Button("C"));
-        getChildren().add(this.chatPane = new ChatComponent(/*
-                                                             * game.getPlayers()
-                                                             * .stream().map(PlayerView::getNick)
-                                                             * .filter(nick -> !nick.equals(game.thePlayer().getNick()))
-                                                             * .toList(), game.thePlayer().getNick(), controller
-                                                             */));
+        getChildren().add(this.chatPane = new ChatComponent(
+                game.getPlayers()
+                        .stream().map(p -> p.getNick())
+                        .filter(nick -> !nick.equals(game.thePlayer().getNick()))
+                        .toList(),
+                game.thePlayer().getNick(), controller));
         this.chatPane.messagesProperty().bind(FxProperties
                 .toFxProperty("messages", this, game.messageList()));
         //change visibility of chatPane when chatBtn is pressed
