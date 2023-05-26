@@ -23,6 +23,7 @@ import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValu
 public class ChatComponent extends VBox {
 
     private final ChatScrollComponent chatScrollComponent;
+    public final static int INSET = 15;
 
     public ChatComponent(List<String> recipients, String thePlayer, GameController controller) {
         //setBackground(Background.fill(Color.WHITE));

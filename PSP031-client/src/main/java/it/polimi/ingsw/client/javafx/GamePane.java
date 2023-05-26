@@ -137,7 +137,7 @@ public class GamePane extends AnchorPane {
         this.chatPane.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTGRAY,
                 new CornerRadii(Math.min(25, 25 * (width.doubleValue() / 210d))),
-                new Insets(-15)))));
+                new Insets(-ChatComponent.INSET)))));
     }
 
     @Override
@@ -173,14 +173,14 @@ public class GamePane extends AnchorPane {
         final var chatPaneWidth = 200.0 * scale;
         if (chatPane.isVisible())
             this.chatBtn.resizeRelocate(
-                    getWidth() - chatPaneWidth - btnSize - 30,
+                    getWidth() - chatPaneWidth - btnSize - ChatComponent.INSET * 2,
                     getHeight() - btnSize, btnSize, btnSize);
         else
             this.chatBtn.resizeRelocate(getWidth() - btnSize, getHeight() - btnSize, btnSize, btnSize);
         this.chatPane.resizeRelocate(
-                getWidth() - chatPaneWidth - 15,
-                15,
-                chatPaneWidth, getHeight() - 30);
+                getWidth() - chatPaneWidth + ChatComponent.INSET,
+                +ChatComponent.INSET,
+                chatPaneWidth - ChatComponent.INSET * 2, getHeight() - ChatComponent.INSET * 2);
     }
 
     public Consumer<@Nullable Throwable> getOnDisconnect() {
