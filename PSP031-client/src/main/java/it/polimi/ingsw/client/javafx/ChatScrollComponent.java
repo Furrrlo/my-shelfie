@@ -18,8 +18,6 @@ import java.util.List;
 
 public class ChatScrollComponent extends ScrollPane {
     //TODO : make so that is always scrolled down on default
-    //      fix resizing of scrolling component and outside pane
-
     private final MessageVBox messagesVBox;
 
     public ChatScrollComponent(String thePlayer) {
@@ -71,7 +69,7 @@ public class ChatScrollComponent extends ScrollPane {
                 getChildren().setAll(newComponents);
             });
 
-            setSpacing(15);
+            setSpacing(18);
         }
     }
 
@@ -83,14 +81,14 @@ public class ChatScrollComponent extends ScrollPane {
                 backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                         Color.LIGHTGRAY,
                         new CornerRadii(15),
-                        new Insets(-2)))));
+                        new Insets(-5)))));
                 setText("[" + message.nickSendingPlayer() + "] : " + message.message());
                 setAlignment(Pos.CENTER);
             } else {
                 backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                         Color.LIGHTSEAGREEN,
                         new CornerRadii(15),
-                        new Insets(-2)))));
+                        new Insets(-5)))));
                 setText(message.message());
                 setAlignment(Pos.CENTER);
             }

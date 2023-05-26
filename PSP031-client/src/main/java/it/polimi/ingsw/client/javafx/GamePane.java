@@ -136,7 +136,7 @@ public class GamePane extends AnchorPane {
         });
         this.chatPane.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTGRAY,
-                new CornerRadii(Math.min(25, 25 * (width.doubleValue() / 210d))),
+                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                 new Insets(-ChatComponent.INSET)))));
     }
 

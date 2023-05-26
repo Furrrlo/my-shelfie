@@ -23,17 +23,19 @@ import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValu
 public class ChatComponent extends VBox {
 
     private final ChatScrollComponent chatScrollComponent;
-    public final static int INSET = 15;
+    public final static int INSET = 10;
+    public final static int SPACING = INSET * 3 / 2;
+    public final static double RADIUS = INSET - (double) INSET / 4;
+    public final static int INNER_INSET = INSET / 2;
 
     public ChatComponent(List<String> recipients, String thePlayer, GameController controller) {
-        //setBackground(Background.fill(Color.WHITE));
-        setSpacing(20);
+        setSpacing(SPACING);
 
         this.chatScrollComponent = new ChatScrollComponent(thePlayer);
         chatScrollComponent.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.WHITE,
-                new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
-                new Insets(-5)))));
+                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
+                new Insets(-INNER_INSET)))));
 
         ChoiceBox<String> recipient = new ChoiceBox<>();
         recipient.getItems().add(UserMessage.EVERYONE_RECIPIENT);
@@ -44,8 +46,8 @@ public class ChatComponent extends VBox {
         recipient.maxWidth(USE_PREF_SIZE);
         recipient.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
-                new Insets(-5)))));
+                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
+                new Insets(-INNER_INSET)))));
 
         TextArea text = new TextArea();
 
@@ -53,7 +55,7 @@ public class ChatComponent extends VBox {
         send.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(50, 50 * (width.doubleValue() / 210d))),
-                new Insets(-5)))));
+                new Insets(-INNER_INSET)))));
 
         var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/paper-plane.png")));
         imgView.setPreserveRatio(true);
@@ -82,14 +84,14 @@ public class ChatComponent extends VBox {
         var hbox = new HBox();
         hbox.setAlignment(Pos.BOTTOM_CENTER);
         hbox.setPadding(Insets.EMPTY);
-        hbox.setSpacing(15);
+        hbox.setSpacing(SPACING);
         hbox.getChildren().add(text);
         text.prefWidthProperty().bind(hbox.widthProperty().subtract(imgView.getFitWidth()));
         text.setBackground(Background.EMPTY);
         text.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.WHITE,
-                new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
-                new Insets(-5)))));
+                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
+                new Insets(-INNER_INSET)))));
         text.minWidth(USE_PREF_SIZE);
         text.maxWidth(USE_PREF_SIZE);
         hbox.getChildren().add(send);
