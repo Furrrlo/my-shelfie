@@ -27,7 +27,7 @@ public class ChatComponent extends VBox {
 
     public ChatComponent(List<String> recipients, String thePlayer, GameController controller) {
         //setBackground(Background.fill(Color.WHITE));
-        setSpacing(15);
+        setSpacing(20);
 
         this.chatScrollComponent = new ChatScrollComponent(thePlayer);
         chatScrollComponent.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
@@ -42,15 +42,23 @@ public class ChatComponent extends VBox {
         recipient.prefWidthProperty().bind(chatScrollComponent.widthProperty());
         recipient.minWidth(USE_PREF_SIZE);
         recipient.maxWidth(USE_PREF_SIZE);
+        recipient.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTSEAGREEN,
+                new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
+                new Insets(-5)))));
 
         TextArea text = new TextArea();
 
         Button send = new Button();
+        send.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTSEAGREEN,
+                new CornerRadii(Math.min(50, 50 * (width.doubleValue() / 210d))),
+                new Insets(-5)))));
 
         var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/paper-plane.png")));
         imgView.setPreserveRatio(true);
-        imgView.setFitWidth(25);
-        imgView.setFitHeight(25);
+        imgView.setFitWidth(20);
+        imgView.setFitHeight(20);
         send.setGraphic(imgView);
 
         send.setOnAction(event -> {
