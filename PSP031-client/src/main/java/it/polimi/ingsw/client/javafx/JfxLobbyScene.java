@@ -2,11 +2,15 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.model.LobbyPlayer;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -15,14 +19,20 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class JfxLobbyScene extends Scene {
+
     public JfxLobbyScene(Stage stage, LobbyAndController lobbyAndController) {
+
         super(createRootNode(stage, lobbyAndController));
+
     }
 
     private static Parent createRootNode(Stage stage, LobbyAndController lobbyAndController) {
+
         //var mainPane = new CenteringFitPane();
         //mainPane.getChildren().add(new MainMenuPane());
         //Pattern ipPattern = Pattern
@@ -76,6 +86,13 @@ public class JfxLobbyScene extends Scene {
             }
         };
 
+        //added Vbox for Lobby  players
+        //TODO : add label showing if player is ready or not 
+        final LobbyPlayersVbox lobbyPlayersVbox = new LobbyPlayersVbox();
+        lobbyPlayersVbox.lobbyPlayersProperty().bind(FxProperties
+                .toFxProperty("messages", lobbyPlayersVbox, lobbyAndController.lobby().joinedPlayers()));
+        lobbyPlayersVbox.setAlignment(Pos.CENTER);
+
         // Create start button
         Button readyButton = new Button("Ready");
         readyButton.setOnAction(eventIpCHeck);
@@ -84,7 +101,7 @@ public class JfxLobbyScene extends Scene {
         VBox vbox = new VBox();
         vbox.setPadding(new Insets(10, 10, 10, 10));
         vbox.setSpacing(10);
-        vbox.getChildren().addAll(mainPane, readyButton);
+        vbox.getChildren().addAll(mainPane, readyButton, lobbyPlayersVbox);
         vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(10d);
 
@@ -105,6 +122,36 @@ public class JfxLobbyScene extends Scene {
                 new BackgroundSize(100, 100, true, true, false, true))));
 
         return anchorPane;
+
     }
 
+    private static class LobbyPlayersVbox extends VBox {
+
+        private final ObjectProperty<List<? extends LobbyPlayer>> lobbyPlayers = new SimpleObjectProperty<>(this,
+                "lobbyPlayers");
+
+        public LobbyPlayersVbox() {
+            lobbyPlayers.addListener((obs, old, newList) -> {
+                var newComponents = new ArrayList<Node>();
+                for (LobbyPlayer p : newList) {
+                    Label playerLabel = new Label();
+                    playerLabel.setText(p.getNick());
+                    newComponents.add(playerLabel);
+                }
+                getChildren().setAll(newComponents);
+            });
+        }
+
+        public List<? extends LobbyPlayer> getLobbyPlayers() {
+            return lobbyPlayers.get();
+        }
+
+        public ObjectProperty<List<? extends LobbyPlayer>> lobbyPlayersProperty() {
+            return lobbyPlayers;
+        }
+
+        public void setLobbyPlayers(List<? extends LobbyPlayer> lobbyPlayers) {
+            this.lobbyPlayers.set(lobbyPlayers);
+        }
+    }
 }
