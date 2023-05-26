@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatScrollComponent extends ScrollPane {
+    //TODO : make so that is always scrolled down on default
+    //      fix resizing of scrolling component and outside pane
 
     private final MessageVBox messagesVBox;
 
@@ -62,14 +64,14 @@ public class ChatScrollComponent extends ScrollPane {
                     text.setFont(m.getFont());
                     var textWidth = text.getLayoutBounds().getWidth();
                     m.maxWidthProperty().bind(widthProperty()
-                            .map(vboxWidth -> Math.min(vboxWidth.doubleValue() / 2d, textWidth)));
+                            .map(vboxWidth -> Math.min(vboxWidth.doubleValue() / 1.5d, textWidth + 10)));
                     hbox.getChildren().add(m);
                     newComponents.add(hbox);
                 }
                 getChildren().setAll(newComponents);
             });
 
-            setSpacing(10);
+            setSpacing(15);
         }
     }
 
@@ -80,15 +82,17 @@ public class ChatScrollComponent extends ScrollPane {
             if (!message.nickSendingPlayer().equals(thePlayer)) {
                 backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                         Color.LIGHTGRAY,
-                        new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
+                        new CornerRadii(15),
                         new Insets(-2)))));
                 setText("[" + message.nickSendingPlayer() + "] : " + message.message());
+                setAlignment(Pos.CENTER);
             } else {
                 backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                         Color.LIGHTSEAGREEN,
-                        new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
+                        new CornerRadii(15),
                         new Insets(-2)))));
                 setText(message.message());
+                setAlignment(Pos.CENTER);
             }
         }
 
