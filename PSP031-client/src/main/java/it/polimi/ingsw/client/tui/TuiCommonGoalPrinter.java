@@ -88,7 +88,7 @@ public class TuiCommonGoalPrinter implements TuiPrinter {
             new Color[] { Color.BLUE     , Color.BLUE     , Color.BLUE     , Color.BLUE     , Color.BLUE      },
             new Color[] { null           , null           , null           , null           , null            },
             new Color[] { Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.GREEN     },
-            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.PINK     , Color.PINK     , Color.LIGHTBLUE, Color.LIGHTBLUE, Color.PINK      },
             //@formatter:on
     };
     private static final Color[][] TWO_ALL_DIFF_COLUMNS = new Color[][] {
