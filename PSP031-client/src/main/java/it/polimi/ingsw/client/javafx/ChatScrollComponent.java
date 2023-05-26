@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatScrollComponent extends ScrollPane {
-    //TODO : make so that is always scrolled down on default
     private final MessageVBox messagesVBox;
 
     public ChatScrollComponent(String thePlayer) {
@@ -26,6 +25,11 @@ public class ChatScrollComponent extends ScrollPane {
         setVbarPolicy(ScrollBarPolicy.NEVER);
         setFitToWidth(true);
         setBackground(Background.EMPTY);
+        this.needsLayoutProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                this.setVvalue(1.0);
+            }
+        });
     }
 
     public List<UserMessage> getMessages() {
