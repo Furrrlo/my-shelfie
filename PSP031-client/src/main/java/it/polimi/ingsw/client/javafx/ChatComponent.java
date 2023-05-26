@@ -12,10 +12,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -28,9 +25,14 @@ public class ChatComponent extends VBox {
     private final ChatScrollComponent chatScrollComponent;
 
     public ChatComponent(List<String> recipients, String thePlayer, GameController controller) {
-        setBackground(Background.fill(Color.WHITE));
+        //setBackground(Background.fill(Color.WHITE));
+        setSpacing(15);
 
         this.chatScrollComponent = new ChatScrollComponent(thePlayer);
+        chatScrollComponent.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.WHITE,
+                new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
+                new Insets(-5)))));
 
         ChoiceBox<String> recipient = new ChoiceBox<>();
         recipient.getItems().add(UserMessage.EVERYONE_RECIPIENT);
@@ -71,8 +73,14 @@ public class ChatComponent extends VBox {
         var hbox = new HBox();
         hbox.setAlignment(Pos.BOTTOM_CENTER);
         hbox.setPadding(Insets.EMPTY);
+        hbox.setSpacing(15);
         hbox.getChildren().add(text);
         text.prefWidthProperty().bind(hbox.widthProperty().subtract(imgView.getFitWidth()));
+        text.setBackground(Background.EMPTY);
+        text.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.WHITE,
+                new CornerRadii(Math.min(15, 15 * (width.doubleValue() / 210d))),
+                new Insets(-5)))));
         text.minWidth(USE_PREF_SIZE);
         text.maxWidth(USE_PREF_SIZE);
         hbox.getChildren().add(send);
@@ -82,6 +90,7 @@ public class ChatComponent extends VBox {
         getChildren().add(recipient);
         setVgrow(hbox, Priority.ALWAYS);
         text.setWrapText(true);
+
         text.prefRowCountProperty()
                 .bind(compositeObservableValue(text.fontProperty(), text.textProperty(), text.widthProperty()).map(i -> {
                     var textComponent = new Text("");
