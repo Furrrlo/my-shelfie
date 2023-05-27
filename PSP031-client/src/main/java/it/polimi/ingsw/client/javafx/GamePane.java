@@ -141,10 +141,21 @@ public class GamePane extends AnchorPane {
                 Color.RED,
                 new CornerRadii(Math.min(100, 100 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
+        this.newMsg.setVisible(false);
         //change visibility of chatPane when chatBtn is pressed
         this.chatBtn.setOnAction(e -> {
             this.chatPane.setVisible(!this.chatPane.isVisible());
-            this.newMsg.setVisible(!this.chatPane.isVisible());
+            if (chatPane.isVisible())
+                this.newMsg.setVisible(false);
+        });
+        this.chatPane.messagesProperty().addListener((observable, oldValue, newValue) -> {
+            if (chatPane.isVisible())
+                this.newMsg.setVisible(false);
+            if (oldValue.size() == 0 && newValue.size() == 1 && !chatPane.isVisible())
+                this.newMsg.setVisible(true);
+            else if (!oldValue.get(oldValue.size() - 1).equals(newValue.get(newValue.size() - 1)) && !chatPane.isVisible()) {
+                this.newMsg.setVisible(true);
+            }
         });
     }
 
