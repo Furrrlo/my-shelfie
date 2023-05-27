@@ -17,6 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
@@ -39,6 +40,7 @@ public class GamePane extends AnchorPane {
     private final Pane player2Shelfie;
     private final Pane player3Shelfie;
     private final Button chatBtn;
+    private final Label newMsg;
     private final ChatComponent chatPane;
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
@@ -130,14 +132,20 @@ public class GamePane extends AnchorPane {
         this.chatPane.messagesProperty().bind(FxProperties
                 .toFxProperty("messages", this, game.messageList()));
         this.chatPane.setVisible(false);
-        //change visibility of chatPane when chatBtn is pressed
-        this.chatBtn.setOnAction(e -> {
-            this.chatPane.setVisible(!this.chatPane.isVisible());
-        });
         this.chatPane.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTGRAY,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                 new Insets(-ChatComponent.INSET)))));
+        getChildren().add(this.newMsg = new Label(""));
+        this.newMsg.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.RED,
+                new CornerRadii(Math.min(100, 100 * (width.doubleValue() / 210d))),
+                new Insets(0)))));
+        //change visibility of chatPane when chatBtn is pressed
+        this.chatBtn.setOnAction(e -> {
+            this.chatPane.setVisible(!this.chatPane.isVisible());
+            this.newMsg.setVisible(!this.chatPane.isVisible());
+        });
     }
 
     @Override
@@ -170,10 +178,11 @@ public class GamePane extends AnchorPane {
         this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 182.0 * scale, 194.0 * scale);
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
         final var btnSize = 45 * scale;
+        final var newMsgSize = 15 * scale;
         final var chatPaneWidth = 200.0 * scale;
         if (chatPane.isVisible())
             this.chatBtn.resizeRelocate(
-                    getWidth() - chatPaneWidth - btnSize - ChatComponent.INSET * 2,
+                    getWidth() - chatPaneWidth - btnSize - (double) ChatComponent.INSET * 3 / 2,
                     getHeight() - btnSize, btnSize, btnSize);
         else
             this.chatBtn.resizeRelocate(getWidth() - btnSize, getHeight() - btnSize, btnSize, btnSize);
@@ -181,6 +190,9 @@ public class GamePane extends AnchorPane {
                 getWidth() - chatPaneWidth + ChatComponent.INSET,
                 +ChatComponent.INSET,
                 chatPaneWidth - ChatComponent.INSET * 2, getHeight() - ChatComponent.INSET * 2);
+        this.newMsg.resizeRelocate(getWidth() - btnSize + newMsgSize * 3 / 2, getHeight() - btnSize - newMsgSize / 3,
+                newMsgSize,
+                newMsgSize);
     }
 
     public Consumer<@Nullable Throwable> getOnDisconnect() {
