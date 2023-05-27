@@ -4,12 +4,16 @@ import it.polimi.ingsw.model.CommonGoalView;
 
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class CommonGoalsPane extends Pane {
 
+    private final Label description;
     private final CommonGoalComponent goal1;
     private final CommonGoalComponent goal2;
 
@@ -28,9 +32,31 @@ public class CommonGoalsPane extends Pane {
                 return clip;
             }));
         }
+        this.description = new Label();
+        //TODO : blurrz the background instead of filling with plain color
+        description.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTGRAY,
+                new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
+                new Insets(-6)))));
+
+        description.setWrapText(true);
+        description.setVisible(false);
 
         getChildren().add(this.goal1 = new CommonGoalComponent(goal1));
         getChildren().add(this.goal2 = new CommonGoalComponent(goal2));
+
+        this.goal1.setOnMousePressed(e -> {
+            description.setText(goal1.getType().getDescription().replaceAll("[\\r\\n]+", " "));
+            description.setVisible(!description.isVisible());
+        });
+        this.goal2.setOnMousePressed(e -> {
+            description.setText(goal2.getType().getDescription().replaceAll("[\\r\\n]+", " "));
+            description.setVisible(!description.isVisible());
+        });
+        this.description.setOnMousePressed(e -> {
+            description.setVisible(!description.isVisible());
+        });
+        getChildren().add(this.description);
     }
 
     @Override
@@ -43,6 +69,7 @@ public class CommonGoalsPane extends Pane {
         double height = 74 * scale;
         goal1.resizeRelocate(getWidth() - width - border, border, width, height);
         goal2.resizeRelocate(getWidth() - width - border, getHeight() - height - border, width, height);
+        description.resizeRelocate(2 * border, 2 * border, getWidth() - 4 * border, getHeight() - 4 * border);
     }
 
     private static class CommonGoalComponent extends ImageButton {
