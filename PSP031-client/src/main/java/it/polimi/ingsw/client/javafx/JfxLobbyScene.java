@@ -86,7 +86,6 @@ public class JfxLobbyScene extends Scene {
             }
         };
 
-        //added Vbox for Lobby  players
         //TODO : add label showing if player is ready or not 
         final LobbyPlayersVbox lobbyPlayersVbox = new LobbyPlayersVbox();
         lobbyPlayersVbox.lobbyPlayersProperty().bind(FxProperties
@@ -134,9 +133,27 @@ public class JfxLobbyScene extends Scene {
             lobbyPlayers.addListener((obs, old, newList) -> {
                 var newComponents = new ArrayList<Node>();
                 for (LobbyPlayer p : newList) {
+                    Label readyLabel = new Label();
+                    if (p.ready().get())
+                        readyLabel.setText("ready");
+                    else
+                        readyLabel.setText("not ready");
+                    var ready = new SimpleObjectProperty<>(p.ready(), "ready");
+                    ready.bind(FxProperties.toFxProperty("ready", this, p.ready()));
+                    ready.addListener(((observable, oldValue, newValue) -> {
+                        if (p.ready().get())
+                            readyLabel.setText("ready");
+                        else
+                            readyLabel.setText("not ready");
+                    }));
                     Label playerLabel = new Label();
                     playerLabel.setText(p.getNick());
-                    newComponents.add(playerLabel);
+                    HBox hBox = new HBox();
+                    hBox.getChildren().add(playerLabel);
+                    hBox.getChildren().add(readyLabel);
+                    hBox.setAlignment(Pos.CENTER);
+                    hBox.setSpacing(5);
+                    newComponents.add(hBox);
                 }
                 getChildren().setAll(newComponents);
             });
@@ -153,5 +170,6 @@ public class JfxLobbyScene extends Scene {
         public void setLobbyPlayers(List<? extends LobbyPlayer> lobbyPlayers) {
             this.lobbyPlayers.set(lobbyPlayers);
         }
+
     }
 }
