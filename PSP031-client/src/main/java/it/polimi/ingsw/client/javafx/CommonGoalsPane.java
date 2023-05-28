@@ -10,9 +10,11 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.TextAlignment;
 
 public class CommonGoalsPane extends Pane {
 
+    private final StackPane stackPane;
     private final Label description;
     private final CommonGoalComponent goal1;
     private final CommonGoalComponent goal2;
@@ -32,31 +34,34 @@ public class CommonGoalsPane extends Pane {
                 return clip;
             }));
         }
-        this.description = new Label();
-        //TODO : blurrz the background instead of filling with plain color
-        description.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+        this.stackPane = new StackPane();
+        stackPane.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTGRAY,
                 new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                new Insets(-6)))));
-
+                new Insets(0)))));
+        stackPane.setOpacity(0.9);
+        this.description = new Label();
+        description.setPadding(new Insets(6));
+        stackPane.getChildren().add(description);
         description.setWrapText(true);
-        description.setVisible(false);
+        stackPane.setVisible(false);
+        description.setTextAlignment(TextAlignment.CENTER);
 
         getChildren().add(this.goal1 = new CommonGoalComponent(goal1));
         getChildren().add(this.goal2 = new CommonGoalComponent(goal2));
 
         this.goal1.setOnMousePressed(e -> {
             description.setText(goal1.getType().getDescription().replaceAll("[\\r\\n]+", " "));
-            description.setVisible(!description.isVisible());
+            stackPane.setVisible(!stackPane.isVisible());
         });
         this.goal2.setOnMousePressed(e -> {
             description.setText(goal2.getType().getDescription().replaceAll("[\\r\\n]+", " "));
-            description.setVisible(!description.isVisible());
+            stackPane.setVisible(!stackPane.isVisible());
         });
-        this.description.setOnMousePressed(e -> {
-            description.setVisible(!description.isVisible());
+        this.stackPane.setOnMousePressed(e -> {
+            stackPane.setVisible(!stackPane.isVisible());
         });
-        getChildren().add(this.description);
+        getChildren().add(stackPane);
     }
 
     @Override
@@ -69,7 +74,7 @@ public class CommonGoalsPane extends Pane {
         double height = 74 * scale;
         goal1.resizeRelocate(getWidth() - width - border, border, width, height);
         goal2.resizeRelocate(getWidth() - width - border, getHeight() - height - border, width, height);
-        description.resizeRelocate(2 * border, 2 * border, getWidth() - 4 * border, getHeight() - 4 * border);
+        stackPane.resizeRelocate(border, border, getWidth() - 2 * border, getHeight() - 2 * border);
     }
 
     private static class CommonGoalComponent extends ImageButton {
