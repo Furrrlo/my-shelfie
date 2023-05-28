@@ -18,8 +18,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -118,11 +121,14 @@ public class GamePane extends AnchorPane {
                 ? new PlayerShelfieComponent(otherPlayers.get(2), true, true)
                 : new Pane());
 
-        getChildren().add(this.chatBtn = new Button("C"));
-        this.chatBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTGRAY,
-                new CornerRadii(Math.min(50, 50 * (width.doubleValue() / 210d))),
-                new Insets(4)))));
+        getChildren().add(this.chatBtn = new Button());
+        var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/message.png")));
+        imgView.setPreserveRatio(true);
+        imgView.setFitWidth(30);
+        imgView.setFitHeight(30);
+        this.chatBtn.setGraphic(imgView);
+        this.chatBtn.setBackground(Background.fill(Color.LIGHTGRAY));
+        this.chatBtn.setShape(new Circle(37));
         getChildren().add(this.chatPane = new ChatComponent(
                 game.getPlayers()
                         .stream().map(PlayerView::getNick)
@@ -138,7 +144,7 @@ public class GamePane extends AnchorPane {
                 new Insets(-ChatComponent.INSET)))));
         getChildren().add(this.newMsg = new Label(""));
         this.newMsg.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.RED,
+                Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(100, 100 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
         this.newMsg.setVisible(false);
