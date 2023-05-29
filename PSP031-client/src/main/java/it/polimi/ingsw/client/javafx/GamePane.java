@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -53,6 +54,8 @@ public class GamePane extends AnchorPane {
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Boolean> suspended = new SimpleObjectProperty<>(this, "suspended");
+
+    private final ObjectProperty<Boolean> endGame = new SimpleObjectProperty<>(this, "endGame");
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
 
@@ -102,12 +105,33 @@ public class GamePane extends AnchorPane {
         this.suspended.bind(FxProperties.toFxProperty("suspended", this, game.suspended()));
         suspended.addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
+                //this.setDisable(true);
+                for (Node n : getChildren()) {
+                    if (!n.equals(suspendedGameMessage)) {
+                        n.setDisable(true);
+                        n.setOpacity(0.5);
+                    }
+                }
                 suspendedGameMessage.setVisible(true);
                 suspendedGameMessage.play();
-                this.setDisable(true);
+
             } else {
-                this.setDisable(false);
                 suspendedGameMessage.setVisible(false);
+                for (Node n : getChildren()) {
+                    if (!n.equals(suspendedGameMessage)) {
+                        n.setDisable(false);
+                        n.setOpacity(1);
+                    }
+                }
+                //this.setDisable(false);
+            }
+        }));
+        //added endGame Listener
+        this.endGame.bind(FxProperties.toFxProperty("endGame", this, game.endGame()));
+        endGame.addListener(((observable, oldValue, newValue) -> {
+            if (newValue) {
+                this.setDisable(true);
+                //TODO : call End Game Dialogue and start new Game
             }
         }));
 
@@ -192,6 +216,7 @@ public class GamePane extends AnchorPane {
                 this.newMsg.setVisible(true);
             }
         });
+
         this.notCurrentTurnMessage.toFront();
         this.suspendedGameMessage.toFront();
         getChildren().add(this.notCurrentTurnMessage);
