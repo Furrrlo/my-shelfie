@@ -101,6 +101,6 @@ public class DialogVbox extends VBox {
     }
 
     public void play() {
-        this.timeline.play();
+        this.timeline.playFromStart();
     }
 }
