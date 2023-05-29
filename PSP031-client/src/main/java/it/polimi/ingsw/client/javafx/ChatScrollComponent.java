@@ -83,10 +83,8 @@ public class ChatScrollComponent extends ScrollPane {
         private final Label text;
 
         public MessageComponent(UserMessage message, String thePlayer) {
-            Label nick = new Label();
-            nick.setWrapText(true);
-            //TODO : fix text not being bold
-            nick.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, Font.getDefault().getSize()));
+            Text nick = new Text();
+            nick.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, Font.getDefault().getSize()));
             text = new Label();
             text.setWrapText(true);
             if (!message.nickSendingPlayer().equals(thePlayer)) {
