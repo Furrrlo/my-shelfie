@@ -38,6 +38,7 @@ public class GamePane extends AnchorPane {
     private final Pane commonGoalCardsPane;
     private final PersonalGoalComponent personalGoalCard;
     private final BoardComponent board;
+    private final Pane boardPane;
     private final PickedTilesPane pickedTilesPane;
     private final Pane player1Shelfie;
     private final Pane player2Shelfie;
@@ -45,6 +46,8 @@ public class GamePane extends AnchorPane {
     private final Button chatBtn;
     private final Label newMsg;
     private final ChatComponent chatPane;
+
+    private final DialogVbox notCurrentTurnMessage;
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
 
@@ -62,19 +65,30 @@ public class GamePane extends AnchorPane {
     });
 
     public GamePane(GameView game, GameController controller) {
+        this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN);
+        notCurrentTurnMessage.toFront();
+        notCurrentTurnMessage.setVisible(false);
+
         getChildren()
                 .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
         getChildren().add(
                 this.commonGoalCardsPane = new CommonGoalsPane(game.getCommonGoals().get(0), game.getCommonGoals().get(1)));
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
-        getChildren().add(this.board = new BoardComponent(game.getBoard()));
+        //getChildren().add(this.board = new BoardComponent(game.getBoard()));
+        this.board = new BoardComponent(game.getBoard());
+        this.boardPane = new Pane(board);
+        getChildren().add(this.boardPane);
         getChildren().add(this.pickedTilesPane = new PickedTilesPane());
 
         final BooleanProperty isMakingMove = new SimpleBooleanProperty();
         final var isCurrentTurn = BooleanExpression.booleanExpression(FxProperties.toFxProperty(
                 "isCurrentTurn", this, game.thePlayer().isCurrentTurn())).and(isMakingMove.not());
         board.disableProperty().bind(isCurrentTurn.not());
+        boardPane.setOnMouseClicked(event -> {
+            if (isCurrentTurn.not().get())
+                this.notCurrentTurnMessage.setVisible(true);
+        });
         pickedTilesPane.tilesProperty().bindBidirectional(board.pickedTilesProperty());
         pickedTilesPane.setIsTileRemovable(tileAndCoords -> {
             final var list = new ArrayList<>(pickedTilesPane.getTiles());
@@ -163,6 +177,8 @@ public class GamePane extends AnchorPane {
                 this.newMsg.setVisible(true);
             }
         });
+        this.notCurrentTurnMessage.toFront();
+        getChildren().add(this.notCurrentTurnMessage);
     }
 
     @Override
@@ -189,11 +205,13 @@ public class GamePane extends AnchorPane {
         this.thePlayerPoints.resizeRelocate(0, 386.0 * scale, 221.0 * scale, 34 * scale);
         this.commonGoalCardsPane.resizeRelocate(0, 422.0 * scale, 221.0 * scale, 164.0 * scale);
         this.personalGoalCard.resizeRelocate(228.0 * scale, 386.0 * scale, 131.794 * scale, 200.0 * scale);
-        this.board.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
+        this.board.resize(460.0 * scale, 460.0 * scale);
+        this.boardPane.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
         this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 182.0 * scale, 194.0 * scale);
         this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 182.0 * scale, 194.0 * scale);
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
+        this.notCurrentTurnMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         final var btnSize = 45 * scale;
         final var newMsgSize = 15 * scale;
         final var chatPaneWidth = 200.0 * scale;
