@@ -103,9 +103,12 @@ public class GamePane extends AnchorPane {
         suspended.addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
                 suspendedGameMessage.setVisible(true);
+                suspendedGameMessage.play();
                 this.setDisable(true);
-            } else
+            } else {
                 this.setDisable(false);
+                suspendedGameMessage.setVisible(false);
+            }
         }));
 
         var canSelectColumns = isCurrentTurn.and(

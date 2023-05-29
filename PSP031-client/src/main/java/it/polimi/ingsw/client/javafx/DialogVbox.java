@@ -1,19 +1,27 @@
 package it.polimi.ingsw.client.javafx;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 
 public class DialogVbox extends VBox {
 
     public static int NOT_CURRENT_TURN = 1;
     public static int DISCONNECTED = 2;
+
+    private final Timeline timeline;
 
     public DialogVbox(int type) {
         setSpacing(15);
@@ -58,17 +66,41 @@ public class DialogVbox extends VBox {
         dialogue.prefWidthProperty().bind(widthProperty());
         dialogue.prefHeightProperty().bind(heightProperty());
 
-        HBox hbox = new HBox();
-        hbox.prefWidthProperty().bind(widthProperty());
-        Button ok = new Button("ok");
-        ok.setAlignment(Pos.CENTER_RIGHT);
-        hbox.getChildren().add(ok);
-        hbox.setAlignment(Pos.CENTER_RIGHT);
-        ok.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                new Insets(-5)))));
-        ok.setOnMouseClicked(e -> this.setVisible(false));
-        this.getChildren().add(hbox);
+        if (type == 1) {
+            HBox hbox = new HBox();
+            hbox.prefWidthProperty().bind(widthProperty());
+            Button ok = new Button("ok");
+            ok.setAlignment(Pos.CENTER_RIGHT);
+            hbox.getChildren().add(ok);
+            hbox.setAlignment(Pos.CENTER_RIGHT);
+            ok.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                    Color.LIGHTSEAGREEN,
+                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
+                    new Insets(-5)))));
+            ok.setOnMouseClicked(e -> this.setVisible(false));
+            this.getChildren().add(hbox);
+        }
+
+        ProgressBar progress = new ProgressBar();
+        this.timeline = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(progress.progressProperty(), 0)),
+                new KeyFrame(Duration.minutes(0.5), e -> {
+                    System.out.println("Minute over");
+                }, new KeyValue(progress.progressProperty(), 1)));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        progress.prefWidthProperty().bind(widthProperty());
+        if (type == 2) {
+            AnchorPane progressPane = new AnchorPane(progress);
+            progressPane.prefWidthProperty().bind(widthProperty());
+            progressPane.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                    Color.LIGHTSEAGREEN,
+                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
+                    new Insets(-5)))));
+            this.getChildren().add(progressPane);
+        }
+    }
+
+    public void play() {
+        this.timeline.play();
     }
 }
