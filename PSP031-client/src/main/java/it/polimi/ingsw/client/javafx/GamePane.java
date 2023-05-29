@@ -48,8 +48,11 @@ public class GamePane extends AnchorPane {
     private final ChatComponent chatPane;
 
     private final DialogVbox notCurrentTurnMessage;
+    private final DialogVbox suspendedGameMessage;
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
+
+    private final ObjectProperty<Boolean> suspended = new SimpleObjectProperty<>(this, "suspended");
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
 
@@ -66,8 +69,9 @@ public class GamePane extends AnchorPane {
 
     public GamePane(GameView game, GameController controller) {
         this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN);
-        notCurrentTurnMessage.toFront();
         notCurrentTurnMessage.setVisible(false);
+        this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
+        suspendedGameMessage.setVisible(false);
 
         getChildren()
                 .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
@@ -95,6 +99,14 @@ public class GamePane extends AnchorPane {
             list.remove(tileAndCoords);
             return list.size() == 0 || game.getBoard().checkBoardCoord(list);
         });
+        this.suspended.bind(FxProperties.toFxProperty("suspended", this, game.suspended()));
+        suspended.addListener(((observable, oldValue, newValue) -> {
+            if (newValue) {
+                suspendedGameMessage.setVisible(true);
+                this.setDisable(true);
+            } else
+                this.setDisable(false);
+        }));
 
         var canSelectColumns = isCurrentTurn.and(
                 BooleanExpression.booleanExpression(pickedTilesPane.tilesProperty().map(t -> !t.isEmpty())));
@@ -178,7 +190,9 @@ public class GamePane extends AnchorPane {
             }
         });
         this.notCurrentTurnMessage.toFront();
+        this.suspendedGameMessage.toFront();
         getChildren().add(this.notCurrentTurnMessage);
+        getChildren().add(this.suspendedGameMessage);
     }
 
     @Override
@@ -212,6 +226,7 @@ public class GamePane extends AnchorPane {
         this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 182.0 * scale, 194.0 * scale);
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
         this.notCurrentTurnMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
+        this.suspendedGameMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         final var btnSize = 45 * scale;
         final var newMsgSize = 15 * scale;
         final var chatPaneWidth = 200.0 * scale;
@@ -240,5 +255,17 @@ public class GamePane extends AnchorPane {
 
     public void setOnDisconnect(Consumer<@Nullable Throwable> onDisconnect) {
         this.onDisconnect.set(onDisconnect);
+    }
+
+    public Boolean getSuspended() {
+        return suspended.get();
+    }
+
+    public ObjectProperty<Boolean> suspendedProperty() {
+        return suspended;
+    }
+
+    public void setSuspended(Boolean suspended) {
+        this.suspended.set(suspended);
     }
 }

@@ -23,8 +23,8 @@ public class DialogVbox extends VBox {
                 new Insets(-10)))));
         String errorTitle = "";
         switch (type) {
-            case 1 -> errorTitle = "Player has disconnected";
-            case 2 -> errorTitle = "Not your turn";
+            case 2 -> errorTitle = "Player has disconnected";
+            case 1 -> errorTitle = "Not your turn";
             default -> errorTitle = "Error";
         }
         Label errorName = new Label("Error : " + errorTitle);
@@ -39,9 +39,9 @@ public class DialogVbox extends VBox {
 
         String errorMessage = "";
         switch (type) {
-            case 1 -> errorMessage = "The game is suspended because all other players have disconnected.\n" +
+            case 2 -> errorMessage = "The game is suspended because all other players have disconnected.\n" +
                     "If no one reconnects within 30 seconds, the game will end";
-            case 2 -> errorMessage = "It's not your current turn, please wait when is your turn before you can " +
+            case 1 -> errorMessage = "It's not your current turn, please wait when is your turn before you can " +
                     "select tiles from board again";
             default -> errorMessage = "Error";
         }
