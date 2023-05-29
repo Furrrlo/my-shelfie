@@ -11,6 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
@@ -73,30 +75,58 @@ public class ChatScrollComponent extends ScrollPane {
                 getChildren().setAll(newComponents);
             });
 
-            setSpacing(18);
+            setSpacing(12);
         }
     }
 
-    private static class MessageComponent extends Label {
+    private static class MessageComponent extends VBox {
+        private final Label text;
 
         public MessageComponent(UserMessage message, String thePlayer) {
-            setWrapText(true);
+            Label nick = new Label();
+            nick.setWrapText(true);
+            //TODO : fix text not being bold
+            nick.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, Font.getDefault().getSize()));
+            text = new Label();
+            text.setWrapText(true);
             if (!message.nickSendingPlayer().equals(thePlayer)) {
-                backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                //message from other players
+                if (message.nickReceivingPlayer().equals("all"))
+                    nick.setText(message.nickSendingPlayer());
+                else
+                    nick.setText(message.nickSendingPlayer() + " @" + message.nickReceivingPlayer());
+                text.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                         Color.LIGHTGRAY,
                         new CornerRadii(15),
                         new Insets(-5)))));
-                setText("[" + message.nickSendingPlayer() + "] : " + message.message());
-                setAlignment(Pos.CENTER);
+                text.setText(message.message());
+                setAlignment(Pos.TOP_LEFT);
+                this.setSpacing(6);
+                this.getChildren().add(nick);
+                this.getChildren().add(text);
             } else {
-                backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                //message sent by the player
+                if (!message.nickReceivingPlayer().equals("all")) {
+                    nick.setText(" @" + message.nickReceivingPlayer());
+                    this.getChildren().add(nick);
+                }
+                text.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                         Color.LIGHTSEAGREEN,
                         new CornerRadii(15),
                         new Insets(-5)))));
-                setText(message.message());
-                setAlignment(Pos.CENTER);
+                text.setText(message.message());
+                this.getChildren().add(text);
+                setAlignment(Pos.TOP_RIGHT);
+                this.setSpacing(6);
             }
         }
 
+        public String getText() {
+            return text.getText();
+        }
+
+        public Font getFont() {
+            return text.getFont();
+        }
     }
 }
