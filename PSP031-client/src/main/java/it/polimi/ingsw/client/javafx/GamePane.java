@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -51,6 +52,7 @@ public class GamePane extends AnchorPane {
 
     private final DialogVbox notCurrentTurnMessage;
     private final DialogVbox suspendedGameMessage;
+    private EndGamePane endGamePane;
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
 
@@ -76,6 +78,8 @@ public class GamePane extends AnchorPane {
         notCurrentTurnMessage.setVisible(false);
         this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
         suspendedGameMessage.setVisible(false);
+        this.endGamePane = new EndGamePane(game.getPlayers().stream().toList());
+        endGamePane.setVisible(false);
 
         getChildren()
                 .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
@@ -137,11 +141,9 @@ public class GamePane extends AnchorPane {
                 }
                 var sortedPlayers = game.getPlayers().stream()
                         .sorted(Comparator.comparing((PlayerView p) -> p.score().get())).toList();
-                var endGamePane = new EndGamePane(sortedPlayers);
-                final double scale = Math.min(getWidth() / 1040d, getHeight() / 585d);
-                endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2, 690 * scale,
-                        490 * scale);
+                this.endGamePane = new EndGamePane(sortedPlayers);
                 endGamePane.toFront();
+                endGamePane.setAlignment(Pos.CENTER);
                 this.getChildren().add(endGamePane);
             }
         }));
@@ -266,6 +268,9 @@ public class GamePane extends AnchorPane {
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
         this.notCurrentTurnMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         this.suspendedGameMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
+        this.endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2, 690 * scale,
+                490 * scale);
+
         final var btnSize = 45 * scale;
         final var newMsgSize = 15 * scale;
         final var chatPaneWidth = 200.0 * scale;
