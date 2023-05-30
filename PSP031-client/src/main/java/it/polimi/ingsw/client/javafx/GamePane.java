@@ -28,6 +28,7 @@ import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -44,7 +45,7 @@ public class GamePane extends AnchorPane {
     //      and add firstFinisherTile ; 
     private final PlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
-    private final Pane commonGoalCardsPane;
+    private final CommonGoalsPane commonGoalCardsPane;
     private final PersonalGoalComponent personalGoalCard;
     private final BoardComponent board;
     private final Pane boardPane;
@@ -65,6 +66,9 @@ public class GamePane extends AnchorPane {
     private final ObjectProperty<Boolean> suspended = new SimpleObjectProperty<>(this, "suspended");
 
     private final ObjectProperty<Boolean> endGame = new SimpleObjectProperty<>(this, "endGame");
+
+    private final ObjectProperty<List<? extends PlayerView>> achieved1 = new SimpleObjectProperty<>(this, "commonGoal1");
+    private final ObjectProperty<List<? extends PlayerView>> achieved2 = new SimpleObjectProperty<>(this, "commonGoal1");
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
 
@@ -117,6 +121,38 @@ public class GamePane extends AnchorPane {
             final var list = new ArrayList<>(pickedTilesPane.getTiles());
             list.remove(tileAndCoords);
             return list.size() == 0 || game.getBoard().checkBoardCoord(list);
+        });
+
+        //TODO: bind game.getCommonGoals().achieved() to
+        this.achieved1.bind(FxProperties.toFxProperty("achieved1", this, game.getCommonGoals().get(0).achieved()));
+        achieved1.addListener((observable, oldValue, newValue) -> {
+            if (newValue.contains(game.thePlayer())) {
+                int index = newValue.indexOf(game.thePlayer());
+                int points;
+                switch (index) {
+                    case 0 -> points = 8;
+                    case 1 -> points = 6;
+                    case 2 -> points = 4;
+                    case 3 -> points = 2;
+                    default -> throw new IllegalStateException("Unexpected value: " + index);
+                }
+                commonGoalCardsPane.setScore1(points);
+            }
+        });
+        this.achieved2.bind(FxProperties.toFxProperty("achieved2", this, game.getCommonGoals().get(1).achieved()));
+        achieved2.addListener((observable, oldValue, newValue) -> {
+            if (newValue.contains(game.thePlayer())) {
+                int index = newValue.indexOf(game.thePlayer());
+                int points;
+                switch (index) {
+                    case 0 -> points = 8;
+                    case 1 -> points = 6;
+                    case 2 -> points = 4;
+                    case 3 -> points = 2;
+                    default -> throw new IllegalStateException("Unexpected value: " + index);
+                }
+                commonGoalCardsPane.setScore2(points);
+            }
         });
 
         //binding suspended to GameView Provider game.suspended() and adding listener that when detects newValue
@@ -311,5 +347,17 @@ public class GamePane extends AnchorPane {
         this.newMsg.resizeRelocate(getWidth() - btnSize + newMsgSize * 3 / 2, getHeight() - btnSize - newMsgSize / 3,
                 newMsgSize,
                 newMsgSize);
+    }
+
+    public List<? extends PlayerView> getAchieved1() {
+        return achieved1.get();
+    }
+
+    public ObjectProperty<List<? extends PlayerView>> achieved1Property() {
+        return achieved1;
+    }
+
+    public void setAchieved1(List<? extends PlayerView> achieved1) {
+        this.achieved1.set(achieved1);
     }
 }

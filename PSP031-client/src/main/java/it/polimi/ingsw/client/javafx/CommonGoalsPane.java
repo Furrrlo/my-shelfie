@@ -4,6 +4,8 @@ import it.polimi.ingsw.model.CommonGoalView;
 
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -17,9 +19,28 @@ public class CommonGoalsPane extends Pane {
     private final StackPane stackPane;
     private final Label description;
     private final CommonGoalComponent goal1;
+
+    private final ObjectProperty<Integer> score1;
+    private final ScoringTokenComponent token1;
     private final CommonGoalComponent goal2;
 
+    private final ObjectProperty<Integer> score2;
+    private final ScoringTokenComponent token2;
+
     public CommonGoalsPane(CommonGoalView goal1, CommonGoalView goal2) {
+        this.score1 = new SimpleObjectProperty<>(this, "score1");
+        this.score2 = new SimpleObjectProperty<>(this, "score2");
+        this.token1 = new ScoringTokenComponent();
+        this.token2 = new ScoringTokenComponent();
+        token1.setScore(ScoringTokenComponent.EMPTY);
+        token2.setScore(ScoringTokenComponent.EMPTY);
+        score1.addListener(((observable, oldValue, newValue) -> {
+            token1.setScore(newValue);
+        }));
+        score2.addListener(((observable, oldValue, newValue) -> {
+            token2.setScore(newValue);
+        }));
+
         setBackground(new Background(new BackgroundImage(
                 new Image(FxResources.getResourceAsStream("assets/misc/base_pagina2.jpg")),
                 BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
@@ -61,7 +82,10 @@ public class CommonGoalsPane extends Pane {
         this.stackPane.setOnMousePressed(e -> {
             stackPane.setVisible(!stackPane.isVisible());
         });
-        getChildren().add(stackPane);
+
+        this.getChildren().add(stackPane);
+        this.getChildren().add(token1);
+        this.getChildren().add(token2);
     }
 
     @Override
@@ -74,6 +98,8 @@ public class CommonGoalsPane extends Pane {
         double height = 74 * scale;
         goal1.resizeRelocate(getWidth() - width - border, border, width, height);
         goal2.resizeRelocate(getWidth() - width - border, getHeight() - height - border, width, height);
+        token1.resizeRelocate(2 * border, border, height, height);
+        token2.resizeRelocate(2 * border, getHeight() - height - border, height, height);
         stackPane.resizeRelocate(border, border, getWidth() - 2 * border, getHeight() - 2 * border);
     }
 
@@ -105,5 +131,29 @@ public class CommonGoalsPane extends Pane {
                 }));
             }
         }
+    }
+
+    public Integer getScore1() {
+        return score1.get();
+    }
+
+    public ObjectProperty<Integer> score1Property() {
+        return score1;
+    }
+
+    public void setScore1(Integer score1) {
+        this.score1.set(score1);
+    }
+
+    public Integer getScore2() {
+        return score2.get();
+    }
+
+    public ObjectProperty<Integer> score2Property() {
+        return score2;
+    }
+
+    public void setScore2(Integer score2) {
+        this.score2.set(score2);
     }
 }
