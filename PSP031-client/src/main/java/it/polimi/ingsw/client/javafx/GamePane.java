@@ -26,6 +26,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -51,8 +52,6 @@ public class GamePane extends AnchorPane {
     private final DialogVbox notCurrentTurnMessage;
     private final DialogVbox suspendedGameMessage;
 
-    private final EndGamePane endGamePane;
-
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Boolean> suspended = new SimpleObjectProperty<>(this, "suspended");
@@ -77,8 +76,6 @@ public class GamePane extends AnchorPane {
         notCurrentTurnMessage.setVisible(false);
         this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
         suspendedGameMessage.setVisible(false);
-        this.endGamePane = new EndGamePane(game.getPlayers());
-        this.endGamePane.setVisible(false);
 
         getChildren()
                 .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
@@ -121,25 +118,31 @@ public class GamePane extends AnchorPane {
 
             } else {
                 suspendedGameMessage.setVisible(false);
+                //restore all the children ( setDisable = true )
                 for (Node n : getChildren()) {
-                    if (!n.equals(suspendedGameMessage)) {
-                        n.setDisable(false);
-                        n.setOpacity(1);
-                    }
+                    n.setDisable(false);
+                    n.setOpacity(1);
                 }
-                //this.setDisable(false);
             }
         }));
+
         //added endGame Listener
         this.endGame.bind(FxProperties.toFxProperty("endGame", this, game.endGame()));
         endGame.addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
+                //disable all the nodes
                 for (Node n : getChildren()) {
-                    //if (!n.equals(/*TODO: insert node for end game*/)) {
-                    //    n.setDisable(true);
-                    //    n.setOpacity(0.5);
-                    //}
+                    n.setDisable(true);
+                    n.setOpacity(0.5);
                 }
+                var sortedPlayers = game.getPlayers().stream()
+                        .sorted(Comparator.comparing((PlayerView p) -> p.score().get())).toList();
+                var endGamePane = new EndGamePane(sortedPlayers);
+                final double scale = Math.min(getWidth() / 1040d, getHeight() / 585d);
+                endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2, 690 * scale,
+                        490 * scale);
+                endGamePane.toFront();
+                this.getChildren().add(endGamePane);
             }
         }));
 
@@ -227,10 +230,8 @@ public class GamePane extends AnchorPane {
 
         this.notCurrentTurnMessage.toFront();
         this.suspendedGameMessage.toFront();
-        this.endGamePane.toFront();
         getChildren().add(this.notCurrentTurnMessage);
         getChildren().add(this.suspendedGameMessage);
-        getChildren().add(this.endGamePane);
     }
 
     @Override
@@ -265,7 +266,6 @@ public class GamePane extends AnchorPane {
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
         this.notCurrentTurnMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         this.suspendedGameMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
-        this.endGamePane.resizeRelocate(20 * scale, 10 * scale, 960 * scale, 540 * scale);
         final var btnSize = 45 * scale;
         final var newMsgSize = 15 * scale;
         final var chatPaneWidth = 200.0 * scale;
