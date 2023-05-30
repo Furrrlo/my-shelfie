@@ -123,7 +123,7 @@ public class GamePane extends AnchorPane {
             return list.size() == 0 || game.getBoard().checkBoardCoord(list);
         });
 
-        //TODO: bind game.getCommonGoals().achieved() to
+        //now displaying points for commonGoals if achieved
         this.achieved1.bind(FxProperties.toFxProperty("achieved1", this, game.getCommonGoals().get(0).achieved()));
         achieved1.addListener((observable, oldValue, newValue) -> {
             if (newValue.contains(game.thePlayer())) {
@@ -347,17 +347,5 @@ public class GamePane extends AnchorPane {
         this.newMsg.resizeRelocate(getWidth() - btnSize + newMsgSize * 3 / 2, getHeight() - btnSize - newMsgSize / 3,
                 newMsgSize,
                 newMsgSize);
-    }
-
-    public List<? extends PlayerView> getAchieved1() {
-        return achieved1.get();
-    }
-
-    public ObjectProperty<List<? extends PlayerView>> achieved1Property() {
-        return achieved1;
-    }
-
-    public void setAchieved1(List<? extends PlayerView> achieved1) {
-        this.achieved1.set(achieved1);
     }
 }

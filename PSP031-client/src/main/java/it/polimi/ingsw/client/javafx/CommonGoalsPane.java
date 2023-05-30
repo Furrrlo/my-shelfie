@@ -83,9 +83,9 @@ public class CommonGoalsPane extends Pane {
             stackPane.setVisible(!stackPane.isVisible());
         });
 
-        this.getChildren().add(stackPane);
         this.getChildren().add(token1);
         this.getChildren().add(token2);
+        this.getChildren().add(stackPane);
     }
 
     @Override
@@ -133,24 +133,8 @@ public class CommonGoalsPane extends Pane {
         }
     }
 
-    public Integer getScore1() {
-        return score1.get();
-    }
-
-    public ObjectProperty<Integer> score1Property() {
-        return score1;
-    }
-
     public void setScore1(Integer score1) {
         this.score1.set(score1);
-    }
-
-    public Integer getScore2() {
-        return score2.get();
-    }
-
-    public ObjectProperty<Integer> score2Property() {
-        return score2;
     }
 
     public void setScore2(Integer score2) {
