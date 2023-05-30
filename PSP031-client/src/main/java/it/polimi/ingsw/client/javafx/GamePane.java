@@ -35,7 +35,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class GamePane extends AnchorPane {
+    /**
+     * set to appear when the required number of players for a game is achieved, and they are all ready.
+     * It displays all the game's components needed for the player to play, including the other players'
+     * shelfies and the chat
+     */
     //TODO : add quit button to GameScene, change position of ChatButton going over fourth shelfie
+    //      and add firstFinisherTile ; 
     private final PlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
     private final Pane commonGoalCardsPane;
@@ -74,13 +80,18 @@ public class GamePane extends AnchorPane {
     });
 
     public GamePane(GameView game, GameController controller) {
+        //set new alerts for suspended game and disconnected player ( making them initially not visible,
+        // will be later made visible when corresponding state is caught )
         this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN);
         notCurrentTurnMessage.setVisible(false);
         this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
         suspendedGameMessage.setVisible(false);
+
+        //initializing endGamePane ( otherwise having problems not being initialized )
         this.endGamePane = new EndGamePane(game.getPlayers().stream().toList());
         endGamePane.setVisible(false);
 
+        //adding game components
         getChildren()
                 .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
@@ -107,10 +118,13 @@ public class GamePane extends AnchorPane {
             list.remove(tileAndCoords);
             return list.size() == 0 || game.getBoard().checkBoardCoord(list);
         });
+
+        //binding suspended to GameView Provider game.suspended() and adding listener that when detects newValue
+        //equals true, disables all current nodes in the game( except suspended game alert and endGamePane, in case
+        //no other player reconnects therefore forcing the game to end )
         this.suspended.bind(FxProperties.toFxProperty("suspended", this, game.suspended()));
         suspended.addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
-                //this.setDisable(true);
                 for (Node n : getChildren()) {
                     if (!n.equals(suspendedGameMessage)) {
                         n.setDisable(true);
@@ -121,6 +135,7 @@ public class GamePane extends AnchorPane {
                 suspendedGameMessage.play();
 
             } else {
+                //when suspended comes back to false it restores the game properties back to normal
                 suspendedGameMessage.setVisible(false);
                 //restore all the children ( setDisable = true )
                 for (Node n : getChildren()) {
@@ -130,11 +145,12 @@ public class GamePane extends AnchorPane {
             }
         }));
 
-        //added endGame Listener
+        //binding this.endGame to game's Provider endGame and adding listener that when listens endGame being true
+        //disables all nodes in the game and displays the endGamePane
         this.endGame.bind(FxProperties.toFxProperty("endGame", this, game.endGame()));
         endGame.addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
-                //disable all the nodes
+                //disable all the nodes ( when entering this state there is no coming back )
                 for (Node n : getChildren()) {
                     n.setDisable(true);
                     n.setOpacity(0.5);
@@ -187,6 +203,7 @@ public class GamePane extends AnchorPane {
                 ? new PlayerShelfieComponent(otherPlayers.get(2), true, true)
                 : new Pane());
 
+        //adding chat button
         getChildren().add(this.chatBtn = new Button());
         var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/message.png")));
         imgView.setPreserveRatio(true);
@@ -195,6 +212,9 @@ public class GamePane extends AnchorPane {
         this.chatBtn.setGraphic(imgView);
         this.chatBtn.setBackground(Background.fill(Color.LIGHTGRAY));
         this.chatBtn.setShape(new Circle(37));
+
+        //adding chat to the game initially set not visible, its visibility can be modified by pressing over the
+        //chat button
         getChildren().add(this.chatPane = new ChatComponent(
                 game.getPlayers()
                         .stream().map(PlayerView::getNick)
@@ -208,12 +228,15 @@ public class GamePane extends AnchorPane {
                 Color.LIGHTGRAY,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                 new Insets(-ChatComponent.INSET)))));
+
+        //adding label displaying if there are any new incoming messages when the chat is closed
         getChildren().add(this.newMsg = new Label(""));
         this.newMsg.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(100, 100 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
         this.newMsg.setVisible(false);
+
         //change visibility of chatPane when chatBtn is pressed
         this.chatBtn.setOnAction(e -> {
             this.chatPane.setVisible(!this.chatPane.isVisible());
@@ -230,6 +253,7 @@ public class GamePane extends AnchorPane {
             }
         });
 
+        //adding the Alerts as last nodes so that they will be on front
         this.notCurrentTurnMessage.toFront();
         this.suspendedGameMessage.toFront();
         getChildren().add(this.notCurrentTurnMessage);
@@ -287,29 +311,5 @@ public class GamePane extends AnchorPane {
         this.newMsg.resizeRelocate(getWidth() - btnSize + newMsgSize * 3 / 2, getHeight() - btnSize - newMsgSize / 3,
                 newMsgSize,
                 newMsgSize);
-    }
-
-    public Consumer<@Nullable Throwable> getOnDisconnect() {
-        return onDisconnect.get();
-    }
-
-    public ObjectProperty<Consumer<@Nullable Throwable>> onDisconnectProperty() {
-        return onDisconnect;
-    }
-
-    public void setOnDisconnect(Consumer<@Nullable Throwable> onDisconnect) {
-        this.onDisconnect.set(onDisconnect);
-    }
-
-    public Boolean getSuspended() {
-        return suspended.get();
-    }
-
-    public ObjectProperty<Boolean> suspendedProperty() {
-        return suspended;
-    }
-
-    public void setSuspended(Boolean suspended) {
-        this.suspended.set(suspended);
     }
 }
