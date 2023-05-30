@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.PlayerView;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -71,6 +72,28 @@ public class EndGamePane extends StackPane {
         quit.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
+        });
+        newGame.setOnMouseClicked(event -> {
+            //closes the existing my shelfie window and opens a new one
+            Stage stage = (Stage) getScene().getWindow();
+            stage.close();
+
+            //opens a new Stage
+            Scene scene = new JfxMainMenuScene(stage);
+
+            stage.setTitle("My Shelfie");
+
+            // Let jfx pick the best fit
+            stage.getIcons().add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Icon 50x50px.png")));
+            stage.getIcons().add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Box 280x280px.png")));
+
+            stage.setScene(scene);
+            stage.setMinWidth(800);
+            stage.setWidth(800);
+            stage.setMinHeight(500);
+            stage.setHeight(500);
+            stage.show();
+
         });
         this.getChildren().add(newGame);
         this.getChildren().add(quit);
