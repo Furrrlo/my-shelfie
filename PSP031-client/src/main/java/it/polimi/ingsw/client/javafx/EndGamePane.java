@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 
 import java.util.List;
 
@@ -66,6 +67,11 @@ public class EndGamePane extends StackPane {
                 Color.INDIANRED,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 350))),
                 new Insets(0)))));
+
+        quit.setOnMouseClicked(event -> {
+            Stage stage = (Stage) getScene().getWindow();
+            stage.close();
+        });
         this.getChildren().add(newGame);
         this.getChildren().add(quit);
     }

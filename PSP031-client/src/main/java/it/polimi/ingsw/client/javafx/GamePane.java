@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class GamePane extends AnchorPane {
-
+    //TODO : add quit button to GameScene, change position of ChatButton going over fourth shelfie
     private final PlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
     private final Pane commonGoalCardsPane;
