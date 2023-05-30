@@ -3,7 +3,9 @@ package it.polimi.ingsw.client.javafx;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.model.LobbyPlayer;
+import org.jetbrains.annotations.NotNull;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -22,6 +24,10 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class JfxLobbyScene extends Scene {
 
@@ -31,12 +37,34 @@ public class JfxLobbyScene extends Scene {
 
     }
 
+    private static final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
+
+        private final AtomicInteger n = new AtomicInteger();
+
+        @Override
+        public Thread newThread(@NotNull Runnable r) {
+            var th = new Thread(r);
+            th.setName("jfx-lobby-ready-" + n.getAndIncrement());
+            th.setDaemon(false);
+            return th;
+        }
+    });
+
     private static Parent createRootNode(Stage stage, LobbyAndController lobbyAndController) {
 
         //var mainPane = new CenteringFitPane();
         //mainPane.getChildren().add(new MainMenuPane());
         //Pattern ipPattern = Pattern
         //                .compile(" (\\b25[0-5]|\\b2[0-4][0-9]|\\b[01]?[0-9][0-9]?)(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3} ");
+
+        //TODO:
+        //-change scene only when everyone is ready
+        //-back to lobby button
+        //X-threads
+        //change ready button to not ready when player is ready and make player not ready when pressed
+        //-if player is first to connect -> set number of players
+        //      -change number of players when already in the lobby
+        //when player disconnects from game and later reconnects he shouldn't go trough lobby
 
         // Create labels
         Label connectionTypeLabel = new Label("Lobby");
@@ -52,41 +80,53 @@ public class JfxLobbyScene extends Scene {
         mainPane.setAlignment(Pos.CENTER);
 
         EventHandler<ActionEvent> eventIpCHeck = e -> {
+            threadPool.submit(() -> {
+                try {
 
-            try {
+                    lobbyAndController.controller().ready(true);
 
-                lobbyAndController.controller().ready(true);
+                    GameAndController<?> gameAndController;
+                    if ((gameAndController = lobbyAndController.lobby().game().get()) == null) {
+                        final CompletableFuture<GameAndController<?>> gameAndControllerFuture = new CompletableFuture<>();
+                        lobbyAndController.lobby().game().registerObserver(gameAndControllerFuture::complete);
+                        gameAndController = gameAndControllerFuture.get();
+                    }
 
-                GameAndController<?> gameAndController;
-                if ((gameAndController = lobbyAndController.lobby().game().get()) == null) {
-                    final CompletableFuture<GameAndController<?>> gameAndControllerFuture = new CompletableFuture<>();
-                    lobbyAndController.lobby().game().registerObserver(gameAndControllerFuture::complete);
-                    gameAndController = gameAndControllerFuture.get();
+                    /*
+                     * if(() -> lobbyAndController.lobby().joinedPlayers().get().size() >= 2
+                     * && lobbyAndController.lobby().joinedPlayers().get().get(0).getNick().equals(netManager.getNick())
+                     * && Objects.requireNonNull(lobbyAndController.lobby().requiredPlayers().get()) != 0
+                     * && lobbyAndController.lobby().joinedPlayers().get().stream().allMatch(p -> p.ready().get())){ }
+                     */
+                    GameAndController<?> finalGameAndController = gameAndController;
+                    Platform.runLater(() -> {
+                        Scene scene = new JfxGameScene(finalGameAndController.game(), finalGameAndController.controller());
+
+                        stage.setTitle("My Shelfie");
+
+                        // Let jfx pick the best fit
+                        stage.getIcons()
+                                .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Icon 50x50px.png")));
+                        stage.getIcons()
+                                .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Box 280x280px.png")));
+
+                        stage.setScene(scene);
+                        stage.setMinWidth(800);
+                        stage.setWidth(1080);
+                        stage.setMinHeight(500);
+                        stage.setHeight(720);
+                        stage.show();
+
+                    });
+
+                } catch (Exception ex) {
+
                 }
 
-                Scene scene = new JfxGameScene(gameAndController.game(), gameAndController.controller());
+            });
 
-                stage.setTitle("My Shelfie");
-
-                // Let jfx pick the best fit
-                stage.getIcons()
-                        .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Icon 50x50px.png")));
-                stage.getIcons()
-                        .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Box 280x280px.png")));
-
-                stage.setScene(scene);
-                stage.setMinWidth(800);
-                stage.setWidth(1080);
-                stage.setMinHeight(500);
-                stage.setHeight(720);
-                stage.show();
-
-            } catch (Exception ex) {
-
-            }
         };
 
-        //TODO : add label showing if player is ready or not 
         final LobbyPlayersVbox lobbyPlayersVbox = new LobbyPlayersVbox();
         lobbyPlayersVbox.lobbyPlayersProperty().bind(FxProperties
                 .toFxProperty("messages", lobbyPlayersVbox, lobbyAndController.lobby().joinedPlayers()));
