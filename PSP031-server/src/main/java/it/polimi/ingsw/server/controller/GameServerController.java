@@ -158,7 +158,7 @@ public class GameServerController {
                 // Change current turn
                 changeCurrentTurn(game);
                 // If someone already finished, and we reached the starting player, the game is over
-                if (game.firstFinisher().get() != null && game.getStartingPlayer().equals(player)) {
+                if (game.firstFinisher().get() != null && game.getStartingPlayer().equals(game.currentTurn().get())) {
                     game.endGame().set(true);
                 }
             }

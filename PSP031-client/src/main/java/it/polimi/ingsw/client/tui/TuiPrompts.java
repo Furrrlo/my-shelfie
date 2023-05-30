@@ -423,6 +423,8 @@ class TuiPrompts {
         game.endGame().registerObserver(endGame -> {
             if (endGame)
                 renderer.setPrompt(promptEndGame(renderer, netManager, game));
+            else
+                renderer.setPrompt(promptGame(renderer, netManager, game, controller));
         });
         game.messageList().registerObserver(messageList -> {
             renderer.rerender();
