@@ -5,10 +5,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 
 public class ScoringTokenComponent extends ImageButton {
-
-    public static int EMPTY = 0;
-    public static int FIRST_FINISHER = 1;
-
     private final ObjectProperty<Integer> score = new SimpleObjectProperty<>(this, "score");
 
     public ScoringTokenComponent() {

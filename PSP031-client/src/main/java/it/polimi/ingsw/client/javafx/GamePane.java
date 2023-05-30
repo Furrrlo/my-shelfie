@@ -100,7 +100,23 @@ public class GamePane extends AnchorPane {
                 .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
         getChildren().add(
-                this.commonGoalCardsPane = new CommonGoalsPane(game.getCommonGoals().get(0), game.getCommonGoals().get(1)));
+                this.commonGoalCardsPane = new CommonGoalsPane(game.getCommonGoals().get(0), game.getCommonGoals().get(1),
+                        (!game.getCommonGoals().get(0).achieved().get().contains(game.thePlayer())) ? 0
+                                : switch (game.getCommonGoals().get(0).achieved().get().indexOf(game.thePlayer())) {
+                                case 0 -> 8;
+                                case 1 -> 6;
+                                case 2 -> 4;
+                                case 3 -> 2;
+                                default -> throw new IllegalStateException("Unexpected value: ");
+                                },
+                        (!game.getCommonGoals().get(1).achieved().get().contains(game.thePlayer())) ? 0
+                                : switch (game.getCommonGoals().get(1).achieved().get().indexOf(game.thePlayer())) {
+                                case 0 -> 8;
+                                case 1 -> 6;
+                                case 2 -> 4;
+                                case 3 -> 2;
+                                default -> throw new IllegalStateException("Unexpected value: ");
+                                }));
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
         //getChildren().add(this.board = new BoardComponent(game.getBoard()));
         this.board = new BoardComponent(game.getBoard());

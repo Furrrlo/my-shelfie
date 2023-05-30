@@ -27,13 +27,13 @@ public class CommonGoalsPane extends Pane {
     private final ObjectProperty<Integer> score2;
     private final ScoringTokenComponent token2;
 
-    public CommonGoalsPane(CommonGoalView goal1, CommonGoalView goal2) {
+    public CommonGoalsPane(CommonGoalView goal1, CommonGoalView goal2, int cg1, int cg2) {
         this.score1 = new SimpleObjectProperty<>(this, "score1");
         this.score2 = new SimpleObjectProperty<>(this, "score2");
         this.token1 = new ScoringTokenComponent();
         this.token2 = new ScoringTokenComponent();
-        token1.setScore(ScoringTokenComponent.EMPTY);
-        token2.setScore(ScoringTokenComponent.EMPTY);
+        token1.setScore(cg1);
+        token2.setScore(cg2);
         score1.addListener(((observable, oldValue, newValue) -> {
             token1.setScore(newValue);
         }));
