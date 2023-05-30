@@ -29,6 +29,7 @@ import javafx.scene.shape.Circle;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -42,7 +43,8 @@ public class GamePane extends AnchorPane {
      * shelfies and the chat
      */
     //TODO : add quit button to GameScene, change position of ChatButton going over fourth shelfie
-    //      and add firstFinisherTile ; 
+    //TODO : for Ferlo, solve problem disconnecting the player before he can read endGame probably related to
+    //unregister Observers
     private final PlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
     private final CommonGoalsPane commonGoalCardsPane;
@@ -60,6 +62,7 @@ public class GamePane extends AnchorPane {
     private final DialogVbox notCurrentTurnMessage;
     private final DialogVbox suspendedGameMessage;
     private EndGamePane endGamePane;
+    private final ScoringTokenComponent finishToken;
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
 
@@ -67,6 +70,8 @@ public class GamePane extends AnchorPane {
 
     private final ObjectProperty<Boolean> endGame = new SimpleObjectProperty<>(this, "endGame");
 
+    private final ObjectProperty<PlayerView> firstFinisher = new SimpleObjectProperty<>(this,
+            "firsFinisher");
     private final ObjectProperty<List<? extends PlayerView>> achieved1 = new SimpleObjectProperty<>(this, "commonGoal1");
     private final ObjectProperty<List<? extends PlayerView>> achieved2 = new SimpleObjectProperty<>(this, "commonGoal1");
 
@@ -94,6 +99,13 @@ public class GamePane extends AnchorPane {
         //initializing endGamePane ( otherwise having problems not being initialized )
         this.endGamePane = new EndGamePane(game.getPlayers().stream().toList());
         endGamePane.setVisible(false);
+
+        //adding first finisher token on game pane otherwise it would have been disabled when is not
+        //the player's turn
+        this.finishToken = new ScoringTokenComponent();
+        finishToken.setRotate(9);
+        finishToken.setScore(
+                game.firstFinisher().get() != null && Objects.equals(game.firstFinisher().get(), game.thePlayer()) ? 1 : 0);
 
         //adding game components
         getChildren()
@@ -137,6 +149,12 @@ public class GamePane extends AnchorPane {
             final var list = new ArrayList<>(pickedTilesPane.getTiles());
             list.remove(tileAndCoords);
             return list.size() == 0 || game.getBoard().checkBoardCoord(list);
+        });
+
+        //binding this.firstFinisher to game.firstFinisher
+        this.firstFinisher.bind(FxProperties.toFxProperty("firstFinisher", firstFinisher, game.firstFinisher()));
+        this.firstFinisher.addListener((observable, oldValue, newValue) -> {
+            finishToken.setScore(newValue != null && newValue.equals(game.thePlayer()) ? 1 : 0);
         });
 
         //now displaying points for commonGoals if achieved
@@ -310,6 +328,9 @@ public class GamePane extends AnchorPane {
         this.suspendedGameMessage.toFront();
         getChildren().add(this.notCurrentTurnMessage);
         getChildren().add(this.suspendedGameMessage);
+
+        finishToken.toFront();
+        getChildren().add(this.finishToken);
     }
 
     @Override
@@ -337,6 +358,7 @@ public class GamePane extends AnchorPane {
         this.commonGoalCardsPane.resizeRelocate(0, 422.0 * scale, 221.0 * scale, 164.0 * scale);
         this.personalGoalCard.resizeRelocate(228.0 * scale, 386.0 * scale, 131.794 * scale, 200.0 * scale);
         this.board.resize(460.0 * scale, 460.0 * scale);
+        this.finishToken.resizeRelocate(743.0 * scale, 322.0 * scale, 46 * scale, 46 * scale);
         this.boardPane.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
         this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 182.0 * scale, 194.0 * scale);
