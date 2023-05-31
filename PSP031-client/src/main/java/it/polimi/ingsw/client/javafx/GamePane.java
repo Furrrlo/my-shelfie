@@ -293,9 +293,9 @@ public class GamePane extends AnchorPane {
                 new Insets(-ChatComponent.INSET)))));
 
         //adding label displaying if there are any new incoming messages when the chat is closed
-        getChildren().add(this.newMsg = new Label(""));
+        this.newMsg = new Label("");
         this.newMsg.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
+                Color.INDIANRED,
                 new CornerRadii(Math.min(100, 100 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
         this.newMsg.setVisible(false);
@@ -362,12 +362,14 @@ public class GamePane extends AnchorPane {
         });
 
         //adding the Alerts as last nodes so that they will be on front
+        this.newMsg.toFront();
         this.notCurrentTurnMessage.toFront();
         this.suspendedGameMessage.toFront();
         this.quitGameMessage.toFront();
         getChildren().add(this.notCurrentTurnMessage);
         getChildren().add(this.suspendedGameMessage);
         getChildren().add(this.quitGameMessage);
+        getChildren().add(this.newMsg);
 
         finishToken.toFront();
         getChildren().add(this.finishToken);
@@ -412,15 +414,12 @@ public class GamePane extends AnchorPane {
         this.endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2, 690 * scale,
                 490 * scale);
 
-        final var btnSize = 45 * scale;
         final var newMsgSize = 15 * scale;
         final var chatPaneWidth = 200.0 * scale;
         this.chatPane.resizeRelocate(
                 getWidth() - chatPaneWidth + ChatComponent.INSET,
                 +ChatComponent.INSET,
                 chatPaneWidth - ChatComponent.INSET * 2, getHeight() - ChatComponent.INSET * 2);
-        this.newMsg.resizeRelocate(getWidth() - btnSize + newMsgSize * 3 / 2, getHeight() - btnSize - newMsgSize / 3,
-                newMsgSize,
-                newMsgSize);
+        this.newMsg.resizeRelocate(800 * scale, 540 * scale, newMsgSize, newMsgSize);
     }
 }
