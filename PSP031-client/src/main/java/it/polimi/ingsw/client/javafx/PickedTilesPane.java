@@ -137,7 +137,8 @@ public class PickedTilesPane extends Pane {
         double border = 6 * scale;
         double tileSize = getHeight() - 4 * border;
 
-        double x = (getWidth() - ((border + tileSize + border) * 3 + 2 * border)) / 2.0;
+        //double x = (getWidth() - ((border + tileSize + border) * 3 + 2 * border)) / 2.0;
+        double x = border * 2;
         tile1Border.resizeRelocate(x, border, tileSize + 2 * border, tileSize + 2 * border);
         tile1.resizeRelocate(x + border, 2 * border, tileSize, tileSize);
 

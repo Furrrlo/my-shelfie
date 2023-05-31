@@ -55,6 +55,8 @@ public class GamePane extends AnchorPane {
     private final Pane player1Shelfie;
     private final Pane player2Shelfie;
     private final Pane player3Shelfie;
+    private final Button quitGameBtn;
+    private final Button newChatBtn;
     private final Button chatBtn;
     private final Label newMsg;
     private final ChatComponent chatPane;
@@ -150,6 +152,26 @@ public class GamePane extends AnchorPane {
             list.remove(tileAndCoords);
             return list.size() == 0 || game.getBoard().checkBoardCoord(list);
         });
+
+        //adding chat button and quit game button over pickedTilesPane
+        this.quitGameBtn = new Button("Quit game");
+        quitGameBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.INDIANRED,
+                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                new Insets(0)))));
+        this.getChildren().add(quitGameBtn);
+        this.newChatBtn = new Button("Show chat");
+        newChatBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTSEAGREEN,
+                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                new Insets(0)))));
+        newChatBtn.setOnMouseClicked(event -> {
+            if (newChatBtn.getText().equals("Show chat"))
+                newChatBtn.setText("Close chat");
+            else
+                newChatBtn.setText("Show chat");
+        });
+        this.getChildren().add(newChatBtn);
 
         //binding this.firstFinisher to game.firstFinisher
         this.firstFinisher.bind(FxProperties.toFxProperty("firstFinisher", firstFinisher, game.firstFinisher()));
@@ -361,6 +383,8 @@ public class GamePane extends AnchorPane {
         this.finishToken.resizeRelocate(743.0 * scale, 322.0 * scale, 46 * scale, 46 * scale);
         this.boardPane.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
+        this.quitGameBtn.resizeRelocate(707 * scale, (470 + 8) * scale, 115 * scale, 46 * scale);
+        this.newChatBtn.resizeRelocate(707 * scale, (470 + 48 + 8 + 5) * scale, 115 * scale, 46 * scale);
         this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 182.0 * scale, 194.0 * scale);
         this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 182.0 * scale, 194.0 * scale);
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
