@@ -63,6 +63,7 @@ public class GamePane extends AnchorPane {
 
     private final DialogVbox notCurrentTurnMessage;
     private final DialogVbox suspendedGameMessage;
+    private final DialogVbox quitGameMessage;
     private EndGamePane endGamePane;
     private final ScoringTokenComponent finishToken;
 
@@ -97,6 +98,9 @@ public class GamePane extends AnchorPane {
         notCurrentTurnMessage.setVisible(false);
         this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
         suspendedGameMessage.setVisible(false);
+        //set alert for quitGame message
+        this.quitGameMessage = new DialogVbox(DialogVbox.QUIT_GAME);
+        quitGameMessage.setVisible(false);
 
         //initializing endGamePane ( otherwise having problems not being initialized )
         this.endGamePane = new EndGamePane(game.getPlayers().stream().toList());
@@ -159,6 +163,15 @@ public class GamePane extends AnchorPane {
                 Color.INDIANRED,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
+        quitGameBtn.setOnMouseClicked(event -> {
+            for (Node n : getChildren()) {
+                if (!n.equals(quitGameMessage)) {
+                    n.setDisable(true);
+                    n.setOpacity(0.5);
+                }
+            }
+            quitGameMessage.setVisible(true);
+        });
         this.getChildren().add(quitGameBtn);
         this.newChatBtn = new Button("Show chat");
         newChatBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
@@ -348,8 +361,10 @@ public class GamePane extends AnchorPane {
         //adding the Alerts as last nodes so that they will be on front
         this.notCurrentTurnMessage.toFront();
         this.suspendedGameMessage.toFront();
+        this.quitGameMessage.toFront();
         getChildren().add(this.notCurrentTurnMessage);
         getChildren().add(this.suspendedGameMessage);
+        getChildren().add(this.quitGameMessage);
 
         finishToken.toFront();
         getChildren().add(this.finishToken);
@@ -390,6 +405,7 @@ public class GamePane extends AnchorPane {
         this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
         this.notCurrentTurnMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         this.suspendedGameMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
+        this.quitGameMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         this.endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2, 690 * scale,
                 490 * scale);
 
