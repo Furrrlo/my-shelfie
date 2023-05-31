@@ -25,6 +25,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -56,7 +57,7 @@ public class GamePane extends AnchorPane {
     private final Pane player2Shelfie;
     private final Pane player3Shelfie;
     private final Button quitGameBtn;
-    private final Button newChatBtn;
+    private final HBox newChatBtn;
     private final Button chatBtn;
     private final Label newMsg;
     private final ChatComponent chatPane;
@@ -173,16 +174,35 @@ public class GamePane extends AnchorPane {
             quitGameMessage.setVisible(true);
         });
         this.getChildren().add(quitGameBtn);
-        this.newChatBtn = new Button("Show chat");
+        this.newChatBtn = new HBox();
+        newChatBtn.setSpacing(5);
+        Text open = new Text("Show chat");
+        open.setAccessibleText("Show chat");
+        ImageView closedMail = new ImageView(new Image(FxResources.getResourceAsStream("fa/message.png")));
+        closedMail.setPreserveRatio(true);
+        closedMail.setFitWidth(30);
+        closedMail.setFitHeight(30);
+        newChatBtn.getChildren().add(open);
+        newChatBtn.getChildren().add(closedMail);
+        newChatBtn.setAlignment(Pos.CENTER);
         newChatBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
         newChatBtn.setOnMouseClicked(event -> {
-            if (newChatBtn.getText().equals("Show chat"))
-                newChatBtn.setText("Close chat");
-            else
-                newChatBtn.setText("Show chat");
+            if (newChatBtn.getChildren().get(0).getAccessibleText().equals("Show chat")) {
+                Text close = new Text("Close chat");
+                close.setAccessibleText("Close chat");
+                newChatBtn.getChildren().set(0, close);
+                ImageView openMail = new ImageView(new Image(FxResources.getResourceAsStream("fa/open-message.png")));
+                openMail.setPreserveRatio(true);
+                openMail.setFitWidth(30);
+                openMail.setFitHeight(30);
+                newChatBtn.getChildren().set(1, openMail);
+            } else {
+                newChatBtn.getChildren().set(0, open);
+                newChatBtn.getChildren().set(1, closedMail);
+            }
         });
         this.getChildren().add(newChatBtn);
 
