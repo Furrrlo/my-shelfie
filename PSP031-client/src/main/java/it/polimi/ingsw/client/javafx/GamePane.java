@@ -42,9 +42,7 @@ public class GamePane extends AnchorPane {
      * It displays all the game's components needed for the player to play, including the other players'
      * shelfies and the chat
      */
-    //TODO : add quit button to GameScene, change position of ChatButton going over fourth shelfie
-    //TODO : for Ferlo, solve problem disconnecting the player before he can read endGame probably related to
-    //unregister Observers
+    //TODO : for Ferlo, solve problem disconnecting the player before he can read endGame probably related to unregister Observers
     private final PlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
     private final CommonGoalsPane commonGoalCardsPane;
@@ -120,19 +118,19 @@ public class GamePane extends AnchorPane {
                 this.commonGoalCardsPane = new CommonGoalsPane(game.getCommonGoals().get(0), game.getCommonGoals().get(1),
                         (!game.getCommonGoals().get(0).achieved().get().contains(game.thePlayer())) ? 0
                                 : switch (game.getCommonGoals().get(0).achieved().get().indexOf(game.thePlayer())) {
-                                case 0 -> 8;
-                                case 1 -> 6;
-                                case 2 -> 4;
-                                case 3 -> 2;
-                                default -> throw new IllegalStateException("Unexpected value: ");
+                                    case 0 -> 8;
+                                    case 1 -> 6;
+                                    case 2 -> 4;
+                                    case 3 -> 2;
+                                    default -> throw new IllegalStateException("Unexpected value: ");
                                 },
                         (!game.getCommonGoals().get(1).achieved().get().contains(game.thePlayer())) ? 0
                                 : switch (game.getCommonGoals().get(1).achieved().get().indexOf(game.thePlayer())) {
-                                case 0 -> 8;
-                                case 1 -> 6;
-                                case 2 -> 4;
-                                case 3 -> 2;
-                                default -> throw new IllegalStateException("Unexpected value: ");
+                                    case 0 -> 8;
+                                    case 1 -> 6;
+                                    case 2 -> 4;
+                                    case 3 -> 2;
+                                    default -> throw new IllegalStateException("Unexpected value: ");
                                 }));
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
         //getChildren().add(this.board = new BoardComponent(game.getBoard()));
