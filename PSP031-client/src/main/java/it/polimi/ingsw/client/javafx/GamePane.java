@@ -101,7 +101,7 @@ public class GamePane extends AnchorPane {
         quitGameMessage.setVisible(false);
 
         //initializing endGamePane ( otherwise having problems not being initialized )
-        this.endGamePane = new EndGamePane(game.getPlayers().stream().toList());
+        this.endGamePane = new EndGamePane(game.getPlayers().stream().toList(), netManager);
         endGamePane.setVisible(false);
 
         //adding first finisher token on game pane otherwise it would have been disabled when is not
@@ -231,7 +231,7 @@ public class GamePane extends AnchorPane {
                 }
                 var sortedPlayers = game.getPlayers().stream()
                         .sorted(Comparator.comparing((PlayerView p) -> p.score().get())).toList();
-                this.endGamePane = new EndGamePane(sortedPlayers);
+                this.endGamePane = new EndGamePane(sortedPlayers, netManager);
                 endGamePane.toFront();
                 endGamePane.setAlignment(Pos.CENTER);
                 this.getChildren().add(endGamePane);

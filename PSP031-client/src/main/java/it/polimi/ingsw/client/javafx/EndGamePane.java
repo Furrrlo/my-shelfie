@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
+import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.PlayerView;
 
 import javafx.geometry.Insets;
@@ -14,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.List;
 
 public class EndGamePane extends StackPane {
@@ -28,7 +30,7 @@ public class EndGamePane extends StackPane {
     private final Button newGame;
     private final Button quit;
 
-    public EndGamePane(List<? extends PlayerView> sortedPlayers) {
+    public EndGamePane(List<? extends PlayerView> sortedPlayers, ClientNetManager netManager) {
         var teamPicture = new ImageView(new Image(FxResources.getResourceAsStream("fa/teamPicture.png")));
         teamPicture.setPreserveRatio(true);
         teamPicture.fitWidthProperty().bind(widthProperty());
@@ -76,6 +78,12 @@ public class EndGamePane extends StackPane {
                 new Insets(0)))));
 
         quit.setOnMouseClicked(event -> {
+            try {
+                netManager.close();
+                System.exit(0);
+            } catch (IOException ex) {
+                System.exit(-1);
+            }
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
         });

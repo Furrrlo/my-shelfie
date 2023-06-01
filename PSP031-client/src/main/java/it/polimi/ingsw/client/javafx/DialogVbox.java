@@ -135,15 +135,14 @@ public class DialogVbox extends VBox {
                     new Insets(-5)))));
 
             quitGame.setOnMouseClicked(event -> {
-                Stage stage = (Stage) getScene().getWindow();
-                stage.close();
                 try {
                     Objects.requireNonNull(netManager).close();
                     System.exit(0);
                 } catch (IOException ex) {
-                    //LOGGER.error("Failed to disconnect from the server while closing", ex);
                     System.exit(-1);
                 }
+                Stage stage = (Stage) getScene().getWindow();
+                stage.close();
             });
             this.getChildren().add(hbox);
         }
