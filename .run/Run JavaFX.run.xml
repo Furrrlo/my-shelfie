@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run JavaFX" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="Run JavaFX" type="MavenRunConfiguration" factoryName="Maven" singleton="false">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
