@@ -6,7 +6,7 @@ class JfxMain {
     public static void main(String[] args) {
         // Configure log4j file if none is already set
         if (System.getProperty("log4j.configurationFile") == null)
-            System.setProperty("log4j.configurationFile", "log4j2-tui.xml");
+            System.setProperty("log4j.configurationFile", "log4j2-jfx.xml");
 
         // add SLF4JBridgeHandler to j.u.l's root logger
         SLF4JBridgeHandler.removeHandlersForRootLogger();
