@@ -79,6 +79,16 @@ public class CommonGoalsPane extends Pane {
             description.setText(goal2.getType().getDescription().replaceAll("[\\r\\n]+", " "));
             stackPane.setVisible(!stackPane.isVisible());
         });
+        this.token1.setOnMousePressed(e -> {
+            description.setText("The common goal cards grant points to the players who achieve the pattern.\n" +
+                    "The first player to achieve it gets 8 point, 6 the second, 4 the third and 2 the last");
+            stackPane.setVisible(!stackPane.isVisible());
+        });
+        this.token2.setOnMousePressed(e -> {
+            description.setText("The common goal cards grant points to the players who achieve the pattern.\n" +
+                    "The first player to achieve it gets 8 point, 6 the second, 4 the third and 2 the last");
+            stackPane.setVisible(!stackPane.isVisible());
+        });
         this.stackPane.setOnMousePressed(e -> {
             stackPane.setVisible(!stackPane.isVisible());
         });
