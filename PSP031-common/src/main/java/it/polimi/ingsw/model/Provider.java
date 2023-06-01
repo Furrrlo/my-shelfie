@@ -4,6 +4,16 @@ import java.io.Serializable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Interface which contains data and allows to register/unregister observers
+ * to be notified about related changes.
+ * <p>
+ * Implementations should be fully concurrent and observers should be able to mutate the data,
+ * register or unregister additional observers or themselves when they are notififed of a value
+ * change.
+ *
+ * @param <T> type o the contained data
+ */
 public interface Provider<T> {
 
     T get();

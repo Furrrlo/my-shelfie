@@ -7,6 +7,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,5 +78,35 @@ class SerializablePropertyTest {
         property.update(v -> v + "_updated");
         assertEquals("empty_updated", property.get());
         assertEquals(property.get(), observed.get(500, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    void testUnregistering() throws InterruptedException {
+        final var property = new SerializableProperty<>("empty");
+        final var observed = IntStream.range(0, 100)
+                .mapToObj(i -> (Consumer<? super String>) str -> {
+                })
+                .collect(Collectors.toList());
+        // Register observers with a few millis of time diff each
+        for (Consumer<? super String> p : observed) {
+            Thread.sleep(10);
+            property.registerObserver(p);
+        }
+        assertTrue(property.getObservers().containsAll(observed));
+
+        // Try to remove the one in the middle
+        // This is cause the impl uses an ordering-based collection (at the time of writing)
+        // so it might be able to remove the first one without issue but struggle with one in the middle
+        var toRemove = observed.remove(50);
+        property.unregisterObserver(toRemove);
+        assertFalse(property.getObservers().contains(toRemove), "Property still contains " + toRemove);
+
+        // Try to remove the others randomly
+        var rnd = RandomGenerator.getDefault();
+        while (!observed.isEmpty()) {
+            toRemove = observed.remove(rnd.nextInt(observed.size()));
+            property.unregisterObserver(toRemove);
+            assertFalse(property.getObservers().contains(toRemove), "Property still contains " + toRemove);
+        }
     }
 }

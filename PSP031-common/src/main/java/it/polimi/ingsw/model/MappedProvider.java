@@ -3,9 +3,10 @@ package it.polimi.ingsw.model;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -14,9 +15,10 @@ class MappedProvider<P, T> implements Provider<T>, Serializable {
     private final Provider<P> parent;
     private final SerializableFunction<P, T> mapper;
 
-    private final transient Map<Consumer<? super T>, Consumer<? super P>> registeredObservers = new HashMap<>();
+    private final transient Map<Consumer<? super T>, Consumer<? super P>> registeredObservers = new ConcurrentHashMap<>();
 
-    private final transient Map<Consumer<? super T>, Consumer<? super P>> registeredWeakObservers = new WeakHashMap<>();
+    private final transient Map<Consumer<? super T>, Consumer<? super P>> registeredWeakObservers = Collections
+            .synchronizedMap(new WeakHashMap<>());
 
     public MappedProvider(Provider<P> parent, SerializableFunction<P, T> mapper) {
         this.parent = parent;
