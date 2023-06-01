@@ -1,6 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyPlayer;
@@ -24,7 +24,6 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -80,53 +79,28 @@ public class JfxLobbyScene extends Scene {
         mainPane.add(connectionTypeLabel, 0, 0);
         mainPane.setAlignment(Pos.CENTER);
 
+        lobbyAndController.lobby().game().registerObserver(gameAndController -> {
+            if (gameAndController != null) {
+                Platform.runLater(() -> {
+                    Scene scene = new JfxGameScene(gameAndController.game(), gameAndController.controller(), netManager);
+                    stage.setScene(scene);
+                    stage.setMinWidth(800);
+                    stage.setWidth(1080);
+                    stage.setMinHeight(500);
+                    stage.setHeight(720);
+                    stage.show();
+                });
+            }
+        });
+
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             threadPool.submit(() -> {
                 try {
-
                     lobbyAndController.controller().ready(true);
-
-                    GameAndController<?> gameAndController;
-                    if ((gameAndController = lobbyAndController.lobby().game().get()) == null) {
-                        final CompletableFuture<GameAndController<?>> gameAndControllerFuture = new CompletableFuture<>();
-                        lobbyAndController.lobby().game().registerObserver(gameAndControllerFuture::complete);
-                        gameAndController = gameAndControllerFuture.get();
-                    }
-
-                    /*
-                     * if(() -> lobbyAndController.lobby().joinedPlayers().get().size() >= 2
-                     * && lobbyAndController.lobby().joinedPlayers().get().get(0).getNick().equals(netManager.getNick())
-                     * && Objects.requireNonNull(lobbyAndController.lobby().requiredPlayers().get()) != 0
-                     * && lobbyAndController.lobby().joinedPlayers().get().stream().allMatch(p -> p.ready().get())){ }
-                     */
-                    GameAndController<?> finalGameAndController = gameAndController;
-                    Platform.runLater(() -> {
-                        Scene scene = new JfxGameScene(finalGameAndController.game(), finalGameAndController.controller(),
-                                netManager);
-
-                        stage.setTitle("My Shelfie");
-
-                        // Let jfx pick the best fit
-                        stage.getIcons()
-                                .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Icon 50x50px.png")));
-                        stage.getIcons()
-                                .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Box 280x280px.png")));
-
-                        stage.setScene(scene);
-                        stage.setMinWidth(800);
-                        stage.setWidth(1080);
-                        stage.setMinHeight(500);
-                        stage.setHeight(720);
-                        stage.show();
-
-                    });
-
-                } catch (Exception ex) {
-
+                } catch (DisconnectedException ex) {
+                    throw new RuntimeException(ex); //TODO
                 }
-
             });
-
         };
 
         final LobbyPlayersVbox lobbyPlayersVbox = new LobbyPlayersVbox();

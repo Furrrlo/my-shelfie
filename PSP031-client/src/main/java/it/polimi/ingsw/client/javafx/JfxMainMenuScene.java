@@ -111,20 +111,8 @@ public class JfxMainMenuScene extends Scene {
 
                 Scene scene = new JfxLobbyScene(stage, lobbyAndController, netManager);
 
-                stage.setTitle("My Shelfie");
-
-                // Let jfx pick the best fit
-                stage.getIcons()
-                        .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Icon 50x50px.png")));
-                stage.getIcons()
-                        .add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Box 280x280px.png")));
-
                 stage.setScene(scene);
-                stage.setMinWidth(800);
-                stage.setWidth(1080);
-                stage.setMinHeight(500);
-                stage.setHeight(720);
-                stage.show();
+
                 stage.setOnCloseRequest(exit -> {
                     int exitCode = 0;
                     try {
