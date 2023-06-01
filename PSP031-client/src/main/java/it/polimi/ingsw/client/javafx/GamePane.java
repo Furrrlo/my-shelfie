@@ -2,6 +2,7 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.PlayerView;
@@ -88,15 +89,15 @@ public class GamePane extends AnchorPane {
         }
     });
 
-    public GamePane(GameView game, GameController controller) {
+    public GamePane(GameView game, GameController controller, ClientNetManager netManager) {
         //set new alerts for suspended game and disconnected player ( making them initially not visible,
         // will be later made visible when corresponding state is caught )
-        this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN);
+        this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN, null);
         notCurrentTurnMessage.setVisible(false);
-        this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
+        this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED, null);
         suspendedGameMessage.setVisible(false);
         //set alert for quitGame message
-        this.quitGameMessage = new DialogVbox(DialogVbox.QUIT_GAME);
+        this.quitGameMessage = new DialogVbox(DialogVbox.QUIT_GAME, netManager);
         quitGameMessage.setVisible(false);
 
         //initializing endGamePane ( otherwise having problems not being initialized )

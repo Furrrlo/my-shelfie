@@ -2,6 +2,7 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyPlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,9 +32,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class JfxLobbyScene extends Scene {
 
-    public JfxLobbyScene(Stage stage, LobbyAndController lobbyAndController) {
+    public JfxLobbyScene(Stage stage, LobbyAndController lobbyAndController, ClientNetManager netManager) {
 
-        super(createRootNode(stage, lobbyAndController));
+        super(createRootNode(stage, lobbyAndController, netManager));
 
     }
 
@@ -50,7 +51,7 @@ public class JfxLobbyScene extends Scene {
         }
     });
 
-    private static Parent createRootNode(Stage stage, LobbyAndController lobbyAndController) {
+    private static Parent createRootNode(Stage stage, LobbyAndController lobbyAndController, ClientNetManager netManager) {
 
         //var mainPane = new CenteringFitPane();
         //mainPane.getChildren().add(new MainMenuPane());
@@ -100,7 +101,8 @@ public class JfxLobbyScene extends Scene {
                      */
                     GameAndController<?> finalGameAndController = gameAndController;
                     Platform.runLater(() -> {
-                        Scene scene = new JfxGameScene(finalGameAndController.game(), finalGameAndController.controller());
+                        Scene scene = new JfxGameScene(finalGameAndController.game(), finalGameAndController.controller(),
+                                netManager);
 
                         stage.setTitle("My Shelfie");
 

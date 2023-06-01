@@ -1,5 +1,8 @@
 package it.polimi.ingsw.client.javafx;
 
+import it.polimi.ingsw.client.network.ClientNetManager;
+import org.jetbrains.annotations.Nullable;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -18,6 +21,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.IOException;
+import java.util.Objects;
+
 public class DialogVbox extends VBox {
 
     public static int QUIT_GAME = 0;
@@ -26,7 +32,7 @@ public class DialogVbox extends VBox {
 
     private final Timeline timeline;
 
-    public DialogVbox(int type) {
+    public DialogVbox(int type, @Nullable ClientNetManager netManager) {
         setSpacing(15);
         if (type == NOT_CURRENT_TURN || type == DISCONNECTED) {
             backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
@@ -131,6 +137,13 @@ public class DialogVbox extends VBox {
             quitGame.setOnMouseClicked(event -> {
                 Stage stage = (Stage) getScene().getWindow();
                 stage.close();
+                try {
+                    Objects.requireNonNull(netManager).close();
+                    System.exit(0);
+                } catch (IOException ex) {
+                    //LOGGER.error("Failed to disconnect from the server while closing", ex);
+                    System.exit(-1);
+                }
             });
             this.getChildren().add(hbox);
         }

@@ -109,7 +109,7 @@ public class JfxMainMenuScene extends Scene {
                 }
                 var lobbyAndController = netManager.joinGame();
 
-                Scene scene = new JfxLobbyScene(stage, lobbyAndController);
+                Scene scene = new JfxLobbyScene(stage, lobbyAndController, netManager);
 
                 stage.setTitle("My Shelfie");
 
