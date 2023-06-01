@@ -60,21 +60,30 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     protected abstract void doClosePlayerGame() throws IOException;
 
     @Override
-    public <T> Consumer<T> registerObserver(Provider<T> toObserve, PlayerObservableTracker.ThrowingConsumer<T> observer) {
-        return controller.supplyOnLocks(nick, () -> {
-            final var observers = observablesToObservers
-                    .computeIfAbsent(toObserve, v -> ConcurrentHashMap.newKeySet());
-            Consumer<T> throwingObserver = t -> {
-                try {
-                    observer.accept(t);
-                } catch (DisconnectedException e) {
-                    disconnectPlayer(e);
-                }
-            };
-            observers.add(throwingObserver);
-            toObserve.registerObserver(throwingObserver);
-            return throwingObserver;
-        });
+    public <T> Consumer<T> registerObserver(Provider<T> toObserve, ThrowingConsumer<T> observer) {
+        return controller.supplyOnLocks(nick, () -> doRegisterObserver(toObserve, observer));
+    }
+
+    @Override
+    public <T> Consumer<T> registerObserver(ServerController.LockBadge controllerLockBadge,
+                                            Provider<T> toObserve,
+                                            ThrowingConsumer<T> observer) {
+        return doRegisterObserver(toObserve, observer);
+    }
+
+    private <T> Consumer<T> doRegisterObserver(Provider<T> toObserve, ThrowingConsumer<T> observer) {
+        final var observers = observablesToObservers
+                .computeIfAbsent(toObserve, v -> ConcurrentHashMap.newKeySet());
+        Consumer<T> throwingObserver = t -> {
+            try {
+                observer.accept(t);
+            } catch (DisconnectedException e) {
+                disconnectPlayer(e);
+            }
+        };
+        observers.add(throwingObserver);
+        toObserve.registerObserver(throwingObserver);
+        return throwingObserver;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

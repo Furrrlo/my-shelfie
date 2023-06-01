@@ -27,8 +27,33 @@ public interface PlayerObservableTracker {
      * @return the actual observer registered to the value, which is an implementation that wraps
      *         the given {@code toObserve} parameter
      * @param <T> type of the observable value
+     * @see #registerObserver(ServerController.LockBadge, Provider, ThrowingConsumer)
      */
     <T> Consumer<T> registerObserver(Provider<T> toObserve, ThrowingConsumer<T> observer);
+
+    /**
+     * Register an observable for the given player and track it in order to remove
+     * it on disconnection
+     * <p>
+     * In addition, the observer will be wrapped to catch any potential disconnection
+     * exceptions and act based on those to close the connection and signal the
+     * player as disconnected
+     * <p>
+     * This method, in contrast to its overload, requires a badge to only allow the ServerController
+     * to call it. By doing so, it can skip any locking as it assumes the caller already handled it.
+     * This also allows skipping code that searches for the correct lock given a player's nick
+     *
+     * @param toObserve value the current player is interested in observing
+     * @param observer player's observable
+     * @return the actual observer registered to the value, which is an implementation that wraps
+     *         the given {@code toObserve} parameter
+     * @param <T> type of the observable value
+     * @see it.polimi.ingsw.server.controller.ServerController.LockBadge
+     * @see #registerObserver(Provider, ThrowingConsumer)
+     */
+    <T> Consumer<T> registerObserver(ServerController.LockBadge controllerLockBadge,
+                                     Provider<T> toObserve,
+                                     ThrowingConsumer<T> observer);
 
     /**
      * Consumer which is allowed to throw disconnection related user exceptions, pushing the burden

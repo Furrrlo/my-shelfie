@@ -168,6 +168,19 @@ public class ServerController implements Closeable {
         }
     }
 
+    /**
+     * Badge class which can be used as a parameter by methods to signal that the method, despite public,
+     * should only be called by the ServerController class, in particular only when the ServerController
+     * is already holding the required lobby/game locks for a certain player.
+     * <p>
+     * See <a href="https://awesomekling.github.io/Serenity-C++-patterns-The-Badge/">the SerenityOS badge pattern</a>
+     */
+    public static class LockBadge {
+        /** Private constructor so that only the ServerController can instantiate the badges */
+        private LockBadge() {
+        }
+    }
+
     public void connectPlayer(String nick, HeartbeatHandler heartbeatHandler)
             throws NickNotValidException {
         if (nick.isEmpty())
@@ -189,6 +202,7 @@ public class ServerController implements Closeable {
 
             try (var serverLobbyCloseable = lockedServerLobby.use()) {
                 var serverLobby = serverLobbyCloseable.obj();
+                var lockBadge = new LockBadge();
 
                 // This is basically double-checked locking, getOrCreateGameLobbySomehow() checks with no lock
                 // so that it can discard options fast, then here we re-check while actually holding the lock
@@ -219,30 +233,33 @@ public class ServerController implements Closeable {
                     for (LobbyPlayer player : serverLobby.joinedPlayers().get())
                         playersRegisteredObservers.put(
                                 player,
-                                observableTracker.registerObserver(player.ready(),
+                                observableTracker.registerObserver(lockBadge, player.ready(),
                                         ready -> lobbyUpdater.updatePlayerReady(player.getNick(), ready)));
 
-                    observableTracker.registerObserver(serverLobby.requiredPlayers(), lobbyUpdater::updateRequiredPlayers);
+                    observableTracker.registerObserver(lockBadge, serverLobby.requiredPlayers(),
+                            lobbyUpdater::updateRequiredPlayers);
 
-                    observableTracker.registerObserver(serverLobby.joinedPlayers(), newLobbyPlayers -> {
+                    observableTracker.registerObserver(lockBadge, serverLobby.joinedPlayers(), newLobbyPlayers -> {
                         lobbyUpdater.updateJoinedPlayers(newLobbyPlayers.stream()
                                 .map(LobbyPlayer::getNick)
                                 .collect(Collectors.toList()));
                         // Add observers to players which joined
                         for (LobbyPlayer p0 : newLobbyPlayers)
-                            playersRegisteredObservers.computeIfAbsent(p0, p -> observableTracker.registerObserver(p.ready(),
+                            playersRegisteredObservers.computeIfAbsent(p0, p -> observableTracker.registerObserver(
+                                    lockBadge, p.ready(),
                                     ready -> lobbyUpdater.updatePlayerReady(p.getNick(), ready)));
                         // Remove observers from players which left
                         // TODO: unregister observers
                         playersRegisteredObservers.entrySet().removeIf(e -> !newLobbyPlayers.contains(e.getKey()));
                     });
-                    observableTracker.registerObserver(serverLobby.game(), game0 -> {
+                    observableTracker.registerObserver(lockBadge, serverLobby.game(), game0 -> {
                         try (var serverLobbyCloseable0 = lockedServerLobby.use()) {
                             var game = serverLobbyCloseable0.obj().game().get();
                             if (game != null) {
                                 updateGameForPlayer(
                                         nick,
                                         serverLobbyAndController,
+                                        lockBadge,
                                         game.game(),
                                         game.controller(),
                                         observableTracker,
@@ -270,6 +287,7 @@ public class ServerController implements Closeable {
                         updateGameForPlayer(
                                 nick,
                                 serverLobbyAndController,
+                                lockBadge,
                                 Objects.requireNonNull(currGame, "Controller is not null but game is null?"),
                                 currGameAndController.controller(),
                                 observableTracker,
@@ -287,6 +305,7 @@ public class ServerController implements Closeable {
 
     private void updateGameForPlayer(String nick,
                                      ServerLobbyAndController<ServerLobby> serverLobbyAndController,
+                                     LockBadge lockBadge,
                                      ServerGame game,
                                      GameServerController gameController,
                                      PlayerObservableTracker observableTracker,
@@ -344,54 +363,55 @@ public class ServerController implements Closeable {
                         game.suspended().get()),
                 gameControllerFactory.apply(thePlayer, gameController)));
         // Register all listeners to the game model
-        game.getBoard().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),
+        game.getBoard().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(
+                lockBadge, tileAndCoords.tile(),
                 tile -> gameUpdater.updateBoardTile(tileAndCoords.row(), tileAndCoords.col(), tile)));
         game.getPlayers().forEach(p -> {
-            observableTracker.registerObserver(p.connected(),
+            observableTracker.registerObserver(lockBadge, p.connected(),
                     connected -> gameUpdater.updatePlayerConnected(p.getNick(), connected));
 
             if (p.getNick().equals(nick)) {
-                observableTracker.registerObserver(p.privateScore(),
+                observableTracker.registerObserver(lockBadge, p.privateScore(),
                         score -> gameUpdater.updatePlayerScore(p.getNick(), score));
             } else {
                 // If the game is not over, send the public score
-                observableTracker.registerObserver(p.publicScore(), score -> {
+                observableTracker.registerObserver(lockBadge, p.publicScore(), score -> {
                     if (!game.endGame().get())
                         gameUpdater.updatePlayerScore(p.getNick(), score);
                 });
                 // If the game is over, send the private score
-                observableTracker.registerObserver(p.privateScore(), score -> {
+                observableTracker.registerObserver(lockBadge, p.privateScore(), score -> {
                     if (game.endGame().get())
                         gameUpdater.updatePlayerScore(p.getNick(), score);
                 });
             }
 
-            p.getShelfie().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(tileAndCoords.tile(),
+            p.getShelfie().tiles().forEach(tileAndCoords -> observableTracker.registerObserver(lockBadge, tileAndCoords.tile(),
                     tile -> gameUpdater.updatePlayerShelfieTile(
                             p.getNick(),
                             tileAndCoords.row(),
                             tileAndCoords.col(),
                             tile)));
         });
-        observableTracker.registerObserver(game.suspended(), gameUpdater::updateSuspended);
+        observableTracker.registerObserver(lockBadge, game.suspended(), gameUpdater::updateSuspended);
 
         // updating message only if message nickReceivingPlayer == nick, or if it's for everyone
-        observableTracker.registerObserver(game.message(), m -> {
+        observableTracker.registerObserver(lockBadge, game.message(), m -> {
             if (m != null && (m.nickReceivingPlayer().equals(nick)
                     || m.isForEveryone()
                     || nick.equals(m.nickSendingPlayer())))
                 gameUpdater.updateMessage(m);
         });
 
-        observableTracker.registerObserver(game.currentTurn(), p -> gameUpdater.updateCurrentTurn(p.getNick()));
-        observableTracker.registerObserver(game.firstFinisher(),
+        observableTracker.registerObserver(lockBadge, game.currentTurn(), p -> gameUpdater.updateCurrentTurn(p.getNick()));
+        observableTracker.registerObserver(lockBadge, game.firstFinisher(),
                 p -> gameUpdater.updateFirstFinisher(p == null ? null : p.getNick()));
         game.getCommonGoals().forEach(goal -> observableTracker.registerObserver(
-                goal.achieved(),
+                lockBadge, goal.achieved(),
                 players -> gameUpdater.updateAchievedCommonGoal(goal.getType(), players.stream()
                         .map(ServerPlayer::getNick)
                         .collect(Collectors.toList()))));
-        observableTracker.registerObserver(game.endGame(), gameOver -> {
+        observableTracker.registerObserver(lockBadge, game.endGame(), gameOver -> {
             // Update all scores to the private ones
             if (gameOver) {
                 for (ServerPlayer p : game.getPlayers())
