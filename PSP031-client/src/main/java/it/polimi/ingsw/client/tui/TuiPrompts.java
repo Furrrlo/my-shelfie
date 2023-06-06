@@ -231,7 +231,7 @@ class TuiPrompts {
                             return ctx.invalid("Number not valid");
                         }
 
-                        if (requiredPlayers < 2 || requiredPlayers > 4)
+                        if (requiredPlayers < LobbyView.MIN_PLAYERS || requiredPlayers > LobbyView.MAX_PLAYERS)
                             return ctx.invalid("Number of players must be between 2 and 4");
                     }
                     try {
@@ -287,8 +287,10 @@ class TuiPrompts {
                             }
                         },
                         () -> lobby.joinedPlayers().get().size() >= 2
-                                && lobby.joinedPlayers().get().get(0).getNick().equals(netManager.getNick())
-                                && Objects.requireNonNull(lobby.requiredPlayers().get()) != 0
+                                && lobby.isLobbyCreator(netManager.getNick())
+                                && Optional.ofNullable(lobby.requiredPlayers().get())
+                                        .map(req -> req != 0)
+                                        .orElse(false)
                                 && lobby.joinedPlayers().get().stream().allMatch(p -> p.ready().get())),
                 new ChoicePrompt.Choice(
                         "Quit",

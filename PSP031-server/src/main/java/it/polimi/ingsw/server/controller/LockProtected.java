@@ -8,6 +8,11 @@ import java.io.Closeable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Represent an object which should only be accessed through the use of a lock
+ * 
+ * @param <T> type of the held object
+ */
 public class LockProtected<T> {
 
     private static final LockCloseable<?> NULL_LOCK_CLOSEABLE = new LockCloseable<>() {
@@ -22,6 +27,16 @@ public class LockProtected<T> {
         }
     };
 
+    /**
+     * Utility method to allow using a possibly null LockProtected object in a try-with-resources
+     * <p>
+     * If the object is not null, this will call {@link LockProtected#use()} and, therefore, take
+     * the lock. Otherwise, it will do nothing.
+     *
+     * @param lock the possibly null LockProtected object
+     * @return a non-null LockCloseable<@Nullable T>
+     * @param <T> type of the held object
+     */
     @MustBeClosed
     @SuppressWarnings("unchecked")
     public static <T> LockCloseable<@Nullable T> useNullable(@Nullable LockProtected<T> lock) {
@@ -56,6 +71,16 @@ public class LockProtected<T> {
         return lock;
     }
 
+    /**
+     * Acquires the lock.
+     * <p>
+     * If the lock is not available then the current thread becomes
+     * disabled for thread scheduling purposes and lies dormant until the
+     * lock has been acquired.
+     *
+     * @return closeable which will unlock the lock automatically once closed
+     * @see Lock#lock()
+     */
     @MustBeClosed
     public LockCloseable<T> use() {
         lock.lock();
@@ -75,8 +100,14 @@ public class LockProtected<T> {
                 '}';
     }
 
+    /**
+     * Closeable which will unlock the lock automatically once closed
+     * 
+     * @param <T> type of the held object
+     */
     public interface LockCloseable<T> extends Closeable {
 
+        /** Returns the object we are currently holding a lock for */
         T obj();
 
         @Override

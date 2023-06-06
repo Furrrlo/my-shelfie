@@ -6,13 +6,19 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
+/**
+ * Actual {@link it.polimi.ingsw.controller.LobbyController} server implementation which all network controllers
+ * delegate to
+ * <p>
+ * This implements all the {@link it.polimi.ingsw.controller.LobbyController} interface methods, but with an overload
+ * which is the nick of the player executing the method
+ *
+ * @see it.polimi.ingsw.controller.LobbyController
+ */
 public class LobbyServerController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LobbyServerController.class);
@@ -64,6 +70,12 @@ public class LobbyServerController {
         this.lockedLobby = lockedLobby;
     }
 
+    /**
+     * Hook method called by the network controllers when a player disconnects
+     *
+     * @param nick nick of the player which disconnected, used as an identifier
+     * @param cause the cause of the unexpected disconnection
+     */
     public void onDisconnectPlayer(String nick, Throwable cause) {
         try (var lobbyCloseable = lockedLobby.use()) {
             var lobby = lobbyCloseable.obj();
@@ -87,6 +99,11 @@ public class LobbyServerController {
         }
     }
 
+    /**
+     * Hook method called by the network controllers when a player reconnects after a disconnection
+     *
+     * @param nick nick of the player which reconnected, used as an identifier
+     */
     public void onReconnectedPlayer(String nick) {
         try (var lobbyCloseable = lockedLobby.use()) {
             var lobby = lobbyCloseable.obj();
@@ -96,10 +113,16 @@ public class LobbyServerController {
         }
     }
 
+    /**
+     * Implementation of {@link it.polimi.ingsw.controller.LobbyController#setRequiredPlayers(int)}, see
+     * there for detailed docs
+     *
+     * @param nick the player executing the method
+     */
     public void setRequiredPlayers(String nick, int requiredPlayers) {
         try (var use = lockedLobby.use()) {
             ServerLobby lobby = use.obj();
-            if (lobby.isOpen() && !lobby.joinedPlayers().get().get(0).getNick().equals(nick))
+            if (lobby.isOpen() && !lobby.isLobbyCreator(nick))
                 throw new IllegalArgumentException("This player is not the creator of this lobby");
 
             if (requiredPlayers != 0
@@ -111,6 +134,12 @@ public class LobbyServerController {
         }
     }
 
+    /**
+     * Implementation of {@link it.polimi.ingsw.controller.LobbyController#ready(boolean)}}, see
+     * there for detailed docs
+     *
+     * @param nick the player executing the method
+     */
     public void ready(String nick, boolean ready) {
         try (var use = lockedLobby.use()) {
             var lobby = use.obj();
@@ -130,7 +159,8 @@ public class LobbyServerController {
         List<LobbyPlayer> lobbyPlayers = lobby.joinedPlayers().get();
         if (lobbyPlayers.stream().allMatch(p -> p.ready().get())
                 && ((!lobby.hasRequiredPlayers() && lobbyPlayers.size() > 1)
-                        || (lobby.hasRequiredPlayers() && lobbyPlayers.size() == lobby.requiredPlayers().get()))) {
+                        || (lobby.hasRequiredPlayers()
+                                && Objects.equals(lobbyPlayers.size(), lobby.requiredPlayers().get())))) {
             final ServerGame game = createGame(0, lobbyPlayers);
             lobby.game().set(new ServerGameAndController<>(game,
                     new GameServerController(new LockProtected<>(game, lockedLobby.getLock()))));
