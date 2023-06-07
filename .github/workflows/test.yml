@@ -21,6 +21,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
+        timeout-minutes: 5
         run: mvn --batch-mode --update-snapshots -Dno-format -Ddetailed-coverage verify
 
       - name: Checkout badges branch dedicated to storing badges only
