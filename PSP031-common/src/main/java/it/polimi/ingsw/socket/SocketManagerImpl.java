@@ -127,6 +127,22 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                     continue;
                 }
 
+                // Also read a null-object to make sure we received the reset from the corresponding ObjectOutputStream.
+                // In particular, we need to read an object cause ObjectInputStream only handles reset requests in
+                // readObject/readUnshared, not in readByte.
+                // We use a null reference 'cause it's the smallest object I can think of sending.
+                // By doing this, we make sure that by the time the current packet we are reading is handled, the
+                // other side has already flushed out all its data related to this packet (including the reset req),
+                // therefore we can (and some packets do) close the connection and the other side could do the same.
+                Object resetFlushObj;
+                try {
+                    resetFlushObj = ois.readUnshared();
+                    if (resetFlushObj != null)
+                        throw new IOException("Received unexpected resetFlushObj " + resetFlushObj);
+                } catch (ClassNotFoundException | ClassCastException ex) {
+                    throw new IOException("Received unexpected resetFlushObj", ex);
+                }
+
                 log("Received packet: " + p);
                 inPacketQueue.add(p);
             } while (!Thread.currentThread().isInterrupted());
@@ -165,6 +181,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                     // can just reset the references after each time we write.
                     // see https://bugs.openjdk.org/browse/JDK-6525563
                     oos.reset();
+                    // Write a null reference to use as a marker that the reset request was flushed
+                    // and received with the packet by the other side.
+                    // See the readLoop for additional details
+                    oos.writeUnshared(null);
                     oos.flush();
 
                     log("Sent " + p);

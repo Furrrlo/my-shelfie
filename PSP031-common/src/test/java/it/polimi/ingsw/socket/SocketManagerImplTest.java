@@ -5,15 +5,14 @@ import it.polimi.ingsw.socket.packets.Packet;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SocketManagerImplTest {
 
     @Test
-    void testInboundPacketsNotDiscarded() throws IOException, InterruptedException {
+    void testInboundPacketsNotDiscarded() throws IOException, InterruptedException, ExecutionException, TimeoutException {
         var executor = Executors.newFixedThreadPool(2);
         try (var pipe = new PipedInputStream();
              var mgrOs = new ObjectOutputStream(new PipedOutputStream(pipe));
@@ -24,10 +23,14 @@ class SocketManagerImplTest {
             double seed = Math.random();
             try (final var mgr = new SocketManagerImpl<>("test", executor, mgrIs, mgrOs, 1, TimeUnit.SECONDS)) {
                 testOos.writeObject(new SimpleSeqPacket(new TestPacketReq(seed), 10));
-                Thread.sleep(2000);
-
-                var ctx = mgr.receive(TestPacketReq.class);
-                assertEquals(seed, ctx.getPacket().rnd());
+                testOos.writeUnshared(null); // reset flush marker, see SocketManagerImpl#readLoop() internals for details
+                testOos.flush();
+                Thread.sleep(500);
+                // Wrap in CompletableFuture to be able to time out
+                assertEquals(seed, CompletableFuture.supplyAsync(() -> assertDoesNotThrow(() -> {
+                    var ctx = mgr.receive(TestPacketReq.class);
+                    return ctx.getPacket().rnd();
+                })).get(500, TimeUnit.MILLISECONDS));
             }
         } finally {
             executor.shutdown();
