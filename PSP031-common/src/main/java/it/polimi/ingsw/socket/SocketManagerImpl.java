@@ -159,7 +159,14 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
                 try {
                     oos.writeObject(p.packet());
+                    // Fix memory leak, as ObjectOutputStream maintains a reference to anything
+                    // you write into it, in order to implement the reference sharing mechanism.
+                    // Since we don't need to share references past a single object graph, we
+                    // can just reset the references after each time we write.
+                    // see https://bugs.openjdk.org/browse/JDK-6525563
+                    oos.reset();
                     oos.flush();
+
                     log("Sent " + p);
                     p.future().complete(null);
                 } catch (InvalidClassException | NotSerializableException ex) {
