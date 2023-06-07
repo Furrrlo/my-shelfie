@@ -48,7 +48,7 @@ public class JoinGameTest {
             nick);
     private static final TestClientNetManagerFactory socketFunction = (f, nick) -> SocketClientNetManager.connect(
             new InetSocketAddress(InetAddress.getLocalHost(), f.choosenPort.get()),
-            1, TimeUnit.SECONDS,
+            1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
             nick);
 
     private interface TestClientNetManagerFactory {

@@ -35,7 +35,7 @@ public class SocketIntegrationTest {
                     try {
                         return SocketClientNetManager.connect(
                                 new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                1, TimeUnit.SECONDS, nick);
+                                1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS, nick);
                     } catch (IOException | NickNotValidException e) {
                         throw new RuntimeException("Failed to create SocketClientNetManager", e);
                     }
@@ -61,7 +61,7 @@ public class SocketIntegrationTest {
                     try {
                         return SocketClientNetManager.connect(
                                 new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                1, TimeUnit.SECONDS, nick);
+                                1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS, nick);
                     } catch (IOException | NickNotValidException e) {
                         throw new RuntimeException("Failed to create SocketClientNetManager", e);
                     }
@@ -87,7 +87,7 @@ public class SocketIntegrationTest {
                     try {
                         return SocketClientNetManager.connect(
                                 new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                1, TimeUnit.SECONDS, nick);
+                                1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS, nick);
                     } catch (IOException | NickNotValidException e) {
                         throw new RuntimeException("Failed to create SocketClientNetManager", e);
                     }

@@ -23,18 +23,23 @@ class RmiHeartbeatClientHandler implements RmiHeartbeatHandler, Closeable {
 
     private final Clock clock;
     private final Runnable onDisconnect;
+    private final long readTimeoutMillis;
     private final ScheduledExecutorService heartbeatExecutor;
     private final AtomicBoolean closed = new AtomicBoolean();
 
     private final Property<Duration> ping = new SerializableProperty<>(Duration.ZERO);
     private volatile Instant lastPing;
 
-    public RmiHeartbeatClientHandler(Runnable onDisconnect) {
-        this(Clock.systemUTC(), onDisconnect);
+    public RmiHeartbeatClientHandler(long readTimeout, TimeUnit readTimeoutUnit, Runnable onDisconnect) {
+        this(Clock.systemUTC(), readTimeout, readTimeoutUnit, onDisconnect);
     }
 
-    public RmiHeartbeatClientHandler(Clock clock, Runnable onDisconnect) {
+    public RmiHeartbeatClientHandler(Clock clock,
+                                     long readTimeout,
+                                     TimeUnit readTimeoutUnit,
+                                     Runnable onDisconnect) {
         this.clock = clock;
+        this.readTimeoutMillis = readTimeoutUnit.toMillis(readTimeout);
         this.onDisconnect = onDisconnect;
         this.lastPing = Instant.EPOCH;
         this.heartbeatExecutor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
@@ -50,11 +55,17 @@ class RmiHeartbeatClientHandler implements RmiHeartbeatHandler, Closeable {
     }
 
     public void start() {
-        this.heartbeatExecutor.scheduleAtFixedRate(this::checkLastPing, 10, 2, TimeUnit.SECONDS);
+        this.heartbeatExecutor.scheduleAtFixedRate(
+                this::checkLastPing,
+                // The first needs to happen after we received the first ping, so wait a while
+                readTimeoutMillis,
+                // Check quite often just to make sure, it's not an expensive check anyway
+                readTimeoutMillis / 5,
+                TimeUnit.MILLISECONDS);
     }
 
     private void checkLastPing() {
-        if (!closed.get() && lastPing.plus(10, ChronoUnit.SECONDS).isBefore(Instant.now(clock))) {
+        if (!closed.get() && lastPing.plus(readTimeoutMillis, ChronoUnit.MILLIS).isBefore(Instant.now(clock))) {
             LOGGER.error("RMI: connection lost");
 
             //TODO: find a better way to get the lobby (?)

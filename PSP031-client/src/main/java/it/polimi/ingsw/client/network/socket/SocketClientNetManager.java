@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.network.socket;
 
 import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.NetworkConstants;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.model.Lobby;
@@ -25,39 +26,55 @@ public class SocketClientNetManager implements ClientNetManager {
     private final ClientSocketManager socketManager;
     private final String nick;
 
+    private final long readTimeout;
+    private final TimeUnit readTimeoutUnit;
+
     private volatile @Nullable Future<?> heartbeatHandlerTask;
     private volatile @Nullable Future<?> updaterTask;
     private volatile @Nullable Lobby lobby;
 
     public static ClientNetManager connect(InetSocketAddress serverAddress, String nick)
             throws IOException, NickNotValidException {
-        return connect(serverAddress, -1, TimeUnit.MILLISECONDS, nick);
+        return connect(
+                serverAddress,
+                TimeUnit.MILLISECONDS.convert(NetworkConstants.READ_TIMEOUT), TimeUnit.MILLISECONDS,
+                TimeUnit.MILLISECONDS.convert(NetworkConstants.RESPONSE_TIMEOUT), TimeUnit.MILLISECONDS,
+                nick);
     }
 
     public static ClientNetManager connect(InetSocketAddress serverAddress,
-                                           long defaultResponseTimeout,
-                                           TimeUnit defaultResponseTimeoutUnit,
+                                           long readTimeout,
+                                           TimeUnit readTimeoutUnit,
+                                           long responseTimeout,
+                                           TimeUnit responseTimeoutUnit,
                                            String nick)
             throws IOException, NickNotValidException {
-        return connect(serverAddress, defaultResponseTimeout, defaultResponseTimeoutUnit, new Socket(), nick);
+        return connect(serverAddress, readTimeout, readTimeoutUnit, responseTimeout, responseTimeoutUnit, new Socket(), nick);
     }
 
     @VisibleForTesting
     public static SocketClientNetManager connect(InetSocketAddress serverAddress,
-                                                 long defaultResponseTimeout,
-                                                 TimeUnit defaultResponseTimeoutUnit,
+                                                 long readTimeout,
+                                                 TimeUnit readTimeoutUnit,
+                                                 long responseTimeout,
+                                                 TimeUnit responseTimeoutUnit,
                                                  Socket socket,
                                                  String nick)
             throws IOException, NickNotValidException {
-        socket.connect(serverAddress, 500); // TODO: probably change this
-        socket.setSoTimeout(10000);
+        if (readTimeout == -1) {
+            socket.connect(serverAddress);
+        } else {
+            var readTimeoutMillis = (int) readTimeoutUnit.toMillis(readTimeout);
+            socket.connect(serverAddress, readTimeoutMillis);
+            socket.setSoTimeout(readTimeoutMillis);
+        }
         socket.setTcpNoDelay(true);
 
         ClientSocketManager socketManager;
         try {
-            socketManager = defaultResponseTimeout == -1
+            socketManager = responseTimeout == -1
                     ? new ClientSocketManagerImpl(socket)
-                    : new ClientSocketManagerImpl(socket, defaultResponseTimeout, defaultResponseTimeoutUnit);
+                    : new ClientSocketManagerImpl(socket, responseTimeout, responseTimeoutUnit);
             socketManager.setNick(nick);
         } catch (Throwable t) {
             socket.close();
@@ -67,7 +84,7 @@ public class SocketClientNetManager implements ClientNetManager {
         LOGGER.info("Connected to : " + serverAddress);
 
         try {
-            var netManager = new SocketClientNetManager(serverAddress, socketManager, nick);
+            var netManager = new SocketClientNetManager(serverAddress, socketManager, readTimeout, readTimeoutUnit, nick);
             netManager.doConnect();
             return netManager;
         } catch (Throwable t) {
@@ -76,10 +93,15 @@ public class SocketClientNetManager implements ClientNetManager {
         }
     }
 
-    @VisibleForTesting
-    private SocketClientNetManager(InetSocketAddress serverAddress, ClientSocketManager socketManager, String nick) {
+    private SocketClientNetManager(InetSocketAddress serverAddress,
+                                   ClientSocketManager socketManager,
+                                   long readTimeout,
+                                   TimeUnit readTimeoutUnit,
+                                   String nick) {
         this.serverAddress = serverAddress;
         this.socketManager = socketManager;
+        this.readTimeout = readTimeout;
+        this.readTimeoutUnit = readTimeoutUnit;
         this.nick = nick;
         this.threadPool = Executors.newFixedThreadPool(2, r -> {
             var th = new Thread(r);
@@ -91,6 +113,8 @@ public class SocketClientNetManager implements ClientNetManager {
     @Override
     public ClientNetManager recreateAndReconnect() throws Exception {
         return SocketClientNetManager.connect(serverAddress,
+                readTimeout,
+                readTimeoutUnit,
                 socketManager.getDefaultResponseTimeout(),
                 socketManager.getDefaultResponseTimeoutUnit(),
                 new Socket(),

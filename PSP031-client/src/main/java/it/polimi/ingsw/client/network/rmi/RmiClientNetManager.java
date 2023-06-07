@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.network.rmi;
 
 import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.NetworkConstants;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.model.Lobby;
@@ -18,6 +19,7 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
@@ -77,7 +79,8 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
         }
 
         AtomicReference<RmiClientNetManager> netManagerRef = new AtomicReference<>();
-        var heartbeatClientHandler = new RmiHeartbeatClientHandler(() -> {
+        var readTimeoutMillis = Long.getLong("sun.rmi.transport.tcp.readTimeout", NetworkConstants.READ_TIMEOUT.toMillis());
+        var heartbeatClientHandler = new RmiHeartbeatClientHandler(readTimeoutMillis, TimeUnit.MILLISECONDS, () -> {
             var netManager = netManagerRef.get();
             if (netManager != null)
                 netManager.close();

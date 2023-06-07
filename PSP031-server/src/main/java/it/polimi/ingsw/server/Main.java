@@ -1,5 +1,6 @@
 package it.polimi.ingsw.server;
 
+import it.polimi.ingsw.NetworkConstants;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
@@ -9,16 +10,15 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    private static final Duration PING_INTERVAL = Duration.of(5, ChronoUnit.SECONDS);
-    private static final Duration READ_TIMEOUT = PING_INTERVAL.multipliedBy(2);
-    private static final Duration RESPONSE_TIMEOUT = Duration.of(2, ChronoUnit.SECONDS);
+    private static final Duration PING_INTERVAL = NetworkConstants.PING_INTERVAL;
+    private static final Duration READ_TIMEOUT = NetworkConstants.READ_TIMEOUT;
+    private static final Duration RESPONSE_TIMEOUT = NetworkConstants.RESPONSE_TIMEOUT;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void main(String[] args) throws IOException {

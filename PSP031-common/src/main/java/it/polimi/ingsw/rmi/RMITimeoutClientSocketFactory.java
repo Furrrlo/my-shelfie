@@ -1,5 +1,6 @@
 package it.polimi.ingsw.rmi;
 
+import it.polimi.ingsw.NetworkConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,9 @@ public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Se
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RMITimeoutClientSocketFactory.class);
 
-    protected static final long CONNECT_TIMEOUT_MILLIS = Long.getLong("sun.rmi.transport.tcp.readTimeout", 5000);
+    protected static final long CONNECT_TIMEOUT_MILLIS = Long.getLong(
+            "sun.rmi.transport.tcp.readTimeout",
+            NetworkConstants.READ_TIMEOUT.toMillis());
 
     @Override
     public Socket createSocket(String host, int port) throws IOException {

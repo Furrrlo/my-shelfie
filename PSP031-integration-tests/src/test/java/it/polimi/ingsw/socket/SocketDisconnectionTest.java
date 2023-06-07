@@ -66,7 +66,7 @@ public class SocketDisconnectionTest {
                             socket.set(s);
                             return SocketClientNetManager.connect(
                                     new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                    1, TimeUnit.SECONDS, s,
+                                    1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS, s,
                                     nick);
                         } catch (IOException | NickNotValidException e) {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
@@ -107,7 +107,7 @@ public class SocketDisconnectionTest {
                             socket.set(s);
                             return SocketClientNetManager.connect(
                                     new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                    1, TimeUnit.SECONDS, s,
+                                    1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS, s,
                                     nick);
                         } catch (IOException | NickNotValidException e) {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
@@ -117,7 +117,7 @@ public class SocketDisconnectionTest {
                         try {
                             return SocketClientNetManager.connect(
                                     new InetSocketAddress(InetAddress.getLocalHost(), choosenPort.get()),
-                                    1, TimeUnit.SECONDS,
+                                    1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
                                     nick);
                         } catch (IOException | NickNotValidException e) {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
@@ -157,7 +157,7 @@ public class SocketDisconnectionTest {
                         try {
                             return SocketClientNetManager.connect(
                                     new InetSocketAddress(InetAddress.getLocalHost(), chosenPort.get()),
-                                    1, TimeUnit.SECONDS,
+                                    1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
                                     nick);
                         } catch (IOException | NickNotValidException e) {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
@@ -169,7 +169,7 @@ public class SocketDisconnectionTest {
                             socket.set(s);
                             return SocketClientNetManager.connect(
                                     new InetSocketAddress(InetAddress.getLocalHost(), chosenPort.get()),
-                                    1, TimeUnit.SECONDS, s,
+                                    1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS, s,
                                     nick);
                         } catch (IOException | NickNotValidException e) {
                             throw new RuntimeException("Failed to create SocketClientNetManager", e);
