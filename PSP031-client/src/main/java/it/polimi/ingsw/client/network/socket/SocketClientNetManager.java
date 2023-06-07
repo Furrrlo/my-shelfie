@@ -88,7 +88,11 @@ public class SocketClientNetManager implements ClientNetManager {
             netManager.doConnect();
             return netManager;
         } catch (Throwable t) {
-            socketManager.close();
+            try {
+                socketManager.close();
+            } catch (Throwable t0) {
+                t.addSuppressed(t0);
+            }
             throw t;
         }
     }
