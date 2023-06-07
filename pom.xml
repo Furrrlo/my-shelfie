@@ -73,21 +73,37 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Annotations libraries, these do not add any actual functionality, only allow for additional
+             compiler checks -->
+        <!-- Nullability annotations -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.0.0</version>
         </dependency>
+        <!-- Errorprone annotations for additional checks -->
         <dependency>
             <groupId>com.google.errorprone</groupId>
             <artifactId>error_prone_annotations</artifactId>
             <version>${errorprone.version}</version>
         </dependency>
+        <!-- We don't actually use the checker framework, so we are going to ignore the majority of annotations
+             in this one, the only one we actually need is the DefaultQualifier one to make IntelliJ apply
+             nonnull by default to everything -->
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-qual</artifactId>
+            <version>3.35.0</version>
+        </dependency>
+
+        <!-- Logging facade -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
+
+        <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -230,7 +246,6 @@
                 <configuration>
                     <propertyName>jacocoArgLine</propertyName>
                     <excludes>
-                        <exclude>org/checkerframework/framework/qual/**/*</exclude>
                         <exclude>it/polimi/ingsw/client/tui/**/*</exclude>
                         <exclude>it/polimi/ingsw/client/javafx/**/*</exclude>
                         <exclude>it/polimi/ingsw/server/Main.*</exclude>
