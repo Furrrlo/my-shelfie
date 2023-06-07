@@ -61,7 +61,7 @@ public class JoinGameTest {
         remoteName = "rmi_e2e_" + System.currentTimeMillis();
         var serverSocket = new ServerSocket(0);
         choosenPort.set(serverSocket.getLocalPort());
-        serverController = new ServerController(5, TimeUnit.SECONDS);
+        serverController = new ServerController(500, TimeUnit.MILLISECONDS);
         socketConnectionServerController = new SocketConnectionServerController(serverController, serverSocket,
                 -1, TimeUnit.MILLISECONDS,
                 1, TimeUnit.SECONDS);

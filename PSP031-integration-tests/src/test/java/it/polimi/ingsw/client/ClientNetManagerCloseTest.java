@@ -18,7 +18,7 @@ public class ClientNetManagerCloseTest {
                                               Function<String, ClientNetManager> clientNetManagerFactory)
             throws Throwable {
         final var serverLobbyPromise = new CompletableFuture<LockProtected<ServerLobby>>();
-        try (Closeable ignored = bindServerController.apply(new ServerController(5, TimeUnit.SECONDS));
+        try (Closeable ignored = bindServerController.apply(new ServerController(500, TimeUnit.MILLISECONDS));
              var clientNetManager1 = clientNetManagerFactory.apply("p1")) {
 
             clientNetManager1.joinGame();

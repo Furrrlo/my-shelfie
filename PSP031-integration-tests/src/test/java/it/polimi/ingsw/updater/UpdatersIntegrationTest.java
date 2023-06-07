@@ -41,7 +41,7 @@ public class UpdatersIntegrationTest {
 
         final var serverGameToSerialize = new CompletableFuture<Game>();
 
-        try (var serverController = new ServerController(5, TimeUnit.SECONDS) {
+        try (var serverController = new ServerController(500, TimeUnit.MILLISECONDS) {
 
             @Override
             protected ServerLobbyAndController<ServerLobby> getOrCreateLobby(String nick) {
