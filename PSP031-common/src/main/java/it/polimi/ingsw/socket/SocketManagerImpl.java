@@ -171,6 +171,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                     p.future().complete(null);
                 } catch (InvalidClassException | NotSerializableException ex) {
                     p.future().completeExceptionally(ex);
+                } catch (Throwable ex) {
+                    p.future().completeExceptionally(ex);
+                    throw ex;
                 }
             } while (!Thread.currentThread().isInterrupted());
         } catch (InterruptedIOException | ClosedByInterruptException | InterruptedException e) {
