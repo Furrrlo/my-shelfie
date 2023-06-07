@@ -2,9 +2,9 @@ package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.DisconnectionIntegrationTest;
 import it.polimi.ingsw.ImproperShutdownSocket;
-import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.function.ThrowingConsumer;

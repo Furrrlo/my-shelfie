@@ -1,6 +1,6 @@
 package it.polimi.ingsw.rmi;
 
-import it.polimi.ingsw.NickNotValidException;
+import it.polimi.ingsw.controller.NickNotValidException;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

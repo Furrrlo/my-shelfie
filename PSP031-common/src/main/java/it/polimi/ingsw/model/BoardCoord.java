@@ -1,6 +1,4 @@
-package it.polimi.ingsw;
-
-import it.polimi.ingsw.model.Coord;
+package it.polimi.ingsw.model;
 
 import java.io.Serializable;
 

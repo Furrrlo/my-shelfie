@@ -3,6 +3,7 @@ package it.polimi.ingsw;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.LobbyView;
 import it.polimi.ingsw.rmi.RMIPortCapturingServerSocketFactory;

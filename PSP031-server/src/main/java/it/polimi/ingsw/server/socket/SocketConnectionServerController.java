@@ -1,7 +1,7 @@
 package it.polimi.ingsw.server.socket;
 
 import it.polimi.ingsw.DisconnectedException;
-import it.polimi.ingsw.NickNotValidException;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;
 import it.polimi.ingsw.socket.SocketManager;

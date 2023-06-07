@@ -1,7 +1,7 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.model.UserMessage;
 
 import java.util.List;

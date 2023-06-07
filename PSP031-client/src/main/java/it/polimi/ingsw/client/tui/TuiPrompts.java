@@ -1,13 +1,12 @@
 package it.polimi.ingsw.client.tui;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
-import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.LobbyController;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

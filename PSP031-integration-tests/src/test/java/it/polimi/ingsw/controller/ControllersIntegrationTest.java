@@ -1,9 +1,9 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.CloseablesTracker;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
+import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.model.LobbyPlayer;
 import it.polimi.ingsw.model.UserMessage;
 import it.polimi.ingsw.server.controller.GameServerController;

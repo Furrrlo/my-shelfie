@@ -1,7 +1,7 @@
 package it.polimi.ingsw.server.socket;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.socket.packets.GameActionPacket;

@@ -1,6 +1,6 @@
 package it.polimi.ingsw.server.controller;
 
-import it.polimi.ingsw.BoardCoord;
+import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.model.UserMessage;

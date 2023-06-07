@@ -1,6 +1,5 @@
 package it.polimi.ingsw.model;
 
-import it.polimi.ingsw.BoardCoord;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

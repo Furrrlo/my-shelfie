@@ -1,9 +1,9 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
+import it.polimi.ingsw.controller.NickNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

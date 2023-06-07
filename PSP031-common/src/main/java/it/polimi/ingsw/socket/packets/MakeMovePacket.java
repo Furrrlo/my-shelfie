@@ -1,6 +1,6 @@
 package it.polimi.ingsw.socket.packets;
 
-import it.polimi.ingsw.BoardCoord;
+import it.polimi.ingsw.model.BoardCoord;
 
 import java.util.List;
 

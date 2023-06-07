@@ -1,9 +1,9 @@
 package it.polimi.ingsw.rmi;
 
-import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.ClientNetManagerCloseTest;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.controller.ControllersIntegrationTest;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.server.rmi.RmiConnectionServerController;
 import it.polimi.ingsw.updater.UpdatersIntegrationTest;
 import org.junit.jupiter.api.Test;

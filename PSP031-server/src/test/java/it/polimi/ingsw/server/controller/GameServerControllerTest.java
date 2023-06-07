@@ -1,6 +1,5 @@
 package it.polimi.ingsw.server.controller;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.model.ServerGameView;
 import it.polimi.ingsw.server.model.ServerPlayerView;

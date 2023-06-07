@@ -1,7 +1,7 @@
 package it.polimi.ingsw.client.network;
 
 import it.polimi.ingsw.LobbyAndController;
-import it.polimi.ingsw.NickNotValidException;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.model.LobbyView;
 
 import java.io.Closeable;

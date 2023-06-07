@@ -1,8 +1,8 @@
 package it.polimi.ingsw.client.network.socket;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.socket.packets.MakeMovePacket;
 import it.polimi.ingsw.socket.packets.SendMessagePacket;
 

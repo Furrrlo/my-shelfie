@@ -1,6 +1,5 @@
 package it.polimi.ingsw.model;
 
-import it.polimi.ingsw.BoardCoord;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

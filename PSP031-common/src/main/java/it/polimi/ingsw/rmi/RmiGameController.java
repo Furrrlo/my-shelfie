@@ -1,8 +1,8 @@
 package it.polimi.ingsw.rmi;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.model.BoardCoord;
 
 import java.io.Serializable;
 import java.rmi.Remote;

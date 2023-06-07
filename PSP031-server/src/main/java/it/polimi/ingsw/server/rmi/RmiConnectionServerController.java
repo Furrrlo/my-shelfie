@@ -1,6 +1,6 @@
 package it.polimi.ingsw.server.rmi;
 
-import it.polimi.ingsw.NickNotValidException;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.rmi.*;
 import it.polimi.ingsw.server.controller.BaseServerConnection;
 import it.polimi.ingsw.server.controller.ServerController;

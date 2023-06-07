@@ -1,8 +1,8 @@
 package it.polimi.ingsw.client.network.rmi;
 
 import it.polimi.ingsw.LobbyAndController;
-import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.model.Lobby;
 import it.polimi.ingsw.rmi.*;
 import org.jetbrains.annotations.Nullable;

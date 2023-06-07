@@ -1,6 +1,5 @@
 package it.polimi.ingsw.model;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.controller.GameController;
 import org.junit.jupiter.api.Test;

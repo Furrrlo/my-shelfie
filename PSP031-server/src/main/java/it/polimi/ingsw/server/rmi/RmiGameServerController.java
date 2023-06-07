@@ -1,6 +1,6 @@
 package it.polimi.ingsw.server.rmi;
 
-import it.polimi.ingsw.BoardCoord;
+import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.rmi.RmiGameController;
 import it.polimi.ingsw.server.controller.GameServerController;
 import it.polimi.ingsw.server.model.ServerPlayer;

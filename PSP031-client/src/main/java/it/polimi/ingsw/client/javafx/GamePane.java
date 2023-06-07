@@ -1,9 +1,9 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.BoardCoord;
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.PlayerView;
 import org.jetbrains.annotations.NotNull;

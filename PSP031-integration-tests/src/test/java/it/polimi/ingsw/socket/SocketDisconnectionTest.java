@@ -2,9 +2,9 @@ package it.polimi.ingsw.socket;
 
 import it.polimi.ingsw.DisconnectionIntegrationTest;
 import it.polimi.ingsw.ImproperShutdownSocket;
-import it.polimi.ingsw.NickNotValidException;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
+import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.server.socket.SocketConnectionServerController;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
