@@ -128,7 +128,7 @@ public class SocketClientNetManager implements ClientNetManager {
                     var nickException = new NickNotValidException(p.message());
 
                     try {
-                        lobbyCtx.reply(new LobbyReceivedPacket());
+                        lobbyCtx.reply(new NickNotValidReceivedPacket());
                     } catch (IOException ex) {
                         // We ignore exceptions on the last ack receival, because the socket may
                         // be closed before we are able to read out the last ack packet

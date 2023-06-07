@@ -143,7 +143,7 @@ public class SocketConnectionServerController implements Closeable {
             joinCtx.reply(new JoinedPacket());
             return connection;
         } catch (NickNotValidException e) {
-            joinCtx.reply(new NickNotValidPacket(Objects.requireNonNull(e.getMessage())), LobbyReceivedPacket.class).ack();
+            joinCtx.reply(new NickNotValidPacket(e.getMessage()), NickNotValidReceivedPacket.class).ack();
             connection.close();
         } catch (Throwable e) {
             connection.disconnectPlayer(e);
