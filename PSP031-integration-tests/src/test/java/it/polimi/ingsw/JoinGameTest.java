@@ -122,8 +122,10 @@ public class JoinGameTest {
         t1.start();
         t2.start();
 
-        t1.join();
-        t2.join();
+        t1.join(500);
+        assertFalse(t1.isAlive());
+        t2.join(500);
+        assertFalse(t2.isAlive());
 
         assertEquals(1, throwableList.size());
         assertInstanceOf(NickNotValidException.class, throwableList.get(0));
@@ -213,8 +215,10 @@ public class JoinGameTest {
         t1.start();
         t2.start();
 
-        t1.join();
-        t2.join();
+        t1.join(500);
+        assertFalse(t1.isAlive());
+        t2.join(500);
+        assertFalse(t2.isAlive());
 
         throwableList.forEach(Throwable::printStackTrace);
         assertTrue(throwableList.isEmpty());
