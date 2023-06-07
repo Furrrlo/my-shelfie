@@ -11,7 +11,8 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.util.Objects;
 
 /**
- * This is needed to set a connection timeout, in order to detect client disconnections
+ * Client socket factory which respects the "sun.rmi.transport.tcp.readTimeout" system property
+ * in order to properly timeout on socket connection
  */
 public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Serializable {
 

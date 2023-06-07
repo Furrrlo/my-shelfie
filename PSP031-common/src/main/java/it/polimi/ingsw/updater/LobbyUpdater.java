@@ -28,7 +28,7 @@ public interface LobbyUpdater {
     /**
      * Set whether the specified player is ready
      *
-     * @param nick
+     * @param nick nick of the player whose ready state is changed
      * @param ready true if the player is ready
      * @throws DisconnectedException if the client disconnects during the update
      */

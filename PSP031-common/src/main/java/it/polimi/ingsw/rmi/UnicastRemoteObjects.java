@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/** Utilities to work with RMI {@link UnicastRemoteObject}s */
 public class UnicastRemoteObjects {
 
     private UnicastRemoteObjects() {

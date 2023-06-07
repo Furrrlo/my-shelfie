@@ -1,5 +1,9 @@
 package it.polimi.ingsw;
 
+/**
+ * Exception thrown to indicate that a remote operation failed because
+ * the connection was lost
+ */
 public class DisconnectedException extends Exception {
 
     public DisconnectedException() {

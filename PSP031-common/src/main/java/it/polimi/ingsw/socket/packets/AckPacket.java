@@ -1,5 +1,5 @@
 package it.polimi.ingsw.socket.packets;
 
-/** Packet with the sequence number of the packet to acknowledge */
+/** Packet which acknowledges another one previously sent */
 public interface AckPacket extends Packet {
 }

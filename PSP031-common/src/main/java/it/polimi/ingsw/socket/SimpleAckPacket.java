@@ -4,7 +4,7 @@ import it.polimi.ingsw.socket.packets.C2SAckPacket;
 import it.polimi.ingsw.socket.packets.S2CAckPacket;
 
 /**
- * Empty ack packet with only the sequence number of the packet to acknowledge
+ * Empty ack packet
  * This will also be wrapped in a {@link SeqAckPacket}, but it's seqN is not used.
  *
  * @see SocketManager.PacketReplyContext#ack()

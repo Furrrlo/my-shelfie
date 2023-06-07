@@ -87,6 +87,7 @@ public class LockProtected<T> {
         return lockCloseable;
     }
 
+    /** Returns the protected object without acquiring the lock */
     @VisibleForTesting
     public T getUnsafe() {
         return obj;
