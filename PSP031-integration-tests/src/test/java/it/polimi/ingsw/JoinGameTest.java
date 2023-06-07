@@ -52,9 +52,10 @@ public class JoinGameTest {
 
     @BeforeEach
     void setUp() throws IOException {
+        serverController = new ServerController(500, TimeUnit.MILLISECONDS);
+
         final var serverSocket = new ServerSocket(0);
         final var choosenPort = serverSocket.getLocalPort();
-        serverController = new ServerController(500, TimeUnit.MILLISECONDS);
         socketConnectionServerController = new SocketConnectionServerController(serverController, serverSocket,
                 -1, TimeUnit.MILLISECONDS,
                 1, TimeUnit.SECONDS);
@@ -81,10 +82,10 @@ public class JoinGameTest {
     @AfterEach
     @SuppressWarnings("EmptyTryBlock")
     void tearDown() throws IOException {
-        try (var ignored1 = serverController;
-             var ignored2 = socketConnectionServerController;
+        try (var ignored4 = clientCloseables;
              var ignored3 = rmiConnectionServerController;
-             var ignored4 = clientCloseables;) {
+             var ignored2 = socketConnectionServerController;
+             var ignored1 = serverController) {
             // Close all of them, but try even if one fails
         }
     }
