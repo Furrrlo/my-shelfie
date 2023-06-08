@@ -227,16 +227,18 @@ public class SocketClientNetManager implements ClientNetManager {
     }
 
     private void doClose(Closeable socketManagerDoClose) throws IOException {
-        var heartbeatHandlerTask = this.heartbeatHandlerTask;
-        if (heartbeatHandlerTask != null)
-            heartbeatHandlerTask.cancel(true);
-        var updaterTask = this.updaterTask;
-        if (updaterTask != null)
-            updaterTask.cancel(true);
-        socketManagerDoClose.close();
-
-        var lobby = this.lobby;
-        if (lobby != null)
-            lobby.disconnectThePlayer(nick);
+        try {
+            var heartbeatHandlerTask = this.heartbeatHandlerTask;
+            if (heartbeatHandlerTask != null)
+                heartbeatHandlerTask.cancel(true);
+            var updaterTask = this.updaterTask;
+            if (updaterTask != null)
+                updaterTask.cancel(true);
+            socketManagerDoClose.close();
+        } finally {
+            var lobby = this.lobby;
+            if (lobby != null)
+                lobby.disconnectThePlayer(nick);
+        }
     }
 }

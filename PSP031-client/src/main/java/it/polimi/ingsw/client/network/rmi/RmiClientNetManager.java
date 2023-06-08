@@ -147,11 +147,13 @@ public class RmiClientNetManager extends RmiAdapter implements ClientNetManager 
 
     @Override
     public void close() {
-        unicastRemoteObjects.unexportAll(true);
-
-        var lobby = this.lobby;
-        if (lobby != null)
-            lobby.disconnectThePlayer(nick);
+        try {
+            unicastRemoteObjects.unexportAll(true);
+        } finally {
+            var lobby = this.lobby;
+            if (lobby != null)
+                lobby.disconnectThePlayer(nick);
+        }
     }
 
     private static class InterceptingFactory implements RmiLobbyUpdaterFactory {
