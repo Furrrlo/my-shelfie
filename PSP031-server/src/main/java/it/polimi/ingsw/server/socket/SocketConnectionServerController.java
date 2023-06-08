@@ -232,12 +232,18 @@ public class SocketConnectionServerController implements Closeable {
         }
 
         @Override
+        @SuppressWarnings("MethodDoesntCallSuperMethod") // It's called indirectly by doClose(...)
         public void close() throws IOException {
+            // This call will bootstrap the socketManager close procedure, which will then
+            // invoke doClose(...),, as it was previously registered using setOnClose
+            // The actual close impl can be found in doClose(...)
             socketManager.close();
         }
 
         private void doClose(Closeable socketManagerDoClose) throws IOException {
             try {
+                super.close();
+
                 var joinGameTask = this.joinGameTask;
                 if (joinGameTask != null)
                     joinGameTask.cancel(true);

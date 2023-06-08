@@ -54,9 +54,8 @@ public class GameServerController {
      * Mark the player as disconnected and suspend the game if remain only 1 player.
      * 
      * @param nick nick of the disconnecting player
-     * @param cause cause of disconnection
      */
-    public void onDisconnectPlayer(String nick, Throwable cause) {
+    public void onDisconnectPlayer(String nick) {
         try (var gameCloseable = game.use()) {
             var game = gameCloseable.obj();
             game.getPlayers().stream()

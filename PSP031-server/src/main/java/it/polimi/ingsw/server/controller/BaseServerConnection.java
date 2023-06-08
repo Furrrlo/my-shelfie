@@ -2,6 +2,7 @@ package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.model.Provider;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,21 +32,23 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     }
 
     public void disconnectPlayer(Throwable cause) {
-        LOGGER.error("Disconnecting {}", nick, cause);
-        controller.runOnLocks(nick, () -> {
-            unregisterObservers();
-            controller.onDisconnectPlayer(nick, cause);
-        });
-
         try {
             close();
         } catch (IOException e) {
-            LOGGER.error("Failed to disconnect player {}", nick, e);
+            cause.addSuppressed(new IOException("Failed to disconnect", e));
         }
+
+        LOGGER.error("Disconnected {}", nick, cause);
     }
 
     @Override
-    public abstract void close() throws IOException;
+    @MustBeInvokedByOverriders
+    public void close() throws IOException {
+        controller.runOnLocks(nick, () -> {
+            unregisterObservers();
+            controller.onDisconnectPlayer(nick);
+        });
+    }
 
     public void onGameOver() {
         controller.runOnLocks(nick, this::unregisterObservers);

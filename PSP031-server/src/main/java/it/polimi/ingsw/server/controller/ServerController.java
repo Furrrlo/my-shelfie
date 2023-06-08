@@ -431,11 +431,11 @@ public class ServerController implements Closeable {
         });
     }
 
-    public void onDisconnectPlayer(String nick, Throwable cause) {
+    public void onDisconnectPlayer(String nick) {
         heartbeats.remove(nick);
 
         final var lobbyAndController = getLobbyFor(nick);
         if (lobbyAndController != null)
-            lobbyAndController.controller().onDisconnectPlayer(nick, cause);
+            lobbyAndController.controller().onDisconnectPlayer(nick);
     }
 }

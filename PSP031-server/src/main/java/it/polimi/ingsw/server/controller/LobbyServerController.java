@@ -74,9 +74,8 @@ public class LobbyServerController {
      * Hook method called by the network controllers when a player disconnects
      *
      * @param nick nick of the player which disconnected, used as an identifier
-     * @param cause the cause of the unexpected disconnection
      */
-    public void onDisconnectPlayer(String nick, Throwable cause) {
+    public void onDisconnectPlayer(String nick) {
         try (var lobbyCloseable = lockedLobby.use()) {
             var lobby = lobbyCloseable.obj();
             LobbyPlayer lobbyPlayer = lobby.joinedPlayers().get().stream()
@@ -86,7 +85,7 @@ public class LobbyServerController {
 
             var game = lobbyCloseable.obj().game().get();
             if (game != null) {
-                game.controller().onDisconnectPlayer(nick, cause);
+                game.controller().onDisconnectPlayer(nick);
             } else {
                 // If the game hasn't started yet, just remove the lobbyPlayer
                 lobby.joinedPlayers().update(lobbyPlayers -> {

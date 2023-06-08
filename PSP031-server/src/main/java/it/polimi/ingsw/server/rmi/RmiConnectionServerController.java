@@ -186,8 +186,9 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
         }
 
         @Override
-        public void close() {
+        public void close() throws IOException {
             try {
+                super.close();
                 gameUnicastRemoteObjects.unexportAll(true);
                 unicastRemoteObjects.unexportAll(true);
             } finally {
