@@ -28,7 +28,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -229,9 +228,7 @@ public class GamePane extends AnchorPane {
                     n.setDisable(true);
                     n.setOpacity(0.5);
                 }
-                var sortedPlayers = game.getPlayers().stream()
-                        .sorted(Comparator.comparing((PlayerView p) -> p.score().get())).toList();
-                this.endGamePane = new EndGamePane(sortedPlayers, netManager);
+                this.endGamePane = new EndGamePane(game.getSortedPlayers(), netManager);
                 endGamePane.toFront();
                 endGamePane.setAlignment(Pos.CENTER);
                 this.getChildren().add(endGamePane);

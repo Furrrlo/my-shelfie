@@ -46,8 +46,9 @@ public class EndGamePane extends StackPane {
 
         this.rankings = new VBox();
         rankings.setSpacing(12);
-        for (int i = sortedPlayers.size(); i > 0; i--) {
-            var p = sortedPlayers.get(i - 1);
+
+        for (int i = 0; i < sortedPlayers.size(); i++) {
+            var p = sortedPlayers.get(i);
             HBox hBox = new HBox();
             hBox.setSpacing(15);
             Label nick = new Label(p.getNick());

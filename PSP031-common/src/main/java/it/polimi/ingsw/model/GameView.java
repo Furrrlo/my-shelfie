@@ -18,6 +18,10 @@ public interface GameView extends Serializable {
     @Unmodifiable
     List<? extends PlayerView> getPlayers();
 
+    /** Returns list of players, sorted by score */
+    @Unmodifiable
+    List<? extends PlayerView> getSortedPlayers();
+
     /** Returns this client's player */
     PlayerView thePlayer();
 

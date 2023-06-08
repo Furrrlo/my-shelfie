@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -102,6 +103,16 @@ public class Game implements GameView {
     @Override
     public @Unmodifiable List<Player> getPlayers() {
         return players;
+    }
+
+    @Override
+    public @Unmodifiable List<? extends PlayerView> getSortedPlayers() {
+        return players.stream()
+                .sorted((Comparator<PlayerView>) (o1, o2) -> {
+                    if (!o2.connected().get())
+                        return -1;
+                    return o1.score().get() - o2.score().get();
+                }).toList();
     }
 
     @Override

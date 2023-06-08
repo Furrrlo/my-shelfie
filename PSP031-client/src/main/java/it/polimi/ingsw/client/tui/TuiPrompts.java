@@ -357,9 +357,7 @@ class TuiPrompts {
                                         GameView game) {
         renderer.setScene(new TuiGameScene(game));
 
-        var scoreSortedPlayers = game.getPlayers().stream()
-                .sorted(Comparator.<PlayerView> comparingInt(p -> p.score().get()).reversed())
-                .toList();
+        var scoreSortedPlayers = game.getSortedPlayers();
         var scoreboard = IntStream.range(0, scoreSortedPlayers.size())
                 .mapToObj(i -> {
                     var p = scoreSortedPlayers.get(i);
