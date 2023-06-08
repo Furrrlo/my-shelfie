@@ -100,7 +100,7 @@ public class SocketConnectionServerController implements Closeable {
                     }
 
                     if (connection != null)
-                        connection.joinGameTask = CompletableFuture.runAsync(ThreadPools.giveNameToTask(
+                        connection.joinGameTask = threadPool.submit(ThreadPools.giveNameToTask(
                                 n -> n + "[" + connection.getNick() + ":joinGameLoop]",
                                 () -> joinGameLoop(connection)),
                                 threadPool);
@@ -136,6 +136,7 @@ public class SocketConnectionServerController implements Closeable {
 
         final var connection = new PlayerConnection(controller, socketManager, nick);
         connections.add(connection);
+        socketManager.setOnClose(connection::doClose);
         try {
             controller.connectPlayer(
                     nick,
@@ -184,30 +185,28 @@ public class SocketConnectionServerController implements Closeable {
                     },
                     lobbyController -> {
                         var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);
-                        connection.lobbyControllerTask.set(CompletableFuture
-                                .runAsync(ThreadPools.giveNameToTask(n -> n + "[" + nick + ":lobbyController]",
-                                        socketController), threadPool)
-                                .handle((__, ex) -> {
-                                    if (ex == null)
-                                        return __;
-
-                                    connection.disconnectPlayer(ex);
-                                    return __;
-                                }));
+                        connection.lobbyControllerTask.set(threadPool.submit(ThreadPools.giveNameToTask(
+                                n -> n + "[" + nick + ":lobbyController]",
+                                () -> {
+                                    try {
+                                        socketController.run();
+                                    } catch (Throwable t) {
+                                        connection.disconnectPlayer(t);
+                                    }
+                                })));
                         return socketController;
                     },
                     (serverPlayer, game) -> {
                         var socketController = new SocketServerGameController(socketManager, serverPlayer, game);
-                        connection.gameControllerTask.set(CompletableFuture
-                                .runAsync(ThreadPools.giveNameToTask(n -> n + "[" + nick + ":gameController]",
-                                        socketController), threadPool)
-                                .handle((__, ex) -> {
-                                    if (ex == null)
-                                        return __;
-
-                                    connection.disconnectPlayer(ex);
-                                    return __;
-                                }));
+                        connection.gameControllerTask.set(threadPool.submit(ThreadPools.giveNameToTask(
+                                n -> n + "[" + nick + ":gameController]",
+                                () -> {
+                                    try {
+                                        socketController.run();
+                                    } catch (Throwable t) {
+                                        connection.disconnectPlayer(t);
+                                    }
+                                })));
                         return socketController;
                     });
             Objects.requireNonNull(lobbyCtx.get(), "Lobby was somehow not sent to the player").ack();
@@ -234,6 +233,10 @@ public class SocketConnectionServerController implements Closeable {
 
         @Override
         public void close() throws IOException {
+            socketManager.close();
+        }
+
+        private void doClose(Closeable socketManagerDoClose) throws IOException {
             try {
                 var joinGameTask = this.joinGameTask;
                 if (joinGameTask != null)
@@ -244,7 +247,7 @@ public class SocketConnectionServerController implements Closeable {
                 var gameControllerTask = this.gameControllerTask.getAndSet(null);
                 if (gameControllerTask != null)
                     gameControllerTask.cancel(true);
-                socketManager.close();
+                socketManagerDoClose.close();
             } finally {
                 connections.remove(this);
             }

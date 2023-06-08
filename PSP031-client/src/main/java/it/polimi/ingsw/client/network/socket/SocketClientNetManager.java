@@ -11,10 +11,14 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class SocketClientNetManager implements ClientNetManager {
 
@@ -85,6 +89,7 @@ public class SocketClientNetManager implements ClientNetManager {
 
         try {
             var netManager = new SocketClientNetManager(serverAddress, socketManager, readTimeout, readTimeoutUnit, nick);
+            socketManager.setOnClose(netManager::doClose);
             netManager.doConnect();
             return netManager;
         } catch (Throwable t) {
@@ -149,21 +154,20 @@ public class SocketClientNetManager implements ClientNetManager {
 
                     throw nickException;
                 }
-                case JoinedPacket ignored -> heartbeatHandlerTask = CompletableFuture
-                        .runAsync(new SocketClientHeartbeatHandler(socketManager), threadPool)
-                        .handle((__, ex) -> {
-                            if (ex == null)
-                                return __;
+                case JoinedPacket ignored -> heartbeatHandlerTask = threadPool.submit(() -> {
+                    try {
+                        var heartbeat = new SocketClientHeartbeatHandler(socketManager);
+                        heartbeat.run();
+                    } catch (Throwable t) {
+                        try {
+                            close();
+                        } catch (IOException e) {
+                            t.addSuppressed(new IOException("Failed to close SocketClientNetManager", e));
+                        }
 
-                            try {
-                                close();
-                            } catch (IOException e) {
-                                ex.addSuppressed(new IOException("Failed to close SocketClientNetManager", e));
-                            }
-
-                            LOGGER.error("Uncaught exception in SocketClientHeartbeatHandler", ex);
-                            return null;
-                        });
+                        LOGGER.error("Uncaught exception in SocketClientHeartbeatHandler", t);
+                    }
+                });
             }
         }
     }
@@ -192,28 +196,26 @@ public class SocketClientNetManager implements ClientNetManager {
             var updaterTask = this.updaterTask;
             if (updaterTask != null)
                 updaterTask.cancel(true);
-            this.updaterTask = CompletableFuture
-                    .supplyAsync(new SocketLobbyClientUpdater(lobby, socketManager), threadPool)
-                    .thenAccept(clientUpdater -> {
-                        LOGGER.info("[Client] [" + nick + "] shut down lobby updater");
+            this.updaterTask = threadPool.submit(() -> {
+                try {
+                    var lobbyUpdater = new SocketLobbyClientUpdater(lobby, socketManager);
+                    var gameUpdater = lobbyUpdater.get();
+                    LOGGER.info("[Client] [" + nick + "] shut down lobby updater");
 
-                        if (clientUpdater != null) {
-                            clientUpdater.run();
-                            LOGGER.info("[Client] [" + nick + "] shut down game updater");
-                        }
-                    }).handle((__, ex) -> {
-                        if (ex == null)
-                            return __;
+                    if (gameUpdater != null) {
+                        gameUpdater.run();
+                        LOGGER.info("[Client] [" + nick + "] shut down game updater");
+                    }
+                } catch (Throwable t) {
+                    try {
+                        close();
+                    } catch (IOException e) {
+                        t.addSuppressed(new IOException("Failed to close SocketClientNetManager", e));
+                    }
 
-                        try {
-                            close();
-                        } catch (IOException e) {
-                            ex.addSuppressed(new IOException("Failed to close SocketClientNetManager", e));
-                        }
-
-                        LOGGER.error("Uncaught exception in SocketClient*Updater", ex);
-                        return null;
-                    });
+                    LOGGER.error("Uncaught exception in SocketClient*Updater", t);
+                }
+            });
             lobbyCtx.reply(new LobbyReceivedPacket());
             return new LobbyAndController<>(lobby, new SocketLobbyController(socketManager));
         }
@@ -221,13 +223,17 @@ public class SocketClientNetManager implements ClientNetManager {
 
     @Override
     public void close() throws IOException {
+        socketManager.close();
+    }
+
+    private void doClose(Closeable socketManagerDoClose) throws IOException {
         var heartbeatHandlerTask = this.heartbeatHandlerTask;
         if (heartbeatHandlerTask != null)
             heartbeatHandlerTask.cancel(true);
         var updaterTask = this.updaterTask;
         if (updaterTask != null)
             updaterTask.cancel(true);
-        socketManager.close();
+        socketManagerDoClose.close();
 
         var lobby = this.lobby;
         if (lobby != null)

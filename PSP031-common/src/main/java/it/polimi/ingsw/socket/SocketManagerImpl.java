@@ -3,6 +3,7 @@ package it.polimi.ingsw.socket;
 import it.polimi.ingsw.socket.packets.AckPacket;
 import it.polimi.ingsw.socket.packets.Packet;
 import it.polimi.ingsw.utils.ThreadPools;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -24,7 +25,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     @VisibleForTesting
     static final String CLOSE_EX_MSG = "Socket was closed";
 
+    private final AtomicBoolean isClosing = new AtomicBoolean();
     private volatile boolean isClosed;
+    private volatile @Nullable OnCloseHook onClose;
+    private volatile @Nullable SeqPacket closePacket;
     private final @Nullable Socket socket;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
@@ -92,10 +96,45 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     }
 
     @Override
-    public void close() throws IOException {
-        log("Closing socket manager...");
-        isClosed = true;
+    public boolean isClosed() {
+        return isClosed;
+    }
 
+    @Override
+    public final void close() throws IOException {
+        var onClose = this.onClose;
+        if (onClose != null)
+            onClose.doClose(this::doClose);
+        else
+            doClose();
+    }
+
+    @MustBeInvokedByOverriders
+    @SuppressWarnings({
+            "unchecked", // ClosePacket and CloseAckPacket need to be hard-casted
+            "resource" // We don't need to ack the last CloseAckPacket
+    })
+    protected void doClose() throws IOException {
+        if (isClosing.getAndSet(true))
+            return;
+
+        log("Closing socket manager...");
+
+        try {
+            var closePacket = this.closePacket;
+            if (closePacket == null) {
+                send((OUT) new ClosePacket(), (Class<ACK_IN>) CloseAckPacket.class);
+            } else {
+                doSend(new SeqAckPacket(new CloseAckPacket(), -1, closePacket.seqN())).get();
+            }
+        } catch (IOException | ExecutionException | InterruptedException ex) {
+            // We ignore exceptions on the last ack receival, because the socket may
+            // be closed before we are able to read out the last ack packet
+            // We don't care about whether the other has received this anyway,
+            // we can just hope it did and go on
+        }
+
+        isClosed = true;
         recvTask.cancel(true);
         sendTask.cancel(true);
 
@@ -111,6 +150,11 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
     }
 
+    @Override
+    public void setOnClose(@Nullable OnCloseHook onClose) {
+        this.onClose = onClose;
+    }
+
     private void ensureOpen() throws IOException {
         if (isClosed)
             throw new IOException(CLOSE_EX_MSG);
@@ -118,6 +162,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
 
     private void readLoop() {
         try {
+            SeqPacket closePacket = null;
+            boolean wasClosed = false;
             do {
                 SeqPacket p;
                 try {
@@ -144,8 +190,29 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
 
                 log("Received packet: " + p);
-                inPacketQueue.add(p);
-            } while (!Thread.currentThread().isInterrupted());
+                if (p.packet() instanceof ClosePacket) {
+                    closePacket = p;
+                    wasClosed = true;
+                } else {
+                    if (p.packet() instanceof CloseAckPacket)
+                        wasClosed = true;
+
+                    inPacketQueue.add(p);
+                }
+
+            } while (!wasClosed && !Thread.currentThread().isInterrupted());
+
+            if (closePacket != null) {
+                this.closePacket = closePacket;
+                // Close the socket, close will be in charge of sending the ack
+                try {
+                    close();
+                } catch (IOException ex) {
+                    LOGGER.error("[{}][{}] Failed to close socket after close packet...", name, nick, ex);
+                }
+                // Signal to everybody who is waiting that the socket got closed
+                inPacketQueue.add(new IOException(CLOSE_EX_MSG));
+            }
         } catch (IOException e) {
             final boolean isTimeout = e instanceof SocketTimeoutException;
 
@@ -312,18 +379,13 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             log("Waiting for  " + type + "...");
             return new PacketReplyContextImpl<>(doReceive(packet -> type.isInstance(packet.packet())));
         } catch (InterruptedException e) {
-            throw new RuntimeException("Failed to receive packet " + type, e);
+            throw (IOException) new InterruptedIOException("Failed to receive packet " + type).initCause(e);
         }
     }
 
     @Override
     public void setNick(String nick) {
         this.nick = nick;
-    }
-
-    @Override
-    public boolean isClosed() {
-        return isClosed;
     }
 
     private void log(String s) {

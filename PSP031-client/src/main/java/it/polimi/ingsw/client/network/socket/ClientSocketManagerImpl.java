@@ -70,8 +70,8 @@ public class ClientSocketManagerImpl
     }
 
     @Override
-    public void close() throws IOException {
-        super.close();
+    protected void doClose() throws IOException {
+        super.doClose();
 
         if (!executor.isShutdown())
             executor.shutdown();

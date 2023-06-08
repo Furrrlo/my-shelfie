@@ -2,6 +2,7 @@ package it.polimi.ingsw.socket;
 
 import it.polimi.ingsw.socket.packets.AckPacket;
 import it.polimi.ingsw.socket.packets.Packet;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -64,6 +65,22 @@ public interface SocketManager<IN extends Packet, ACK_IN extends /* Packet & */ 
     void setNick(String nick);
 
     boolean isClosed();
+
+    /**
+     * Hook which allows doing cleanup before and after the SocketManager is closed
+     * 
+     * @param onClose hook which will be called on socket close.
+     *        The actual SocketManager close method will be passed as a parameter and the hook itself
+     *        will be in charge of calling it at what it deems to be the right time.
+     */
+    void setOnClose(@Nullable OnCloseHook onClose);
+
+    /** @see #setOnClose(OnCloseHook) */
+    @FunctionalInterface
+    interface OnCloseHook {
+
+        void doClose(Closeable socketManagerDoClose) throws IOException;
+    }
 
     /**
      * Context of a Packet
