@@ -432,7 +432,10 @@ public class ServerController implements Closeable {
     }
 
     public void onDisconnectPlayer(String nick) {
-        heartbeats.remove(nick);
+        boolean wasConnected = heartbeats.remove(nick) != null;
+        // Only call the rest if the player was actually connected
+        if (!wasConnected)
+            return;
 
         final var lobbyAndController = getLobbyFor(nick);
         if (lobbyAndController != null)
