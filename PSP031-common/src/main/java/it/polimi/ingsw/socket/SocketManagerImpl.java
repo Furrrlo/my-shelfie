@@ -236,9 +236,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     }
 
     private void writeLoop() {
+        QueuedOutput p = null;
         try {
             do {
-                QueuedOutput p = outPacketQueue.take();
+                p = outPacketQueue.take();
 
                 try {
                     oos.writeObject(p.packet());
@@ -270,7 +271,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             if (Thread.currentThread().isInterrupted())
                 return;
 
-            LOGGER.error("[{}][{}] Failed to write packet, closing...", name, nick, e);
+            LOGGER.error("[{}][{}] Failed to write packet {}, closing...", name, nick, p, e);
             try {
                 close();
             } catch (IOException ignored) {
