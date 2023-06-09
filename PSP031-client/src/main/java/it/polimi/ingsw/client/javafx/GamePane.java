@@ -26,6 +26,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ public class GamePane extends AnchorPane {
     private final Pane thePlayerPoints;
     private final CommonGoalsPane commonGoalCardsPane;
     private final PersonalGoalComponent personalGoalCard;
+    private final StackPane personalGoalDescription;
     private final BoardComponent board;
     private final Pane boardPane;
     private final PickedTilesPane pickedTilesPane;
@@ -133,10 +135,29 @@ public class GamePane extends AnchorPane {
                                     default -> throw new IllegalStateException("Unexpected value: ");
                                 }));
 
+        getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
+
+        //creating description for personal goal
+        this.getChildren().add(this.personalGoalDescription = new StackPane());
+        personalGoalDescription.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTGRAY,
+                new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
+                new Insets(0)))));
+        personalGoalDescription.setOpacity(0.9);
+        final Label text = new Label("Personal Goal Description");
+        text.setTextAlignment(TextAlignment.CENTER);
+        text.setAlignment(Pos.CENTER);
+        text.setPadding(new Insets(6));
+        text.setWrapText(true);
+        personalGoalDescription.setAlignment(Pos.CENTER);
+        personalGoalDescription.getChildren().add(text);
+        personalGoalDescription.setVisible(false);
+
         //displaying common goals on shelfie
         this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getCommonGoal1NodeIndex()).setOnMousePressed(event -> {
             thePlayerShelfie.setCommonGoal2Visible(false);
             thePlayerShelfie.setPersonalGoalVisible(false);
+            personalGoalDescription.setVisible(false);
 
             if (!thePlayerShelfie.getCommonGoal1Visible()) {
                 //bring down opacity of shelfie tiles
@@ -150,6 +171,7 @@ public class GamePane extends AnchorPane {
         this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getCommonGoal2NodeIndex()).setOnMousePressed(event -> {
             thePlayerShelfie.setCommonGoal1Visible(false);
             thePlayerShelfie.setPersonalGoalVisible(false);
+            personalGoalDescription.setVisible(false);
 
             if (!thePlayerShelfie.getCommonGoal2Visible()) {
                 //bring down opacity of shelfie tiles
@@ -170,8 +192,6 @@ public class GamePane extends AnchorPane {
             thePlayerShelfie.restoreTilesOpacity();
         });
 
-        getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
-
         //displaying personal goals on shelfie
         this.personalGoalCard.setOnMouseClicked(
                 event -> {
@@ -189,6 +209,21 @@ public class GamePane extends AnchorPane {
                     thePlayerShelfie.setCommonGoal2Visible(false);
                     //change personalGoal visibility
                     thePlayerShelfie.setPersonalGoalVisible(!thePlayerShelfie.getPersonalGoalVisible());
+                    personalGoalDescription.setVisible(!personalGoalDescription.isVisible());
+                });
+        this.personalGoalDescription.setOnMouseClicked(
+                event -> {
+                    thePlayerShelfie.restoreTilesOpacity();
+
+                    if (commonGoalCardsPane.getDescriptionVisible())
+                        commonGoalCardsPane.setDescriptionVisible(false, 0);
+
+                    //set not visible the commonGoals pattern if visible
+                    thePlayerShelfie.setCommonGoal1Visible(false);
+                    thePlayerShelfie.setCommonGoal2Visible(false);
+                    //change personalGoal visibility
+                    thePlayerShelfie.setPersonalGoalVisible(!thePlayerShelfie.getPersonalGoalVisible());
+                    personalGoalDescription.setVisible(!personalGoalDescription.isVisible());
                 });
 
         this.board = new BoardComponent(game.getBoard());
@@ -457,6 +492,8 @@ public class GamePane extends AnchorPane {
         this.thePlayerPoints.resizeRelocate(0, 386.0 * scale, 221.0 * scale, 34 * scale);
         this.commonGoalCardsPane.resizeRelocate(0, 422.0 * scale, 221.0 * scale, 164.0 * scale);
         this.personalGoalCard.resizeRelocate(228.0 * scale, 386.0 * scale, 131.794 * scale, 200.0 * scale);
+        this.personalGoalDescription.resizeRelocate((228.0 + 6.0) * scale, (386.0 + 6.0) * scale, (131.794 - 12.0) * scale,
+                (200.0 - 12.0) * scale);
         this.board.resize(460.0 * scale, 460.0 * scale);
         this.finishToken.resizeRelocate(743.0 * scale, 322.0 * scale, 46 * scale, 46 * scale);
         this.boardPane.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
