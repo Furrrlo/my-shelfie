@@ -3,6 +3,7 @@ package it.polimi.ingsw.client.javafx;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.PlayerView;
 
+import javafx.beans.binding.DoubleBinding;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -25,7 +26,6 @@ public class EndGamePane extends StackPane {
      * 1 --> by pressing the quit button, it closes the stage and the application is terminated
      * 2 --> by pressing the new game button, the game is closed and the player is brought to a new main Menu scene
      */
-    private final AnchorPane scoringBackground;
     private final VBox rankings;
     private final Button newGame;
     private final Button quit;
@@ -37,30 +37,17 @@ public class EndGamePane extends StackPane {
         teamPicture.fitHeightProperty().bind(heightProperty());
         this.getChildren().add(teamPicture);
 
-        this.scoringBackground = new AnchorPane();
-        scoringBackground.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+        this.rankings = new VBox(15);
+        rankings.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / (getWidth() - 400)))),
                 new Insets(0)))));
-        this.getChildren().add(scoringBackground);
-
-        this.rankings = new VBox();
-        rankings.setSpacing(12);
 
         for (int i = 0; i < sortedPlayers.size(); i++) {
             var p = sortedPlayers.get(i);
-            HBox hBox = new HBox();
-            hBox.setSpacing(15);
-            Label nick = new Label(p.getNick());
-            Label score = new Label(p.score().get().toString());
-            hBox.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                    Color.WHITE,
-                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                    new Insets(-2)))));
-            hBox.getChildren().add(nick);
-            hBox.getChildren().add(score);
-            hBox.setAlignment(Pos.CENTER);
-            rankings.getChildren().add(hBox);
+            var row = new RankingRow(p, i + 1);
+            VBox.setVgrow(row, Priority.ALWAYS);
+            rankings.getChildren().add(row);
         }
         rankings.setAlignment(Pos.CENTER);
         getChildren().add(rankings);
@@ -118,10 +105,61 @@ public class EndGamePane extends StackPane {
     protected void layoutChildren() {
         super.layoutChildren();
         final double scale = Math.min(getWidth() / 1515, getHeight() / 1080);
-        scoringBackground.resizeRelocate(200 * scale, 650 * scale, getWidth() - 400 * scale, getHeight() - 800 * scale);
-        rankings.resizeRelocate((200 + 100) * scale, (650 + 20) * scale, getWidth() - (400 + 200) * scale,
-                getHeight() - (800 + 40) * scale);
+        rankings.resizeRelocate(200 * scale, 650 * scale, getWidth() - 400 * scale, getHeight() - 800 * scale);
+        rankings.setPadding(new Insets(30 * scale, 50 * scale, 30 * scale, 50 * scale));
         newGame.resizeRelocate(getWidth() - (200 + 350) * scale, 970 * scale, 350 * scale, 70 * scale);
         quit.resizeRelocate(200 * scale, 970 * scale, 250 * scale, 70 * scale);
+    }
+
+    private static class RankingRow extends HBox {
+        public RankingRow(PlayerView player, int pos) {
+            setPadding(new Insets(0, 5, 0, 5));
+            setMaxHeight(50);
+            setMinHeight(0);
+            Label nick = new Label(pos + ". " + player.getNick());
+            Label score = new Label(player.score().get().toString());
+
+            DoubleBinding scale = heightProperty().divide(nick.heightProperty());
+
+            nick.scaleXProperty().bind(scale);
+            nick.scaleYProperty().bind(scale);
+            nick.translateXProperty()
+                    .bind(nick.widthProperty().multiply(scale).subtract(nick.widthProperty()).divide(2));
+
+            Region padding = new Region();
+            padding.prefWidthProperty().bind(widthProperty().divide(2).subtract(nick.widthProperty()));
+
+            score.scaleXProperty().bind(scale);
+            score.scaleYProperty().bind(scale);
+
+            if (!player.connected().get()) {
+                nick.setTextFill(Color.RED);
+                score.setTextFill(Color.RED);
+            }
+
+            backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                    Color.WHITE,
+                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
+                    new Insets(-2)))));
+            getChildren().add(nick);
+            getChildren().add(padding);
+            getChildren().add(score);
+
+            if (pos == 1) {
+                var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/trophy.png")));
+                imgView.setPreserveRatio(true);
+                imgView.fitHeightProperty().bind(score.heightProperty());
+                imgView.scaleXProperty().bind(scale);
+                imgView.scaleYProperty().bind(scale);
+
+                imgView.translateXProperty()
+                        .bind(imgView.fitHeightProperty().multiply(scale)
+                                .subtract(imgView.fitHeightProperty()));
+                getChildren().add(imgView);
+            }
+
+            setAlignment(Pos.CENTER_LEFT);
+        }
+
     }
 }

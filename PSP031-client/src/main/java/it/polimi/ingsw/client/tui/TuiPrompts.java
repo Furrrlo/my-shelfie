@@ -361,7 +361,8 @@ class TuiPrompts {
         var scoreboard = IntStream.range(0, scoreSortedPlayers.size())
                 .mapToObj(i -> {
                     var p = scoreSortedPlayers.get(i);
-                    return (i + 1) + ". " + p.getNick() + ": " + p.score().get() + "pt";
+                    return (i + 1) + ". " + (!p.connected().get() ? ConsoleColors.RED_BOLD_BRIGHT : "") + p.getNick() + ": "
+                            + p.score().get() + "pt" + ConsoleColors.RESET;
                 })
                 .collect(Collectors.joining("\n"));
         return new ChoicePrompt(
