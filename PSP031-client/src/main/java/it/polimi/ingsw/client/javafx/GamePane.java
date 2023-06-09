@@ -42,7 +42,6 @@ public class GamePane extends AnchorPane {
      * It displays all the game's components needed for the player to play, including the other players'
      * shelfies and the chat
      */
-    //TODO : for Ferlo, solve problem disconnecting the player before he can read endGame probably related to unregister Observers
     private final PlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
     private final CommonGoalsPane commonGoalCardsPane;
@@ -112,7 +111,7 @@ public class GamePane extends AnchorPane {
 
         //adding game components
         getChildren()
-                .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer()));
+                .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer(), game.getPersonalGoal()));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
         getChildren().add(
                 this.commonGoalCardsPane = new CommonGoalsPane(game.getCommonGoals().get(0), game.getCommonGoals().get(1),
@@ -133,7 +132,10 @@ public class GamePane extends AnchorPane {
                                     default -> throw new IllegalStateException("Unexpected value: ");
                                 }));
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
-        //getChildren().add(this.board = new BoardComponent(game.getBoard()));
+
+        this.personalGoalCard.setOnMouseClicked(
+                event -> thePlayerShelfie.setPersonalGoalVisible(!thePlayerShelfie.getPersonalGoalVisible()));
+
         this.board = new BoardComponent(game.getBoard());
         this.boardPane = new Pane(board);
         getChildren().add(this.boardPane);
@@ -265,13 +267,13 @@ public class GamePane extends AnchorPane {
         final var otherPlayers = new ArrayList<>(game.getPlayers());
         otherPlayers.remove(game.thePlayer());
         getChildren().add(this.player1Shelfie = otherPlayers.size() >= 1
-                ? new PlayerShelfieComponent(otherPlayers.get(0), true, true)
+                ? new PlayerShelfieComponent(otherPlayers.get(0), game.getPersonalGoal(), true, true)
                 : new Pane());
         getChildren().add(this.player2Shelfie = otherPlayers.size() >= 2
-                ? new PlayerShelfieComponent(otherPlayers.get(1), true, true)
+                ? new PlayerShelfieComponent(otherPlayers.get(1), game.getPersonalGoal(), true, true)
                 : new Pane());
         getChildren().add(this.player3Shelfie = otherPlayers.size() >= 3
-                ? new PlayerShelfieComponent(otherPlayers.get(2), true, true)
+                ? new PlayerShelfieComponent(otherPlayers.get(2), game.getPersonalGoal(), true, true)
                 : new Pane());
 
         //adding chat to the game initially set not visible, its visibility can be modified by pressing over the

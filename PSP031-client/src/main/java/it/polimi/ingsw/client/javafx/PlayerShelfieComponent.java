@@ -1,9 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.model.PlayerView;
-import it.polimi.ingsw.model.Provider;
-import it.polimi.ingsw.model.Tile;
-import it.polimi.ingsw.model.TileAndCoords;
+import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 
 import javafx.beans.property.BooleanProperty;
@@ -23,14 +20,18 @@ public class PlayerShelfieComponent extends Pane {
 
     private final NickLabel label;
     private final ShelfieComponent shelfieComponent;
+    private final GoalPatternComponent personalGoalPattern;
     private final Pane chair;
 
-    public PlayerShelfieComponent(PlayerView player) {
-        this(player, false, false);
+    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal) {
+        this(player, personalGoal, false, false);
     }
 
-    public PlayerShelfieComponent(PlayerView player, boolean mouseTransparent, boolean showScore) {
+    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal, boolean mouseTransparent,
+                                  boolean showScore) {
         getChildren().add(this.shelfieComponent = new ShelfieComponent(player.getShelfie()));
+        getChildren().add(this.personalGoalPattern = new GoalPatternComponent(personalGoal));
+        this.personalGoalPattern.setVisible(false);
         setMouseTransparent(mouseTransparent);
 
         getChildren().add(this.label = new NickLabel(player.getNick(), player.score(), showScore));
@@ -61,9 +62,19 @@ public class PlayerShelfieComponent extends Pane {
         double shelfieWidth = 180d * scale;
         this.shelfieComponent.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
                 getHeight() - shelfieOffsetY);
+        this.personalGoalPattern.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
+                getHeight() - shelfieOffsetY);
 
         double chairWidth = 35 * scale, chairHeight = 33 * scale;
         this.chair.resizeRelocate(getWidth() - chairWidth, getHeight() - chairHeight, chairWidth, chairHeight);
+    }
+
+    public void setPersonalGoalVisible(boolean visible) {
+        this.personalGoalPattern.setVisible(visible);
+    }
+
+    public boolean getPersonalGoalVisible() {
+        return this.personalGoalPattern.isVisible();
     }
 
     public boolean isColumnSelectionMode() {
