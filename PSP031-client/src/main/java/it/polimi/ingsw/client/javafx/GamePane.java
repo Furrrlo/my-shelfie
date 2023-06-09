@@ -144,7 +144,9 @@ public class GamePane extends AnchorPane {
                 new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
         personalGoalDescription.setOpacity(0.9);
-        final Label text = new Label("Personal Goal Description");
+        final Label text = new Label("The personal goal card grants points if you match the highlighted " +
+                "spaces with the corresponding item tiles.\n1 pt for one matched tile, 2 pts for two, 4 pts for three, " +
+                "6 pts for four, 9 pts for five, 12 pts for six.");
         text.setTextAlignment(TextAlignment.CENTER);
         text.setAlignment(Pos.CENTER);
         text.setPadding(new Insets(6));
