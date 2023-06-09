@@ -167,6 +167,7 @@ public class GamePane extends AnchorPane {
             if (thePlayerShelfie.getCommonGoal2Visible())
                 thePlayerShelfie.setCommonGoal2Visible(false);
             commonGoalCardsPane.setDescriptionVisible(false, 0);
+            thePlayerShelfie.restoreTilesOpacity();
         });
 
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
@@ -179,6 +180,9 @@ public class GamePane extends AnchorPane {
                         thePlayerShelfie.setTilesLowOpacity();
                     } else
                         thePlayerShelfie.restoreTilesOpacity();
+
+                    if (commonGoalCardsPane.getDescriptionVisible())
+                        commonGoalCardsPane.setDescriptionVisible(false, 0);
 
                     //set not visible the commonGoals pattern if visible
                     thePlayerShelfie.setCommonGoal1Visible(false);
