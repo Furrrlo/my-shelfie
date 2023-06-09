@@ -26,8 +26,13 @@ public class CommonGoalsPane extends Pane {
 
     private final ObjectProperty<Integer> score2;
     private final ScoringTokenComponent token2;
+    private final String text1;
+    private final String text2;
 
     public CommonGoalsPane(CommonGoalView goal1, CommonGoalView goal2, int cg1, int cg2) {
+        this.text1 = goal1.getType().getDescription().replaceAll("[\\r\\n]+", " ");
+        this.text2 = goal2.getType().getDescription().replaceAll("[\\r\\n]+", " ");
+
         this.score1 = new SimpleObjectProperty<>(this, "score1");
         this.score2 = new SimpleObjectProperty<>(this, "score2");
         this.token1 = new ScoringTokenComponent();
@@ -71,14 +76,6 @@ public class CommonGoalsPane extends Pane {
         getChildren().add(this.goal1 = new CommonGoalComponent(goal1));
         getChildren().add(this.goal2 = new CommonGoalComponent(goal2));
 
-        this.goal1.setOnMousePressed(e -> {
-            description.setText(goal1.getType().getDescription().replaceAll("[\\r\\n]+", " "));
-            stackPane.setVisible(!stackPane.isVisible());
-        });
-        this.goal2.setOnMousePressed(e -> {
-            description.setText(goal2.getType().getDescription().replaceAll("[\\r\\n]+", " "));
-            stackPane.setVisible(!stackPane.isVisible());
-        });
         this.token1.setOnMousePressed(e -> {
             description.setText("The common goal cards grant points to the players who achieve the pattern.\n" +
                     "The first player to achieve it gets 8 point, 6 the second, 4 the third and 2 the last");
@@ -149,6 +146,24 @@ public class CommonGoalsPane extends Pane {
 
     public int getCommonGoal2NodeIndex() {
         return this.getChildren().indexOf(goal2);
+    }
+
+    public int getDescriptionNodeIndex() {
+        return this.getChildren().indexOf(stackPane);
+    }
+
+    public void setDescriptionVisible(boolean visible, int index) {
+        this.stackPane.setVisible(visible);
+        if (visible) {
+            if (index == 1)
+                this.description.setText(text1);
+            else
+                this.description.setText(text2);
+        }
+    }
+
+    public boolean getDescriptionVisible() {
+        return this.stackPane.isVisible();
     }
 
     public void setScore1(Integer score1) {

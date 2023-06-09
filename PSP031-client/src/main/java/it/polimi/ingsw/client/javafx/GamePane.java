@@ -145,6 +145,7 @@ public class GamePane extends AnchorPane {
                 thePlayerShelfie.restoreTilesOpacity();
 
             thePlayerShelfie.setCommonGoal1Visible(!thePlayerShelfie.getCommonGoal1Visible());
+            commonGoalCardsPane.setDescriptionVisible(!commonGoalCardsPane.getDescriptionVisible(), 1);
         });
         this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getCommonGoal2NodeIndex()).setOnMousePressed(event -> {
             thePlayerShelfie.setCommonGoal1Visible(false);
@@ -156,8 +157,18 @@ public class GamePane extends AnchorPane {
             } else
                 thePlayerShelfie.restoreTilesOpacity();
 
+            commonGoalCardsPane.setDescriptionVisible(!commonGoalCardsPane.getDescriptionVisible(), 2);
             thePlayerShelfie.setCommonGoal2Visible(!thePlayerShelfie.getCommonGoal2Visible());
         });
+        //turning description of common goals and commonGoals pattern off when pressed on it
+        this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getDescriptionNodeIndex()).setOnMousePressed(event -> {
+            if (thePlayerShelfie.getCommonGoal1Visible())
+                thePlayerShelfie.setCommonGoal1Visible(false);
+            if (thePlayerShelfie.getCommonGoal2Visible())
+                thePlayerShelfie.setCommonGoal2Visible(false);
+            commonGoalCardsPane.setDescriptionVisible(false, 0);
+        });
+
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
 
         //displaying personal goals on shelfie
