@@ -109,8 +109,13 @@ public class JfxMainMenuScene extends Scene {
                 }
                 var lobbyAndController = netManager.joinGame();
 
-                Scene scene = new JfxLobbyScene(stage, lobbyAndController, netManager);
-
+                Scene scene;
+                var game = lobbyAndController.lobby().game().get();
+                if (game != null) {
+                    scene = new JfxGameScene(stage, game.game(), game.controller(), netManager);
+                } else {
+                    scene = new JfxLobbyScene(stage, lobbyAndController, netManager);
+                }
                 stage.setScene(scene);
 
                 stage.setOnCloseRequest(exit -> {
