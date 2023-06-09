@@ -21,17 +21,25 @@ public class PlayerShelfieComponent extends Pane {
     private final NickLabel label;
     private final ShelfieComponent shelfieComponent;
     private final GoalPatternComponent personalGoalPattern;
+    private final GoalPatternComponent commonGoalPattern1;
+    private final GoalPatternComponent commonGoalPattern2;
     private final Pane chair;
 
-    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal) {
-        this(player, personalGoal, false, false);
+    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal, CommonGoalView cg1, CommonGoalView cg2) {
+        this(player, personalGoal, cg1, cg2, false, false);
     }
 
-    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal, boolean mouseTransparent,
+    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal, CommonGoalView cg1, CommonGoalView cg2,
+                                  boolean mouseTransparent,
                                   boolean showScore) {
         getChildren().add(this.shelfieComponent = new ShelfieComponent(player.getShelfie()));
         getChildren().add(this.personalGoalPattern = new GoalPatternComponent(personalGoal));
         this.personalGoalPattern.setVisible(false);
+        getChildren().add(this.commonGoalPattern1 = new GoalPatternComponent(cg1));
+        getChildren().add(this.commonGoalPattern2 = new GoalPatternComponent(cg2));
+        this.commonGoalPattern1.setVisible(false);
+        this.commonGoalPattern2.setVisible(false);
+
         setMouseTransparent(mouseTransparent);
 
         getChildren().add(this.label = new NickLabel(player.getNick(), player.score(), showScore));
@@ -64,6 +72,10 @@ public class PlayerShelfieComponent extends Pane {
                 getHeight() - shelfieOffsetY);
         this.personalGoalPattern.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
                 getHeight() - shelfieOffsetY);
+        this.commonGoalPattern1.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
+                getHeight() - shelfieOffsetY);
+        this.commonGoalPattern2.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
+                getHeight() - shelfieOffsetY);
 
         double chairWidth = 35 * scale, chairHeight = 33 * scale;
         this.chair.resizeRelocate(getWidth() - chairWidth, getHeight() - chairHeight, chairWidth, chairHeight);
@@ -83,6 +95,22 @@ public class PlayerShelfieComponent extends Pane {
 
     public boolean getPersonalGoalVisible() {
         return this.personalGoalPattern.isVisible();
+    }
+
+    public void setCommonGoal1Visible(boolean visible) {
+        this.commonGoalPattern1.setVisible(visible);
+    }
+
+    public boolean getCommonGoal1Visible() {
+        return this.commonGoalPattern1.isVisible();
+    }
+
+    public void setCommonGoal2Visible(boolean visible) {
+        this.commonGoalPattern2.setVisible(visible);
+    }
+
+    public boolean getCommonGoal2Visible() {
+        return this.commonGoalPattern2.isVisible();
     }
 
     public boolean isColumnSelectionMode() {

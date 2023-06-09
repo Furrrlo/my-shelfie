@@ -1,10 +1,133 @@
 package it.polimi.ingsw.client.javafx;
 
+import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.model.CommonGoalView;
 import it.polimi.ingsw.model.PersonalGoalView;
+import it.polimi.ingsw.model.Shelfie;
 
 import javafx.scene.layout.AnchorPane;
 
 public class GoalPatternComponent extends AnchorPane {
+    private static final Color[][] SIX_COUPLES = new Color[][] {
+            //@formatter:off
+            new Color[] { Color.WHITE    , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , Color.BLUE      },
+            new Color[] { Color.WHITE    , null           , null           , null           , Color.BLUE      },
+            new Color[] { null           , null           , Color.YELLOW   , null           , null            },
+            new Color[] { null           , null           , Color.YELLOW   , null           , null            },
+            new Color[] { Color.GREEN    , null           , null           , null           , null            },
+            new Color[] { Color.GREEN    , null           , null           , Color.PINK     , Color.PINK      },
+            //@formatter:on
+    };
+    private static final Color[][] ALL_CORNERS = new Color[][] {
+            //@formatter:off
+            new Color[] { Color.LIGHTBLUE, null           , null           , null           , Color.LIGHTBLUE },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.LIGHTBLUE, null           , null           , null           , Color.LIGHTBLUE },
+            //@formatter:on
+    };
+    private static final Color[][] FOUR_QUADRIPLETS = new Color[][] {
+            //@formatter:off
+            new Color[] { Color.BLUE     , Color.BLUE     , null           , Color.PINK     , null            },
+            new Color[] { Color.BLUE     , Color.BLUE     , null           , Color.PINK     , null            },
+            new Color[] { null           , null           , null           , Color.PINK     , null            },
+            new Color[] { null           , null           , null           , Color.PINK     , null            },
+            new Color[] { null           , Color.YELLOW   , Color.GREEN    , Color.GREEN    , null            },
+            new Color[] { Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.GREEN    , Color.GREEN     },
+            //@formatter:on
+    };
+    private static final Color[][] TWO_SQUARES = new Color[][] {
+            //@formatter:off
+            new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            },
+            new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           , null            },
+            new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+    };
+    private static final Color[][] THREE_COLUMNS = new Color[][] {
+            //@formatter:off
+            new Color[] { Color.BLUE     , null           , Color.BLUE     , Color.LIGHTBLUE, null            },
+            new Color[] { Color.YELLOW   , null           , Color.WHITE    , Color.PINK     , null            },
+            new Color[] { Color.YELLOW   , null           , Color.BLUE     , Color.GREEN    , null            },
+            new Color[] { Color.GREEN    , null           , Color.WHITE    , Color.BLUE     , null            },
+            new Color[] { Color.YELLOW   , null           , Color.YELLOW   , Color.LIGHTBLUE, null            },
+            new Color[] { Color.GREEN    , null           , Color.YELLOW   , Color.LIGHTBLUE, null            },
+            //@formatter:on
+    };
+    private static final Color[][] EIGHT_EQUAL_TILES = new Color[][] {
+            //@formatter:off
+            new Color[] { Color.LIGHTBLUE, null           , null           , null           , Color.LIGHTBLUE },
+            new Color[] { Color.LIGHTBLUE, null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.LIGHTBLUE, null           , Color.LIGHTBLUE, null           , null            },
+            new Color[] { null           , null           , null           , null           , Color.LIGHTBLUE },
+            new Color[] { null           , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
+            //@formatter:on
+    };
+    private static final Color[][] DIAGONAL = new Color[][] {
+            //@formatter:off
+            new Color[] { Color.PINK     , null           , null           , null           , null            },
+            new Color[] { null           , Color.PINK     , null           , null           , null            },
+            new Color[] { null           , null           , Color.PINK     , null           , null            },
+            new Color[] { null           , null           , null           , Color.PINK     , null            },
+            new Color[] { null           , null           , null           , null           , Color.PINK     },
+            new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+    };
+    private static final Color[][] FOUR_ROWS = new Color[][] {
+            //@formatter:off
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE     },
+            new Color[] { Color.BLUE     , Color.BLUE     , Color.BLUE     , Color.BLUE     , Color.BLUE      },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.GREEN     },
+            new Color[] { Color.PINK     , Color.PINK     , Color.LIGHTBLUE, Color.LIGHTBLUE, Color.PINK      },
+            //@formatter:on
+    };
+    private static final Color[][] TWO_ALL_DIFF_COLUMNS = new Color[][] {
+            //@formatter:off
+            new Color[] { Color.YELLOW   , null           , Color.PINK     , null           , Color.PINK      },
+            new Color[] { Color.GREEN    , null           , Color.GREEN    , null           , Color.GREEN     },
+            new Color[] { Color.LIGHTBLUE, null           , Color.LIGHTBLUE, null           , Color.LIGHTBLUE },
+            new Color[] { Color.BLUE     , null           , Color.BLUE     , null           , Color.BLUE      },
+            new Color[] { Color.PINK     , null           , Color.YELLOW   , null           , Color.YELLOW    },
+            new Color[] { Color.WHITE    , null           , Color.WHITE    , null           , Color.WHITE     },
+            //@formatter:on
+    };
+    private static final Color[][] TWO_ALL_DIFF_ROWS = new Color[][] {
+            //@formatter:off
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.PINK     , Color.WHITE    , Color.PINK     , Color.WHITE    , Color.PINK     },
+            new Color[] { Color.BLUE     , Color.BLUE     , Color.GREEN    , Color.GREEN    , Color.YELLOW    },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE     },
+            new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+    };
+    private static final Color[][] CROSS = new Color[][] {
+            //@formatter:off
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , Color.PINK     , null           , Color.PINK     , null            },
+            new Color[] { null           , null           , Color.PINK     , null           , null            },
+            new Color[] { null           , Color.PINK     , null           , Color.PINK     , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+    };
+    private static final Color[][] TRIANGLE = new Color[][] {
+            //@formatter:off
+            new Color[] { null           , null           , null           , null           , null             },
+            new Color[] { null           , null           , null           , null           , Color.YELLOW     },
+            new Color[] { null           , null           , null           , Color.GREEN    , Color.WHITE      },
+            new Color[] { null           , null           , Color.GREEN    , Color.YELLOW   , Color.WHITE      },
+            new Color[] { null           , Color.YELLOW   , Color.WHITE    , Color.YELLOW   , Color.WHITE      },
+            new Color[] { Color.PINK     , Color.GREEN    , Color.PINK     , Color.GREEN    , Color.YELLOW     },
+            //@formatter:on
+    };
     public ColorTileComponent t0x0;
     public ColorTileComponent t0x1;
     public ColorTileComponent t0x2;
@@ -68,6 +191,55 @@ public class GoalPatternComponent extends AnchorPane {
         getChildren().add(t5x2 = new ColorTileComponent(personalGoal.get(5, 2)));
         getChildren().add(t5x3 = new ColorTileComponent(personalGoal.get(5, 3)));
         getChildren().add(t5x4 = new ColorTileComponent(personalGoal.get(5, 4)));
+    }
+
+    public GoalPatternComponent(CommonGoalView commonGoal) {
+        Shelfie shelfie;
+        switch (commonGoal.getType()) {
+            case SIX_COUPLES -> shelfie = new Shelfie(SIX_COUPLES);
+            case ALL_CORNERS -> shelfie = new Shelfie(ALL_CORNERS);
+            case FOUR_QUADRIPLETS -> shelfie = new Shelfie(FOUR_QUADRIPLETS);
+            case TWO_SQUARES -> shelfie = new Shelfie(TWO_SQUARES);
+            case THREE_COLUMNS -> shelfie = new Shelfie(THREE_COLUMNS);
+            case EIGHT_EQUAL_TILES -> shelfie = new Shelfie(EIGHT_EQUAL_TILES);
+            case DIAGONAL -> shelfie = new Shelfie(DIAGONAL);
+            case FOUR_ROWS -> shelfie = new Shelfie(FOUR_ROWS);
+            case TWO_ALL_DIFF_COLUMNS -> shelfie = new Shelfie(TWO_ALL_DIFF_COLUMNS);
+            case TWO_ALL_DIFF_ROWS -> shelfie = new Shelfie(TWO_ALL_DIFF_ROWS);
+            case CROSS -> shelfie = new Shelfie(CROSS);
+            case TRIANGLE -> shelfie = new Shelfie(TRIANGLE);
+            default -> throw new IllegalStateException("Unexpected value: " + commonGoal.getType());
+        }
+        getChildren().add(t0x0 = new ColorTileComponent(shelfie.tile(0, 0).get()));
+        getChildren().add(t0x1 = new ColorTileComponent(shelfie.tile(0, 1).get()));
+        getChildren().add(t0x2 = new ColorTileComponent(shelfie.tile(0, 2).get()));
+        getChildren().add(t0x3 = new ColorTileComponent(shelfie.tile(0, 3).get()));
+        getChildren().add(t0x4 = new ColorTileComponent(shelfie.tile(0, 4).get()));
+        getChildren().add(t1x0 = new ColorTileComponent(shelfie.tile(1, 0).get()));
+        getChildren().add(t1x1 = new ColorTileComponent(shelfie.tile(1, 1).get()));
+        getChildren().add(t1x2 = new ColorTileComponent(shelfie.tile(1, 2).get()));
+        getChildren().add(t1x3 = new ColorTileComponent(shelfie.tile(1, 3).get()));
+        getChildren().add(t1x4 = new ColorTileComponent(shelfie.tile(1, 4).get()));
+        getChildren().add(t2x0 = new ColorTileComponent(shelfie.tile(2, 0).get()));
+        getChildren().add(t2x2 = new ColorTileComponent(shelfie.tile(2, 2).get()));
+        getChildren().add(t2x1 = new ColorTileComponent(shelfie.tile(2, 1).get()));
+        getChildren().add(t2x3 = new ColorTileComponent(shelfie.tile(2, 3).get()));
+        getChildren().add(t2x4 = new ColorTileComponent(shelfie.tile(2, 4).get()));
+        getChildren().add(t3x0 = new ColorTileComponent(shelfie.tile(3, 0).get()));
+        getChildren().add(t3x1 = new ColorTileComponent(shelfie.tile(3, 1).get()));
+        getChildren().add(t3x2 = new ColorTileComponent(shelfie.tile(3, 2).get()));
+        getChildren().add(t3x3 = new ColorTileComponent(shelfie.tile(3, 3).get()));
+        getChildren().add(t3x4 = new ColorTileComponent(shelfie.tile(3, 4).get()));
+        getChildren().add(t4x0 = new ColorTileComponent(shelfie.tile(4, 0).get()));
+        getChildren().add(t4x1 = new ColorTileComponent(shelfie.tile(4, 1).get()));
+        getChildren().add(t4x2 = new ColorTileComponent(shelfie.tile(4, 2).get()));
+        getChildren().add(t4x3 = new ColorTileComponent(shelfie.tile(4, 3).get()));
+        getChildren().add(t4x4 = new ColorTileComponent(shelfie.tile(4, 4).get()));
+        getChildren().add(t5x0 = new ColorTileComponent(shelfie.tile(5, 0).get()));
+        getChildren().add(t5x1 = new ColorTileComponent(shelfie.tile(5, 1).get()));
+        getChildren().add(t5x2 = new ColorTileComponent(shelfie.tile(5, 2).get()));
+        getChildren().add(t5x3 = new ColorTileComponent(shelfie.tile(5, 3).get()));
+        getChildren().add(t5x4 = new ColorTileComponent(shelfie.tile(5, 4).get()));
     }
 
     protected void layoutChildren() {

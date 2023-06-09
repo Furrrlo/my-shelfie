@@ -111,7 +111,8 @@ public class GamePane extends AnchorPane {
 
         //adding game components
         getChildren()
-                .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer(), game.getPersonalGoal()));
+                .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer(), game.getPersonalGoal(),
+                        game.getCommonGoals().get(0), game.getCommonGoals().get(1)));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
         getChildren().add(
                 this.commonGoalCardsPane = new CommonGoalsPane(game.getCommonGoals().get(0), game.getCommonGoals().get(1),
@@ -131,15 +132,47 @@ public class GamePane extends AnchorPane {
                                     case 3 -> 2;
                                     default -> throw new IllegalStateException("Unexpected value: ");
                                 }));
+
+        //displaying common goals on shelfie
+        this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getCommonGoal1NodeIndex()).setOnMousePressed(event -> {
+            thePlayerShelfie.setCommonGoal2Visible(false);
+            thePlayerShelfie.setPersonalGoalVisible(false);
+
+            if (!thePlayerShelfie.getCommonGoal1Visible()) {
+                //bring down opacity of shelfie tiles
+                thePlayerShelfie.setTilesLowOpacity();
+            } else
+                thePlayerShelfie.restoreTilesOpacity();
+
+            thePlayerShelfie.setCommonGoal1Visible(!thePlayerShelfie.getCommonGoal1Visible());
+        });
+        this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getCommonGoal2NodeIndex()).setOnMousePressed(event -> {
+            thePlayerShelfie.setCommonGoal1Visible(false);
+            thePlayerShelfie.setPersonalGoalVisible(false);
+
+            if (!thePlayerShelfie.getCommonGoal2Visible()) {
+                //bring down opacity of shelfie tiles
+                thePlayerShelfie.setTilesLowOpacity();
+            } else
+                thePlayerShelfie.restoreTilesOpacity();
+
+            thePlayerShelfie.setCommonGoal2Visible(!thePlayerShelfie.getCommonGoal2Visible());
+        });
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
 
+        //displaying personal goals on shelfie
         this.personalGoalCard.setOnMouseClicked(
                 event -> {
-                    if (!thePlayerShelfie.getPersonalGoalVisible())
+                    if (!thePlayerShelfie.getPersonalGoalVisible()) {
+                        //bring down opacity of shelfie tiles
                         thePlayerShelfie.setTilesLowOpacity();
-                    else
+                    } else
                         thePlayerShelfie.restoreTilesOpacity();
 
+                    //set not visible the commonGoals pattern if visible
+                    thePlayerShelfie.setCommonGoal1Visible(false);
+                    thePlayerShelfie.setCommonGoal2Visible(false);
+                    //change personalGoal visibility
                     thePlayerShelfie.setPersonalGoalVisible(!thePlayerShelfie.getPersonalGoalVisible());
                 });
 
@@ -274,13 +307,16 @@ public class GamePane extends AnchorPane {
         final var otherPlayers = new ArrayList<>(game.getPlayers());
         otherPlayers.remove(game.thePlayer());
         getChildren().add(this.player1Shelfie = otherPlayers.size() >= 1
-                ? new PlayerShelfieComponent(otherPlayers.get(0), game.getPersonalGoal(), true, true)
+                ? new PlayerShelfieComponent(otherPlayers.get(0), game.getPersonalGoal(), game.getCommonGoals().get(0),
+                        game.getCommonGoals().get(0), true, true)
                 : new Pane());
         getChildren().add(this.player2Shelfie = otherPlayers.size() >= 2
-                ? new PlayerShelfieComponent(otherPlayers.get(1), game.getPersonalGoal(), true, true)
+                ? new PlayerShelfieComponent(otherPlayers.get(1), game.getPersonalGoal(), game.getCommonGoals().get(0),
+                        game.getCommonGoals().get(0), true, true)
                 : new Pane());
         getChildren().add(this.player3Shelfie = otherPlayers.size() >= 3
-                ? new PlayerShelfieComponent(otherPlayers.get(2), game.getPersonalGoal(), true, true)
+                ? new PlayerShelfieComponent(otherPlayers.get(2), game.getPersonalGoal(), game.getCommonGoals().get(0),
+                        game.getCommonGoals().get(0), true, true)
                 : new Pane());
 
         //adding chat to the game initially set not visible, its visibility can be modified by pressing over the

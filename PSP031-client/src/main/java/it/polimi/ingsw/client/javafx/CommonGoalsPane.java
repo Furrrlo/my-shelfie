@@ -143,6 +143,14 @@ public class CommonGoalsPane extends Pane {
         }
     }
 
+    public int getCommonGoal1NodeIndex() {
+        return this.getChildren().indexOf(goal1);
+    }
+
+    public int getCommonGoal2NodeIndex() {
+        return this.getChildren().indexOf(goal2);
+    }
+
     public void setScore1(Integer score1) {
         this.score1.set(score1);
     }
