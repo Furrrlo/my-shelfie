@@ -18,6 +18,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -82,13 +83,30 @@ public class JfxLobbyScene extends Scene {
         lobbyAndController.lobby().game().registerObserver(gameAndController -> {
             if (gameAndController != null) {
                 Platform.runLater(() -> {
-                    Scene scene = new JfxGameScene(gameAndController.game(), gameAndController.controller(), netManager);
-                    stage.setScene(scene);
+                    StackPane loadingRoot = new StackPane();
+                    loadingRoot.setBackground(new Background(new BackgroundImage(
+                            new Image(FxResources.getResourceAsStream("assets/misc/sfondo parquet.jpg")),
+                            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.DEFAULT,
+                            new BackgroundSize(100, 100, true, true, false, true))));
+
+                    loadingRoot.getChildren().setAll(new ProgressIndicator());
+                    final Scene scene = new Scene(loadingRoot);
+
                     stage.setMinWidth(800);
                     stage.setWidth(1080);
                     stage.setMinHeight(500);
                     stage.setHeight(720);
+                    stage.setScene(scene);
                     stage.show();
+
+                    Platform.runLater(() -> {
+                        Scene gameScene = new JfxGameScene(gameAndController.game(), gameAndController.controller(),
+                                netManager);
+                        stage.setScene(gameScene);
+                        stage.show();
+                    });
+
                 });
             }
         });
