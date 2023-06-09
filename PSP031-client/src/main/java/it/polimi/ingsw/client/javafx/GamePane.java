@@ -134,7 +134,14 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
 
         this.personalGoalCard.setOnMouseClicked(
-                event -> thePlayerShelfie.setPersonalGoalVisible(!thePlayerShelfie.getPersonalGoalVisible()));
+                event -> {
+                    if (!thePlayerShelfie.getPersonalGoalVisible())
+                        thePlayerShelfie.setTilesLowOpacity();
+                    else
+                        thePlayerShelfie.restoreTilesOpacity();
+
+                    thePlayerShelfie.setPersonalGoalVisible(!thePlayerShelfie.getPersonalGoalVisible());
+                });
 
         this.board = new BoardComponent(game.getBoard());
         this.boardPane = new Pane(board);

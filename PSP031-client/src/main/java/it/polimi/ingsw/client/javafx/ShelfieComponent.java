@@ -210,4 +210,20 @@ public class ShelfieComponent extends AnchorPane {
     public void setOnTileAction(@Nullable Consumer<TileAndCoords<@Nullable Tile>> onTileAction) {
         this.onTileAction.set(onTileAction);
     }
+
+    public void setLowOpacity() {
+        for (TileComponent[] t : matrix) {
+            for (TileComponent tt : t) {
+                tt.setOpacity(0.5);
+            }
+        }
+    }
+
+    public void restoreOpacity() {
+        for (TileComponent[] t : matrix) {
+            for (TileComponent tt : t) {
+                tt.setOpacity(1);
+            }
+        }
+    }
 }

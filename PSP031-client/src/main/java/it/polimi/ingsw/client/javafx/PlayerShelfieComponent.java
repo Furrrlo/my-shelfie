@@ -69,6 +69,14 @@ public class PlayerShelfieComponent extends Pane {
         this.chair.resizeRelocate(getWidth() - chairWidth, getHeight() - chairHeight, chairWidth, chairHeight);
     }
 
+    public void setTilesLowOpacity() {
+        this.shelfieComponent.setLowOpacity();
+    }
+
+    public void restoreTilesOpacity() {
+        this.shelfieComponent.restoreOpacity();
+    }
+
     public void setPersonalGoalVisible(boolean visible) {
         this.personalGoalPattern.setVisible(visible);
     }
