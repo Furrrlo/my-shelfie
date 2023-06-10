@@ -150,6 +150,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
     }
 
+    private boolean isClosePacket(@Nullable Packet packet) {
+        return packet instanceof ClosePacket || packet instanceof CloseAckPacket;
+    }
+
     @Override
     public void setOnClose(@Nullable OnCloseHook onClose) {
         this.onClose = onClose;
@@ -190,16 +194,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
 
                 log("Received packet: " + p);
+                wasClosed = isClosePacket(p.packet());
                 if (p.packet() instanceof ClosePacket) {
                     closePacket = p;
-                    wasClosed = true;
                 } else {
-                    if (p.packet() instanceof CloseAckPacket)
-                        wasClosed = true;
-
                     inPacketQueue.add(p);
                 }
-
             } while (!wasClosed && !Thread.currentThread().isInterrupted());
 
             if (closePacket != null) {
@@ -269,6 +269,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         } catch (IOException e) {
             // If the interruption flag was set, we got interrupted by close, so it's expected
             if (Thread.currentThread().isInterrupted())
+                return;
+            // If it was a close packet being sent, we don't need to log the error and call close
+            // see #doClose(...) for more details on the close sequence
+            if (isClosePacket(p.packet().packet()))
                 return;
 
             LOGGER.error("[{}][{}] Failed to write packet {}, closing...", name, nick, p, e);
