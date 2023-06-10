@@ -176,7 +176,7 @@ public class DisconnectionIntegrationTest {
         var serverControllerRef = new AtomicReference<ServerController>();
         try {
             Assertions.assertTimeoutPreemptively(
-                    Duration.of(1, ChronoUnit.MINUTES),
+                    Duration.of(45, ChronoUnit.SECONDS),
                     () -> doTestDisconnection_clientCloseInGame0(
                             bindServerController,
                             clientNetManagerFactory1,
