@@ -109,9 +109,11 @@ public class Game implements GameView {
     public @Unmodifiable List<? extends PlayerView> getSortedPlayers() {
         return players.stream()
                 .sorted((Comparator<PlayerView>) (o1, o2) -> {
-                    if (!o2.connected().get())
+                    if (o1.connected().get() && !o2.connected().get())
                         return -1;
-                    return o1.score().get() - o2.score().get();
+                    if (!o1.connected().get() && o2.connected().get())
+                        return 1;
+                    return o2.score().get() - o1.score().get();
                 }).toList();
     }
 

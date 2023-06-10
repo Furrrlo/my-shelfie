@@ -461,6 +461,88 @@ class GameTest {
     }
 
     @Test
+    void testGetSortedPlayer() {
+        final var game = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 1),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 2)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertEquals(List.of("player2", "player1"), game.getSortedPlayers().stream().map(PlayerView::getNick).toList());
+
+        final var game2 = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 2),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 1),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 3)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertEquals(List.of("player3", "player1", "player2"),
+                game2.getSortedPlayers().stream().map(PlayerView::getNick).toList());
+
+        final var game3 = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, false, ct, ff, 2),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, false, ct, ff, 1),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, false, ct, ff, 3)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertEquals(List.of("player3", "player1", "player2"),
+                game3.getSortedPlayers().stream().map(PlayerView::getNick).toList());
+
+        final var game4 = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, false, ct, ff, 2),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 1),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 3)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertEquals(List.of("player3", "player2", "player1"),
+                game4.getSortedPlayers().stream().map(PlayerView::getNick).toList());
+
+        final var game5 = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, false, ct, ff, 2),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 1),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, false, ct, ff, 3),
+                        (sp, ct, ff) -> new Player("player4", new Shelfie(), sp, true, ct, ff, 3)),
+                0,
+                0,
+                0,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        assertEquals(List.of("player4", "player2", "player3", "player1"),
+                game5.getSortedPlayers().stream().map(PlayerView::getNick).toList());
+    }
+
+    @Test
     void testToString() {
         final var game = new Game(
                 0,
