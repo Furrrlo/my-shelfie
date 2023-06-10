@@ -49,6 +49,7 @@ public class GamePane extends AnchorPane {
     private final ImageButton adjacentItemTiles;
 
     private final FirstFinisherDescription firstFinisherDescription;
+    private final AdjacentItemTilesDescription adjacentItemTilesDescription;
     private final Pane boardPane;
     private final PickedTilesPane pickedTilesPane;
     private final Pane player1Shelfie;
@@ -245,6 +246,9 @@ public class GamePane extends AnchorPane {
 
         //setting onClick action on finish token to set visible its description
         finishToken.setOnMouseClicked(event -> this.firstFinisherDescription.setVisible(!firstFinisherDescription.isVisible()));
+
+        //adding Adjacent Item Tiles description to game's pane
+        this.getChildren().add(this.adjacentItemTilesDescription = new AdjacentItemTilesDescription());
 
         final BooleanProperty isMakingMove = new SimpleBooleanProperty();
         final var isCurrentTurn = BooleanExpression.booleanExpression(FxProperties.toFxProperty(
@@ -514,6 +518,7 @@ public class GamePane extends AnchorPane {
         this.boardPane.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
         this.adjacentItemTiles.resizeRelocate((370.0 + 305.0) * scale, 380 * scale, 147 * scale, 70 * scale);
         this.firstFinisherDescription.resizeRelocate((370.0 + 305.0) * scale, 5 * scale, 150 * scale, 150 * scale);
+        this.adjacentItemTilesDescription.resizeRelocate((370.0 + 305.0) * scale, 5 * scale, 150 * scale, 150 * scale);
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
         this.quitGameBtn.resizeRelocate(707 * scale, (470 + 8) * scale, 115 * scale, 46 * scale);
         this.newChatBtn.resizeRelocate(707 * scale, (470 + 48 + 8 + 5) * scale, 115 * scale, 46 * scale);
