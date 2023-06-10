@@ -47,6 +47,8 @@ public class GamePane extends AnchorPane {
     private final StackPane personalGoalDescription;
     private final BoardComponent board;
     private final ImageButton adjacentItemTiles;
+
+    private final FirstFinisherDescription firstFinisherDescription;
     private final Pane boardPane;
     private final PickedTilesPane pickedTilesPane;
     private final Pane player1Shelfie;
@@ -236,6 +238,8 @@ public class GamePane extends AnchorPane {
                 new Image(FxResources.getResourceAsStream("assets/boards/livingroom.png")).getPixelReader(),
                 1977, 2465, 889, 394));
         getChildren().add(adjacentItemTiles);
+
+        getChildren().add(this.firstFinisherDescription = new FirstFinisherDescription());
 
         final BooleanProperty isMakingMove = new SimpleBooleanProperty();
         final var isCurrentTurn = BooleanExpression.booleanExpression(FxProperties.toFxProperty(
@@ -503,7 +507,8 @@ public class GamePane extends AnchorPane {
         this.board.resize(460.0 * scale, 460.0 * scale);
         this.finishToken.resizeRelocate(743.0 * scale, 322.0 * scale, 46 * scale, 46 * scale);
         this.boardPane.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
-        this.adjacentItemTiles.resizeRelocate((370.0 + 305.0) * scale, 380 * scale, 147 * scale, 70 * scale);//137 w, 60h
+        this.adjacentItemTiles.resizeRelocate((370.0 + 305.0) * scale, 380 * scale, 147 * scale, 70 * scale);
+        this.firstFinisherDescription.resizeRelocate((370.0 + 305.0) * scale, 5 * scale, 150 * scale, 150 * scale);
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
         this.quitGameBtn.resizeRelocate(707 * scale, (470 + 8) * scale, 115 * scale, 46 * scale);
         this.newChatBtn.resizeRelocate(707 * scale, (470 + 48 + 8 + 5) * scale, 115 * scale, 46 * scale);
