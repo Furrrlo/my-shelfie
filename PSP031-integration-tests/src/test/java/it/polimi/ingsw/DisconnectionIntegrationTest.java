@@ -7,17 +7,24 @@ import it.polimi.ingsw.server.controller.*;
 import it.polimi.ingsw.server.model.*;
 import it.polimi.ingsw.updater.LobbyUpdaterFactory;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -165,7 +172,44 @@ public class DisconnectionIntegrationTest {
                                                              Function<String, ClientNetManager> clientNetManagerFactory2,
                                                              Function<String, ClientNetManager> clientNetManagerFactory3,
                                                              Executable disconnect,
-                                                             Function<String, ClientNetManager> clientNetManagerFactory2New)
+                                                             Function<String, ClientNetManager> clientNetManagerFactory2New) {
+        var serverControllerRef = new AtomicReference<ServerController>();
+        try {
+            Assertions.assertTimeoutPreemptively(
+                    Duration.of(1, ChronoUnit.MINUTES),
+                    () -> doTestDisconnection_clientCloseInGame0(
+                            bindServerController,
+                            clientNetManagerFactory1,
+                            clientNetManagerFactory2,
+                            clientNetManagerFactory3,
+                            disconnect,
+                            clientNetManagerFactory2New,
+                            serverControllerRef));
+        } catch (Throwable t) {
+            var serverController = serverControllerRef.get();
+            Lock lock;
+            if (serverController != null && (lock = serverController.getOnlyLobbyLock()) != null) {
+                try {
+                    Method fd = ReentrantLock.class.getDeclaredMethod("getOwner");
+                    fd.setAccessible(true);
+                    var owner = (Thread) fd.invoke(lock);
+                    var lockEx = new Exception("Lobby lock was held by " + owner);
+                    lockEx.setStackTrace(owner.getStackTrace());
+                    t.addSuppressed(lockEx);
+                } catch (Throwable t0) {
+                    t.addSuppressed(new Exception("Couldn't figure out who holds the lock", t0));
+                }
+            }
+        }
+    }
+
+    private static void doTestDisconnection_clientCloseInGame0(Function<ServerController, Closeable> bindServerController,
+                                                               Function<String, ClientNetManager> clientNetManagerFactory1,
+                                                               Function<String, ClientNetManager> clientNetManagerFactory2,
+                                                               Function<String, ClientNetManager> clientNetManagerFactory3,
+                                                               Executable disconnect,
+                                                               Function<String, ClientNetManager> clientNetManagerFactory2New,
+                                                               AtomicReference<ServerController> serverControllerRef)
             throws Throwable {
         final var rnd = new Random();
 
@@ -200,6 +244,7 @@ public class DisconnectionIntegrationTest {
         };
              var ignored = bindServerController.apply(serverController);
              var closeables = new CloseablesTracker()) {
+            serverControllerRef.set(serverController);
 
             //Connect 3 client
 

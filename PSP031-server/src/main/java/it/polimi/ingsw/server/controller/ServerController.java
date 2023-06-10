@@ -145,6 +145,22 @@ public class ServerController implements Closeable {
 
     @VisibleForTesting
     public void runOnOnlyLobbyLocks(Runnable runnable) {
+        var lock = getOnlyLobbyLock();
+        if (lock == null) {
+            runnable.run();
+            return;
+        }
+
+        lock.lock();
+        try {
+            runnable.run();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @VisibleForTesting
+    public @Nullable Lock getOnlyLobbyLock() {
         if (lobbies.size() != 1)
             throw new AssertionError("This method is supposed to be used for testing when there's only 1 lobby");
 
@@ -152,14 +168,9 @@ public class ServerController implements Closeable {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("This method is supposed to be used for testing " +
                         "when there's only 1 lobby"));
-        if (lobbyAndController == null) {
-            runnable.run();
-            return;
-        }
-
-        try (var ignored = lobbyAndController.lobby().use()) {
-            runnable.run();
-        }
+        return lobbyAndController == null
+                ? null
+                : lobbyAndController.lobby().getLock();
     }
 
     public <T> T supplyOnLocks(String nick, Supplier<T> callable) {
