@@ -200,6 +200,7 @@ public class DisconnectionIntegrationTest {
                     t.addSuppressed(new Exception("Couldn't figure out who holds the lock", t0));
                 }
             }
+            throw t;
         }
     }
 
