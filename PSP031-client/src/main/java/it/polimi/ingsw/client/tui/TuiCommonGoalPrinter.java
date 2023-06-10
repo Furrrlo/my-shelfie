@@ -104,7 +104,7 @@ public class TuiCommonGoalPrinter implements TuiPrinter {
     private static final Color[][] TWO_ALL_DIFF_ROWS = new Color[][] {
             //@formatter:off
             new Color[] { null           , null           , null           , null           , null            },
-            new Color[] { Color.PINK     , Color.WHITE    , Color.PINK     , Color.WHITE    , Color.PINK     },
+            new Color[] { null           , null           , null           , null           , null            },
             new Color[] { Color.BLUE     , Color.BLUE     , Color.GREEN    , Color.GREEN    , Color.YELLOW    },
             new Color[] { null           , null           , null           , null           , null            },
             new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE     },
