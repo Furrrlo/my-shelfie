@@ -37,6 +37,7 @@
                     <properties>
                         <configurationParameters>
                             junit.jupiter.execution.timeout.default = 1m
+                            junit.jupiter.execution.timeout.thread.mode.default = SEPARATE_THREAD
                         </configurationParameters>
                     </properties>
                 </configuration>
