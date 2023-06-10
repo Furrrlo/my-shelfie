@@ -156,17 +156,17 @@ public class GameServerController {
             } else {
                 // Change current turn
                 changeCurrentTurn(game);
-                // If someone already finished, and we reached the starting player, the game is over
-                if (game.firstFinisher().get() != null && game.getStartingPlayer().equals(game.currentTurn().get())) {
-                    game.endGame().set(true);
-                }
             }
         }
     }
 
     /**
      * Change the current turn to the next player, skipping disconnected players.
+     * End the game if someone already finished and we reached the starting player.
      * If no player is connected, do nothing.
+     * This method is called only after acquiring the lock.
+     * 
+     * @param game the server game
      */
     private void changeCurrentTurn(ServerGame game) {
         int nextPlayerIdx = game.getPlayers().indexOf(game.currentTurn().get());
@@ -177,6 +177,12 @@ public class GameServerController {
                 nextPlayerIdx = 0;
 
             var nextPlayer = game.getPlayers().get(nextPlayerIdx);
+
+            // If someone already finished, and we reached the starting player, the game is over
+            if (game.firstFinisher().get() != null && game.getStartingPlayer().equals(nextPlayer)) {
+                game.endGame().set(true);
+            }
+
             // Only pick a player if there's a currently connected one
             if (nextPlayer.connected().get()) {
                 game.currentTurn().set(nextPlayer);
