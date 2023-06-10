@@ -244,11 +244,23 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.firstFinisherDescription = new FirstFinisherDescription());
         this.firstFinisherDescription.setVisible(false);
 
-        //setting onClick action on finish token to set visible its description
-        finishToken.setOnMouseClicked(event -> this.firstFinisherDescription.setVisible(!firstFinisherDescription.isVisible()));
-
         //adding Adjacent Item Tiles description to game's pane
         this.getChildren().add(this.adjacentItemTilesDescription = new AdjacentItemTilesDescription());
+        this.adjacentItemTilesDescription.setVisible(false);
+
+        //setting onClick action on finish token to set visible its description
+        finishToken.setOnMouseClicked(event -> {
+            if (adjacentItemTilesDescription.isVisible())
+                adjacentItemTilesDescription.setVisible(false);
+            this.firstFinisherDescription.setVisible(!firstFinisherDescription.isVisible());
+        });
+
+        //setting onClick action on Adjacent Item Tiles image button to set visible its description
+        adjacentItemTiles.setOnMouseClicked(event -> {
+            if (firstFinisherDescription.isVisible())
+                firstFinisherDescription.setVisible(false);
+            this.adjacentItemTilesDescription.setVisible(!adjacentItemTilesDescription.isVisible());
+        });
 
         final BooleanProperty isMakingMove = new SimpleBooleanProperty();
         final var isCurrentTurn = BooleanExpression.booleanExpression(FxProperties.toFxProperty(
