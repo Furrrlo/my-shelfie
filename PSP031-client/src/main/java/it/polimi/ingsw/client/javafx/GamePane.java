@@ -239,7 +239,12 @@ public class GamePane extends AnchorPane {
                 1977, 2465, 889, 394));
         getChildren().add(adjacentItemTiles);
 
+        //adding the end game token description to the game's pane
         getChildren().add(this.firstFinisherDescription = new FirstFinisherDescription());
+        this.firstFinisherDescription.setVisible(false);
+
+        //setting onClick action on finish token to set visible its description
+        finishToken.setOnMouseClicked(event -> this.firstFinisherDescription.setVisible(!firstFinisherDescription.isVisible()));
 
         final BooleanProperty isMakingMove = new SimpleBooleanProperty();
         final var isCurrentTurn = BooleanExpression.booleanExpression(FxProperties.toFxProperty(
