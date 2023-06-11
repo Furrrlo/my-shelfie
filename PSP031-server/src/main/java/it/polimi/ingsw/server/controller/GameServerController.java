@@ -181,6 +181,7 @@ public class GameServerController {
             // If someone already finished, and we reached the starting player, the game is over
             if (game.firstFinisher().get() != null && game.getStartingPlayer().equals(nextPlayer)) {
                 game.endGame().set(true);
+                return;
             }
 
             // Only pick a player if there's a currently connected one
