@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -24,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -189,19 +187,37 @@ public class DisconnectionIntegrationTest {
             var serverController = serverControllerRef.get();
             Lock lock;
             if (serverController != null && (lock = serverController.getOnlyLobbyLock()) != null) {
-                try {
-                    Method fd = ReentrantLock.class.getDeclaredMethod("getOwner");
-                    fd.setAccessible(true);
-                    var owner = (Thread) fd.invoke(lock);
-                    var lockEx = new Exception("Lobby lock was held by " + owner);
-                    lockEx.setStackTrace(owner.getStackTrace());
-                    t.addSuppressed(lockEx);
-                } catch (Throwable t0) {
-                    t.addSuppressed(new Exception("Couldn't figure out who holds the lock", t0));
+                var ownerName = getLockOwnerName(lock);
+                if (ownerName == null) {
+                    t.addSuppressed(new Exception("Couldn't figure out who was holding the lock " + lock));
+                } else {
+                    Thread.getAllStackTraces().keySet()
+                            .stream()
+                            .filter(th -> th.getName().equals(ownerName))
+                            .findFirst()
+                            .ifPresentOrElse(owner -> {
+                                var lockEx = new Exception("Lobby lock was held by " + owner);
+                                lockEx.setStackTrace(owner.getStackTrace());
+                                t.addSuppressed(lockEx);
+                            }, () -> t.addSuppressed(new Exception("Couldn't find thread lock owner " + ownerName)));
                 }
             }
             throw t;
         }
+    }
+
+    private static @Nullable String getLockOwnerName(Lock lock) {
+        var ownerName = lock.toString();
+        var startIdx = ownerName.lastIndexOf("Locked by thread ");
+        if (startIdx == -1)
+            return null;
+
+        ownerName = ownerName.substring(startIdx + "Locked by thread ".length());
+        var endIdx = ownerName.lastIndexOf("]");
+        if (endIdx == -1)
+            return null;
+
+        return ownerName.substring(0, endIdx);
     }
 
     private static void doTestDisconnection_clientCloseInGame0(Function<ServerController, Closeable> bindServerController,
