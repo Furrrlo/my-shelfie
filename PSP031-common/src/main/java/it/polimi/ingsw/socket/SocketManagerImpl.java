@@ -429,11 +429,17 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         private void doAck() throws IOException {
             try {
                 doSend(new SeqAckPacket(new SimpleAckPacket(), -1, packet.seqN())).get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 if (e.getCause() instanceof IOException)
                     throw new IOException("Failed to ack packet " + packet, e);
 
                 throw new RuntimeException("Failed to ack packet " + packet, e);
+            } catch (InterruptedException ignored) {
+                //When a player calls makeMove for the last time, the server will close the connection
+                // and kill the gameController thread (SocketConnectionServerController.PlayerConnection#doClosePlayerGame).
+                // CompletableFuture#get will throw an InterruptedException, but the last ack packet is actually sent
+                // because the connection is still active.
+                // So ignore this InterruptedException because rethrowing it will cause the server to close the connection.
             }
         }
 
