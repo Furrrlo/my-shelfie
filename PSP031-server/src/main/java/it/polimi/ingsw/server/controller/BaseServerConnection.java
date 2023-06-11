@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -44,14 +45,12 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     @Override
     @MustBeInvokedByOverriders
     public void close() throws IOException {
-        controller.runOnLocks(nick, () -> {
-            unregisterObservers();
-            controller.onDisconnectPlayer(nick);
-        });
+        unregisterObservers();
+        controller.runOnLocks(nick, () -> controller.onDisconnectPlayer(nick));
     }
 
     public void onGameOver() {
-        controller.runOnLocks(nick, this::unregisterObservers);
+        unregisterObservers();
 
         try {
             doClosePlayerGame();
@@ -64,19 +63,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
 
     @Override
     public <T> Consumer<T> registerObserver(Provider<T> toObserve, ThrowingConsumer<T> observer) {
-        return controller.supplyOnLocks(nick, () -> doRegisterObserver(toObserve, observer));
-    }
-
-    @Override
-    public <T> Consumer<T> registerObserver(ServerController.LockBadge controllerLockBadge,
-                                            Provider<T> toObserve,
-                                            ThrowingConsumer<T> observer) {
-        return doRegisterObserver(toObserve, observer);
-    }
-
-    private <T> Consumer<T> doRegisterObserver(Provider<T> toObserve, ThrowingConsumer<T> observer) {
-        final var observers = observablesToObservers
-                .computeIfAbsent(toObserve, v -> ConcurrentHashMap.newKeySet());
+        final var observers = observablesToObservers.computeIfAbsent(toObserve, v -> ConcurrentHashMap.newKeySet());
         Consumer<T> throwingObserver = t -> {
             try {
                 observer.accept(t);
@@ -91,10 +78,8 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     protected void unregisterObservers() {
-        controller.runOnLocks(nick, () -> {
-            observablesToObservers.forEach((provider, observers) -> observers
-                    .forEach(o -> ((Provider) provider).unregisterObserver(o)));
-            observablesToObservers.clear();
-        });
+        var toUnregister = new HashMap<>(observablesToObservers);
+        observablesToObservers.keySet().removeAll(toUnregister.keySet());
+        toUnregister.forEach((provider, observers) -> observers.forEach(o -> ((Provider) provider).unregisterObserver(o)));
     }
 }
