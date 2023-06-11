@@ -136,7 +136,7 @@ public class SocketConnectionServerController implements Closeable {
 
         final var connection = new PlayerConnection(controller, socketManager, nick);
         connections.add(connection);
-        socketManager.setOnClose(connection::doClose);
+        socketManager.setOnClose(connection::onSocketClose);
         try {
             var heartbeatHandler = new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer);
             connection.heartbeatHandler = heartbeatHandler;
@@ -221,6 +221,8 @@ public class SocketConnectionServerController implements Closeable {
         final AtomicReference<@Nullable Future<?>> lobbyControllerTask = new AtomicReference<>();
         final AtomicReference<@Nullable Future<?>> gameControllerTask = new AtomicReference<>();
 
+        private volatile @Nullable Closeable socketManagerDoClose;
+
         public PlayerConnection(ServerController controller,
                                 ServerSocketManager socketManager,
                                 String nick) {
@@ -241,26 +243,33 @@ public class SocketConnectionServerController implements Closeable {
             socketManager.close();
         }
 
-        private void doClose(Closeable socketManagerDoClose) throws IOException {
+        private void onSocketClose(Closeable socketManagerDoClose) throws IOException {
+            this.socketManagerDoClose = socketManagerDoClose;
             try {
                 super.close();
-
-                var heartbeatHandler = this.heartbeatHandler;
-                if (heartbeatHandler != null)
-                    heartbeatHandler.close();
-                var joinGameTask = this.joinGameTask;
-                if (joinGameTask != null)
-                    joinGameTask.cancel(true);
-                var lobbyControllerTask = this.lobbyControllerTask.getAndSet(null);
-                if (lobbyControllerTask != null)
-                    lobbyControllerTask.cancel(true);
-                var gameControllerTask = this.gameControllerTask.getAndSet(null);
-                if (gameControllerTask != null)
-                    gameControllerTask.cancel(true);
-                socketManagerDoClose.close();
             } finally {
+                this.socketManagerDoClose = null;
                 connections.remove(this);
             }
+        }
+
+        @Override
+        protected void doClose() throws IOException {
+            var heartbeatHandler = this.heartbeatHandler;
+            if (heartbeatHandler != null)
+                heartbeatHandler.close();
+            var joinGameTask = this.joinGameTask;
+            if (joinGameTask != null)
+                joinGameTask.cancel(true);
+            var lobbyControllerTask = this.lobbyControllerTask.getAndSet(null);
+            if (lobbyControllerTask != null)
+                lobbyControllerTask.cancel(true);
+            var gameControllerTask = this.gameControllerTask.getAndSet(null);
+            if (gameControllerTask != null)
+                gameControllerTask.cancel(true);
+            var socketManagerDoClose = this.socketManagerDoClose;
+            if (socketManagerDoClose != null)
+                socketManagerDoClose.close();
         }
 
         @Override
