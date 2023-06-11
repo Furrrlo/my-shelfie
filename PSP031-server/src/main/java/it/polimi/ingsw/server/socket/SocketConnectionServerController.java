@@ -138,9 +138,9 @@ public class SocketConnectionServerController implements Closeable {
         connections.add(connection);
         socketManager.setOnClose(connection::doClose);
         try {
-            controller.connectPlayer(
-                    nick,
-                    new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer));
+            var heartbeatHandler = new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer);
+            connection.heartbeatHandler = heartbeatHandler;
+            controller.connectPlayer(nick, heartbeatHandler);
             joinCtx.reply(new JoinedPacket());
             return connection;
         } catch (NickNotValidException e) {
@@ -216,6 +216,7 @@ public class SocketConnectionServerController implements Closeable {
     private class PlayerConnection extends BaseServerConnection {
 
         private final ServerSocketManager socketManager;
+        volatile @Nullable Closeable heartbeatHandler;
         volatile @Nullable Future<?> joinGameTask;
         final AtomicReference<@Nullable Future<?>> lobbyControllerTask = new AtomicReference<>();
         final AtomicReference<@Nullable Future<?>> gameControllerTask = new AtomicReference<>();
@@ -244,6 +245,9 @@ public class SocketConnectionServerController implements Closeable {
             try {
                 super.close();
 
+                var heartbeatHandler = this.heartbeatHandler;
+                if (heartbeatHandler != null)
+                    heartbeatHandler.close();
                 var joinGameTask = this.joinGameTask;
                 if (joinGameTask != null)
                     joinGameTask.cancel(true);
