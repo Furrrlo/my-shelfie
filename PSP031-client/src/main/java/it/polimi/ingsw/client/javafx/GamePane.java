@@ -55,7 +55,7 @@ public class GamePane extends AnchorPane {
     private final Pane player1Shelfie;
     private final Pane player2Shelfie;
     private final Pane player3Shelfie;
-    private final Button quitGameBtn;
+    private final QuitGameButton quitGameBtn;
     private final HBox newChatBtn;
     private final Label newMsg;
     private final ChatComponent chatPane;
@@ -426,11 +426,11 @@ public class GamePane extends AnchorPane {
 
         //change visibility of chatPane when chatBtn is pressed
         //adding chat button and quit game button over pickedTilesPane
-        this.quitGameBtn = new Button("Quit game");
-        quitGameBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.INDIANRED,
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
-                new Insets(0)))));
+        this.quitGameBtn = new QuitGameButton();
+        //quitGameBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+        //        Color.INDIANRED,
+        //        new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+        //        new Insets(0)))));
         quitGameBtn.setOnMouseClicked(event -> {
             for (Node n : getChildren()) {
                 if (!n.equals(quitGameMessage)) {
@@ -441,6 +441,7 @@ public class GamePane extends AnchorPane {
             quitGameMessage.setVisible(true);
         });
         this.getChildren().add(quitGameBtn);
+
         this.newChatBtn = new HBox();
         newChatBtn.setSpacing(5);
         Text open = new Text("Show chat");

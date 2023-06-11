@@ -22,7 +22,7 @@ import java.util.List;
 public class EndGamePane extends StackPane {
     /**
      * set to appear when the Game ends ( either due to forced conditions or regular play ) it shows the list of
-     * players sorted upon their individual scoring, and giving the player to option :
+     * players sorted upon their individual scoring, and giving the player two options :
      * 1 --> by pressing the quit button, it closes the stage and the application is terminated
      * 2 --> by pressing the new game button, the game is closed and the player is brought to a new main Menu scene
      */
