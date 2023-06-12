@@ -45,14 +45,22 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     @Override
     @MustBeInvokedByOverriders
     public void close() throws IOException {
-        unregisterObservers();
-        doClose();
-        // Make sure we only grab locks after we closed the connection, as if we do
-        // it before it may lead to deadlocks
-        controller.runOnLocks(nick, () -> controller.onDisconnectPlayer(nick));
+        try {
+            unregisterObservers();
+            doClose();
+        } finally {
+            // Make sure we only grab locks after we closed the connection, as if we do
+            // it before it may lead to deadlocks
+            callDisconnectPlayerHook();
+        }
     }
 
     protected abstract void doClose() throws IOException;
+
+    @MustBeInvokedByOverriders
+    protected void callDisconnectPlayerHook() {
+        controller.runOnLocks(nick, () -> controller.onDisconnectPlayer(nick));
+    }
 
     public void onGameOver() {
         unregisterObservers();

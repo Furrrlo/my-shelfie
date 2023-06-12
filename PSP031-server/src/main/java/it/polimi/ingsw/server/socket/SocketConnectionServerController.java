@@ -273,6 +273,24 @@ public class SocketConnectionServerController implements Closeable {
         }
 
         @Override
+        protected void callDisconnectPlayerHook() {
+            if (!Thread.currentThread().isInterrupted()) {
+                super.callDisconnectPlayerHook();
+                return;
+            }
+
+            // If we are in an interrupted thread (might be the socket recv/read thread which triggered the close)
+            // we need to clear the state in order to be able to call potentially interrupting methods
+            // We do it in a complete different thread as subsequent close calls might re-interrupt the thread,
+            // so instead we use Future#getUninterruptibly() which should handle this properly
+            try {
+                ThreadPools.getUninterruptibly(threadPool.submit(super::callDisconnectPlayerHook));
+            } catch (ExecutionException e) {
+                throw new RuntimeException("Failed to invoke disconnectPlayerHook uninterruptibly", e.getCause());
+            }
+        }
+
+        @Override
         protected void doClosePlayerGame() {
             var lobbyControllerTask = this.lobbyControllerTask.getAndSet(null);
             if (lobbyControllerTask != null)
