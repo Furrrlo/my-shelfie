@@ -24,6 +24,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class GamePane extends AnchorPane {
     private final Pane player2Shelfie;
     private final Pane player3Shelfie;
     private final QuitGameButton quitGameBtn;
-    private final HBox newChatBtn;
+    private final ChatButton newChatBtn;
     private final Label newMsg;
     private final ChatComponent chatPane;
 
@@ -427,10 +428,7 @@ public class GamePane extends AnchorPane {
         //change visibility of chatPane when chatBtn is pressed
         //adding chat button and quit game button over pickedTilesPane
         this.quitGameBtn = new QuitGameButton();
-        //quitGameBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-        //        Color.INDIANRED,
-        //        new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
-        //        new Insets(0)))));
+
         quitGameBtn.setOnMouseClicked(event -> {
             for (Node n : getChildren()) {
                 if (!n.equals(quitGameMessage)) {
@@ -442,40 +440,15 @@ public class GamePane extends AnchorPane {
         });
         this.getChildren().add(quitGameBtn);
 
-        this.newChatBtn = new HBox();
-        newChatBtn.setSpacing(5);
-        Text open = new Text("Show chat");
-        open.setAccessibleText("Show chat");
-        ImageView closedMail = new ImageView(new Image(FxResources.getResourceAsStream("fa/message.png")));
-        closedMail.setPreserveRatio(true);
-        closedMail.setFitWidth(30);
-        closedMail.setFitHeight(30);
-        newChatBtn.getChildren().add(open);
-        newChatBtn.getChildren().add(closedMail);
-        newChatBtn.setAlignment(Pos.CENTER);
-        newChatBtn.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
-                new Insets(0)))));
+        this.newChatBtn = new ChatButton();
         newChatBtn.setOnMouseClicked(event -> {
-            if (newChatBtn.getChildren().get(0).getAccessibleText().equals("Show chat")) {
-                Text close = new Text("Close chat");
-                close.setAccessibleText("Close chat");
-                newChatBtn.getChildren().set(0, close);
-                ImageView openMail = new ImageView(new Image(FxResources.getResourceAsStream("fa/open-message.png")));
-                openMail.setPreserveRatio(true);
-                openMail.setFitWidth(30);
-                openMail.setFitHeight(30);
-                newChatBtn.getChildren().set(1, openMail);
-            } else {
-                newChatBtn.getChildren().set(0, open);
-                newChatBtn.getChildren().set(1, closedMail);
-            }
+            newChatBtn.swap();
             this.chatPane.setVisible(!this.chatPane.isVisible());
             if (chatPane.isVisible())
                 this.newMsg.setVisible(false);
         });
         this.getChildren().add(newChatBtn);
+
         this.chatPane.messagesProperty().addListener((observable, oldValue, newValue) -> {
             if (chatPane.isVisible())
                 this.newMsg.setVisible(false);
@@ -546,12 +519,12 @@ public class GamePane extends AnchorPane {
         this.endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2, 690 * scale,
                 490 * scale);
 
-        final var newMsgSize = 15 * scale;
+        final var newMsgSize = 13 * scale;
         final var chatPaneWidth = 200.0 * scale;
         this.chatPane.resizeRelocate(
                 getWidth() - chatPaneWidth + ChatComponent.INSET,
                 +ChatComponent.INSET,
                 chatPaneWidth - ChatComponent.INSET * 2, getHeight() - ChatComponent.INSET * 2);
-        this.newMsg.resizeRelocate(800 * scale, 540 * scale, newMsgSize, newMsgSize);
+        this.newMsg.resizeRelocate(803 * scale, 540 * scale, newMsgSize, newMsgSize);
     }
 }
