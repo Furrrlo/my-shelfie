@@ -39,7 +39,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private final NBlockingQueue<Object> inPacketQueue = new NBlockingQueue<>();
 
     private final Future<?> recvTask;
+    private volatile boolean isRecvTaskRunning;
     private final Future<?> sendTask;
+    private volatile boolean isSendTaskRunning;
 
     private final AtomicLong seq = new AtomicLong();
     private final String name;
@@ -92,7 +94,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         this.defaultResponseTimeoutUnit = defaultResponseTimeoutUnit;
 
         recvTask = executor.submit(ThreadPools.giveNameToTask(n -> n + "[socket-recv]", this::readLoop));
+        isRecvTaskRunning = true;
         sendTask = executor.submit(ThreadPools.giveNameToTask(n -> n + "[socket-send]", this::writeLoop));
+        isSendTaskRunning = true;
     }
 
     @Override
@@ -202,6 +206,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
             } while (!wasClosed && !Thread.currentThread().isInterrupted());
 
+            this.isRecvTaskRunning = false;
             if (closePacket != null) {
                 this.closePacket = closePacket;
                 // Close the socket, close will be in charge of sending the ack
@@ -214,9 +219,10 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 inPacketQueue.add(new IOException(CLOSE_EX_MSG));
             }
         } catch (IOException e) {
-            final boolean isTimeout = e instanceof SocketTimeoutException;
+            this.isRecvTaskRunning = false;
 
             // If it's an interrupted exception or the interruption flag was set
+            final boolean isTimeout = e instanceof SocketTimeoutException;
             if (!isTimeout && (e instanceof InterruptedIOException || e instanceof ClosedByInterruptException
                     || Thread.currentThread().isInterrupted())) {
                 // Signal to everybody who is waiting that the reading thread was interrupted
@@ -264,9 +270,14 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                     throw ex;
                 }
             } while (!Thread.currentThread().isInterrupted());
+
+            this.isSendTaskRunning = false;
         } catch (InterruptedIOException | ClosedByInterruptException | InterruptedException e) {
+            this.isSendTaskRunning = false;
             // Go on, interruption is expected
         } catch (IOException e) {
+            this.isSendTaskRunning = false;
+
             // If the interruption flag was set, we got interrupted by close, so it's expected
             if (Thread.currentThread().isInterrupted())
                 return;
@@ -287,6 +298,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private CompletableFuture<Void> doSend(SeqPacket toSend) throws IOException {
         ensureOpen();
 
+        if (!isSendTaskRunning)
+            throw new IOException(CLOSE_EX_MSG);
+
         final CompletableFuture<Void> hasSent = new CompletableFuture<>();
         log("Sending " + toSend + "...");
         outPacketQueue.add(new QueuedOutput(toSend, hasSent));
@@ -297,6 +311,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
     private SeqPacket doReceive(Predicate<SeqPacket> filter, long timeout, TimeUnit timeoutUnit)
             throws InterruptedException, IOException, TimeoutException {
         ensureOpen();
+
+        if (!isRecvTaskRunning)
+            throw new IOException(CLOSE_EX_MSG);
 
         final NBlockingQueue.Matcher<Object> cond = (obj, res) -> {
             // We should be the only ones getting this packet, consume it
