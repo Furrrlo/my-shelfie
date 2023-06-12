@@ -3,7 +3,6 @@ package it.polimi.ingsw.client.javafx;
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.CommonGoalView;
 import it.polimi.ingsw.model.PersonalGoalView;
-import it.polimi.ingsw.model.Shelfie;
 
 import javafx.scene.layout.AnchorPane;
 
@@ -194,52 +193,50 @@ public class GoalPatternComponent extends AnchorPane {
     }
 
     public GoalPatternComponent(CommonGoalView commonGoal) {
-        Shelfie shelfie;
-        switch (commonGoal.getType()) {
-            case SIX_COUPLES -> shelfie = new Shelfie(SIX_COUPLES);
-            case ALL_CORNERS -> shelfie = new Shelfie(ALL_CORNERS);
-            case FOUR_QUADRIPLETS -> shelfie = new Shelfie(FOUR_QUADRIPLETS);
-            case TWO_SQUARES -> shelfie = new Shelfie(TWO_SQUARES);
-            case THREE_COLUMNS -> shelfie = new Shelfie(THREE_COLUMNS);
-            case EIGHT_EQUAL_TILES -> shelfie = new Shelfie(EIGHT_EQUAL_TILES);
-            case DIAGONAL -> shelfie = new Shelfie(DIAGONAL);
-            case FOUR_ROWS -> shelfie = new Shelfie(FOUR_ROWS);
-            case TWO_ALL_DIFF_COLUMNS -> shelfie = new Shelfie(TWO_ALL_DIFF_COLUMNS);
-            case TWO_ALL_DIFF_ROWS -> shelfie = new Shelfie(TWO_ALL_DIFF_ROWS);
-            case CROSS -> shelfie = new Shelfie(CROSS);
-            case TRIANGLE -> shelfie = new Shelfie(TRIANGLE);
-            default -> throw new IllegalStateException("Unexpected value: " + commonGoal.getType());
-        }
-        getChildren().add(t0x0 = new ColorTileComponent(shelfie.tile(0, 0).get()));
-        getChildren().add(t0x1 = new ColorTileComponent(shelfie.tile(0, 1).get()));
-        getChildren().add(t0x2 = new ColorTileComponent(shelfie.tile(0, 2).get()));
-        getChildren().add(t0x3 = new ColorTileComponent(shelfie.tile(0, 3).get()));
-        getChildren().add(t0x4 = new ColorTileComponent(shelfie.tile(0, 4).get()));
-        getChildren().add(t1x0 = new ColorTileComponent(shelfie.tile(1, 0).get()));
-        getChildren().add(t1x1 = new ColorTileComponent(shelfie.tile(1, 1).get()));
-        getChildren().add(t1x2 = new ColorTileComponent(shelfie.tile(1, 2).get()));
-        getChildren().add(t1x3 = new ColorTileComponent(shelfie.tile(1, 3).get()));
-        getChildren().add(t1x4 = new ColorTileComponent(shelfie.tile(1, 4).get()));
-        getChildren().add(t2x0 = new ColorTileComponent(shelfie.tile(2, 0).get()));
-        getChildren().add(t2x2 = new ColorTileComponent(shelfie.tile(2, 2).get()));
-        getChildren().add(t2x1 = new ColorTileComponent(shelfie.tile(2, 1).get()));
-        getChildren().add(t2x3 = new ColorTileComponent(shelfie.tile(2, 3).get()));
-        getChildren().add(t2x4 = new ColorTileComponent(shelfie.tile(2, 4).get()));
-        getChildren().add(t3x0 = new ColorTileComponent(shelfie.tile(3, 0).get()));
-        getChildren().add(t3x1 = new ColorTileComponent(shelfie.tile(3, 1).get()));
-        getChildren().add(t3x2 = new ColorTileComponent(shelfie.tile(3, 2).get()));
-        getChildren().add(t3x3 = new ColorTileComponent(shelfie.tile(3, 3).get()));
-        getChildren().add(t3x4 = new ColorTileComponent(shelfie.tile(3, 4).get()));
-        getChildren().add(t4x0 = new ColorTileComponent(shelfie.tile(4, 0).get()));
-        getChildren().add(t4x1 = new ColorTileComponent(shelfie.tile(4, 1).get()));
-        getChildren().add(t4x2 = new ColorTileComponent(shelfie.tile(4, 2).get()));
-        getChildren().add(t4x3 = new ColorTileComponent(shelfie.tile(4, 3).get()));
-        getChildren().add(t4x4 = new ColorTileComponent(shelfie.tile(4, 4).get()));
-        getChildren().add(t5x0 = new ColorTileComponent(shelfie.tile(5, 0).get()));
-        getChildren().add(t5x1 = new ColorTileComponent(shelfie.tile(5, 1).get()));
-        getChildren().add(t5x2 = new ColorTileComponent(shelfie.tile(5, 2).get()));
-        getChildren().add(t5x3 = new ColorTileComponent(shelfie.tile(5, 3).get()));
-        getChildren().add(t5x4 = new ColorTileComponent(shelfie.tile(5, 4).get()));
+        Color[][] shelfie = switch (commonGoal.getType()) {
+            case SIX_COUPLES -> SIX_COUPLES;
+            case ALL_CORNERS -> ALL_CORNERS;
+            case FOUR_QUADRIPLETS -> FOUR_QUADRIPLETS;
+            case TWO_SQUARES -> TWO_SQUARES;
+            case THREE_COLUMNS -> THREE_COLUMNS;
+            case EIGHT_EQUAL_TILES -> EIGHT_EQUAL_TILES;
+            case DIAGONAL -> DIAGONAL;
+            case FOUR_ROWS -> FOUR_ROWS;
+            case TWO_ALL_DIFF_COLUMNS -> TWO_ALL_DIFF_COLUMNS;
+            case TWO_ALL_DIFF_ROWS -> TWO_ALL_DIFF_ROWS;
+            case CROSS -> CROSS;
+            case TRIANGLE -> TRIANGLE;
+        };
+        getChildren().add(t0x0 = new ColorTileComponent(shelfie[0][0]));
+        getChildren().add(t0x1 = new ColorTileComponent(shelfie[0][1]));
+        getChildren().add(t0x2 = new ColorTileComponent(shelfie[0][2]));
+        getChildren().add(t0x3 = new ColorTileComponent(shelfie[0][3]));
+        getChildren().add(t0x4 = new ColorTileComponent(shelfie[0][4]));
+        getChildren().add(t1x0 = new ColorTileComponent(shelfie[1][0]));
+        getChildren().add(t1x1 = new ColorTileComponent(shelfie[1][1]));
+        getChildren().add(t1x2 = new ColorTileComponent(shelfie[1][2]));
+        getChildren().add(t1x3 = new ColorTileComponent(shelfie[1][3]));
+        getChildren().add(t1x4 = new ColorTileComponent(shelfie[1][4]));
+        getChildren().add(t2x0 = new ColorTileComponent(shelfie[2][0]));
+        getChildren().add(t2x2 = new ColorTileComponent(shelfie[2][2]));
+        getChildren().add(t2x1 = new ColorTileComponent(shelfie[2][1]));
+        getChildren().add(t2x3 = new ColorTileComponent(shelfie[2][3]));
+        getChildren().add(t2x4 = new ColorTileComponent(shelfie[2][4]));
+        getChildren().add(t3x0 = new ColorTileComponent(shelfie[3][0]));
+        getChildren().add(t3x1 = new ColorTileComponent(shelfie[3][1]));
+        getChildren().add(t3x2 = new ColorTileComponent(shelfie[3][2]));
+        getChildren().add(t3x3 = new ColorTileComponent(shelfie[3][3]));
+        getChildren().add(t3x4 = new ColorTileComponent(shelfie[3][4]));
+        getChildren().add(t4x0 = new ColorTileComponent(shelfie[4][0]));
+        getChildren().add(t4x1 = new ColorTileComponent(shelfie[4][1]));
+        getChildren().add(t4x2 = new ColorTileComponent(shelfie[4][2]));
+        getChildren().add(t4x3 = new ColorTileComponent(shelfie[4][3]));
+        getChildren().add(t4x4 = new ColorTileComponent(shelfie[4][4]));
+        getChildren().add(t5x0 = new ColorTileComponent(shelfie[5][0]));
+        getChildren().add(t5x1 = new ColorTileComponent(shelfie[5][1]));
+        getChildren().add(t5x2 = new ColorTileComponent(shelfie[5][2]));
+        getChildren().add(t5x3 = new ColorTileComponent(shelfie[5][3]));
+        getChildren().add(t5x4 = new ColorTileComponent(shelfie[5][4]));
     }
 
     protected void layoutChildren() {
