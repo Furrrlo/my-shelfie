@@ -59,7 +59,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
 
     @MustBeInvokedByOverriders
     protected void callDisconnectPlayerHook() {
-        controller.runOnLocks(nick, () -> controller.onDisconnectPlayer(nick));
+        controller.onDisconnectPlayer(nick);
     }
 
     public void onGameOver() {

@@ -431,7 +431,16 @@ public class ServerController implements Closeable {
             return;
 
         final var lobbyAndController = getLobbyFor(nick);
-        if (lobbyAndController != null)
-            lobbyAndController.controller().onDisconnectPlayer(nick);
+        if (lobbyAndController != null) {
+            try (var lobbyCloseable = lobbyAndController.lobby().use()) {
+                var lobby = lobbyCloseable.obj();
+
+                lobbyAndController.controller().onDisconnectPlayer(nick);
+
+                if (lobby.joinedPlayers().get().size() == 0) {
+                    lobbies.remove(lobbyAndController);
+                }
+            }
+        }
     }
 }
