@@ -35,7 +35,10 @@ public class JfxGameScene extends Scene {
 
         mainPane.getChildren().setAll(new ProgressIndicator());
 
-        Platform.runLater(() -> mainPane.getChildren().setAll(new GamePane(game, controller, netManager)));
+        new Thread(() -> {
+            var gamePane = new GamePane(game, controller, netManager);
+            Platform.runLater(() -> mainPane.getChildren().setAll(gamePane));
+        }).start();
 
         return mainPane;
     }
