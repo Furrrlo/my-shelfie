@@ -127,6 +127,9 @@ public class LobbyServerController {
             if (requiredPlayers != 0
                     && (requiredPlayers < ServerLobbyView.MIN_PLAYERS || requiredPlayers > ServerLobbyView.MAX_PLAYERS))
                 throw new IllegalArgumentException("Number of player not valid");
+
+            //TODO: do something if the new value is lower than the number of player
+
             lobby.requiredPlayers().set(requiredPlayers);
 
             checkGameStart(lobby);
