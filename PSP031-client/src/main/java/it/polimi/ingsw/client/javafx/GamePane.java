@@ -24,7 +24,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class GamePane extends AnchorPane {
     private final Pane thePlayerPoints;
     private final CommonGoalsPane commonGoalCardsPane;
     private final PersonalGoalComponent personalGoalCard;
-    private final StackPane personalGoalDescription;
+    private final PersonalGoalDescription personalGoalDescription;
     private final BoardComponent board;
     private final ImageButton adjacentItemTiles;
 
@@ -140,21 +139,7 @@ public class GamePane extends AnchorPane {
         getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
 
         //creating description for personal goal
-        this.getChildren().add(this.personalGoalDescription = new StackPane());
-        personalGoalDescription.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTGRAY,
-                new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                new Insets(0)))));
-        personalGoalDescription.setOpacity(0.9);
-        final Label text = new Label("The personal goal card grants points if you match the highlighted " +
-                "spaces with the corresponding item tiles.\n1 pt for one matched tile, 2 pts for two, 4 pts for three, " +
-                "6 pts for four, 9 pts for five, 12 pts for six.");
-        text.setTextAlignment(TextAlignment.CENTER);
-        text.setAlignment(Pos.CENTER);
-        text.setPadding(new Insets(6));
-        text.setWrapText(true);
-        personalGoalDescription.setAlignment(Pos.CENTER);
-        personalGoalDescription.getChildren().add(text);
+        this.getChildren().add(this.personalGoalDescription = new PersonalGoalDescription());
         personalGoalDescription.setVisible(false);
 
         //displaying common goals on shelfie
