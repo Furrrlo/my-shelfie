@@ -69,7 +69,6 @@ public class GameServerController {
                             game.suspended().set(true);
                             endGameFuture = executor.schedule(() -> {
                                 LOGGER.info("Game " + game.getGameID() + " is over because players have disconnected");
-                                //TODO: The only connected player (if any) should win
                                 game.endGame().set(true);
                             }, 120, TimeUnit.SECONDS);
                             //TODO: remember to bring back to 30 second
