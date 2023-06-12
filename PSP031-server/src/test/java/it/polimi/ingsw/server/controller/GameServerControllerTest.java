@@ -37,6 +37,34 @@ class GameServerControllerTest {
     }
 
     @Test
+    void testOnDisconnectPlayer() {
+        controller.onDisconnectPlayer("p1");
+        assertFalse(startingPlayer.connected().get());
+        assertTrue(game.suspended().get());
+        assertNotSame(startingPlayer, game.currentTurn().get());
+        //endGame will be set to true in 30 sec
+        // too long to wait (?) :(
+    }
+
+    @Test
+    void testOnReconnectPlayer() {
+        controller.onDisconnectPlayer("p1");
+        controller.onReconnectedPlayer("p1");
+        assertTrue(startingPlayer.connected().get());
+        assertFalse(game.suspended().get());
+    }
+
+    @Test
+    void testOnReconnectPlayer_2disconnection() {
+        controller.onDisconnectPlayer("p1");
+        controller.onDisconnectPlayer("p2");
+        controller.onReconnectedPlayer("p1");
+        assertTrue(startingPlayer.connected().get());
+        assertTrue(game.suspended().get());
+        assertSame(startingPlayer, game.currentTurn().get());
+    }
+
+    @Test
     void testMakeMove_endedGame() {
         game.endGame().set(true);
         assertThrows(IllegalStateException.class, () -> controller.makeMove(startingPlayer, List.of(), 0));
