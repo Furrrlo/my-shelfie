@@ -313,10 +313,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         try {
             ThreadPools.getUninterruptibly(hasSent);
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof IOException)
-                throw new IOException("Failed to send packet " + toSend, e);
-
-            throw new RuntimeException("Failed to send packet " + toSend, e);
+            throw rethrowIOException(e.getCause() != null ? e.getCause() : e, "Failed to send packet " + toSend);
         }
     }
 
@@ -345,19 +342,23 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         if (res instanceof SeqPacket pkt)
             return pkt;
         // We got an exception
-        if (res instanceof RuntimeException ex) {
-            ex.addSuppressed(new Exception("Called from here"));
-            throw ex;
-        }
-        if (res instanceof Error ex) {
-            ex.addSuppressed(new Exception("Called from here"));
-            throw ex;
-        }
-
         if (res instanceof Throwable t)
-            throw new IOException("Failed to receive packet", t);
+            throw rethrowIOException(t, "Failed to receive packet");
 
         throw new AssertionError("Unexpected result from queue " + res);
+    }
+
+    private RuntimeException rethrowIOException(Throwable t, String msg) throws IOException {
+        if (t instanceof RuntimeException ex) {
+            ex.addSuppressed(new Exception("Called from here"));
+            throw ex;
+        }
+        if (t instanceof Error ex) {
+            ex.addSuppressed(new Exception("Called from here"));
+            throw ex;
+        }
+
+        throw new IOException(msg, t);
     }
 
     private SeqPacket doReceive(Predicate<SeqPacket> filter) throws InterruptedException, IOException {
