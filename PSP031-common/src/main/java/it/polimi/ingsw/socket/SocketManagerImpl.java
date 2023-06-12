@@ -129,9 +129,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             if (closePacket == null) {
                 send((OUT) new ClosePacket(), (Class<ACK_IN>) CloseAckPacket.class);
             } else {
-                doSend(new SeqAckPacket(new CloseAckPacket(), -1, closePacket.seqN())).get();
+                doSend(new SeqAckPacket(new CloseAckPacket(), -1, closePacket.seqN()));
             }
-        } catch (IOException | ExecutionException | InterruptedException ex) {
+        } catch (IOException ex) {
             // We ignore exceptions on the last ack receival, because the socket may
             // be closed before we are able to read out the last ack packet
             // We don't care about whether the other has received this anyway,
@@ -295,7 +295,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
     }
 
-    private CompletableFuture<Void> doSend(SeqPacket toSend) throws IOException {
+    private void doSend(SeqPacket toSend) throws IOException {
         ensureOpen();
 
         if (!isSendTaskRunning)
@@ -305,7 +305,15 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         log("Sending " + toSend + "...");
         outPacketQueue.add(new QueuedOutput(toSend, hasSent));
         log(String.valueOf(outPacketQueue.size()));
-        return hasSent;
+
+        try {
+            ThreadPools.getUninterruptibly(hasSent);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof IOException)
+                throw new IOException("Failed to send packet " + toSend, e);
+
+            throw new RuntimeException("Failed to send packet " + toSend, e);
+        }
     }
 
     private SeqPacket doReceive(Predicate<SeqPacket> filter, long timeout, TimeUnit timeoutUnit)
@@ -367,7 +375,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             throws IOException {
         try {
             final long seqN = p.seqN();
-            doSend(p).get();
+            doSend(p);
             log("Waiting for  " + replyType + "...");
             return new PacketReplyContextImpl<>(doReceiveWithTimeout(packet -> replyType.isInstance(packet.packet()) &&
                     packet instanceof SeqAckPacket ack &&
@@ -444,20 +452,7 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         }
 
         private void doAck() throws IOException {
-            try {
-                doSend(new SeqAckPacket(new SimpleAckPacket(), -1, packet.seqN())).get();
-            } catch (ExecutionException e) {
-                if (e.getCause() instanceof IOException)
-                    throw new IOException("Failed to ack packet " + packet, e);
-
-                throw new RuntimeException("Failed to ack packet " + packet, e);
-            } catch (InterruptedException ignored) {
-                //When a player calls makeMove for the last time, the server will close the connection
-                // and kill the gameController thread (SocketConnectionServerController.PlayerConnection#doClosePlayerGame).
-                // CompletableFuture#get will throw an InterruptedException, but the last ack packet is actually sent
-                // because the connection is still active.
-                // So ignore this InterruptedException because rethrowing it will cause the server to close the connection.
-            }
+            doSend(new SeqAckPacket(new SimpleAckPacket(), -1, packet.seqN()));
         }
 
         @Override

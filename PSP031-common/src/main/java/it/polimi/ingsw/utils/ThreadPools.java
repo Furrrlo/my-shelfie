@@ -1,5 +1,8 @@
 package it.polimi.ingsw.utils;
 
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 /**
@@ -59,5 +62,34 @@ public class ThreadPools {
             // If there's an uncaught exception, keep the name
             th.setName(prevName);
         };
+    }
+
+    /**
+     * Waits if necessary for the computation to complete, and then
+     * retrieves its result.
+     * <p>
+     * If a thread is interrupted during the call, it continues to block until the result is available,
+     * and then re-interrupts the thread at the end.
+     *
+     * @return the computed result
+     * @param <T> The result type returned by this Future's get method
+     * @throws CancellationException if the computation was cancelled
+     * @throws ExecutionException if the computation threw an exception
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static <T> T getUninterruptibly(Future<T> future) throws ExecutionException {
+        boolean wasInterrupted = false;
+        try {
+            while (true) {
+                try {
+                    return future.get();
+                } catch (InterruptedException e) {
+                    wasInterrupted = true;
+                }
+            }
+        } finally {
+            if (wasInterrupted)
+                Thread.currentThread().interrupt();
+        }
     }
 }
