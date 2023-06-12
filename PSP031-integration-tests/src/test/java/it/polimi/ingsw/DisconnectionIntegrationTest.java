@@ -186,38 +186,10 @@ public class DisconnectionIntegrationTest {
         } catch (Throwable t) {
             var serverController = serverControllerRef.get();
             Lock lock;
-            if (serverController != null && (lock = serverController.getOnlyLobbyLock()) != null) {
-                var ownerName = getLockOwnerName(lock);
-                if (ownerName == null) {
-                    t.addSuppressed(new Exception("Couldn't figure out who was holding the lock " + lock));
-                } else {
-                    Thread.getAllStackTraces().keySet()
-                            .stream()
-                            .filter(th -> th.getName().equals(ownerName))
-                            .findFirst()
-                            .ifPresentOrElse(owner -> {
-                                var lockEx = new Exception("Lobby lock was held by " + owner);
-                                lockEx.setStackTrace(owner.getStackTrace());
-                                t.addSuppressed(lockEx);
-                            }, () -> t.addSuppressed(new Exception("Couldn't find thread lock owner " + ownerName)));
-                }
-            }
+            if (serverController != null && (lock = serverController.getOnlyLobbyLock()) != null)
+                t.addSuppressed(LockHacks.dumpLockOwnerStackInException(lock));
             throw t;
         }
-    }
-
-    private static @Nullable String getLockOwnerName(Lock lock) {
-        var ownerName = lock.toString();
-        var startIdx = ownerName.lastIndexOf("Locked by thread ");
-        if (startIdx == -1)
-            return null;
-
-        ownerName = ownerName.substring(startIdx + "Locked by thread ".length());
-        var endIdx = ownerName.lastIndexOf("]");
-        if (endIdx == -1)
-            return null;
-
-        return ownerName.substring(0, endIdx);
     }
 
     private static void doTestDisconnection_clientCloseInGame0(Function<ServerController, Closeable> bindServerController,
