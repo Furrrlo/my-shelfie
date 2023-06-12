@@ -24,6 +24,19 @@ class LobbyServerControllerTest {
     }
 
     @Test
+    void testOnDisconnectPlayer() {
+        assertTrue(lobby.joinedPlayers().get().stream().anyMatch(p -> p.getNick().equals("p1")));
+        controller.onDisconnectPlayer("p1");
+        assertFalse(lobby.joinedPlayers().get().stream().anyMatch(p -> p.getNick().equals("p1")));
+    }
+
+    @Test
+    void testOnReconnectPlayer() {
+        controller.onDisconnectPlayer("p1");
+        assertDoesNotThrow(() -> controller.onReconnectedPlayer("p1"));
+    }
+
+    @Test
     void testSetRequiredPlayers_wrongPlayer() {
         assertThrows(IllegalArgumentException.class, () -> controller.setRequiredPlayers("p2", 2));
         assertThrows(IllegalArgumentException.class, () -> controller.setRequiredPlayers("p3", 2));
