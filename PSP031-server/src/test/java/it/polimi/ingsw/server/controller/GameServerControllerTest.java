@@ -1,18 +1,110 @@
 package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerGameView;
+import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.server.model.ServerPlayerView;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.random.RandomGeneratorFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServerControllerTest {
+
+    private volatile ServerGame game;
+    private volatile GameServerController controller;
+
+    private volatile ServerPlayer startingPlayer, otherPlayer;
+
+    @BeforeEach
+    void setUp() {
+        final var randomFactory = RandomGeneratorFactory.getDefault();
+        game = LobbyServerController.createGame(0, randomFactory.create(0),
+                List.of(new LobbyPlayer("p1"),
+                        new LobbyPlayer("p2")));
+        controller = new GameServerController(new LockProtected<>(game));
+        startingPlayer = game.getStartingPlayer();
+        otherPlayer = game.getPlayers().stream()
+                .filter(player -> player != startingPlayer)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    @Test
+    void testMakeMove_endedGame() {
+        game.endGame().set(true);
+        assertThrows(IllegalStateException.class, () -> controller.makeMove(game.getStartingPlayer(), List.of(), 0));
+    }
+
+    @Test
+    void testMakeMove_suspendedGame() {
+        game.suspended().set(true);
+        assertThrows(IllegalStateException.class, () -> controller.makeMove(game.getStartingPlayer(), List.of(), 0));
+    }
+
+    private void fillShelfie(Shelfie shelfie, BiPredicate<Integer, Integer> toFill) {
+        for (int r = 0; r < Shelfie.ROWS; r++)
+            for (int c = 0; c < Shelfie.COLUMNS; c++)
+                if (toFill.test(r, c))
+                    shelfie.tile(r, c).set(new Tile(Arrays.stream(Color.values()).findAny().orElseThrow()));
+    }
+
+    @Test
+    void testMakeMove_firstFinisher() {
+        assertNull(game.firstFinisher().get());
+        fillShelfie(startingPlayer.getShelfie(), (r, c) -> r != 0 || c != 0);
+        controller.makeMove(startingPlayer, List.of(new BoardCoord(1, 3)), 0);
+        assertSame(startingPlayer, game.firstFinisher().get());
+    }
+
+    @Test
+    void testMakeMove_firstFinisherAlreadySet() {
+        assertNull(game.firstFinisher().get());
+        fillShelfie(startingPlayer.getShelfie(), (r, c) -> r != 0 || c != 0);
+        controller.makeMove(startingPlayer, List.of(new BoardCoord(1, 3)), 0);
+        fillShelfie(otherPlayer.getShelfie(), (r, c) -> r != 0 || c != 0);
+        controller.makeMove(otherPlayer, List.of(new BoardCoord(1, 4)), 0);
+        assertSame(startingPlayer, game.firstFinisher().get());
+    }
+
+    @Test
+    void testMakeMove_fullShelfie() {
+        assertNull(game.firstFinisher().get());
+        fillShelfie(startingPlayer.getShelfie(), (r, c) -> r != 0 || c != 0);
+        assertThrows(IllegalArgumentException.class,
+                () -> controller.makeMove(startingPlayer, List.of(new BoardCoord(1, 3)), 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> controller.makeMove(startingPlayer, List.of(new BoardCoord(1, 3), new BoardCoord(1, 4)), 0));
+    }
+
+    @Test
+    void testMakeMove_emptyBoardAndBag() {
+        assertFalse(game.endGame().get());
+        game.getBoard().tiles().forEach(t -> {
+            if (t.row() != 1 || t.col() != 3)
+                Property.setNullable(t.tile(), null);
+        });
+        game.getBag().clear();
+        controller.makeMove(startingPlayer, List.of(new BoardCoord(1, 3)), 0);
+        assertTrue(game.endGame().get());
+    }
+
+    @Test
+    void testMakeMove_gameOver() {
+        assertFalse(game.endGame().get());
+        fillShelfie(startingPlayer.getShelfie(), (r, c) -> r != 0 || c != 0);
+        controller.makeMove(startingPlayer, List.of(new BoardCoord(1, 3)), 0);
+        assertFalse(game.endGame().get());
+        controller.makeMove(otherPlayer, List.of(new BoardCoord(1, 4)), 0);
+        assertTrue(game.endGame().get());
+    }
 
     //TODO: finish testing makeMove
     @Test
@@ -51,8 +143,6 @@ class GameServerControllerTest {
         selectedList.add(List.of(new BoardCoord(3, 4), new BoardCoord(3, 5), new BoardCoord(3, 6)));
         selectedList.add(List.of(new BoardCoord(4, 7)));
         selectedList.add(List.of(new BoardCoord(5, 4), new BoardCoord(5, 5), new BoardCoord(5, 6)));
-        //this last move should trigger board refill, and after we expect the board to be full 
-        selectedList.add(List.of(new BoardCoord(4, 4), new BoardCoord(4, 5), new BoardCoord(4, 6)));
 
         //expects throw of IllegalArgumentException("Invalid move") if selected tiles are invalid
         List<BoardCoord> selectedWrong = new ArrayList<>();
@@ -76,7 +166,7 @@ class GameServerControllerTest {
         assertNull(game.getBoard().tile(selected.get(0).row(), selected.get(0).col()).get());
         assertNull(game.getBoard().tile(selected.get(1).row(), selected.get(1).col()).get());
 
-        //expected tiles in shelfie in column 0, to be !=null and to be equal to the ones extracted from boards,
+        //expected tiles in shelfie in column 0, to be != null and to be equal to the ones extracted from boards,
         //following extraction order
         assertEquals(tileProp0.get(), game.getStartingPlayer().getShelfie().tile(0, 0).get());
         assertEquals(tileProp1.get(), game.getStartingPlayer().getShelfie().tile(1, 0).get());
@@ -93,19 +183,22 @@ class GameServerControllerTest {
         //the game until board refill is triggered
         final var player1 = game.getStartingPlayer();
         final var player2 = game.getPlayers().stream()
-                .filter(player -> !player.getNick().equals(game.getStartingPlayer().getNick())).toList().get(0);
+                .filter(player -> !player.getNick().equals(game.getStartingPlayer().getNick()))
+                .findFirst()
+                .orElseThrow();
         int c1 = 0; //representing col index for player 1
         int c2 = 0; //representing col index for player 2
-        for (int i = 0; i < selectedList.size() - 1; i++) {
+        for (int i = 0; i < selectedList.size(); i++) {
+            var curr = selectedList.get(i);
             if (i % 2 == 0) {
                 //player2 is playing
-                gsc.makeMove(player2, selectedList.remove(0), c2);
+                gsc.makeMove(player2, curr, c2);
                 c2++;
                 if (c2 > ShelfieView.COLUMNS)
                     c2 = 0;
             } else {
                 //player1 is playing
-                gsc.makeMove(player1, selectedList.remove(0), c1);
+                gsc.makeMove(player1, curr, c1);
                 c1++;
                 if (c1 > ShelfieView.COLUMNS)
                     c1 = 0;
@@ -113,23 +206,38 @@ class GameServerControllerTest {
         }
         //at this point we expect that on the board are remaining only (4,4),(4,5),(4,6) that are going to be picked by the last player
         //and (3,3),(3,7) that are going to trigger the refill therefore finding board to be full
-        final var remainingTiles = game.getBoard().tiles().filter(Objects::nonNull).map(t -> new BoardCoord(t.row(), t.col()))
+        final var remainingTiles = game.getBoard().tiles()
+                .filter(t -> game.getBoard().isValidTile(t.row(), t.col()))
+                .filter(t -> t.tile().get() != null)
+                .map(BoardCoord::new)
                 .toList();
+
         final var expectedRemainingTiles = new ArrayList<BoardCoord>();
         expectedRemainingTiles.add(new BoardCoord(3, 3));
         expectedRemainingTiles.add(new BoardCoord(3, 7));
         expectedRemainingTiles.add(new BoardCoord(4, 4));
         expectedRemainingTiles.add(new BoardCoord(4, 5));
         expectedRemainingTiles.add(new BoardCoord(4, 6));
+
         //we expect that board contains all the remaining tiles
-        expectedRemainingTiles.forEach(t -> assertTrue(remainingTiles.contains(t)));
+        assertSame(expectedRemainingTiles.size(), remainingTiles.size());
+        assertTrue(remainingTiles.containsAll(expectedRemainingTiles));
+
+        Tile t1 = game.getBoard().tile(3, 3).get();
+        Tile t2 = game.getBoard().tile(3, 7).get();
+
+        //this last move should trigger board refill, and after we expect the board to be full 
+        var lastMove = List.of(new BoardCoord(4, 4), new BoardCoord(4, 5), new BoardCoord(4, 6));
 
         //player 1 now makes the last move triggering board refill
-        gsc.makeMove(player1, selectedList.remove(0), c1);
+        gsc.makeMove(player1, lastMove, c1);
 
         //we expect at this point board to be full ( 29 tiles on the board )
         //and we expect tiles in position (3,3) and (3,7) to have not changed
-        assertEquals(29, game.getBoard().tiles().mapToInt(t -> 1).sum());
+        assertEquals(29, game.getBoard().tiles().count());
+
+        assertSame(t1, game.getBoard().tile(3, 3).get());
+        assertSame(t2, game.getBoard().tile(3, 7).get());
     }
 
     private String getPlayerColor(String nick, ServerGameView game) {

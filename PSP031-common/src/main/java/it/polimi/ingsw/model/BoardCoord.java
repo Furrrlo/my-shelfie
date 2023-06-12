@@ -9,4 +9,7 @@ import java.io.Serializable;
  * @param col the col of this coord
  */
 public record BoardCoord(int row, int col) implements Coord, Serializable {
+    public BoardCoord(Coord coords) {
+        this(coords.row(), coords.col());
+    }
 }
