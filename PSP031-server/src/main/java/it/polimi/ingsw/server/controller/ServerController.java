@@ -394,9 +394,10 @@ public class ServerController implements Closeable {
         });
         observableTracker.registerObserver(game.suspended(), gameUpdater::updateSuspended);
 
-        // updating message only if message nickReceivingPlayer == nick, or if it's for everyone
+        //Updating message only if message is for everyone, nickReceivingPlayer == nick or nickSendingPlayer == nick
         observableTracker.registerObserver(game.message(), m -> {
-            if (m != null && (m.nickReceivingPlayer().equals(nick) || m.isForEveryone()))
+            if (m != null && (m.isForEveryone() ||
+                    m.nickReceivingPlayer().equals(nick) || m.nickSendingPlayer().equals(nick)))
                 gameUpdater.updateMessage(m);
         });
 
