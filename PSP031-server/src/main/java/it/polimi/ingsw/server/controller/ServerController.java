@@ -69,8 +69,9 @@ public class ServerController implements Closeable {
         heartbeatThreadPool.shutdown();
     }
 
+    @VisibleForTesting
     @SuppressWarnings("FutureReturnValueIgnored") // We don't need to keep track of it as we shut down everything together
-    private void detectDisconnectedPlayers() {
+    protected void detectDisconnectedPlayers() {
         heartbeats.forEach(
                 (nick, heartbeatHandler) -> heartbeatThreadPool
                         .submit(() -> heartbeatHandler.sendHeartbeat(Instant.now(clock))));
