@@ -203,8 +203,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 }
             } while (!wasClosed && !Thread.currentThread().isInterrupted());
 
-            this.isRecvTaskRunning = false;
             if (closePacket != null) {
+                // Set it here (other than in the finally-block) as we need it set before the close call
+                this.isRecvTaskRunning = false;
                 this.closePacket = closePacket;
                 // Close the socket, close will be in charge of sending the ack
                 try {
@@ -212,20 +213,17 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                 } catch (IOException ex) {
                     LOGGER.error("[{}][{}] Failed to close socket after close packet...", name, nick, ex);
                 }
-                // Signal to everybody who is waiting that the socket got closed
-                inPacketQueue.add(new IOException(CLOSE_EX_MSG));
             }
         } catch (IOException e) {
+            // Set it here (other than in the finally-block) as we need it set before the close call
             this.isRecvTaskRunning = false;
 
             // If it's an interrupted exception or the interruption flag was set
             final boolean isTimeout = e instanceof SocketTimeoutException;
-            if (!isTimeout && (e instanceof InterruptedIOException || e instanceof ClosedByInterruptException
-                    || Thread.currentThread().isInterrupted())) {
-                // Signal to everybody who is waiting that the reading thread was interrupted
-                inPacketQueue.add(new InterruptedIOException().initCause(e));
+            if (!isTimeout && (e instanceof InterruptedIOException
+                    || e instanceof ClosedByInterruptException
+                    || Thread.currentThread().isInterrupted()))
                 return;
-            }
 
             LOGGER.error("[{}][{}] Failed to read packet, closing...", name, nick, e);
             try {
@@ -233,6 +231,9 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             } catch (IOException ignored) {
                 // Ignore
             }
+        } finally {
+            this.isRecvTaskRunning = false;
+
             // Signal to everybody who is waiting that the socket got closed
             inPacketQueue.add(new IOException(CLOSE_EX_MSG));
         }
@@ -267,23 +268,15 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
                     throw ex;
                 }
             } while (!Thread.currentThread().isInterrupted());
-
-            this.isSendTaskRunning = false;
         } catch (InterruptedIOException | ClosedByInterruptException | InterruptedException e) {
-            this.isSendTaskRunning = false;
             // Go on, interruption is expected
         } catch (IOException e) {
+            // Set it here (other than in the finally-block) as we need it set before the close call
             this.isSendTaskRunning = false;
 
             // If the interruption flag was set, we got interrupted by close, so it's expected
-            if (Thread.currentThread().isInterrupted()) {
-                // Signal to everybody who is waiting that the reading thread was interrupted
-                var toCancel = new ArrayList<>(outPacketQueue);
-                outPacketQueue.removeAll(toCancel);
-                final IOException interruptEx = (IOException) new InterruptedIOException().initCause(e);
-                toCancel.forEach(q -> q.future().completeExceptionally(interruptEx));
+            if (Thread.currentThread().isInterrupted())
                 return;
-            }
             // If it was a close packet being sent, we don't need to log the error and call close
             // see #doClose(...) for more details on the close sequence
             if (isClosePacket(p.packet().packet()))
@@ -295,6 +288,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             } catch (IOException ignored) {
                 // Ignore
             }
+        } finally {
+            this.isSendTaskRunning = false;
 
             // Signal to everybody who is waiting that the socket got closed
             var toCancel = new ArrayList<>(outPacketQueue);
@@ -358,8 +353,6 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             ex.addSuppressed(new Exception("Called from here"));
             throw ex;
         }
-        if (res instanceof InterruptedIOException ex)
-            throw (IOException) new InterruptedIOException().initCause(ex);
 
         if (res instanceof Throwable t)
             throw new IOException("Failed to receive packet", t);
@@ -389,11 +382,8 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             return new PacketReplyContextImpl<>(doReceiveWithTimeout(packet -> replyType.isInstance(packet.packet()) &&
                     packet instanceof SeqAckPacket ack &&
                     ack.seqAck() == seqN));
-        } catch (InterruptedException | ExecutionException e) {
-            if (e.getCause() instanceof IOException)
-                throw new IOException("Failed to send packet " + p, e);
-
-            throw new RuntimeException("Failed to send packet " + p, e);
+        } catch (InterruptedException e) {
+            throw (IOException) new InterruptedIOException("Failed to send packet " + p).initCause(e);
         } catch (TimeoutException e) {
             throw new IOException("Timeout expired while waiting for response packet " + replyType +
                     " after sending " + p, e);
