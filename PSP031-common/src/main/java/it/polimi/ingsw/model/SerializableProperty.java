@@ -2,6 +2,8 @@ package it.polimi.ingsw.model;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ObjectStreamException;
 import java.io.Serial;
@@ -15,6 +17,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SerializableProperty<T> implements Property<T>, Serializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerializableProperty.class);
 
     private T val;
 
@@ -61,7 +65,11 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
                 continue;
             }
 
-            body.accept(val);
+            try {
+                body.accept(val);
+            } catch (Throwable t) {
+                LOGGER.error("Exception during observer invocation {} with value {}", observer, val, t);
+            }
         }
     }
 
