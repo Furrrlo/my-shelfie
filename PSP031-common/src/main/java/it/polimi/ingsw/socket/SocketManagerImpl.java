@@ -13,6 +13,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -141,10 +142,6 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         isClosed = true;
         recvTask.cancel(true);
         sendTask.cancel(true);
-
-        final IOException closeEx = new IOException(CLOSE_EX_MSG);
-        outPacketQueue.forEach(q -> q.future().completeExceptionally(closeEx));
-        outPacketQueue.clear();
 
         // Use a try-with-resources so everything is closed even if any of the close methods fail
         try (var ignoredOos = this.oos;
@@ -279,8 +276,14 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             this.isSendTaskRunning = false;
 
             // If the interruption flag was set, we got interrupted by close, so it's expected
-            if (Thread.currentThread().isInterrupted())
+            if (Thread.currentThread().isInterrupted()) {
+                // Signal to everybody who is waiting that the reading thread was interrupted
+                var toCancel = new ArrayList<>(outPacketQueue);
+                outPacketQueue.removeAll(toCancel);
+                final IOException interruptEx = (IOException) new InterruptedIOException().initCause(e);
+                toCancel.forEach(q -> q.future().completeExceptionally(interruptEx));
                 return;
+            }
             // If it was a close packet being sent, we don't need to log the error and call close
             // see #doClose(...) for more details on the close sequence
             if (isClosePacket(p.packet().packet()))
@@ -292,6 +295,12 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
             } catch (IOException ignored) {
                 // Ignore
             }
+
+            // Signal to everybody who is waiting that the socket got closed
+            var toCancel = new ArrayList<>(outPacketQueue);
+            outPacketQueue.removeAll(toCancel);
+            final IOException closeEx = new IOException(CLOSE_EX_MSG);
+            toCancel.forEach(q -> q.future().completeExceptionally(closeEx));
         }
     }
 
