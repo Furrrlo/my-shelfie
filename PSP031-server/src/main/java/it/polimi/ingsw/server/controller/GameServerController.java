@@ -207,10 +207,10 @@ public class GameServerController {
 
             final var isForEveryone = nickReceivingPlayer.equals(UserMessage.EVERYONE_RECIPIENT);
             if (!isForEveryone && game.getPlayers().stream().noneMatch(p -> p.getNick().equals(nickReceivingPlayer)))
-                throw new IllegalArgumentException("Sending player: " + nickReceivingPlayer + " is not valid player");
+                throw new IllegalArgumentException("Receiving player: " + nickReceivingPlayer + " is not valid player");
 
             message = message.strip();
-            if (message.equals(""))
+            if (message.isEmpty())
                 throw new IllegalArgumentException("No text written for message to be sent");
 
             var ps = game.getPlayers();
