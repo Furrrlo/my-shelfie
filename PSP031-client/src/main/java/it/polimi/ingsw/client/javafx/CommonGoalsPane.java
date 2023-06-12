@@ -7,17 +7,21 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
-import javafx.scene.control.Label;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 public class CommonGoalsPane extends Pane {
 
-    private final StackPane stackPane;
-    private final Label description;
+    private final StackPane textBackground;
+    private final Text description;
     private final CommonGoalComponent goal1;
 
     private final ObjectProperty<Integer> score1;
@@ -60,18 +64,22 @@ public class CommonGoalsPane extends Pane {
                 return clip;
             }));
         }
-        this.stackPane = new StackPane();
-        stackPane.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+
+        this.textBackground = new StackPane();
+        textBackground.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTGRAY,
                 new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
-        stackPane.setOpacity(0.9);
-        this.description = new Label();
-        description.setPadding(new Insets(6));
-        stackPane.getChildren().add(description);
-        description.setWrapText(true);
-        stackPane.setVisible(false);
+        textBackground.setOpacity(0.9);
+        textBackground.setVisible(false);
+
+        this.description = new Text();
+        //description.setPadding(new Insets(6));
+        //stackPane.getChildren().add(description);
+        //description.setWrapText(true);
+        //stackPane.setVisible(false);
         description.setTextAlignment(TextAlignment.CENTER);
+        //description.setTextOrigin(VPos.CENTER);
 
         getChildren().add(this.goal1 = new CommonGoalComponent(goal1));
         getChildren().add(this.goal2 = new CommonGoalComponent(goal2));
@@ -79,20 +87,26 @@ public class CommonGoalsPane extends Pane {
         this.token1.setOnMousePressed(e -> {
             description.setText("The common goal cards grant points to the players who achieve the pattern.\n" +
                     "The first player to achieve it gets 8 point, 6 the second, 4 the third and 2 the last");
-            stackPane.setVisible(!stackPane.isVisible());
+            textBackground.setVisible(!textBackground.isVisible());
+            //description.setVisible(!description.isVisible());
         });
         this.token2.setOnMousePressed(e -> {
             description.setText("The common goal cards grant points to the players who achieve the pattern.\n" +
                     "The first player to achieve it gets 8 point, 6 the second, 4 the third and 2 the last");
-            stackPane.setVisible(!stackPane.isVisible());
+            textBackground.setVisible(!textBackground.isVisible());
+            //description.setVisible(!description.isVisible());
         });
-        this.stackPane.setOnMousePressed(e -> {
-            stackPane.setVisible(!stackPane.isVisible());
+        this.textBackground.setOnMousePressed(e -> {
+            textBackground.setVisible(!textBackground.isVisible());
+            //description.setVisible(!description.isVisible());
+
         });
 
         this.getChildren().add(token1);
         this.getChildren().add(token2);
-        this.getChildren().add(stackPane);
+        this.getChildren().add(textBackground);
+        this.textBackground.getChildren().add(description);
+        StackPane.setAlignment(description, Pos.CENTER);
     }
 
     @Override
@@ -103,11 +117,20 @@ public class CommonGoalsPane extends Pane {
         double border = 6 * scale;
         double width = 113 * scale;
         double height = 74 * scale;
+
+        int rows = (int) (description.getText().length() * 5.7 * scale / (getWidth() - 2 * border));
+        double textH = 14 * scale * rows;
+
+        description.setTextOrigin(VPos.CENTER);
+
+        description.setFont(Font.font(Font.getDefault().getName(), FontWeight.NORMAL, 13 * scale));
+        description.setWrappingWidth(getWidth() - 4 * border);
+
         goal1.resizeRelocate(getWidth() - width - border, border, width, height);
         goal2.resizeRelocate(getWidth() - width - border, getHeight() - height - border, width, height);
         token1.resizeRelocate(2 * border, border, height, height);
         token2.resizeRelocate(2 * border, getHeight() - height - border, height, height);
-        stackPane.resizeRelocate(border, border, getWidth() - 2 * border, getHeight() - 2 * border);
+        textBackground.resizeRelocate(border, border, getWidth() - 2 * border, getHeight() - 2 * border);
     }
 
     private static class CommonGoalComponent extends ImageButton {
@@ -149,11 +172,11 @@ public class CommonGoalsPane extends Pane {
     }
 
     public int getDescriptionNodeIndex() {
-        return this.getChildren().indexOf(stackPane);
+        return this.getChildren().indexOf(textBackground);
     }
 
     public void setDescriptionVisible(boolean visible, int index) {
-        this.stackPane.setVisible(visible);
+        this.textBackground.setVisible(visible);
         if (visible) {
             if (index == 1)
                 this.description.setText(text1);
@@ -163,7 +186,7 @@ public class CommonGoalsPane extends Pane {
     }
 
     public boolean getDescriptionVisible() {
-        return this.stackPane.isVisible();
+        return this.textBackground.isVisible();
     }
 
     public void setScore1(Integer score1) {
