@@ -28,7 +28,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ServerController implements Closeable {
@@ -132,18 +131,6 @@ public class ServerController implements Closeable {
         }
     }
 
-    public void runOnLocks(String nick, Runnable runnable) {
-        final var lobbyAndController = getLobbyFor(nick);
-        if (lobbyAndController == null) {
-            runnable.run();
-            return;
-        }
-
-        try (var ignored = lobbyAndController.lobby().use()) {
-            runnable.run();
-        }
-    }
-
     @VisibleForTesting
     public void runOnOnlyLobbyLocks(Runnable runnable) {
         var lock = getOnlyLobbyLock();
@@ -172,16 +159,6 @@ public class ServerController implements Closeable {
         return lobbyAndController == null
                 ? null
                 : lobbyAndController.lobby().getLock();
-    }
-
-    public <T> T supplyOnLocks(String nick, Supplier<T> callable) {
-        final var lobbyAndController = getLobbyFor(nick);
-        if (lobbyAndController == null)
-            return callable.get();
-
-        try (var ignored = lobbyAndController.lobby().use()) {
-            return callable.get();
-        }
     }
 
     public void connectPlayer(String nick, HeartbeatHandler heartbeatHandler)
