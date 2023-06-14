@@ -8,9 +8,19 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 import java.util.function.Consumer;
 
 class PrivateScoreProvider implements Provider<Integer>, Serializable {
+
+    private final List<Integer> PERSONAL_GOAL_SCORE_BY_NUM = List.of(
+            /* 0 -> */ 0,
+            /* 1 -> */ 1,
+            /* 2 -> */ 2,
+            /* 3 -> */ 4,
+            /* 4 -> */ 6,
+            /* 5 -> */ 9,
+            /* 6 -> */ 12);
 
     private final Property<Integer> scoreProperty;
 
@@ -39,16 +49,8 @@ class PrivateScoreProvider implements Provider<Integer>, Serializable {
     }
 
     private int getPersonalGoalScore() {
-        return switch (player.getShelfie().numTilesOverlappingWithPersonalGoal(player.getPersonalGoal())) {
-            case 0 -> 0;
-            case 1 -> 1;
-            case 2 -> 2;
-            case 3 -> 4;
-            case 4 -> 6;
-            case 5 -> 9;
-            case 6 -> 12;
-            default -> throw new IllegalStateException("Unexpected value during personalGoal score check");
-        };
+        return PERSONAL_GOAL_SCORE_BY_NUM
+                .get(player.getShelfie().numTilesOverlappingWithPersonalGoal(player.getPersonalGoal()));
     }
 
     @Override
