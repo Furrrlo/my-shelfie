@@ -8,9 +8,6 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 import it.polimi.ingsw.server.model.ServerPlayerView;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ObjectStreamException;
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +15,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-class PublicScoreProvider implements Provider<Integer>, Serializable {
+class PublicScoreProvider implements Provider<Integer> {
 
     private final List<Integer> COMMON_GOAL_SCORE_BY_POS = List.of(8, 6, 4, 2);
 
@@ -36,12 +33,6 @@ class PublicScoreProvider implements Provider<Integer>, Serializable {
         this.firstFinisher = firstFinisher;
         this.scoreProperty = new SerializableProperty<>(calculateScore());
         registerObservers();
-    }
-
-    @Serial
-    private Object readResolve() throws ObjectStreamException {
-        registerObservers();
-        return this;
     }
 
     private void registerObservers() {

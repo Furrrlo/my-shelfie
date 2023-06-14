@@ -5,13 +5,10 @@ import it.polimi.ingsw.model.Provider;
 import it.polimi.ingsw.model.SerializableProperty;
 import it.polimi.ingsw.server.model.ServerPlayer;
 
-import java.io.ObjectStreamException;
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.List;
 import java.util.function.Consumer;
 
-class PrivateScoreProvider implements Provider<Integer>, Serializable {
+class PrivateScoreProvider implements Provider<Integer> {
 
     private final List<Integer> PERSONAL_GOAL_SCORE_BY_NUM = List.of(
             /* 0 -> */ 0,
@@ -30,12 +27,6 @@ class PrivateScoreProvider implements Provider<Integer>, Serializable {
         this.player = player;
         this.scoreProperty = new SerializableProperty<>(calculateScore());
         registerObservers();
-    }
-
-    @Serial
-    private Object readResolve() throws ObjectStreamException {
-        registerObservers();
-        return this;
     }
 
     private void registerObservers() {
