@@ -3,12 +3,15 @@ package it.polimi.ingsw.client.javafx;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class JfxApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        // Load fonts from ttf files
+        Font.loadFonts(FxResources.getResourceAsStream("Inter-VariableFont_slnt,wght.ttf"), 0);
 
         Scene scene = new JfxMainMenuScene(stage);
 

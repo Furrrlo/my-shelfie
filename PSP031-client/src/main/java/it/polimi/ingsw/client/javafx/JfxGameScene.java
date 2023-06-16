@@ -26,6 +26,7 @@ public class JfxGameScene extends Scene {
         stage.setHeight(720);
 
         var mainPane = new CenteringFitPane();
+        mainPane.setStyle(mainPane.getStyle() + "-fx-font-family: \"Inter Regular\";");
         mainPane.setPadding(new Insets(10));
         mainPane.setBackground(new Background(new BackgroundImage(
                 new Image(FxResources.getResourceAsStream("assets/misc/sfondo parquet.jpg")),
