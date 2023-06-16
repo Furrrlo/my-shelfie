@@ -34,7 +34,7 @@ public class PersonalGoalDescription extends AnchorPane {
         double scale = Math.min(getWidth() / 120d, getHeight() / 190d);
         double border = 6 * scale;
 
-        text.setFont(Font.font(Font.getDefault().getName(), FontWeight.NORMAL, 12 * scale));
+        text.setFont(Font.font(Font.getDefault().getName(), FontWeight.NORMAL, 11 * scale));
         text.setWrappingWidth(getWidth() - 2 * border);
         text.resizeRelocate(border, border, getWidth() - 2 * border, getHeight() - 2 * border);
     }

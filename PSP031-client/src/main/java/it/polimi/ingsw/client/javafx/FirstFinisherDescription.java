@@ -3,7 +3,10 @@ package it.polimi.ingsw.client.javafx;
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -14,7 +17,7 @@ public class FirstFinisherDescription extends AnchorPane {
     private final ImageView achieved;
     private final Text description = new Text(
             "The first player who completely fills their bookshelf scores 1 additional point," +
-                    " and receives the end game token as displayed :");
+                    " and receives the end game token as displayed:");
     private final Text arrow = new Text("☞");
 
     public FirstFinisherDescription() {
@@ -48,7 +51,7 @@ public class FirstFinisherDescription extends AnchorPane {
         double middleW = getWidth() / 2;
         double middleH = getHeight() / 2;
         double width = getWidth() / 3;
-        double text_height = 17 * scale;
+        double text_height = 16 * scale;
 
         achieved.setFitWidth(width);
         notAchieved.setFitWidth(width);

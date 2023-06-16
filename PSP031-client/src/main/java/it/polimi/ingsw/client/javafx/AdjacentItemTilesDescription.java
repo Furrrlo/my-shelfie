@@ -36,8 +36,8 @@ public class AdjacentItemTilesDescription extends AnchorPane {
     protected void layoutChildren() {
         super.layoutChildren();
         double scale = Math.min(getWidth() / 221d, getHeight() / 156d);
-        double titleHeight = 20 * scale;
-        double textHeight = 17 * scale;
+        double titleHeight = 19 * scale;
+        double textHeight = 16 * scale;
         double border = 6 * scale;
 
         description.setWrappingWidth(getWidth() - 2 * border);
