@@ -1,7 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
 import javafx.geometry.Insets;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
@@ -20,7 +19,7 @@ public class FirstFinisherDescription extends AnchorPane {
                     " and receives the end game token as displayed:");
     private final Text arrow = new Text("☞");
 
-    public FirstFinisherDescription() {
+    public FirstFinisherDescription(FxResourcesLoader resources) {
         backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTGRAY,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
@@ -29,12 +28,10 @@ public class FirstFinisherDescription extends AnchorPane {
         description.setTextAlignment(TextAlignment.CENTER);
         arrow.setTextAlignment(TextAlignment.CENTER);
 
-        this.notAchieved = new ImageView(
-                new Image(FxResources.getResourceAsStream("assets/scoring tokens/scoring_back_EMPTY.jpg")));
+        this.notAchieved = new ImageView(resources.loadImage("assets/scoring tokens/scoring_back_EMPTY.jpg"));
         notAchieved.setPreserveRatio(true);
 
-        this.achieved = new ImageView(
-                new Image(FxResources.getResourceAsStream("assets/scoring tokens/end game.jpg")));
+        this.achieved = new ImageView(resources.loadImage("assets/scoring tokens/end game.jpg"));
         achieved.setPreserveRatio(true);
 
         this.getChildren().add(description);

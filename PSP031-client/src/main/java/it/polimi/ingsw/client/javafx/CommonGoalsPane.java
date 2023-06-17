@@ -9,7 +9,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
-import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -33,14 +32,14 @@ public class CommonGoalsPane extends Pane {
     private final String text1;
     private final String text2;
 
-    public CommonGoalsPane(CommonGoalView goal1, CommonGoalView goal2, int cg1, int cg2) {
+    public CommonGoalsPane(FxResourcesLoader resources, CommonGoalView goal1, CommonGoalView goal2, int cg1, int cg2) {
         this.text1 = goal1.getType().getDescription().replaceAll("[\\r\\n]+", " ");
         this.text2 = goal2.getType().getDescription().replaceAll("[\\r\\n]+", " ");
 
         this.score1 = new SimpleObjectProperty<>(this, "score1");
         this.score2 = new SimpleObjectProperty<>(this, "score2");
-        this.token1 = new ScoringTokenComponent();
-        this.token2 = new ScoringTokenComponent();
+        this.token1 = new ScoringTokenComponent(resources);
+        this.token2 = new ScoringTokenComponent(resources);
         token1.setScore(cg1);
         token2.setScore(cg2);
         score1.addListener(((observable, oldValue, newValue) -> {
@@ -51,7 +50,7 @@ public class CommonGoalsPane extends Pane {
         }));
 
         setBackground(new Background(new BackgroundImage(
-                new Image(FxResources.getResourceAsStream("assets/misc/base_pagina2.jpg")),
+                resources.loadImage("assets/misc/base_pagina2.jpg"),
                 BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
                 BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
 
@@ -81,8 +80,8 @@ public class CommonGoalsPane extends Pane {
         description.setTextAlignment(TextAlignment.CENTER);
         //description.setTextOrigin(VPos.CENTER);
 
-        getChildren().add(this.goal1 = new CommonGoalComponent(goal1));
-        getChildren().add(this.goal2 = new CommonGoalComponent(goal2));
+        getChildren().add(this.goal1 = new CommonGoalComponent(resources, goal1));
+        getChildren().add(this.goal2 = new CommonGoalComponent(resources, goal2));
 
         this.token1.setOnMousePressed(e -> {
             description.setText("The common goal cards grant points to the players who achieve the pattern.\n" +
@@ -135,8 +134,8 @@ public class CommonGoalsPane extends Pane {
 
     private static class CommonGoalComponent extends ImageButton {
 
-        public CommonGoalComponent(CommonGoalView commonGoal) {
-            setImage(new Image(FxResources.getResourceAsStream("assets/common goal cards/" + switch (commonGoal.getType()) {
+        public CommonGoalComponent(FxResourcesLoader resources, CommonGoalView commonGoal) {
+            setImage(resources.loadImage("assets/common goal cards/" + switch (commonGoal.getType()) {
                 case TWO_SQUARES -> 1;
                 case TWO_ALL_DIFF_COLUMNS -> 2;
                 case FOUR_QUADRIPLETS -> 3;
@@ -149,7 +148,7 @@ public class CommonGoalsPane extends Pane {
                 case CROSS -> 10;
                 case DIAGONAL -> 11;
                 case TRIANGLE -> 12;
-            } + ".jpg")));
+            } + ".jpg"));
 
             if (Platform.isSupported(ConditionalFeature.SHAPE_CLIP)) {
                 clipProperty().bind(layoutBoundsProperty().map(bounds -> {

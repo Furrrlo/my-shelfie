@@ -18,7 +18,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -31,10 +30,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class JfxLobbyScene extends Scene {
 
-    public JfxLobbyScene(Stage stage, LobbyAndController lobbyAndController, ClientNetManager netManager) {
-
-        super(createRootNode(stage, lobbyAndController, netManager));
-
+    public JfxLobbyScene(FxResourcesLoader resources,
+                         Stage stage,
+                         LobbyAndController lobbyAndController,
+                         ClientNetManager netManager) {
+        super(createRootNode(resources, stage, lobbyAndController, netManager));
     }
 
     private static final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -50,7 +50,10 @@ public class JfxLobbyScene extends Scene {
         }
     });
 
-    private static Parent createRootNode(Stage stage, LobbyAndController lobbyAndController, ClientNetManager netManager) {
+    private static Parent createRootNode(FxResourcesLoader resources,
+                                         Stage stage,
+                                         LobbyAndController lobbyAndController,
+                                         ClientNetManager netManager) {
 
         //var mainPane = new CenteringFitPane();
         //mainPane.getChildren().add(new MainMenuPane());
@@ -82,7 +85,8 @@ public class JfxLobbyScene extends Scene {
         lobbyAndController.lobby().game().registerObserver(gameAndController -> {
             if (gameAndController != null) {
                 Platform.runLater(() -> {
-                    Scene gameScene = new JfxGameScene(stage, gameAndController.game(), gameAndController.controller(),
+                    Scene gameScene = new JfxGameScene(resources, stage,
+                            gameAndController.game(), gameAndController.controller(),
                             netManager);
                     stage.setScene(gameScene);
                 });
@@ -128,7 +132,7 @@ public class JfxLobbyScene extends Scene {
 
         anchorPane.setStyle(anchorPane.getStyle() + "-fx-font-family: \"Inter Regular\";");
         anchorPane.setBackground(new Background(new BackgroundImage(
-                new Image(FxResources.getResourceAsStream("assets/misc/sfondo parquet.jpg")),
+                resources.loadImage("assets/misc/sfondo parquet.jpg"),
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(100, 100, true, true, false, true))));

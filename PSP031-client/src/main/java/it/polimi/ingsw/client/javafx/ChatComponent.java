@@ -10,7 +10,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -28,7 +27,10 @@ public class ChatComponent extends VBox {
     public final static double RADIUS = INSET - (double) INSET / 4;
     public final static int INNER_INSET = INSET / 2;
 
-    public ChatComponent(List<String> recipients, String thePlayer, GameController controller) {
+    public ChatComponent(FxResourcesLoader resources,
+                         List<String> recipients,
+                         String thePlayer,
+                         GameController controller) {
         setSpacing(SPACING);
 
         this.chatScrollComponent = new ChatScrollComponent(thePlayer);
@@ -57,7 +59,7 @@ public class ChatComponent extends VBox {
                 new CornerRadii(Math.min(50, 50 * (width.doubleValue() / 210d))),
                 new Insets(-INNER_INSET)))));
 
-        var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/paper-plane.png")));
+        var imgView = new ImageView(resources.loadImage("fa/paper-plane.png"));
         imgView.setPreserveRatio(true);
         imgView.setFitWidth(20);
         imgView.setFitHeight(20);

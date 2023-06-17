@@ -29,11 +29,11 @@ import java.net.InetSocketAddress;
 public class JfxMainMenuScene extends Scene {
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuScene.class);
 
-    public JfxMainMenuScene(Stage stage) {
-        super(createRootNode(stage));
+    public JfxMainMenuScene(FxResourcesLoader resources, Stage stage) {
+        super(createRootNode(resources, stage));
     }
 
-    private static Parent createRootNode(Stage stage) {
+    private static Parent createRootNode(FxResourcesLoader resources, Stage stage) {
         //var mainPane = new CenteringFitPane();
         //mainPane.getChildren().add(new MainMenuPane());
         //Pattern ipPattern = Pattern
@@ -112,9 +112,9 @@ public class JfxMainMenuScene extends Scene {
                 Scene scene;
                 var game = lobbyAndController.lobby().game().get();
                 if (game != null) {
-                    scene = new JfxGameScene(stage, game.game(), game.controller(), netManager);
+                    scene = new JfxGameScene(resources, stage, game.game(), game.controller(), netManager);
                 } else {
-                    scene = new JfxLobbyScene(stage, lobbyAndController, netManager);
+                    scene = new JfxLobbyScene(resources, stage, lobbyAndController, netManager);
                 }
                 stage.setScene(scene);
 
@@ -164,7 +164,7 @@ public class JfxMainMenuScene extends Scene {
 
         anchorPane.setStyle(anchorPane.getStyle() + "-fx-font-family: \"Inter Regular\";");
         anchorPane.setBackground(new Background(new BackgroundImage(
-                new Image(FxResources.getResourceAsStream("assets/misc/sfondo parquet.jpg")),
+                resources.loadImage("assets/misc/sfondo parquet.jpg"),
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(100, 100, true, true, false, true))));

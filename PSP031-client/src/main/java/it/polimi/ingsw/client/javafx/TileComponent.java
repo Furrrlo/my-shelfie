@@ -5,10 +5,10 @@ import org.jetbrains.annotations.Nullable;
 
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
+import javafx.beans.NamedArg;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
 public class TileComponent extends ImageButton {
@@ -18,23 +18,23 @@ public class TileComponent extends ImageButton {
 
     private final ObjectProperty<@Nullable Tile> tile = new SimpleObjectProperty<>(this, "tile");
 
-    public TileComponent() {
-        this(null);
+    public TileComponent(@NamedArg(FxResourcesLoader.NAMED_ARG_NAME) FxResourcesLoader resources) {
+        this(resources, null);
     }
 
-    public TileComponent(@Nullable Tile tile) {
+    public TileComponent(FxResourcesLoader resources, @Nullable Tile tile) {
         this.tile.set(tile);
 
         imageProperty().bind(tileProperty().orElse(NULL_TILE).map(ignored -> {
             var currTile = this.tile.get();
-            return currTile == null ? null : new Image(FxResources.getResourceAsStream(switch (currTile.getColor()) {
+            return currTile == null ? null : resources.loadImage(switch (currTile.getColor()) {
                 case GREEN -> "assets/item tiles/Gatti1." + (currTile.getPicIndex() + 1) + ".png";
                 case WHITE -> "assets/item tiles/Libri1." + (currTile.getPicIndex() + 1) + ".png";
                 case YELLOW -> "assets/item tiles/Giochi1." + (currTile.getPicIndex() + 1) + ".png";
                 case BLUE -> "assets/item tiles/Cornici1." + (currTile.getPicIndex() + 1) + ".png";
                 case LIGHTBLUE -> "assets/item tiles/Trofei1." + (currTile.getPicIndex() + 1) + ".png";
                 case PINK -> "assets/item tiles/Piante1." + (currTile.getPicIndex() + 1) + ".png";
-            }));
+            });
         }));
 
         if (Platform.isSupported(ConditionalFeature.SHAPE_CLIP)) {

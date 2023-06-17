@@ -2,9 +2,11 @@ package it.polimi.ingsw.client.javafx;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -17,7 +19,7 @@ public class ChatButton extends HBox {
     private final Text open;
     private final Text close;
 
-    public ChatButton() {
+    public ChatButton(FxResourcesLoader resources) {
         setAlignment(Pos.CENTER);
         setSpacing(5);
 
@@ -36,8 +38,8 @@ public class ChatButton extends HBox {
         getChildren().add(open);
         getChildren().add(close);
 
-        closedMail = new ImageView(new Image(FxResources.getResourceAsStream("fa/message.png")));
-        openedMail = new ImageView(new Image(FxResources.getResourceAsStream("fa/open-message.png")));
+        closedMail = new ImageView(resources.loadImage("fa/message.png"));
+        openedMail = new ImageView(resources.loadImage("fa/open-message.png"));
         openedMail.setVisible(false);
 
         closedMail.setPreserveRatio(true);

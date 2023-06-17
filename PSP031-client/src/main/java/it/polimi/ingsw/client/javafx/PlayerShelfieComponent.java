@@ -8,7 +8,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -25,18 +24,26 @@ public class PlayerShelfieComponent extends Pane {
     private final GoalPatternComponent commonGoalPattern2;
     private final Pane chair;
 
-    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal, CommonGoalView cg1, CommonGoalView cg2) {
-        this(player, personalGoal, cg1, cg2, false, false);
+    public PlayerShelfieComponent(FxResourcesLoader resources,
+                                  PlayerView player,
+                                  PersonalGoalView personalGoal,
+                                  CommonGoalView cg1,
+                                  CommonGoalView cg2) {
+        this(resources, player, personalGoal, cg1, cg2, false, false);
     }
 
-    public PlayerShelfieComponent(PlayerView player, PersonalGoalView personalGoal, CommonGoalView cg1, CommonGoalView cg2,
+    public PlayerShelfieComponent(FxResourcesLoader resources,
+                                  PlayerView player,
+                                  PersonalGoalView personalGoal,
+                                  CommonGoalView cg1,
+                                  CommonGoalView cg2,
                                   boolean mouseTransparent,
                                   boolean showScore) {
-        getChildren().add(this.shelfieComponent = new ShelfieComponent(player.getShelfie()));
-        getChildren().add(this.personalGoalPattern = new GoalPatternComponent(personalGoal));
+        getChildren().add(this.shelfieComponent = new ShelfieComponent(resources, player.getShelfie()));
+        getChildren().add(this.personalGoalPattern = new GoalPatternComponent(resources, personalGoal));
         this.personalGoalPattern.setVisible(false);
-        getChildren().add(this.commonGoalPattern1 = new GoalPatternComponent(cg1));
-        getChildren().add(this.commonGoalPattern2 = new GoalPatternComponent(cg2));
+        getChildren().add(this.commonGoalPattern1 = new GoalPatternComponent(resources, cg1));
+        getChildren().add(this.commonGoalPattern2 = new GoalPatternComponent(resources, cg2));
         this.commonGoalPattern1.setVisible(false);
         this.commonGoalPattern2.setVisible(false);
 
@@ -44,8 +51,7 @@ public class PlayerShelfieComponent extends Pane {
 
         getChildren().add(this.label = new NickLabel(player.getNick(), player.score(), showScore));
 
-        final var chairImgView = new ImageView(new Image(FxResources.getResourceAsStream(
-                "assets/misc/firstplayertoken.png")));
+        final var chairImgView = new ImageView(resources.loadImage("assets/misc/firstplayertoken.png"));
         getChildren().add(this.chair = new AnchorPane(chairImgView));
         AnchorPane.setTopAnchor(chairImgView, 0.0);
         AnchorPane.setBottomAnchor(chairImgView, 0.0);

@@ -9,7 +9,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -30,8 +29,8 @@ public class EndGamePane extends StackPane {
     private final Button newGame;
     private final Button quit;
 
-    public EndGamePane(List<? extends PlayerView> sortedPlayers, ClientNetManager netManager) {
-        var teamPicture = new ImageView(new Image(FxResources.getResourceAsStream("fa/teamPicture.png")));
+    public EndGamePane(FxResourcesLoader resources, List<? extends PlayerView> sortedPlayers, ClientNetManager netManager) {
+        var teamPicture = new ImageView(resources.loadImage("fa/teamPicture.png"));
         teamPicture.setPreserveRatio(true);
         teamPicture.fitWidthProperty().bind(widthProperty());
         teamPicture.fitHeightProperty().bind(heightProperty());
@@ -45,7 +44,7 @@ public class EndGamePane extends StackPane {
 
         for (int i = 0; i < sortedPlayers.size(); i++) {
             var p = sortedPlayers.get(i);
-            var row = new RankingRow(p, i + 1);
+            var row = new RankingRow(resources, p, i + 1);
             VBox.setVgrow(row, Priority.ALWAYS);
             rankings.getChildren().add(row);
         }
@@ -81,7 +80,7 @@ public class EndGamePane extends StackPane {
             stage.close();
 
             //opens a new Stage
-            Scene scene = new JfxMainMenuScene(stage);
+            Scene scene = new JfxMainMenuScene(resources, stage);
             stage.setScene(scene);
             stage.show();
         });
@@ -100,7 +99,7 @@ public class EndGamePane extends StackPane {
     }
 
     private static class RankingRow extends HBox {
-        public RankingRow(PlayerView player, int pos) {
+        public RankingRow(FxResourcesLoader resources, PlayerView player, int pos) {
             setPadding(new Insets(0, 5, 0, 5));
             setMaxHeight(50);
             setMinHeight(0);
@@ -134,7 +133,7 @@ public class EndGamePane extends StackPane {
             getChildren().add(score);
 
             if (pos == 1) {
-                var imgView = new ImageView(new Image(FxResources.getResourceAsStream("fa/trophy.png")));
+                var imgView = new ImageView(resources.loadImage("fa/trophy.png"));
                 imgView.setPreserveRatio(true);
                 imgView.fitHeightProperty().bind(score.heightProperty());
                 imgView.scaleXProperty().bind(scale);

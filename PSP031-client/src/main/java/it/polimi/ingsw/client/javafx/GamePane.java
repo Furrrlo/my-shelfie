@@ -20,8 +20,6 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
@@ -90,7 +88,7 @@ public class GamePane extends AnchorPane {
         }
     });
 
-    public GamePane(GameView game, GameController controller, ClientNetManager netManager) {
+    public GamePane(FxResourcesLoader resources, GameView game, GameController controller, ClientNetManager netManager) {
         //set new alerts for suspended game and disconnected player ( making them initially not visible,
         // will be later made visible when corresponding state is caught )
         this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN, null);
@@ -102,23 +100,23 @@ public class GamePane extends AnchorPane {
         quitGameMessage.setVisible(false);
 
         //initializing endGamePane ( otherwise having problems not being initialized )
-        this.endGamePane = new EndGamePane(game.getPlayers().stream().toList(), netManager);
+        this.endGamePane = new EndGamePane(resources, game.getPlayers().stream().toList(), netManager);
         endGamePane.setVisible(false);
 
         //adding first finisher token on game pane otherwise it would have been disabled when is not
         //the player's turn
-        this.finishToken = new ScoringTokenComponent();
+        this.finishToken = new ScoringTokenComponent(resources);
         finishToken.setRotate(9);
         finishToken.setScore(
                 game.firstFinisher().get() != null && Objects.equals(game.firstFinisher().get(), game.thePlayer()) ? 1 : 0);
 
         //adding game components
-        getChildren()
-                .add(this.thePlayerShelfie = new PlayerShelfieComponent(game.thePlayer(), game.getPersonalGoal(),
-                        game.getCommonGoals().get(0), game.getCommonGoals().get(1)));
+        getChildren().add(this.thePlayerShelfie = new PlayerShelfieComponent(resources, game.thePlayer(),
+                game.getPersonalGoal(), game.getCommonGoals().get(0), game.getCommonGoals().get(1)));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
         getChildren().add(
-                this.commonGoalCardsPane = new CommonGoalsPane(game.getCommonGoals().get(0), game.getCommonGoals().get(1),
+                this.commonGoalCardsPane = new CommonGoalsPane(resources,
+                        game.getCommonGoals().get(0), game.getCommonGoals().get(1),
                         (!game.getCommonGoals().get(0).achieved().get().contains(game.thePlayer())) ? 0
                                 : switch (game.getCommonGoals().get(0).achieved().get().indexOf(game.thePlayer())) {
                                     case 0 -> 8;
@@ -136,7 +134,7 @@ public class GamePane extends AnchorPane {
                                     default -> throw new IllegalStateException("Unexpected value: ");
                                 }));
 
-        getChildren().add(this.personalGoalCard = new PersonalGoalComponent(game.getPersonalGoal()));
+        getChildren().add(this.personalGoalCard = new PersonalGoalComponent(resources, game.getPersonalGoal()));
 
         //creating description for personal goal
         this.getChildren().add(this.personalGoalDescription = new PersonalGoalDescription());
@@ -215,19 +213,19 @@ public class GamePane extends AnchorPane {
                     personalGoalDescription.setVisible(!personalGoalDescription.isVisible());
                 });
 
-        this.board = new BoardComponent(game.getBoard());
+        this.board = new BoardComponent(resources, game.getBoard());
         this.boardPane = new Pane(board);
         getChildren().add(this.boardPane);
-        getChildren().add(this.pickedTilesPane = new PickedTilesPane());
+        getChildren().add(this.pickedTilesPane = new PickedTilesPane(resources));
 
         this.adjacentItemTiles = new ImageButton();
-        adjacentItemTiles.setImage(new WritableImage(
-                new Image(FxResources.getResourceAsStream("assets/boards/livingroom.png")).getPixelReader(),
+        adjacentItemTiles.setImage(resources.loadCroppedImage(
+                "assets/boards/livingroom.png",
                 1977, 2465, 889, 394));
         getChildren().add(adjacentItemTiles);
 
         //adding the end game token description to the game's pane
-        getChildren().add(this.firstFinisherDescription = new FirstFinisherDescription());
+        getChildren().add(this.firstFinisherDescription = new FirstFinisherDescription(resources));
         this.firstFinisherDescription.setVisible(false);
 
         //adding Adjacent Item Tiles description to game's pane
@@ -337,7 +335,7 @@ public class GamePane extends AnchorPane {
                     n.setDisable(true);
                     n.setOpacity(0.5);
                 }
-                this.endGamePane = new EndGamePane(game.getSortedPlayers(), netManager);
+                this.endGamePane = new EndGamePane(resources, game.getSortedPlayers(), netManager);
                 endGamePane.toFront();
                 endGamePane.setAlignment(Pos.CENTER);
                 this.getChildren().add(endGamePane);
@@ -374,21 +372,22 @@ public class GamePane extends AnchorPane {
         final var otherPlayers = new ArrayList<>(game.getPlayers());
         otherPlayers.remove(game.thePlayer());
         getChildren().add(this.player1Shelfie = otherPlayers.size() >= 1
-                ? new PlayerShelfieComponent(otherPlayers.get(0), game.getPersonalGoal(), game.getCommonGoals().get(0),
-                        game.getCommonGoals().get(0), true, true)
+                ? new PlayerShelfieComponent(resources, otherPlayers.get(0), game.getPersonalGoal(),
+                        game.getCommonGoals().get(0), game.getCommonGoals().get(0), true, true)
                 : new Pane());
         getChildren().add(this.player2Shelfie = otherPlayers.size() >= 2
-                ? new PlayerShelfieComponent(otherPlayers.get(1), game.getPersonalGoal(), game.getCommonGoals().get(0),
-                        game.getCommonGoals().get(0), true, true)
+                ? new PlayerShelfieComponent(resources, otherPlayers.get(1), game.getPersonalGoal(),
+                        game.getCommonGoals().get(0), game.getCommonGoals().get(0), true, true)
                 : new Pane());
         getChildren().add(this.player3Shelfie = otherPlayers.size() >= 3
-                ? new PlayerShelfieComponent(otherPlayers.get(2), game.getPersonalGoal(), game.getCommonGoals().get(0),
-                        game.getCommonGoals().get(0), true, true)
+                ? new PlayerShelfieComponent(resources, otherPlayers.get(2), game.getPersonalGoal(),
+                        game.getCommonGoals().get(0), game.getCommonGoals().get(0), true, true)
                 : new Pane());
 
         //adding chat to the game initially set not visible, its visibility can be modified by pressing over the
         //chat button
         getChildren().add(this.chatPane = new ChatComponent(
+                resources,
                 game.getPlayers()
                         .stream().map(PlayerView::getNick)
                         .filter(nick -> !nick.equals(game.thePlayer().getNick()))
@@ -425,7 +424,7 @@ public class GamePane extends AnchorPane {
         });
         this.getChildren().add(quitGameBtn);
 
-        this.newChatBtn = new ChatButton();
+        this.newChatBtn = new ChatButton(resources);
         newChatBtn.setOnMouseClicked(event -> {
             newChatBtn.swap();
             this.chatPane.setVisible(!this.chatPane.isVisible());

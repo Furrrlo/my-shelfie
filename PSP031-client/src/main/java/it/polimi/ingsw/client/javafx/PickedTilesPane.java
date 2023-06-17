@@ -10,7 +10,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
@@ -37,9 +36,9 @@ public class PickedTilesPane extends Pane {
     private final TileComponent tile3;
     private final TileBorder tile3Border;
 
-    public PickedTilesPane() {
+    public PickedTilesPane(FxResourcesLoader resources) {
         setBackground(new Background(new BackgroundImage(
-                new Image(FxResources.getResourceAsStream("assets/misc/base_pagina2.jpg")),
+                resources.loadImage("assets/misc/base_pagina2.jpg"),
                 BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
                 BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
 
@@ -54,7 +53,7 @@ public class PickedTilesPane extends Pane {
         }
 
         getChildren().add(this.tile1Border = new TileBorder());
-        getChildren().add(this.tile1 = new TileComponent());
+        getChildren().add(this.tile1 = new TileComponent(resources));
         this.tile1.tileProperty().bind(tiles.map(tiles -> tiles.size() >= 1 ? tiles.get(0).tile() : null));
         this.tile1.setOnAction(e -> {
             if (tiles.size() >= 1 && isTileRemovable.get().test(tiles.get(0)))
@@ -62,7 +61,7 @@ public class PickedTilesPane extends Pane {
         });
 
         getChildren().add(this.tile2Border = new TileBorder());
-        getChildren().add(this.tile2 = new TileComponent());
+        getChildren().add(this.tile2 = new TileComponent(resources));
         this.tile2.tileProperty().bind(tiles.map(tiles -> tiles.size() >= 2 ? tiles.get(1).tile() : null));
         this.tile2.setOnAction(e -> {
             if (tiles.size() >= 2 && isTileRemovable.get().test(tiles.get(1)))
@@ -70,7 +69,7 @@ public class PickedTilesPane extends Pane {
         });
 
         getChildren().add(this.tile3Border = new TileBorder());
-        getChildren().add(this.tile3 = new TileComponent());
+        getChildren().add(this.tile3 = new TileComponent(resources));
         this.tile3.tileProperty().bind(tiles.map(tiles -> tiles.size() >= 3 ? tiles.get(2).tile() : null));
         this.tile3.setOnAction(e -> {
             if (tiles.size() >= 3 && isTileRemovable.get().test(tiles.get(2)))

@@ -158,41 +158,41 @@ public class GoalPatternComponent extends AnchorPane {
     public ColorTileComponent t5x3;
     public ColorTileComponent t5x4;
 
-    public GoalPatternComponent(PersonalGoalView personalGoal) {
+    public GoalPatternComponent(FxResourcesLoader resources, PersonalGoalView personalGoal) {
 
-        getChildren().add(t0x0 = new ColorTileComponent(personalGoal.get(0, 0)));
-        getChildren().add(t0x1 = new ColorTileComponent(personalGoal.get(0, 1)));
-        getChildren().add(t0x2 = new ColorTileComponent(personalGoal.get(0, 2)));
-        getChildren().add(t0x3 = new ColorTileComponent(personalGoal.get(0, 3)));
-        getChildren().add(t0x4 = new ColorTileComponent(personalGoal.get(0, 4)));
-        getChildren().add(t1x0 = new ColorTileComponent(personalGoal.get(1, 0)));
-        getChildren().add(t1x1 = new ColorTileComponent(personalGoal.get(1, 1)));
-        getChildren().add(t1x2 = new ColorTileComponent(personalGoal.get(1, 2)));
-        getChildren().add(t1x3 = new ColorTileComponent(personalGoal.get(1, 3)));
-        getChildren().add(t1x4 = new ColorTileComponent(personalGoal.get(1, 4)));
-        getChildren().add(t2x0 = new ColorTileComponent(personalGoal.get(2, 0)));
-        getChildren().add(t2x2 = new ColorTileComponent(personalGoal.get(2, 2)));
-        getChildren().add(t2x1 = new ColorTileComponent(personalGoal.get(2, 1)));
-        getChildren().add(t2x3 = new ColorTileComponent(personalGoal.get(2, 3)));
-        getChildren().add(t2x4 = new ColorTileComponent(personalGoal.get(2, 4)));
-        getChildren().add(t3x0 = new ColorTileComponent(personalGoal.get(3, 0)));
-        getChildren().add(t3x1 = new ColorTileComponent(personalGoal.get(3, 1)));
-        getChildren().add(t3x2 = new ColorTileComponent(personalGoal.get(3, 2)));
-        getChildren().add(t3x3 = new ColorTileComponent(personalGoal.get(3, 3)));
-        getChildren().add(t3x4 = new ColorTileComponent(personalGoal.get(3, 4)));
-        getChildren().add(t4x0 = new ColorTileComponent(personalGoal.get(4, 0)));
-        getChildren().add(t4x1 = new ColorTileComponent(personalGoal.get(4, 1)));
-        getChildren().add(t4x2 = new ColorTileComponent(personalGoal.get(4, 2)));
-        getChildren().add(t4x3 = new ColorTileComponent(personalGoal.get(4, 3)));
-        getChildren().add(t4x4 = new ColorTileComponent(personalGoal.get(4, 4)));
-        getChildren().add(t5x0 = new ColorTileComponent(personalGoal.get(5, 0)));
-        getChildren().add(t5x1 = new ColorTileComponent(personalGoal.get(5, 1)));
-        getChildren().add(t5x2 = new ColorTileComponent(personalGoal.get(5, 2)));
-        getChildren().add(t5x3 = new ColorTileComponent(personalGoal.get(5, 3)));
-        getChildren().add(t5x4 = new ColorTileComponent(personalGoal.get(5, 4)));
+        getChildren().add(t0x0 = new ColorTileComponent(resources, personalGoal.get(0, 0)));
+        getChildren().add(t0x1 = new ColorTileComponent(resources, personalGoal.get(0, 1)));
+        getChildren().add(t0x2 = new ColorTileComponent(resources, personalGoal.get(0, 2)));
+        getChildren().add(t0x3 = new ColorTileComponent(resources, personalGoal.get(0, 3)));
+        getChildren().add(t0x4 = new ColorTileComponent(resources, personalGoal.get(0, 4)));
+        getChildren().add(t1x0 = new ColorTileComponent(resources, personalGoal.get(1, 0)));
+        getChildren().add(t1x1 = new ColorTileComponent(resources, personalGoal.get(1, 1)));
+        getChildren().add(t1x2 = new ColorTileComponent(resources, personalGoal.get(1, 2)));
+        getChildren().add(t1x3 = new ColorTileComponent(resources, personalGoal.get(1, 3)));
+        getChildren().add(t1x4 = new ColorTileComponent(resources, personalGoal.get(1, 4)));
+        getChildren().add(t2x0 = new ColorTileComponent(resources, personalGoal.get(2, 0)));
+        getChildren().add(t2x2 = new ColorTileComponent(resources, personalGoal.get(2, 2)));
+        getChildren().add(t2x1 = new ColorTileComponent(resources, personalGoal.get(2, 1)));
+        getChildren().add(t2x3 = new ColorTileComponent(resources, personalGoal.get(2, 3)));
+        getChildren().add(t2x4 = new ColorTileComponent(resources, personalGoal.get(2, 4)));
+        getChildren().add(t3x0 = new ColorTileComponent(resources, personalGoal.get(3, 0)));
+        getChildren().add(t3x1 = new ColorTileComponent(resources, personalGoal.get(3, 1)));
+        getChildren().add(t3x2 = new ColorTileComponent(resources, personalGoal.get(3, 2)));
+        getChildren().add(t3x3 = new ColorTileComponent(resources, personalGoal.get(3, 3)));
+        getChildren().add(t3x4 = new ColorTileComponent(resources, personalGoal.get(3, 4)));
+        getChildren().add(t4x0 = new ColorTileComponent(resources, personalGoal.get(4, 0)));
+        getChildren().add(t4x1 = new ColorTileComponent(resources, personalGoal.get(4, 1)));
+        getChildren().add(t4x2 = new ColorTileComponent(resources, personalGoal.get(4, 2)));
+        getChildren().add(t4x3 = new ColorTileComponent(resources, personalGoal.get(4, 3)));
+        getChildren().add(t4x4 = new ColorTileComponent(resources, personalGoal.get(4, 4)));
+        getChildren().add(t5x0 = new ColorTileComponent(resources, personalGoal.get(5, 0)));
+        getChildren().add(t5x1 = new ColorTileComponent(resources, personalGoal.get(5, 1)));
+        getChildren().add(t5x2 = new ColorTileComponent(resources, personalGoal.get(5, 2)));
+        getChildren().add(t5x3 = new ColorTileComponent(resources, personalGoal.get(5, 3)));
+        getChildren().add(t5x4 = new ColorTileComponent(resources, personalGoal.get(5, 4)));
     }
 
-    public GoalPatternComponent(CommonGoalView commonGoal) {
+    public GoalPatternComponent(FxResourcesLoader resources, CommonGoalView commonGoal) {
         Color[][] shelfie = switch (commonGoal.getType()) {
             case SIX_COUPLES -> SIX_COUPLES;
             case ALL_CORNERS -> ALL_CORNERS;
@@ -207,36 +207,36 @@ public class GoalPatternComponent extends AnchorPane {
             case CROSS -> CROSS;
             case TRIANGLE -> TRIANGLE;
         };
-        getChildren().add(t0x0 = new ColorTileComponent(shelfie[0][0]));
-        getChildren().add(t0x1 = new ColorTileComponent(shelfie[0][1]));
-        getChildren().add(t0x2 = new ColorTileComponent(shelfie[0][2]));
-        getChildren().add(t0x3 = new ColorTileComponent(shelfie[0][3]));
-        getChildren().add(t0x4 = new ColorTileComponent(shelfie[0][4]));
-        getChildren().add(t1x0 = new ColorTileComponent(shelfie[1][0]));
-        getChildren().add(t1x1 = new ColorTileComponent(shelfie[1][1]));
-        getChildren().add(t1x2 = new ColorTileComponent(shelfie[1][2]));
-        getChildren().add(t1x3 = new ColorTileComponent(shelfie[1][3]));
-        getChildren().add(t1x4 = new ColorTileComponent(shelfie[1][4]));
-        getChildren().add(t2x0 = new ColorTileComponent(shelfie[2][0]));
-        getChildren().add(t2x2 = new ColorTileComponent(shelfie[2][2]));
-        getChildren().add(t2x1 = new ColorTileComponent(shelfie[2][1]));
-        getChildren().add(t2x3 = new ColorTileComponent(shelfie[2][3]));
-        getChildren().add(t2x4 = new ColorTileComponent(shelfie[2][4]));
-        getChildren().add(t3x0 = new ColorTileComponent(shelfie[3][0]));
-        getChildren().add(t3x1 = new ColorTileComponent(shelfie[3][1]));
-        getChildren().add(t3x2 = new ColorTileComponent(shelfie[3][2]));
-        getChildren().add(t3x3 = new ColorTileComponent(shelfie[3][3]));
-        getChildren().add(t3x4 = new ColorTileComponent(shelfie[3][4]));
-        getChildren().add(t4x0 = new ColorTileComponent(shelfie[4][0]));
-        getChildren().add(t4x1 = new ColorTileComponent(shelfie[4][1]));
-        getChildren().add(t4x2 = new ColorTileComponent(shelfie[4][2]));
-        getChildren().add(t4x3 = new ColorTileComponent(shelfie[4][3]));
-        getChildren().add(t4x4 = new ColorTileComponent(shelfie[4][4]));
-        getChildren().add(t5x0 = new ColorTileComponent(shelfie[5][0]));
-        getChildren().add(t5x1 = new ColorTileComponent(shelfie[5][1]));
-        getChildren().add(t5x2 = new ColorTileComponent(shelfie[5][2]));
-        getChildren().add(t5x3 = new ColorTileComponent(shelfie[5][3]));
-        getChildren().add(t5x4 = new ColorTileComponent(shelfie[5][4]));
+        getChildren().add(t0x0 = new ColorTileComponent(resources, shelfie[0][0]));
+        getChildren().add(t0x1 = new ColorTileComponent(resources, shelfie[0][1]));
+        getChildren().add(t0x2 = new ColorTileComponent(resources, shelfie[0][2]));
+        getChildren().add(t0x3 = new ColorTileComponent(resources, shelfie[0][3]));
+        getChildren().add(t0x4 = new ColorTileComponent(resources, shelfie[0][4]));
+        getChildren().add(t1x0 = new ColorTileComponent(resources, shelfie[1][0]));
+        getChildren().add(t1x1 = new ColorTileComponent(resources, shelfie[1][1]));
+        getChildren().add(t1x2 = new ColorTileComponent(resources, shelfie[1][2]));
+        getChildren().add(t1x3 = new ColorTileComponent(resources, shelfie[1][3]));
+        getChildren().add(t1x4 = new ColorTileComponent(resources, shelfie[1][4]));
+        getChildren().add(t2x0 = new ColorTileComponent(resources, shelfie[2][0]));
+        getChildren().add(t2x2 = new ColorTileComponent(resources, shelfie[2][2]));
+        getChildren().add(t2x1 = new ColorTileComponent(resources, shelfie[2][1]));
+        getChildren().add(t2x3 = new ColorTileComponent(resources, shelfie[2][3]));
+        getChildren().add(t2x4 = new ColorTileComponent(resources, shelfie[2][4]));
+        getChildren().add(t3x0 = new ColorTileComponent(resources, shelfie[3][0]));
+        getChildren().add(t3x1 = new ColorTileComponent(resources, shelfie[3][1]));
+        getChildren().add(t3x2 = new ColorTileComponent(resources, shelfie[3][2]));
+        getChildren().add(t3x3 = new ColorTileComponent(resources, shelfie[3][3]));
+        getChildren().add(t3x4 = new ColorTileComponent(resources, shelfie[3][4]));
+        getChildren().add(t4x0 = new ColorTileComponent(resources, shelfie[4][0]));
+        getChildren().add(t4x1 = new ColorTileComponent(resources, shelfie[4][1]));
+        getChildren().add(t4x2 = new ColorTileComponent(resources, shelfie[4][2]));
+        getChildren().add(t4x3 = new ColorTileComponent(resources, shelfie[4][3]));
+        getChildren().add(t4x4 = new ColorTileComponent(resources, shelfie[4][4]));
+        getChildren().add(t5x0 = new ColorTileComponent(resources, shelfie[5][0]));
+        getChildren().add(t5x1 = new ColorTileComponent(resources, shelfie[5][1]));
+        getChildren().add(t5x2 = new ColorTileComponent(resources, shelfie[5][2]));
+        getChildren().add(t5x3 = new ColorTileComponent(resources, shelfie[5][3]));
+        getChildren().add(t5x4 = new ColorTileComponent(resources, shelfie[5][4]));
     }
 
     protected void layoutChildren() {

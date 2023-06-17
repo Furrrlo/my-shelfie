@@ -2,16 +2,15 @@ package it.polimi.ingsw.client.javafx;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.image.Image;
 
 public class ScoringTokenComponent extends ImageButton {
     private final ObjectProperty<Integer> score = new SimpleObjectProperty<>(this, "score");
 
-    public ScoringTokenComponent() {
+    public ScoringTokenComponent(FxResourcesLoader resources) {
         score.set(score.get());
         imageProperty().bind(scoreProperty().map(ignored -> {
             var currScore = score.get();
-            return new Image(FxResources.getResourceAsStream(switch (currScore) {
+            return resources.loadImage(switch (currScore) {
                 case 2 -> "assets/scoring tokens/scoring_2.jpg";
                 case 4 -> "assets/scoring tokens/scoring_4.jpg";
                 case 6 -> "assets/scoring tokens/scoring_6.jpg";
@@ -19,7 +18,7 @@ public class ScoringTokenComponent extends ImageButton {
                 case 0 -> "assets/scoring tokens/scoring_back_EMPTY.jpg";
                 case 1 -> "assets/scoring tokens/end game.jpg";
                 default -> throw new IllegalStateException("Unexpected value: " + score.get());
-            }));
+            });
         }));
     }
 

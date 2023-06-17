@@ -67,8 +67,8 @@ public class ShelfieComponent extends AnchorPane {
     private final ObjectProperty<@Nullable Consumer<TileAndCoords<@Nullable Tile>>> onTileAction = new SimpleObjectProperty<>(
             this, "onTileAction");
 
-    public ShelfieComponent(ShelfieView shelfie) {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("shelfie.fxml"));
+    public ShelfieComponent(FxResourcesLoader resources, ShelfieView shelfie) {
+        FXMLLoader fxmlLoader = resources.getFxmlLoader("shelfie.fxml");
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

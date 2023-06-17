@@ -5,16 +5,15 @@ import it.polimi.ingsw.model.PersonalGoalView;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class PersonalGoalComponent extends ImageButton {
 
-    public PersonalGoalComponent(PersonalGoalView personalGoal) {
-        var img = new Image(FxResources.getResourceAsStream(personalGoal.getIndex() == 0
+    public PersonalGoalComponent(FxResourcesLoader resources, PersonalGoalView personalGoal) {
+        var img = resources.loadImage(personalGoal.getIndex() == 0
                 ? "assets/personal goal cards/Personal_Goals.png"
-                : "assets/personal goal cards/Personal_Goals" + (personalGoal.getIndex() + 1) + ".png"));
+                : "assets/personal goal cards/Personal_Goals" + (personalGoal.getIndex() + 1) + ".png");
         setImage(img);
 
         if (Platform.isSupported(ConditionalFeature.SHAPE_CLIP)) {

@@ -80,8 +80,8 @@ public class BoardComponent extends AnchorPane {
             new ObservableListWrapper<>(new ArrayList<>()));
     private final @Nullable TileComponent[][] matrix;
 
-    public BoardComponent(BoardView board) {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
+    public BoardComponent(FxResourcesLoader resources, BoardView board) {
+        FXMLLoader fxmlLoader = resources.getFxmlLoader("board.fxml");
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

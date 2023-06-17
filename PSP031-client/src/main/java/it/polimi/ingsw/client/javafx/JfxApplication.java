@@ -2,7 +2,6 @@ package it.polimi.ingsw.client.javafx;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -19,13 +18,13 @@ public class JfxApplication extends Application {
         th.setDaemon(true);
         th.start();
 
-        Scene scene = new JfxMainMenuScene(stage);
+        Scene scene = new JfxMainMenuScene(resources, stage);
 
         stage.setTitle("My Shelfie");
 
         // Let jfx pick the best fit
-        stage.getIcons().add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Icon 50x50px.png")));
-        stage.getIcons().add(new Image(FxResources.getResourceAsStream("assets/Publisher material/Box 280x280px.png")));
+        stage.getIcons().add(resources.loadImage("assets/Publisher material/Icon 50x50px.png"));
+        stage.getIcons().add(resources.loadImage("assets/Publisher material/Box 280x280px.png"));
 
         stage.setScene(scene);
         stage.setMinWidth(800);
