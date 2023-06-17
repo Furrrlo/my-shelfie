@@ -10,8 +10,14 @@ public class JfxApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        var resources = new FxCachingResourcesLoader();
         // Load fonts from ttf files
         Font.loadFonts(FxResources.getResourceAsStream("Inter-VariableFont_slnt,wght.ttf"), 0);
+
+        var th = new Thread(resources::populateCache);
+        th.setName("JFX-resources-preload-thread");
+        th.setDaemon(true);
+        th.start();
 
         Scene scene = new JfxMainMenuScene(stage);
 
