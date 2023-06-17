@@ -66,14 +66,16 @@ public class GamePane extends AnchorPane {
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Boolean> suspended = new SimpleObjectProperty<>(this, "suspended");
-
-    private final ObjectProperty<Boolean> endGame = new SimpleObjectProperty<>(this, "endGame");
-
-    private final ObjectProperty<PlayerView> firstFinisher = new SimpleObjectProperty<>(this,
-            "firsFinisher");
-    private final ObjectProperty<List<? extends PlayerView>> achieved1 = new SimpleObjectProperty<>(this, "commonGoal1");
-    private final ObjectProperty<List<? extends PlayerView>> achieved2 = new SimpleObjectProperty<>(this, "commonGoal1");
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
+    private final Consumer<Boolean> suspendedObserver;
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
+    private final Consumer<Boolean> endGameObserver;
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
+    private final Consumer<PlayerView> firstFinisherObserver;
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
+    private final Consumer<List<? extends PlayerView>> achieved1Observer;
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
+    private final Consumer<List<? extends PlayerView>> achieved2Observer;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
 
@@ -262,14 +264,11 @@ public class GamePane extends AnchorPane {
         });
 
         //binding this.firstFinisher to game.firstFinisher
-        this.firstFinisher.bind(FxProperties.toFxProperty("firstFinisher", firstFinisher, game.firstFinisher()));
-        this.firstFinisher.addListener((observable, oldValue, newValue) -> {
-            finishToken.setScore(newValue != null && newValue.equals(game.thePlayer()) ? 1 : 0);
-        });
+        game.firstFinisher().registerWeakObserver(firstFinisherObserver = newValue -> finishToken
+                .setScore(newValue != null && newValue.equals(game.thePlayer()) ? 1 : 0));
 
         //now displaying points for commonGoals if achieved
-        this.achieved1.bind(FxProperties.toFxProperty("achieved1", this, game.getCommonGoals().get(0).achieved()));
-        achieved1.addListener((observable, oldValue, newValue) -> {
+        game.getCommonGoals().get(0).achieved().registerWeakObserver(achieved1Observer = newValue -> {
             if (newValue.contains(game.thePlayer())) {
                 int index = newValue.indexOf(game.thePlayer());
                 int points;
@@ -283,8 +282,7 @@ public class GamePane extends AnchorPane {
                 commonGoalCardsPane.setScore1(points);
             }
         });
-        this.achieved2.bind(FxProperties.toFxProperty("achieved2", this, game.getCommonGoals().get(1).achieved()));
-        achieved2.addListener((observable, oldValue, newValue) -> {
+        game.getCommonGoals().get(1).achieved().registerWeakObserver(achieved2Observer = newValue -> {
             if (newValue.contains(game.thePlayer())) {
                 int index = newValue.indexOf(game.thePlayer());
                 int points;
@@ -302,8 +300,7 @@ public class GamePane extends AnchorPane {
         //binding suspended to GameView Provider game.suspended() and adding listener that when detects newValue
         //equals true, disables all current nodes in the game( except suspended game alert and endGamePane, in case
         //no other player reconnects therefore forcing the game to end )
-        this.suspended.bind(FxProperties.toFxProperty("suspended", this, game.suspended()));
-        suspended.addListener(((observable, oldValue, newValue) -> {
+        game.suspended().registerWeakObserver(suspendedObserver = newValue -> {
             if (newValue) {
                 for (Node n : getChildren()) {
                     if (!n.equals(suspendedGameMessage)) {
@@ -323,12 +320,11 @@ public class GamePane extends AnchorPane {
                     n.setOpacity(1);
                 }
             }
-        }));
+        });
 
         //binding this.endGame to game's Provider endGame and adding listener that when listens endGame being true
         //disables all nodes in the game and displays the endGamePane
-        this.endGame.bind(FxProperties.toFxProperty("endGame", this, game.endGame()));
-        endGame.addListener(((observable, oldValue, newValue) -> {
+        game.endGame().registerWeakObserver(endGameObserver = newValue -> {
             if (newValue) {
                 //disable all the nodes ( when entering this state there is no coming back )
                 for (Node n : getChildren()) {
@@ -340,7 +336,7 @@ public class GamePane extends AnchorPane {
                 endGamePane.setAlignment(Pos.CENTER);
                 this.getChildren().add(endGamePane);
             }
-        }));
+        });
 
         var canSelectColumns = isCurrentTurn.and(
                 BooleanExpression.booleanExpression(pickedTilesPane.tilesProperty().map(t -> !t.isEmpty())));
