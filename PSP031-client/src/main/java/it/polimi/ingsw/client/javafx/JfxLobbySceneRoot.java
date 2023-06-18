@@ -14,8 +14,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -28,14 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class JfxLobbyScene extends Scene {
-
-    public JfxLobbyScene(FxResourcesLoader resources,
-                         Stage stage,
-                         LobbyAndController lobbyAndController,
-                         ClientNetManager netManager) {
-        super(createRootNode(resources, stage, lobbyAndController, netManager));
-    }
+public class JfxLobbySceneRoot extends AnchorPane {
 
     private static final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
 
@@ -50,15 +41,10 @@ public class JfxLobbyScene extends Scene {
         }
     });
 
-    private static Parent createRootNode(FxResourcesLoader resources,
-                                         Stage stage,
-                                         LobbyAndController lobbyAndController,
-                                         ClientNetManager netManager) {
-
-        //var mainPane = new CenteringFitPane();
-        //mainPane.getChildren().add(new MainMenuPane());
-        //Pattern ipPattern = Pattern
-        //                .compile(" (\\b25[0-5]|\\b2[0-4][0-9]|\\b[01]?[0-9][0-9]?)(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3} ");
+    public JfxLobbySceneRoot(FxResourcesLoader resources,
+                             Stage stage,
+                             LobbyAndController<?> lobbyAndController,
+                             ClientNetManager netManager) {
 
         //TODO:
         //-change scene only when everyone is ready
@@ -84,12 +70,9 @@ public class JfxLobbyScene extends Scene {
 
         lobbyAndController.lobby().game().registerObserver(gameAndController -> {
             if (gameAndController != null) {
-                Platform.runLater(() -> {
-                    Scene gameScene = new JfxGameScene(resources, stage,
-                            gameAndController.game(), gameAndController.controller(),
-                            netManager);
-                    stage.setScene(gameScene);
-                });
+                Platform.runLater(() -> stage.getScene().setRoot(new JfxGameSceneRoot(resources,
+                        gameAndController.game(), gameAndController.controller(),
+                        netManager)));
             }
         });
 
@@ -120,25 +103,20 @@ public class JfxLobbyScene extends Scene {
         vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(10d);
 
-        AnchorPane anchorPane = new AnchorPane();
-
         AnchorPane.setTopAnchor(vbox, 1d);
         AnchorPane.setBottomAnchor(vbox, 10d);
         AnchorPane.setLeftAnchor(vbox, 10d);
         AnchorPane.setRightAnchor(vbox, 10d);
-        anchorPane.getChildren().add(vbox);
-        //anchorPane.prefWidthProperty().bind(scene.widthProperty());
-        //anchorPane.prefHeightProperty().bind(scene.heightProperty());
+        getChildren().add(vbox);
+        //prefWidthProperty().bind(scene.widthProperty());
+        //prefHeightProperty().bind(scene.heightProperty());
 
-        anchorPane.setStyle(anchorPane.getStyle() + "-fx-font-family: \"Inter Regular\";");
-        anchorPane.setBackground(new Background(new BackgroundImage(
+        setStyle(getStyle() + "-fx-font-family: \"Inter Regular\";");
+        setBackground(new Background(new BackgroundImage(
                 resources.loadImage("assets/misc/sfondo parquet.jpg"),
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(100, 100, true, true, false, true))));
-
-        return anchorPane;
-
     }
 
     private static class LobbyPlayersVbox extends VBox {

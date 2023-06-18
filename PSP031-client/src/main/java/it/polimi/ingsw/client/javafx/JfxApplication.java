@@ -18,7 +18,7 @@ public class JfxApplication extends Application {
         th.setDaemon(true);
         th.start();
 
-        Scene scene = new JfxMainMenuScene(resources, stage);
+        Scene scene = new Scene(new JfxMainMenuSceneRoot(resources, stage));
 
         stage.setTitle("My Shelfie");
 

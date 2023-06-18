@@ -13,7 +13,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -26,14 +25,11 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-public class JfxMainMenuScene extends Scene {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuScene.class);
+public class JfxMainMenuSceneRoot extends AnchorPane {
 
-    public JfxMainMenuScene(FxResourcesLoader resources, Stage stage) {
-        super(createRootNode(resources, stage));
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuSceneRoot.class);
 
-    private static Parent createRootNode(FxResourcesLoader resources, Stage stage) {
+    public JfxMainMenuSceneRoot(FxResourcesLoader resources, Stage stage) {
         //var mainPane = new CenteringFitPane();
         //mainPane.getChildren().add(new MainMenuPane());
         //Pattern ipPattern = Pattern
@@ -86,6 +82,7 @@ public class JfxMainMenuScene extends Scene {
             String connectionType = connectionTypeChoice.getValue();
 
             try {
+                // TODO: clean this up
                 ClientNetManager netManager;
                 if (connectionType.equals("RMI")) {
                     if (ipText.equals("")) {
@@ -109,14 +106,14 @@ public class JfxMainMenuScene extends Scene {
                 }
                 var lobbyAndController = netManager.joinGame();
 
-                Scene scene;
+                Parent sceneRoot;
                 var game = lobbyAndController.lobby().game().get();
                 if (game != null) {
-                    scene = new JfxGameScene(resources, stage, game.game(), game.controller(), netManager);
+                    sceneRoot = new JfxGameSceneRoot(resources, game.game(), game.controller(), netManager);
                 } else {
-                    scene = new JfxLobbyScene(resources, stage, lobbyAndController, netManager);
+                    sceneRoot = new JfxLobbySceneRoot(resources, stage, lobbyAndController, netManager);
                 }
-                stage.setScene(scene);
+                stage.getScene().setRoot(sceneRoot);
 
                 stage.setOnCloseRequest(exit -> {
                     int exitCode = 0;
@@ -152,23 +149,19 @@ public class JfxMainMenuScene extends Scene {
         vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(10d);
 
-        AnchorPane anchorPane = new AnchorPane();
-
         AnchorPane.setTopAnchor(vbox, 1d);
         AnchorPane.setBottomAnchor(vbox, 10d);
         AnchorPane.setLeftAnchor(vbox, 10d);
         AnchorPane.setRightAnchor(vbox, 10d);
-        anchorPane.getChildren().add(vbox);
-        //anchorPane.prefWidthProperty().bind(scene.widthProperty());
-        //anchorPane.prefHeightProperty().bind(scene.heightProperty());
+        getChildren().add(vbox);
+        //prefWidthProperty().bind(scene.widthProperty());
+        //prefHeightProperty().bind(scene.heightProperty());
 
-        anchorPane.setStyle(anchorPane.getStyle() + "-fx-font-family: \"Inter Regular\";");
-        anchorPane.setBackground(new Background(new BackgroundImage(
+        setStyle(getStyle() + "-fx-font-family: \"Inter Regular\";");
+        setBackground(new Background(new BackgroundImage(
                 resources.loadImage("assets/misc/sfondo parquet.jpg"),
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(100, 100, true, true, false, true))));
-
-        return anchorPane;
     }
 }

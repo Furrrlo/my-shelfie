@@ -6,7 +6,6 @@ import it.polimi.ingsw.model.PlayerView;
 import javafx.beans.binding.DoubleBinding;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -76,14 +75,15 @@ public class EndGamePane extends Pane {
             stage.close();
         });
         newGame.setOnMouseClicked(event -> {
+            // TODO: this is wrong
             //closes the existing my shelfie window and opens a new one
-            Stage stage = (Stage) getScene().getWindow();
-            stage.close();
+            //            Stage stage = (Stage) getScene().getWindow();
+            //            stage.close();
 
             //opens a new Stage
-            Scene scene = new JfxMainMenuScene(resources, stage);
-            stage.setScene(scene);
-            stage.show();
+            //            Scene scene = new JfxMainMenuScenePane(resources, stage);
+            //            stage.setScene(scene);
+            //            stage.show();
         });
         this.getChildren().add(newGame);
         this.getChildren().add(quit);
