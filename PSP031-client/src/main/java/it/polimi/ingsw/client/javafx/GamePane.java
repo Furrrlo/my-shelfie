@@ -260,11 +260,11 @@ public class GamePane extends AnchorPane {
         });
 
         //binding this.firstFinisher to game.firstFinisher
-        game.firstFinisher().registerWeakObserver(firstFinisherObserver = newValue -> finishToken
-                .setScore(newValue != null && newValue.equals(game.thePlayer()) ? 1 : 0));
+        game.firstFinisher().registerWeakObserver(firstFinisherObserver = newValue -> Platform
+                .runLater(() -> finishToken.setScore(newValue != null && newValue.equals(game.thePlayer()) ? 1 : 0)));
 
         //now displaying points for commonGoals if achieved
-        game.getCommonGoals().get(0).achieved().registerWeakObserver(achieved1Observer = newValue -> {
+        game.getCommonGoals().get(0).achieved().registerWeakObserver(achieved1Observer = newValue -> Platform.runLater(() -> {
             if (newValue.contains(game.thePlayer())) {
                 int index = newValue.indexOf(game.thePlayer());
                 int points;
@@ -277,8 +277,8 @@ public class GamePane extends AnchorPane {
                 }
                 commonGoalCardsPane.setScore1(points);
             }
-        });
-        game.getCommonGoals().get(1).achieved().registerWeakObserver(achieved2Observer = newValue -> {
+        }));
+        game.getCommonGoals().get(1).achieved().registerWeakObserver(achieved2Observer = newValue -> Platform.runLater(() -> {
             if (newValue.contains(game.thePlayer())) {
                 int index = newValue.indexOf(game.thePlayer());
                 int points;
@@ -291,12 +291,12 @@ public class GamePane extends AnchorPane {
                 }
                 commonGoalCardsPane.setScore2(points);
             }
-        });
+        }));
 
         //binding suspended to GameView Provider game.suspended() and adding listener that when detects newValue
         //equals true, disables all current nodes in the game( except suspended game alert and endGamePane, in case
         //no other player reconnects therefore forcing the game to end )
-        game.suspended().registerWeakObserver(suspendedObserver = newValue -> {
+        game.suspended().registerWeakObserver(suspendedObserver = newValue -> Platform.runLater(() -> {
             if (newValue) {
                 for (Node n : getChildren()) {
                     if (!n.equals(suspendedGameMessage)) {
@@ -316,11 +316,11 @@ public class GamePane extends AnchorPane {
                     n.setOpacity(1);
                 }
             }
-        });
+        }));
 
         //binding this.endGame to game's Provider endGame and adding listener that when listens endGame being true
         //disables all nodes in the game and displays the endGamePane
-        game.endGame().registerWeakObserver(endGameObserver = newValue -> {
+        game.endGame().registerWeakObserver(endGameObserver = newValue -> Platform.runLater(() -> {
             if (newValue) {
                 //disable all the nodes ( when entering this state there is no coming back )
                 for (Node n : getChildren()) {
@@ -332,7 +332,7 @@ public class GamePane extends AnchorPane {
                 endGamePane.setAlignment(Pos.CENTER);
                 this.getChildren().add(endGamePane);
             }
-        });
+        }));
 
         var canSelectColumns = isCurrentTurn.and(
                 BooleanExpression.booleanExpression(pickedTilesPane.tilesProperty().map(t -> !t.isEmpty())));
