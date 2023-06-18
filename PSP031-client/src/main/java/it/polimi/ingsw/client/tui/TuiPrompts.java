@@ -119,11 +119,12 @@ class TuiPrompts {
         return promptFactory.input(
                 "Choose a nickname:",
                 (renderer0, ctx, nick) -> {
+                    ClientNetManager netManager = null;
                     try {
                         if (nick.isEmpty())
                             return ctx.invalid("Nick can't be empty");
 
-                        var netManager = netManagerFactory.create(host, port, nick);
+                        netManager = netManagerFactory.create(host, port, nick);
                         var lobbyAndController = netManager.joinGame();
                         return ctx.prompt(
                                 promptLobby(renderer, netManager, lobbyAndController.lobby(),
@@ -131,6 +132,14 @@ class TuiPrompts {
                     } catch (NickNotValidException e) {
                         return ctx.invalid(Objects.requireNonNull(e.getMessage()));
                     } catch (Throwable ex) {
+                        if (netManager != null) {
+                            try {
+                                netManager.close();
+                            } catch (IOException ex0) {
+                                ex.addSuppressed(ex0);
+                            }
+                        }
+
                         LOGGER.error("Failed to connect to the server", ex);
                         return ctx.invalid("Failed to connect to the server");
                     }
