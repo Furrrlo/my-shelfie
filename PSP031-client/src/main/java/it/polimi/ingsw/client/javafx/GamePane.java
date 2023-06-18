@@ -17,10 +17,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-public class GamePane extends AnchorPane {
+public class GamePane extends Pane {
     /**
      * set to appear when the required number of players for a game is achieved, and they are all ready.
      * It displays all the game's components needed for the player to play, including the other players'
@@ -212,7 +214,12 @@ public class GamePane extends AnchorPane {
                 });
 
         this.board = new BoardComponent(resources, game.getBoard());
-        this.boardPane = new Pane(board);
+        this.boardPane = new Pane(board) {
+            @Override
+            protected void layoutChildren() {
+                // Override this to avoid messing with layout
+            }
+        };
         getChildren().add(this.boardPane);
         getChildren().add(this.pickedTilesPane = new PickedTilesPane(resources));
 
@@ -306,7 +313,6 @@ public class GamePane extends AnchorPane {
                 }
                 suspendedGameMessage.setVisible(true);
                 suspendedGameMessage.play();
-
             } else {
                 //when suspended comes back to false it restores the game properties back to normal
                 suspendedGameMessage.setVisible(false);
@@ -329,7 +335,6 @@ public class GamePane extends AnchorPane {
                 }
                 this.endGamePane = new EndGamePane(resources, game.getSortedPlayers(), netManager);
                 endGamePane.toFront();
-                endGamePane.setAlignment(Pos.CENTER);
                 this.getChildren().add(endGamePane);
             }
         }));
@@ -466,8 +471,6 @@ public class GamePane extends AnchorPane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
-
         final double scale = Math.min(getWidth() / 1040d, getHeight() / 585d);
         this.thePlayerShelfie.resizeRelocate(0, 0, 365.0 * scale, 384.0 * scale);
         this.thePlayerPoints.resizeRelocate(0, 386.0 * scale, 221.0 * scale, 34 * scale);

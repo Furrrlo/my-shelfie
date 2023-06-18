@@ -65,8 +65,6 @@ public class PlayerShelfieComponent extends Pane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
-
         double scale = Math.min(getWidth() / 180d, getHeight() / 194d);
 
         double labelWidth = Math.min(300, getWidth() - 2 * 28 * scale);

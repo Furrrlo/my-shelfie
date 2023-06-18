@@ -87,6 +87,10 @@ public class ShelfieComponent extends AnchorPane {
                 new TileComponent[] { t5x0, t5x1, t5x2, t5x3, t5x4 },
         };
 
+        for (TileComponent[] tileComponents : matrix)
+            for (TileComponent tileComponent : tileComponents)
+                tileComponent.setManaged(false);
+
         for (int c = 0; c < ShelfieView.COLUMNS; c++) {
             final int col = c;
 

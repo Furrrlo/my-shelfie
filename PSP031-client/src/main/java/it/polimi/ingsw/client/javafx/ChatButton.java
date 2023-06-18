@@ -1,28 +1,24 @@
 package it.polimi.ingsw.client.javafx;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class ChatButton extends HBox {
+public class ChatButton extends Pane {
     private final ImageView openedMail;
     private final ImageView closedMail;
     private final Text open;
     private final Text close;
 
     public ChatButton(FxResourcesLoader resources) {
-        setAlignment(Pos.CENTER);
-        setSpacing(5);
-
         backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
@@ -51,7 +47,6 @@ public class ChatButton extends HBox {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
         double scale = Math.min(getWidth() / 115d, getHeight() / 46d);
         double border = 6 * scale;
 
@@ -65,7 +60,6 @@ public class ChatButton extends HBox {
         close.resizeRelocate(7 * scale, (getHeight() - 15 * scale) / 2, getWidth() / 2, getHeight());
         openedMail.resizeRelocate(getWidth() / 2 + 3 * border, (getHeight() - 30 * scale) / 2, getWidth(), getHeight());
         closedMail.resizeRelocate(getWidth() / 2 + 3 * border, (getHeight() - 30 * scale) / 2, getWidth(), getHeight());
-
     }
 
     public void swap() {

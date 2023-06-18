@@ -18,7 +18,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 
-public class EndGamePane extends StackPane {
+public class EndGamePane extends Pane {
+    private final ImageView teamPicture;
     /**
      * set to appear when the Game ends ( either due to forced conditions or regular play ) it shows the list of
      * players sorted upon their individual scoring, and giving the player two options :
@@ -30,7 +31,7 @@ public class EndGamePane extends StackPane {
     private final Button quit;
 
     public EndGamePane(FxResourcesLoader resources, List<? extends PlayerView> sortedPlayers, ClientNetManager netManager) {
-        var teamPicture = new ImageView(resources.loadImage("fa/teamPicture.png"));
+        teamPicture = new ImageView(resources.loadImage("fa/teamPicture.png"));
         teamPicture.setPreserveRatio(true);
         teamPicture.fitWidthProperty().bind(widthProperty());
         teamPicture.fitHeightProperty().bind(heightProperty());
@@ -90,8 +91,11 @@ public class EndGamePane extends StackPane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
         final double scale = Math.min(getWidth() / 1515, getHeight() / 1080);
+
+        teamPicture.autosize();
+        teamPicture.relocate(0, 0);
+
         rankings.resizeRelocate(200 * scale, 650 * scale, getWidth() - 400 * scale, getHeight() - 800 * scale);
         rankings.setPadding(new Insets(30 * scale, 50 * scale, 30 * scale, 50 * scale));
         newGame.resizeRelocate(getWidth() - (200 + 350) * scale, 970 * scale, 350 * scale, 70 * scale);

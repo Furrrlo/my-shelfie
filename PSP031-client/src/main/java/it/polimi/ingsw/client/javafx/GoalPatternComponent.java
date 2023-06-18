@@ -4,9 +4,9 @@ import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.CommonGoalView;
 import it.polimi.ingsw.model.PersonalGoalView;
 
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
-public class GoalPatternComponent extends AnchorPane {
+public class GoalPatternComponent extends Pane {
     private static final Color[][] SIX_COUPLES = new Color[][] {
             //@formatter:off
             new Color[] { Color.WHITE    , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , Color.BLUE      },
@@ -240,8 +240,6 @@ public class GoalPatternComponent extends AnchorPane {
     }
 
     protected void layoutChildren() {
-        super.layoutChildren();
-
         final double _widthScale = getWidth() / 1218d;
         final double _heightScale = getHeight() / 1235d;
         final double scale = Math.min(_widthScale, _heightScale);

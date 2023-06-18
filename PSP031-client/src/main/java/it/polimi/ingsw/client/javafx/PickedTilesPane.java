@@ -130,8 +130,6 @@ public class PickedTilesPane extends Pane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
-
         double scale = getHeight() / 114.0;
         double border = 6 * scale;
         double tileSize = getHeight() - 4 * border;

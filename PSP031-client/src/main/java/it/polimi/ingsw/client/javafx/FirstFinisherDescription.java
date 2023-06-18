@@ -2,16 +2,16 @@ package it.polimi.ingsw.client.javafx;
 
 import javafx.geometry.Insets;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class FirstFinisherDescription extends AnchorPane {
+public class FirstFinisherDescription extends Pane {
     private final ImageView notAchieved;
     private final ImageView achieved;
     private final Text description = new Text(
@@ -42,7 +42,6 @@ public class FirstFinisherDescription extends AnchorPane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
         double scale = Math.min(getWidth() / 221d, getHeight() / 156d);
         double border = 6 * scale;
         double middleW = getWidth() / 2;

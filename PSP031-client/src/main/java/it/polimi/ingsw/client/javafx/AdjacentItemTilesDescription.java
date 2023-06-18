@@ -1,17 +1,17 @@
 package it.polimi.ingsw.client.javafx;
 
 import javafx.geometry.Insets;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class AdjacentItemTilesDescription extends AnchorPane {
+public class AdjacentItemTilesDescription extends Pane {
     private final Text title = new Text("Adjacent Item Tiles");
     private final Text description = new Text(
             "Groups of adjacent tiles of the same type on your shelfie " +
@@ -34,7 +34,6 @@ public class AdjacentItemTilesDescription extends AnchorPane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
         double scale = Math.min(getWidth() / 221d, getHeight() / 156d);
         double titleHeight = 19 * scale;
         double textHeight = 16 * scale;

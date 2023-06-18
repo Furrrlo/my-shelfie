@@ -154,6 +154,17 @@ public class DialogVbox extends VBox {
                     System.out.println("Minute over");
                 }, new KeyValue(progress.progressProperty(), 1)));
         timeline.setCycleCount(Animation.INDEFINITE);
+
+        // Stop it if the pane becomes invisible or disabled
+        disabledProperty().addListener((obs, old, newV) -> {
+            if (newV)
+                timeline.stop();
+        });
+        visibleProperty().addListener((obs, old, newV) -> {
+            if (!newV)
+                timeline.stop();
+        });
+
         progress.prefWidthProperty().bind(widthProperty());
         if (type == DISCONNECTED) {
             AnchorPane progressPane = new AnchorPane(progress);

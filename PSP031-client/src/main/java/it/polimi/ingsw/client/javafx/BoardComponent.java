@@ -93,6 +93,13 @@ public class BoardComponent extends AnchorPane {
 
         matrix = createMatrix();
 
+        for (TileComponent[] tileComponents : Objects.requireNonNull(matrix)) {
+            for (TileComponent tileComponent : tileComponents) {
+                if (tileComponent != null)
+                    tileComponent.setManaged(false);
+            }
+        }
+
         for (int r = 0; r < board.getRows(); r++) {
             for (int c = 0; c < board.getCols(); c++) {
                 final int row = r, col = c;

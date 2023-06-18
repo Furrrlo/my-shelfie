@@ -11,8 +11,6 @@ public class CenteringFitPane extends Pane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
-
         for (var child : getManagedChildren()) {
             var insets = getInsets();
             var contentWidth = getWidth() - insets.getLeft() - insets.getRight();

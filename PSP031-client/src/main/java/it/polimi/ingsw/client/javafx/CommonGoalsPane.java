@@ -110,8 +110,6 @@ public class CommonGoalsPane extends Pane {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
-
         double scale = Math.min(getWidth() / 221d, getHeight() / 156d);
         double border = 6 * scale;
         double width = 113 * scale;
