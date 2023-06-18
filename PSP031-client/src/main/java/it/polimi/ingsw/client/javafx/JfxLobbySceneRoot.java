@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JfxLobbySceneRoot extends AnchorPane {
@@ -47,7 +48,7 @@ public class JfxLobbySceneRoot extends AnchorPane {
                              ClientNetManager netManager) {
 
         //TODO:
-        //-change scene only when everyone is ready
+        //X-change scene only when everyone is ready
         //-back to lobby button
         //X-threads
         //change ready button to not ready when player is ready and make player not ready when pressed
@@ -55,6 +56,7 @@ public class JfxLobbySceneRoot extends AnchorPane {
         //      -change number of players when already in the lobby
         //when player disconnects from game and later reconnects he shouldn't go trough lobby
 
+        AtomicBoolean isReady = new AtomicBoolean(false);
         // Create labels
         Label connectionTypeLabel = new Label("Lobby");
 
@@ -79,7 +81,14 @@ public class JfxLobbySceneRoot extends AnchorPane {
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             threadPool.submit(() -> {
                 try {
-                    lobbyAndController.controller().ready(true);
+                    if (!isReady.get()) {
+                        lobbyAndController.controller().ready(true);
+                        isReady.set(true);
+                    } else if (isReady.get()) {
+                        lobbyAndController.controller().ready(false);
+                        isReady.set(false);
+                    }
+
                 } catch (DisconnectedException ex) {
                     throw new RuntimeException(ex); //TODO
                 }
