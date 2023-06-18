@@ -13,10 +13,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -24,6 +21,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.rmi.registry.Registry;
+import java.util.Locale;
 
 public class JfxMainMenuSceneRoot extends AnchorPane {
 
@@ -44,12 +43,23 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
         // Create choice dialog for connection type
         ChoiceBox<String> connectionTypeChoice = new ChoiceBox<>();
         connectionTypeChoice.getItems().addAll("RMI", "Socket");
-        connectionTypeChoice.getSelectionModel().selectFirst();
 
         // Create text fields
         TextField ipTextField = new TextField();
         TextField portTextField = new TextField();
         TextField usernameTextField = new TextField();
+
+        // Set prompt values
+        ipTextField.setPromptText("localhost");
+        portTextField.setTextFormatter(new TextFormatter<>(
+                c -> c.getControlNewText().matches("([1-9][0-9]*)?") ? c : null));
+        connectionTypeChoice.setOnAction(e -> portTextField
+                .setPromptText(String.valueOf(switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {
+                    case "rmi" -> Registry.REGISTRY_PORT;
+                    case "socket" -> SocketClientNetManager.DEFAULT_PORT;
+                    default -> throw new IllegalStateException("Unexpected value: " + connectionTypeChoice.getValue());
+                })));
+        connectionTypeChoice.getSelectionModel().selectFirst();
 
         //create tile image
         Image titleImage = new Image(FxResources.getResourceAsStream("assets/Publisher material/Title 2000x618px.png"), 400,
@@ -73,37 +83,24 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
         mainPane.add(usernameTextField, 1, 3);
         mainPane.setAlignment(Pos.CENTER);
 
-        //ip validation
+        // ip validation
         Label errorLabel = new Label("");
         EventHandler<ActionEvent> eventIpCHeck = e -> {
-            String ipText = ipTextField.getText();
-            String portText = portTextField.getText();
-            String usernameText = usernameTextField.getText();
-            String connectionType = connectionTypeChoice.getValue();
+            String host = ipTextField.getText().isBlank()
+                    ? ipTextField.getPromptText().strip()
+                    : ipTextField.getText().strip();
+            int port = Integer.parseInt(portTextField.getText().isBlank()
+                    ? portTextField.getPromptText().strip()
+                    : portTextField.getText().strip());
+            String username = usernameTextField.getText();
 
+            ClientNetManager netManager = null;
             try {
-                // TODO: clean this up
-                ClientNetManager netManager;
-                if (connectionType.equals("RMI")) {
-                    if (ipText.equals("")) {
-                        ipText = "localhost";
-                    }
-                    if (portText.equals("")) {
-                        portText = "1099";
-                    }
-                    netManager = RmiClientNetManager.connect(ipText, Integer.parseInt(portText), usernameText);
-                } else if (connectionType.equals("Socket")) {
-                    if (ipText.equals("")) {
-                        ipText = "localhost";
-                    }
-                    if (portText.equals("")) {
-                        portText = "1234";
-                    }
-                    netManager = SocketClientNetManager.connect(new InetSocketAddress(ipText, Integer.parseInt(portText)),
-                            usernameText);
-                } else {
-                    throw new RuntimeException();
-                }
+                netManager = switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {
+                    case "rmi" -> RmiClientNetManager.connect(host, port, username);
+                    case "socket" -> SocketClientNetManager.connect(new InetSocketAddress(host, port), username);
+                    default -> throw new IllegalStateException("Unexpected value: " + connectionTypeChoice.getValue());
+                };
                 var lobbyAndController = netManager.joinGame();
 
                 Parent sceneRoot;
@@ -115,10 +112,11 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                 }
                 stage.getScene().setRoot(sceneRoot);
 
+                final var netManager0 = netManager;
                 stage.setOnCloseRequest(exit -> {
                     int exitCode = 0;
                     try {
-                        netManager.close();
+                        netManager0.close();
                     } catch (IOException ex) {
                         LOGGER.error("Failed to disconnect from the server while closing", ex);
                         exitCode = -1;
@@ -130,9 +128,16 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
 
             } catch (NickNotValidException ex) {
                 errorLabel.setText(ex.getMessage());
+            } catch (Throwable ex) {
+                if (netManager != null) {
+                    try {
+                        netManager.close();
+                    } catch (IOException exc) {
+                        ex.addSuppressed(ex);
+                    }
+                }
 
-            } catch (Exception ex) {
-                errorLabel.setText("Failed to connect to the server. Check IpP and port");
+                errorLabel.setText("Failed to connect to the server. Check ip and port");
                 LOGGER.error("Failed to connect", ex);
             }
         };
@@ -140,6 +145,8 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
         // Create start button
         Button startButton = new Button("Connect");
         startButton.setOnAction(eventIpCHeck);
+        startButton.setDefaultButton(true);
+        startButton.disableProperty().bind(usernameTextField.textProperty().map(String::isBlank));
 
         //vbox
         VBox vbox = new VBox();
