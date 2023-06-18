@@ -61,7 +61,7 @@ public class GamePane extends AnchorPane {
     private final DialogVbox notCurrentTurnMessage;
     private final DialogVbox suspendedGameMessage;
     private final DialogVbox quitGameMessage;
-    private EndGamePane endGamePane;
+    private @Nullable EndGamePane endGamePane;
     private final ScoringTokenComponent finishToken;
 
     private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
@@ -100,10 +100,6 @@ public class GamePane extends AnchorPane {
         //set alert for quitGame message
         this.quitGameMessage = new DialogVbox(DialogVbox.QUIT_GAME, netManager);
         quitGameMessage.setVisible(false);
-
-        //initializing endGamePane ( otherwise having problems not being initialized )
-        this.endGamePane = new EndGamePane(resources, game.getPlayers().stream().toList(), netManager);
-        endGamePane.setVisible(false);
 
         //adding first finisher token on game pane otherwise it would have been disabled when is not
         //the player's turn
@@ -496,8 +492,9 @@ public class GamePane extends AnchorPane {
                 230.0 * scale);
         this.quitGameMessage.resizeRelocate((getWidth() - 230 * scale) / 2, (getHeight() - 230 * scale) / 2, 230 * scale,
                 230.0 * scale);
-        this.endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2, 690 * scale,
-                490 * scale);
+        if (endGamePane != null)
+            this.endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2,
+                    690 * scale, 490 * scale);
 
         final var newMsgSize = 13 * scale;
         final var chatPaneWidth = 200.0 * scale;
