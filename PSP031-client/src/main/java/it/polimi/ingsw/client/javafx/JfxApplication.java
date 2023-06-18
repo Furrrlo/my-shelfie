@@ -28,9 +28,9 @@ public class JfxApplication extends Application {
 
         stage.setScene(scene);
         stage.setMinWidth(800);
-        stage.setWidth(800);
+        stage.setWidth(1080);
         stage.setMinHeight(500);
-        stage.setHeight(500);
+        stage.setHeight(720);
         stage.show();
     }
 }

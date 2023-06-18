@@ -16,19 +16,13 @@ public class JfxGameScene extends Scene {
 
     public JfxGameScene(FxResourcesLoader resources, Stage stage, GameView game, GameController controller,
                         ClientNetManager netManager) {
-        super(createRootNode(resources, stage, game, controller, netManager));
+        super(createRootNode(resources, game, controller, netManager));
     }
 
     private static Parent createRootNode(FxResourcesLoader resources,
-                                         Stage stage,
                                          GameView game,
                                          GameController controller,
                                          ClientNetManager netManager) {
-        stage.setMinWidth(800);
-        stage.setWidth(1080);
-        stage.setMinHeight(500);
-        stage.setHeight(720);
-
         var mainPane = new CenteringFitPane();
         mainPane.setStyle(mainPane.getStyle() + "-fx-font-family: \"Inter Regular\";");
         mainPane.setPadding(new Insets(10));
