@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
 public class JfxMainMenuSceneRoot extends AnchorPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuSceneRoot.class);
 
-    public JfxMainMenuSceneRoot(FxResourcesLoader resources, Stage stage) {
+    public JfxMainMenuSceneRoot(FxResourcesLoader resources, ExecutorService threadPool, Stage stage) {
         //var mainPane = new CenteringFitPane();
         //mainPane.getChildren().add(new MainMenuPane());
         //Pattern ipPattern = Pattern
@@ -106,9 +107,9 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                 Parent sceneRoot;
                 var game = lobbyAndController.lobby().game().get();
                 if (game != null) {
-                    sceneRoot = new JfxGameSceneRoot(resources, game.game(), game.controller(), netManager);
+                    sceneRoot = new JfxGameSceneRoot(resources, threadPool, game.game(), game.controller(), netManager);
                 } else {
-                    sceneRoot = new JfxLobbySceneRoot(resources, stage, lobbyAndController, netManager);
+                    sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
                 }
                 stage.getScene().setRoot(sceneRoot);
 

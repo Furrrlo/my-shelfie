@@ -6,7 +6,6 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.PlayerView;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javafx.application.Platform;
@@ -29,9 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class GamePane extends Pane {
@@ -79,20 +75,11 @@ public class GamePane extends Pane {
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
     private final Consumer<List<? extends PlayerView>> achieved2Observer;
 
-    private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
-
-        private final AtomicInteger n = new AtomicInteger();
-
-        @Override
-        public Thread newThread(@NotNull Runnable r) {
-            var th = new Thread(r);
-            th.setName("jfx-controller-executor-" + n.getAndIncrement());
-            th.setDaemon(false);
-            return th;
-        }
-    });
-
-    public GamePane(FxResourcesLoader resources, GameView game, GameController controller, ClientNetManager netManager) {
+    public GamePane(FxResourcesLoader resources,
+                    ExecutorService threadPool,
+                    GameView game,
+                    GameController controller,
+                    ClientNetManager netManager) {
         //set new alerts for suspended game and disconnected player ( making them initially not visible,
         // will be later made visible when corresponding state is caught )
         this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN, null);

@@ -4,7 +4,6 @@ import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyPlayer;
-import org.jetbrains.annotations.NotNull;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -22,27 +21,12 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class JfxLobbySceneRoot extends AnchorPane {
 
-    private static final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
-
-        private final AtomicInteger n = new AtomicInteger();
-
-        @Override
-        public Thread newThread(@NotNull Runnable r) {
-            var th = new Thread(r);
-            th.setName("jfx-lobby-ready-" + n.getAndIncrement());
-            th.setDaemon(false);
-            return th;
-        }
-    });
-
     public JfxLobbySceneRoot(FxResourcesLoader resources,
+                             ExecutorService threadPool,
                              Stage stage,
                              LobbyAndController<?> lobbyAndController,
                              ClientNetManager netManager) {
@@ -72,7 +56,7 @@ public class JfxLobbySceneRoot extends AnchorPane {
 
         lobbyAndController.lobby().game().registerObserver(gameAndController -> {
             if (gameAndController != null) {
-                Platform.runLater(() -> stage.getScene().setRoot(new JfxGameSceneRoot(resources,
+                Platform.runLater(() -> stage.getScene().setRoot(new JfxGameSceneRoot(resources, threadPool,
                         gameAndController.game(), gameAndController.controller(),
                         netManager)));
             }

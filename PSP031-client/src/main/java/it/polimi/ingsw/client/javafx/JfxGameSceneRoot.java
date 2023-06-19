@@ -3,15 +3,19 @@ package it.polimi.ingsw.client.javafx;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.GameView;
+import it.polimi.ingsw.utils.ThreadPools;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.*;
 
+import java.util.concurrent.ExecutorService;
+
 public class JfxGameSceneRoot extends CenteringFitPane {
 
     public JfxGameSceneRoot(FxResourcesLoader resources,
+                            ExecutorService threadPool,
                             GameView game,
                             GameController controller,
                             ClientNetManager netManager) {
@@ -26,9 +30,9 @@ public class JfxGameSceneRoot extends CenteringFitPane {
 
         getChildren().setAll(new ProgressIndicator());
 
-        new Thread(() -> {
-            var gamePane = new GamePane(resources, game, controller, netManager);
+        threadPool.submit(ThreadPools.giveNameToTask("jfx-load-gamepane-thread", () -> {
+            var gamePane = new GamePane(resources, threadPool, game, controller, netManager);
             Platform.runLater(() -> getChildren().setAll(gamePane));
-        }).start();
+        }));
     }
 }
