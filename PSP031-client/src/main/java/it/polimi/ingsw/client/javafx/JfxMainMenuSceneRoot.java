@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -86,6 +89,7 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
 
         // ip validation
         Label errorLabel = new Label("");
+        BooleanProperty isConnecting = new SimpleBooleanProperty(false);
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             String host = ipTextField.getText().isBlank()
                     ? ipTextField.getPromptText().strip()
@@ -95,59 +99,67 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                     : portTextField.getText().strip());
             String username = usernameTextField.getText();
 
-            ClientNetManager netManager = null;
-            try {
-                netManager = switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {
-                    case "rmi" -> RmiClientNetManager.connect(host, port, username);
-                    case "socket" -> SocketClientNetManager.connect(new InetSocketAddress(host, port), username);
-                    default -> throw new IllegalStateException("Unexpected value: " + connectionTypeChoice.getValue());
-                };
-                var lobbyAndController = netManager.joinGame();
+            isConnecting.set(true);
+            @SuppressWarnings("unused")
+            var unused = threadPool.submit(() -> {
+                ClientNetManager netManager = null;
+                try {
+                    netManager = switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {
+                        case "rmi" -> RmiClientNetManager.connect(host, port, username);
+                        case "socket" -> SocketClientNetManager.connect(new InetSocketAddress(host, port), username);
+                        default -> throw new IllegalStateException("Unexpected value: " + connectionTypeChoice.getValue());
+                    };
+                    var lobbyAndController = netManager.joinGame();
 
-                Parent sceneRoot;
-                var game = lobbyAndController.lobby().game().get();
-                if (game != null) {
-                    sceneRoot = new JfxGameSceneRoot(resources, threadPool, game.game(), game.controller(), netManager);
-                } else {
-                    sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
-                }
-                stage.getScene().setRoot(sceneRoot);
-
-                final var netManager0 = netManager;
-                stage.setOnCloseRequest(exit -> {
-                    int exitCode = 0;
-                    try {
-                        netManager0.close();
-                    } catch (IOException ex) {
-                        LOGGER.error("Failed to disconnect from the server while closing", ex);
-                        exitCode = -1;
+                    Parent sceneRoot;
+                    var game = lobbyAndController.lobby().game().get();
+                    if (game != null) {
+                        sceneRoot = new JfxGameSceneRoot(resources, threadPool, game.game(), game.controller(), netManager);
+                    } else {
+                        sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
                     }
 
-                    Platform.exit();
-                    System.exit(exitCode);
-                });
+                    final var netManager0 = netManager;
+                    Platform.runLater(() -> {
+                        stage.getScene().setRoot(sceneRoot);
+                        stage.setOnCloseRequest(exit -> {
+                            int exitCode = 0;
+                            try {
+                                netManager0.close();
+                            } catch (IOException ex) {
+                                LOGGER.error("Failed to disconnect from the server while closing", ex);
+                                exitCode = -1;
+                            }
 
-            } catch (NickNotValidException ex) {
-                errorLabel.setText(ex.getMessage());
-            } catch (Throwable ex) {
-                if (netManager != null) {
-                    try {
-                        netManager.close();
-                    } catch (IOException exc) {
-                        ex.addSuppressed(ex);
+                            Platform.exit();
+                            System.exit(exitCode);
+                        });
+                    });
+                } catch (NickNotValidException ex) {
+                    Platform.runLater(() -> errorLabel.setText(ex.getMessage()));
+                } catch (Throwable ex) {
+                    if (netManager != null) {
+                        try {
+                            netManager.close();
+                        } catch (IOException exc) {
+                            ex.addSuppressed(ex);
+                        }
                     }
-                }
 
-                errorLabel.setText("Failed to connect to the server. Check ip and port");
-                LOGGER.error("Failed to connect", ex);
-            }
+                    LOGGER.error("Failed to connect", ex);
+                    Platform.runLater(() -> errorLabel.setText("Failed to connect to the server. Check ip and port"));
+                } finally {
+                    Platform.runLater(() -> isConnecting.set(false));
+                }
+            });
         };
 
         // Create start button
         Button startButton = new Button("Connect");
         startButton.setOnAction(eventIpCHeck);
         startButton.setDefaultButton(true);
-        startButton.disableProperty().bind(usernameTextField.textProperty().map(String::isBlank));
+        startButton.disableProperty().bind(isConnecting
+                .or(BooleanExpression.booleanExpression(usernameTextField.textProperty().map(String::isBlank))));
 
         //vbox
         VBox vbox = new VBox();
