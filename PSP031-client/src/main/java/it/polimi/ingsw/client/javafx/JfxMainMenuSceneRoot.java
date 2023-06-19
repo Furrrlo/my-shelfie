@@ -111,13 +111,7 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                     };
                     var lobbyAndController = netManager.joinGame();
 
-                    Parent sceneRoot;
-                    var game = lobbyAndController.lobby().game().get();
-                    if (game != null) {
-                        sceneRoot = new JfxGameSceneRoot(resources, threadPool, game.game(), game.controller(), netManager);
-                    } else {
-                        sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
-                    }
+                    Parent sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
 
                     final var netManager0 = netManager;
                     Platform.runLater(() -> {
