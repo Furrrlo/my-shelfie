@@ -21,6 +21,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -115,8 +116,7 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
 
                     final var netManager0 = netManager;
                     Platform.runLater(() -> {
-                        stage.getScene().setRoot(sceneRoot);
-                        stage.setOnCloseRequest(exit -> {
+                        EventHandler<WindowEvent> onClose = evt -> {
                             int exitCode = 0;
                             try {
                                 netManager0.close();
@@ -127,7 +127,10 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
 
                             Platform.exit();
                             System.exit(exitCode);
-                        });
+                        };
+                        stage.getScene().setRoot(sceneRoot);
+                        stage.setOnCloseRequest(onClose);
+                        stage.setOnHiding(onClose);
                     });
                 } catch (NickNotValidException ex) {
                     Platform.runLater(() -> errorLabel.setText(ex.getMessage()));

@@ -12,9 +12,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.List;
 
 public class EndGamePane extends Pane {
@@ -64,16 +62,8 @@ public class EndGamePane extends Pane {
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 350))),
                 new Insets(0)))));
 
-        quit.setOnMouseClicked(event -> {
-            try {
-                netManager.close();
-                System.exit(0);
-            } catch (IOException ex) {
-                System.exit(-1);
-            }
-            Stage stage = (Stage) getScene().getWindow();
-            stage.close();
-        });
+        // The stage has a onHidden handler which will handle the closing
+        quit.setOnMouseClicked(event -> getScene().getWindow().hide());
         newGame.setOnMouseClicked(event -> {
             // TODO: this is wrong
             //closes the existing my shelfie window and opens a new one
