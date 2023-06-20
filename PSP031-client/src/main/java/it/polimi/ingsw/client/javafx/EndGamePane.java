@@ -16,7 +16,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -65,13 +64,13 @@ public class EndGamePane extends Pane {
         getChildren().add(rankings);
 
         this.newGame = new Button("Start new game");
-        newGame.setTextAlignment(TextAlignment.CENTER);
+        newGame.setAlignment(Pos.CENTER);
         newGame.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 350))),
                 new Insets(0)))));
         this.quit = new Button("Quit");
-        quit.setTextAlignment(TextAlignment.CENTER);
+        quit.setAlignment(Pos.CENTER);
         quit.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.INDIANRED,
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 350))),
