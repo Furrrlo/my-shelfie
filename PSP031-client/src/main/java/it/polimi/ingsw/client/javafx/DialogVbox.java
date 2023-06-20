@@ -95,28 +95,21 @@ public class DialogVbox extends VBox {
         if (type == NOT_CURRENT_TURN) {
             HBox hbox = new HBox();
             hbox.prefWidthProperty().bind(widthProperty());
-            Button ok = new Button("ok");
-            ok.setAlignment(Pos.CENTER_RIGHT);
+
+            Button ok = new InGameButton("ok", Color.LIGHTSEAGREEN);
+            ok.setOnMouseClicked(e -> this.setVisible(false));
+
             hbox.getChildren().add(ok);
             hbox.setAlignment(Pos.CENTER_RIGHT);
-            ok.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                    Color.LIGHTSEAGREEN,
-                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                    new Insets(-5)))));
-            ok.setOnMouseClicked(e -> this.setVisible(false));
             this.getChildren().add(hbox);
         }
         if (type == QUIT_GAME) {
             HBox hbox = new HBox();
             hbox.setSpacing(15);
             hbox.prefWidthProperty().bind(widthProperty());
-            Button cancel = new Button("Go back");
-            cancel.setAlignment(Pos.CENTER_LEFT);
-            cancel.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                    Color.LIGHTSEAGREEN,
-                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                    new Insets(-5)))));
-            hbox.getChildren().add(cancel);
+            hbox.setAlignment(Pos.CENTER_RIGHT);
+
+            Button cancel = new InGameButton("Go back", Color.LIGHTSEAGREEN);
             cancel.setOnMouseClicked(e -> {
                 this.setVisible(false);
                 for (Node n : this.getParent().getChildrenUnmodifiable()) {
@@ -124,16 +117,9 @@ public class DialogVbox extends VBox {
                     n.setOpacity(1);
                 }
             });
+            hbox.getChildren().add(cancel);
 
-            Button quitGame = new Button("Quit Game");
-            quitGame.setAlignment(Pos.CENTER_RIGHT);
-            hbox.getChildren().add(quitGame);
-            hbox.setAlignment(Pos.CENTER_RIGHT);
-            quitGame.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                    Color.INDIANRED,
-                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                    new Insets(-5)))));
-
+            Button quitGame = new InGameButton("Quit Game", Color.INDIANRED);
             quitGame.setOnMouseClicked(event -> {
                 try {
                     Objects.requireNonNull(netManager).close();
@@ -144,6 +130,8 @@ public class DialogVbox extends VBox {
                 Stage stage = (Stage) getScene().getWindow();
                 stage.close();
             });
+
+            hbox.getChildren().add(quitGame);
             this.getChildren().add(hbox);
         }
 
@@ -179,5 +167,17 @@ public class DialogVbox extends VBox {
 
     public void play() {
         this.timeline.playFromStart();
+    }
+
+    protected static class DialogButton extends InGameButton {
+
+        public DialogButton(String text, @Nullable Color bgColor) {
+            super(text, bgColor);
+
+            backgroundRadiusProperty().bind(parentProperty()
+                    .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
+                    .map(w -> new CornerRadii(Math.min(5, 5 * (w.doubleValue() / 210d)))));
+            setBackgroundInsets(new Insets(-5));
+        }
     }
 }

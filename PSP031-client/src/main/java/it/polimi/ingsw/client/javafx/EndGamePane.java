@@ -2,6 +2,7 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.PlayerView;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,18 +64,8 @@ public class EndGamePane extends Pane {
         rankings.setAlignment(Pos.CENTER);
         getChildren().add(rankings);
 
-        this.newGame = new Button("Start new game");
-        newGame.setAlignment(Pos.CENTER);
-        newGame.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 350))),
-                new Insets(0)))));
-        this.quit = new Button("Quit");
-        quit.setAlignment(Pos.CENTER);
-        quit.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.INDIANRED,
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 350))),
-                new Insets(0)))));
+        this.newGame = new EndGameButton("Start new game", Color.LIGHTSEAGREEN);
+        this.quit = new EndGameButton("Quit", Color.INDIANRED);
 
         // The stage has a onHidden handler which will handle the closing
         BooleanProperty isRejoiningAGame = new SimpleBooleanProperty(this, "isJoiningAGame");
@@ -114,6 +105,18 @@ public class EndGamePane extends Pane {
         rankings.setPadding(new Insets(30 * scale, 50 * scale, 30 * scale, 50 * scale));
         newGame.resizeRelocate(getWidth() - (200 + 350) * scale, 970 * scale, 350 * scale, 70 * scale);
         quit.resizeRelocate(200 * scale, 970 * scale, 250 * scale, 70 * scale);
+    }
+
+    private static class EndGameButton extends InGameButton {
+
+        public EndGameButton(String text, @Nullable Color bgColor) {
+            super(text, bgColor);
+
+            backgroundRadiusProperty().bind(parentProperty()
+                    .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
+                    .map(w -> new CornerRadii(Math.min(10, 10 * (w.doubleValue() / 350)))));
+            setBackgroundInsets(new Insets(0));
+        }
     }
 
     private static class RankingRow extends HBox {
