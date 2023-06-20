@@ -30,13 +30,21 @@ public class InGameButton extends Button {
         setAlignment(Pos.CENTER);
         backgroundProperty().bind(FxProperties
                 .compositeObservableValue(
+                        armedProperty(),
+                        hoverProperty(),
                         backgroundColorProperty(),
                         backgroundRadiusProperty(),
                         backgroundInsetsProperty())
-                .map(i -> new Background(new BackgroundFill(
-                        getBackgroundColor(),
-                        getBackgroundRadius(),
-                        getBackgroundInsets()))));
+                .map(i -> {
+                    var color = backgroundColor.get();
+                    return new Background(new BackgroundFill(
+                            color == null ? null
+                                    : isArmed() ? color.darker().darker()
+                                            : isHover() ? color.darker()
+                                                    : color,
+                            getBackgroundRadius(),
+                            getBackgroundInsets()));
+                }));
     }
 
     public Color getBackgroundColor() {
