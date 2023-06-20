@@ -1,7 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -20,13 +19,7 @@ class QuitGameDialog extends DialogVbox {
         hbox.setAlignment(Pos.CENTER_RIGHT);
 
         Button cancel = new DialogButton("Go back", Color.LIGHTSEAGREEN);
-        cancel.setOnMouseClicked(e -> {
-            this.setVisible(false);
-            for (Node n : this.getParent().getChildrenUnmodifiable()) {
-                n.setDisable(false);
-                n.setOpacity(1);
-            }
-        });
+        cancel.setOnMouseClicked(e -> this.setVisible(false));
         hbox.getChildren().add(cancel);
 
         Button quitGame = new DialogButton("Quit Game", Color.INDIANRED);
