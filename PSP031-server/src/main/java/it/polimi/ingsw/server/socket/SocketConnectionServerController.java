@@ -141,6 +141,7 @@ public class SocketConnectionServerController implements Closeable {
             var heartbeatHandler = new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer);
             connection.heartbeatHandler = heartbeatHandler;
             controller.connectPlayer(nick, heartbeatHandler);
+            connection.verifyNick();
             joinCtx.reply(new JoinedPacket());
             return connection;
         } catch (NickNotValidException e) {
@@ -232,6 +233,12 @@ public class SocketConnectionServerController implements Closeable {
 
         public ServerSocketManager getSocketManager() {
             return socketManager;
+        }
+
+        @Override
+        protected void verifyNick() {
+            // Override to be able to access it in the outer class
+            super.verifyNick();
         }
 
         @Override

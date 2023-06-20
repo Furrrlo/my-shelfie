@@ -91,6 +91,7 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
         connections.add(connection);
         try {
             controller.connectPlayer(nick, new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer));
+            connection.verifyNick();
             return connection.unicastRemoteObjects().export(new ConnectedControllerImpl(connection), 0);
         } catch (NickNotValidException e) {
             try {
@@ -175,6 +176,12 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
             super(controller, nick);
             this.unicastRemoteObjects = unicastRemoteObjects;
             this.gameUnicastRemoteObjects = gameUnicastRemoteObjects;
+        }
+
+        @Override
+        protected void verifyNick() {
+            // Override to be able to access it in the outer class
+            super.verifyNick();
         }
 
         public UnicastRemoteObjects.TrackingExporter unicastRemoteObjects() {

@@ -22,6 +22,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
     private final ConcurrentMap<Provider<?>, Set<Consumer<?>>> observablesToObservers = new ConcurrentHashMap<>();
 
     protected final String nick;
+    protected volatile boolean nickVerified;
 
     public BaseServerConnection(ServerController controller, String nick) {
         this.controller = controller;
@@ -30,6 +31,10 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
 
     public String getNick() {
         return nick;
+    }
+
+    protected void verifyNick() {
+        nickVerified = true;
     }
 
     public void disconnectPlayer(Throwable cause) {
@@ -51,7 +56,8 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
         } finally {
             // Make sure we only grab locks after we closed the connection, as if we do
             // it before it may lead to deadlocks
-            callDisconnectPlayerHook();
+            if (nickVerified)
+                callDisconnectPlayerHook();
         }
     }
 
