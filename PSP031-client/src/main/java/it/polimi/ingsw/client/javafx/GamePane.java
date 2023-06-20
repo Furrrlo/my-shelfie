@@ -23,6 +23,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +78,7 @@ public class GamePane extends Pane {
 
     public GamePane(FxResourcesLoader resources,
                     ExecutorService threadPool,
+                    Stage stage,
                     GameView game,
                     GameController controller,
                     ClientNetManager netManager) {
@@ -320,7 +322,7 @@ public class GamePane extends Pane {
                     n.setDisable(true);
                     n.setOpacity(0.5);
                 }
-                this.endGamePane = new EndGamePane(resources, game.getSortedPlayers(), netManager);
+                this.endGamePane = new EndGamePane(resources, threadPool, stage, game.getSortedPlayers(), netManager);
                 endGamePane.toFront();
                 this.getChildren().add(endGamePane);
             }

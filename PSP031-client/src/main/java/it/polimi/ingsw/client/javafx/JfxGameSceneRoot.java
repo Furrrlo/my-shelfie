@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.*;
+import javafx.stage.Stage;
 
 import java.util.concurrent.ExecutorService;
 
@@ -16,6 +17,7 @@ public class JfxGameSceneRoot extends CenteringFitPane {
 
     public JfxGameSceneRoot(FxResourcesLoader resources,
                             ExecutorService threadPool,
+                            Stage stage,
                             GameView game,
                             GameController controller,
                             ClientNetManager netManager) {
@@ -31,7 +33,7 @@ public class JfxGameSceneRoot extends CenteringFitPane {
         getChildren().setAll(new ProgressIndicator());
 
         threadPool.submit(ThreadPools.giveNameToTask("jfx-load-gamepane-thread", () -> {
-            var gamePane = new GamePane(resources, threadPool, game, controller, netManager);
+            var gamePane = new GamePane(resources, threadPool, stage, game, controller, netManager);
             Platform.runLater(() -> getChildren().setAll(gamePane));
         }));
     }

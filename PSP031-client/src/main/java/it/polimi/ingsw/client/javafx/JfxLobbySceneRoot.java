@@ -56,14 +56,15 @@ public class JfxLobbySceneRoot extends AnchorPane {
 
         lobbyAndController.lobby().game().registerObserver(gameAndController -> {
             if (gameAndController != null) {
-                Platform.runLater(() -> stage.getScene().setRoot(new JfxGameSceneRoot(resources, threadPool,
+                Platform.runLater(() -> stage.getScene().setRoot(new JfxGameSceneRoot(resources, threadPool, stage,
                         gameAndController.game(), gameAndController.controller(),
                         netManager)));
             }
         });
         var game = lobbyAndController.lobby().game().get();
         if (game != null)
-            stage.getScene().setRoot(new JfxGameSceneRoot(resources, threadPool, game.game(), game.controller(), netManager));
+            stage.getScene()
+                    .setRoot(new JfxGameSceneRoot(resources, threadPool, stage, game.game(), game.controller(), netManager));
 
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             threadPool.submit(() -> {

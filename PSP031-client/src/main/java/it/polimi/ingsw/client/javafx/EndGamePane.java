@@ -2,8 +2,13 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.PlayerView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -12,10 +17,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class EndGamePane extends Pane {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EndGamePane.class);
+
     private final ImageView teamPicture;
     /**
      * set to appear when the Game ends ( either due to forced conditions or regular play ) it shows the list of
@@ -27,7 +37,12 @@ public class EndGamePane extends Pane {
     private final Button newGame;
     private final Button quit;
 
-    public EndGamePane(FxResourcesLoader resources, List<? extends PlayerView> sortedPlayers, ClientNetManager netManager) {
+    public EndGamePane(FxResourcesLoader resources,
+                       ExecutorService threadPool,
+                       Stage stage,
+                       List<? extends PlayerView> sortedPlayers,
+                       ClientNetManager netManager) {
+
         teamPicture = new ImageView(resources.loadImage("fa/teamPicture.png"));
         teamPicture.setPreserveRatio(true);
         teamPicture.fitWidthProperty().bind(widthProperty());
@@ -63,18 +78,28 @@ public class EndGamePane extends Pane {
                 new Insets(0)))));
 
         // The stage has a onHidden handler which will handle the closing
+        BooleanProperty isRejoiningAGame = new SimpleBooleanProperty(this, "isJoiningAGame");
         quit.setOnMouseClicked(event -> getScene().getWindow().hide());
         newGame.setOnMouseClicked(event -> {
-            // TODO: this is wrong
-            //closes the existing my shelfie window and opens a new one
-            //            Stage stage = (Stage) getScene().getWindow();
-            //            stage.close();
+            isRejoiningAGame.set(true);
 
-            //opens a new Stage
-            //            Scene scene = new JfxMainMenuScenePane(resources, stage);
-            //            stage.setScene(scene);
-            //            stage.show();
+            threadPool.execute(() -> {
+                try {
+                    var lobbyAndController = netManager.joinGame();
+                    var sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
+                    Platform.runLater(() -> stage.getScene().setRoot(sceneRoot));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to join a new game", e);
+                    // TODO: reconnect
+                    throw new RuntimeException(e);
+                } finally {
+                    Platform.runLater(() -> isRejoiningAGame.set(false));
+                }
+            });
         });
+        newGame.disableProperty().bind(isRejoiningAGame);
+        quit.disableProperty().bind(isRejoiningAGame);
+
         this.getChildren().add(newGame);
         this.getChildren().add(quit);
     }
