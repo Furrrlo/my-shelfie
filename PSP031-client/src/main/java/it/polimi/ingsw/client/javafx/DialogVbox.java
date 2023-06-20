@@ -1,6 +1,5 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.client.network.ClientNetManager;
 import org.jetbrains.annotations.Nullable;
 
 import javafx.animation.Animation;
@@ -18,11 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.io.IOException;
-import java.util.Objects;
 
 public class DialogVbox extends VBox {
 
@@ -32,7 +27,7 @@ public class DialogVbox extends VBox {
 
     private final Timeline timeline;
 
-    public DialogVbox(int type, @Nullable ClientNetManager netManager) {
+    public DialogVbox(int type) {
         setSpacing(15);
         if (type == NOT_CURRENT_TURN || type == DISCONNECTED) {
             backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
@@ -120,16 +115,8 @@ public class DialogVbox extends VBox {
             hbox.getChildren().add(cancel);
 
             Button quitGame = new InGameButton("Quit Game", Color.INDIANRED);
-            quitGame.setOnMouseClicked(event -> {
-                try {
-                    Objects.requireNonNull(netManager).close();
-                    System.exit(0);
-                } catch (IOException ex) {
-                    System.exit(-1);
-                }
-                Stage stage = (Stage) getScene().getWindow();
-                stage.close();
-            });
+            // The stage has a onHidden handler which will handle the closing
+            quitGame.setOnMouseClicked(event -> getScene().getWindow().hide());
 
             hbox.getChildren().add(quitGame);
             this.getChildren().add(hbox);

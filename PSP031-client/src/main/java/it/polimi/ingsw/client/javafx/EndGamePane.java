@@ -68,8 +68,9 @@ public class EndGamePane extends Pane {
         this.quit = new EndGameButton("Quit", Color.INDIANRED);
 
         // The stage has a onHidden handler which will handle the closing
-        BooleanProperty isRejoiningAGame = new SimpleBooleanProperty(this, "isJoiningAGame");
         quit.setOnMouseClicked(event -> getScene().getWindow().hide());
+
+        BooleanProperty isRejoiningAGame = new SimpleBooleanProperty(this, "isJoiningAGame");
         newGame.setOnMouseClicked(event -> {
             isRejoiningAGame.set(true);
 

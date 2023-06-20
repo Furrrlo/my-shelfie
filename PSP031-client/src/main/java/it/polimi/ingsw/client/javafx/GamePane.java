@@ -117,12 +117,12 @@ public class GamePane extends Pane {
         };
         //set new alerts for suspended game and disconnected player ( making them initially not visible,
         // will be later made visible when corresponding state is caught )
-        this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN, null);
+        this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN);
         bindBidirectionalVisibility.accept(notCurrentTurnMessage);
-        this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED, null);
+        this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
         bindBidirectionalVisibility.accept(suspendedGameMessage);
         //set alert for quitGame message
-        this.quitGameMessage = new DialogVbox(DialogVbox.QUIT_GAME, netManager);
+        this.quitGameMessage = new DialogVbox(DialogVbox.QUIT_GAME);
         bindBidirectionalVisibility.accept(quitGameMessage);
 
         // Hide and disable / un-hide and enable all nodes when a dialog displayed/hidden
