@@ -10,5 +10,5 @@ public interface NetworkConstants {
     /** Timeout after which, if nothing was read, the connection should be considered dead */
     Duration READ_TIMEOUT = PING_INTERVAL.multipliedBy(2);
     /** Timeout after which, if a response to a packet was not received, the connection should be considered dead */
-    Duration RESPONSE_TIMEOUT = Duration.of(2, ChronoUnit.SECONDS);
+    Duration RESPONSE_TIMEOUT = Duration.of(5, ChronoUnit.SECONDS);
 }
