@@ -342,7 +342,7 @@ public class GamePane extends Pane {
                             .map(t -> new BoardCoord(t.row(), t.col()))
                             .toList();
                     pickedTilesPane.tilesProperty().clear();
-                    threadPool.submit(() -> {
+                    threadPool.execute(() -> {
                         try {
                             controller.makeMove(choosenCoords, tileAndCoords.col());
                         } catch (DisconnectedException e) {

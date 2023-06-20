@@ -101,8 +101,7 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
             String username = usernameTextField.getText();
 
             isConnecting.set(true);
-            @SuppressWarnings("unused")
-            var unused = threadPool.submit(() -> {
+            threadPool.execute(() -> {
                 ClientNetManager netManager = null;
                 try {
                     netManager = switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {

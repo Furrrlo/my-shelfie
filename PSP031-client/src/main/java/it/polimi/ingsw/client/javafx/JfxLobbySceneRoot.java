@@ -67,7 +67,7 @@ public class JfxLobbySceneRoot extends AnchorPane {
                     .setRoot(new JfxGameSceneRoot(resources, threadPool, stage, game.game(), game.controller(), netManager));
 
         EventHandler<ActionEvent> eventIpCHeck = e -> {
-            threadPool.submit(() -> {
+            threadPool.execute(() -> {
                 try {
                     if (!isReady.get()) {
                         lobbyAndController.controller().ready(true);

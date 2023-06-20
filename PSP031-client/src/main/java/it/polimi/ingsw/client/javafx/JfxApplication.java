@@ -2,6 +2,8 @@ package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.utils.ThreadPools;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -15,6 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class JfxApplication extends Application {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JfxApplication.class);
+
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
 
         private final AtomicInteger n = new AtomicInteger();
@@ -24,6 +28,7 @@ public class JfxApplication extends Application {
             var th = new Thread(r);
             th.setName("jfx-executor-" + n.getAndIncrement());
             th.setDaemon(true);
+            th.setUncaughtExceptionHandler((th0, t) -> LOGGER.error("Uncaught exception in JFX worker thread {}", th0, t));
             return th;
         }
     });
@@ -33,7 +38,7 @@ public class JfxApplication extends Application {
         var resources = new FxCachingResourcesLoader();
         // Load fonts from ttf files
         Font.loadFonts(FxResources.getResourceAsStream("Inter-VariableFont_slnt,wght.ttf"), 0);
-        threadPool.submit(ThreadPools.giveNameToTask("JFX-resources-preload-thread", resources::populateCache));
+        threadPool.execute(ThreadPools.giveNameToTask("JFX-resources-preload-thread", resources::populateCache));
 
         Scene scene = new Scene(new JfxMainMenuSceneRoot(resources, threadPool, stage));
 

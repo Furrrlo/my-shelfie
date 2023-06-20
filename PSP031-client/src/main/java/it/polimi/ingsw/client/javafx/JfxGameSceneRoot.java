@@ -32,7 +32,7 @@ public class JfxGameSceneRoot extends CenteringFitPane {
 
         getChildren().setAll(new ProgressIndicator());
 
-        threadPool.submit(ThreadPools.giveNameToTask("jfx-load-gamepane-thread", () -> {
+        threadPool.execute(ThreadPools.giveNameToTask("jfx-load-gamepane-thread", () -> {
             var gamePane = new GamePane(resources, threadPool, stage, game, controller, netManager);
             Platform.runLater(() -> getChildren().setAll(gamePane));
         }));
