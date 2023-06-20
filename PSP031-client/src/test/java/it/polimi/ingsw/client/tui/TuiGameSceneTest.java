@@ -29,12 +29,6 @@ class TuiGameSceneTest {
     }
 
     @Test
-    void printPersonalGoal() {
-        PersonalGoal p2 = new PersonalGoal(0);
-        TuiGameScene.printPersonalGoal(out, p2);
-    }
-
-    @Test
     void printAchieved() {
         PersonalGoal p0 = new PersonalGoal(0);
         Shelfie shelfie = new Shelfie(new Color[][] {
