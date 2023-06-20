@@ -370,6 +370,7 @@ public class GamePane extends Pane {
                 visibleDialog.set(null);
             }
         }));
+        suspendedObserver.accept(game.suspended().get()); // Trigger suspension in case it's true
 
         //binding this.endGame to game's Provider endGame and adding listener that when listens endGame being true
         //disables all nodes in the game and displays the endGamePane
@@ -396,6 +397,7 @@ public class GamePane extends Pane {
                 visibleDialog.set(endGamePane);
             }
         }));
+        endGameObserver.accept(game.endGame().get()); // Trigger end game in case it's true
 
         var canSelectColumns = isCurrentTurn.and(
                 BooleanExpression.booleanExpression(pickedTilesPane.tilesProperty().map(t -> !t.isEmpty())));
