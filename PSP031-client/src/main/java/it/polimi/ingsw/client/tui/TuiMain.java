@@ -13,9 +13,13 @@ import java.nio.charset.Charset;
  *           possibility to set the {@code log4j.configurationFile} system property to the
  *           correct file
  */
-class TuiMain {
+public class TuiMain {
 
     public static void main(String[] args) {
+        doMain(args, true);
+    }
+
+    public static void doMain(String[] args, boolean hasTuiArg) {
         //If the client has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
         //@see https://bugs.openjdk.org/browse/JDK-8042232
         // To work around this, run JVM with the parameter -Djava.rmi.server.hostname=<client address> or uncomment the following line.

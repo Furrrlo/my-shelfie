@@ -2,8 +2,8 @@
 <Configuration status="WARN">
     <Appenders>
         <RollingRandomAccessFile name="file"
-                                 fileName="./logs/latest.log"
-                                 filePattern="./logs/%d{yyyy-MM-dd}/logs.%d{yyyy-MM-dd}.%i.log.gz"
+                                 fileName="./logs/tui-latest.log"
+                                 filePattern="./tui-logs/%d{yyyy-MM-dd}/logs.%d{yyyy-MM-dd}.%i.log.gz"
                                  immediateFlush="true"
                                  append="true">
             <PatternLayout>
