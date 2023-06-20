@@ -3,6 +3,8 @@ assets/*
 PSP031-client/src/main/resources/it/polimi/ingsw/client/javafx/assets/*
 # Ignore logs
 **/logs/*
+**/tui-logs/*
+**/jfx-logs/*
 
 ### Maven stuff ###
 target/
