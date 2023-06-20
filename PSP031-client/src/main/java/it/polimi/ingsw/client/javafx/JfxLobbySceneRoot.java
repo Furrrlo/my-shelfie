@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyPlayer;
@@ -13,6 +14,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -22,14 +24,47 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class JfxLobbySceneRoot extends AnchorPane {
 
-    public JfxLobbySceneRoot(FxResourcesLoader resources,
-                             ExecutorService threadPool,
-                             Stage stage,
-                             LobbyAndController<?> lobbyAndController,
-                             ClientNetManager netManager) {
+    /**
+     * Returns the appropriate scene root for the given lobby.
+     * <p>
+     * Depending on the state of the given lobby, this may return a {@link JfxLobbySceneRoot} or a {@link JfxGameSceneRoot}
+     */
+    public static Parent getSceneRootFor(FxResourcesLoader resources,
+                                         ExecutorService threadPool,
+                                         Stage stage,
+                                         LobbyAndController<?> lobbyAndController,
+                                         ClientNetManager netManager) {
+        var currGame = lobbyAndController.lobby().game();
+
+        Consumer<? super GameAndController<?>> observer;
+        currGame.registerWeakObserver(observer = gameAndController -> {
+            if (gameAndController != null) {
+                Platform.runLater(() -> stage.getScene().setRoot(new JfxGameSceneRoot(resources, threadPool, stage,
+                        gameAndController.game(), gameAndController.controller(),
+                        netManager)));
+            }
+        });
+
+        var game = currGame.get();
+        return game == null
+                ? new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, observer, netManager)
+                : new JfxGameSceneRoot(resources, threadPool, stage, game.game(), game.controller(), netManager);
+    }
+
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the game observable, we need to keep a strong ref
+    private final Consumer<? super GameAndController<?>> gameObserver;
+
+    private JfxLobbySceneRoot(FxResourcesLoader resources,
+                              ExecutorService threadPool,
+                              Stage stage,
+                              LobbyAndController<?> lobbyAndController,
+                              Consumer<? super GameAndController<?>> gameObserver,
+                              ClientNetManager netManager) {
+        this.gameObserver = gameObserver;
 
         //TODO:
         //X-change scene only when everyone is ready
@@ -54,17 +89,16 @@ public class JfxLobbySceneRoot extends AnchorPane {
         mainPane.add(connectionTypeLabel, 0, 0);
         mainPane.setAlignment(Pos.CENTER);
 
-        lobbyAndController.lobby().game().registerObserver(gameAndController -> {
-            if (gameAndController != null) {
-                Platform.runLater(() -> stage.getScene().setRoot(new JfxGameSceneRoot(resources, threadPool, stage,
-                        gameAndController.game(), gameAndController.controller(),
-                        netManager)));
-            }
-        });
         var game = lobbyAndController.lobby().game().get();
-        if (game != null)
-            stage.getScene()
+        if (game != null) {
+            // TODO: can this somehow be overridden?
+            Runnable changeScene = () -> stage.getScene()
                     .setRoot(new JfxGameSceneRoot(resources, threadPool, stage, game.game(), game.controller(), netManager));
+            if (Platform.isFxApplicationThread())
+                changeScene.run();
+            else
+                Platform.runLater(changeScene);
+        }
 
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             threadPool.execute(() -> {

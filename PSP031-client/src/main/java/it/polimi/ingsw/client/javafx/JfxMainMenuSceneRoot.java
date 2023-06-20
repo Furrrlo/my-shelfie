@@ -15,7 +15,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -111,8 +110,6 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                     };
                     var lobbyAndController = netManager.joinGame();
 
-                    Parent sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
-
                     final var netManager0 = netManager;
                     Platform.runLater(() -> {
                         EventHandler<WindowEvent> onClose = evt -> {
@@ -127,7 +124,8 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                             Platform.exit();
                             System.exit(exitCode);
                         };
-                        stage.getScene().setRoot(sceneRoot);
+                        stage.getScene().setRoot(JfxLobbySceneRoot
+                                .getSceneRootFor(resources, threadPool, stage, lobbyAndController, netManager0));
                         stage.setOnCloseRequest(onClose);
                         stage.setOnHiding(onClose);
                     });

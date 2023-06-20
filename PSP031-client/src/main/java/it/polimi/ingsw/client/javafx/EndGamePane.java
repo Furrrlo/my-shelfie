@@ -85,8 +85,8 @@ public class EndGamePane extends Pane {
             threadPool.execute(() -> {
                 try {
                     var lobbyAndController = netManager.joinGame();
-                    var sceneRoot = new JfxLobbySceneRoot(resources, threadPool, stage, lobbyAndController, netManager);
-                    Platform.runLater(() -> stage.getScene().setRoot(sceneRoot));
+                    Platform.runLater(() -> stage.getScene().setRoot(
+                            JfxLobbySceneRoot.getSceneRootFor(resources, threadPool, stage, lobbyAndController, netManager)));
                 } catch (Exception e) {
                     LOGGER.error("Failed to join a new game", e);
                     // TODO: reconnect
