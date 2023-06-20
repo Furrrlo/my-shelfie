@@ -61,9 +61,9 @@ public class GamePane extends Pane {
     private final Label newMsg;
     private final ChatComponent chatPane;
 
-    private final DialogVbox notCurrentTurnMessage;
-    private final DialogVbox suspendedGameMessage;
-    private final DialogVbox quitGameMessage;
+    private final NotCurrentTurnDialog notCurrentTurnMessage;
+    private final SuspendedGameDialog suspendedGameMessage;
+    private final QuitGameDialog quitGameMessage;
     private @Nullable EndGamePane endGamePane;
     private final ScoringTokenComponent finishToken;
 
@@ -117,12 +117,12 @@ public class GamePane extends Pane {
         };
         //set new alerts for suspended game and disconnected player ( making them initially not visible,
         // will be later made visible when corresponding state is caught )
-        this.notCurrentTurnMessage = new DialogVbox(DialogVbox.NOT_CURRENT_TURN);
+        this.notCurrentTurnMessage = new NotCurrentTurnDialog();
         bindBidirectionalVisibility.accept(notCurrentTurnMessage);
-        this.suspendedGameMessage = new DialogVbox(DialogVbox.DISCONNECTED);
+        this.suspendedGameMessage = new SuspendedGameDialog();
         bindBidirectionalVisibility.accept(suspendedGameMessage);
         //set alert for quitGame message
-        this.quitGameMessage = new DialogVbox(DialogVbox.QUIT_GAME);
+        this.quitGameMessage = new QuitGameDialog();
         bindBidirectionalVisibility.accept(quitGameMessage);
 
         // Hide and disable / un-hide and enable all nodes when a dialog displayed/hidden
