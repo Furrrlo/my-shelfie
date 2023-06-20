@@ -24,8 +24,12 @@ class FxProperties {
 
         final var nullMarker = new Object();
         ObservableValue<?> currVal = ((ObservableValue) properties.get(0)).orElse(nullMarker);
-        for (ObservableValue<?> val : properties)
-            currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+        boolean first = true;
+        for (ObservableValue<?> val : properties) {
+            if (!first)
+                currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+            first = false;
+        }
         return currVal;
     }
 
@@ -36,8 +40,12 @@ class FxProperties {
 
         final var nullMarker = new Object();
         ObservableValue<?> currVal = ((ObservableValue) properties[0]).orElse(nullMarker);
-        for (ObservableValue<?> val : properties)
-            currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+        boolean first = true;
+        for (ObservableValue<?> val : properties) {
+            if (!first)
+                currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+            first = false;
+        }
         return currVal;
     }
 
@@ -49,8 +57,12 @@ class FxProperties {
 
         final var nullMarker = new Object();
         ObservableValue<?> currVal = ((ObservableValue) properties.get(0)).orElse(nullMarker);
-        for (ObservableValue<?> val : properties)
-            currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+        boolean first = true;
+        for (ObservableValue<?> val : properties) {
+            if (!first)
+                currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
+            first = false;
+        }
         for (ObservableValue<?> val : additional)
             currVal = currVal.flatMap(ignored -> ((ObservableValue) val).orElse(nullMarker));
         return currVal;
