@@ -26,6 +26,8 @@ import java.util.function.Predicate;
 
 public class PickedTilesPane extends Pane {
 
+    private static final DataFormat TILE_DATA_FORMAT = new DataFormat("my-shelfie/swap-tile-n-coords");
+
     private final ListProperty<TileAndCoords<Tile>> tiles = new SimpleListProperty<>(this, "tiles");
     private final ObjectProperty<Predicate<TileAndCoords<Tile>>> isTileRemovable = new SimpleObjectProperty<>(this,
             "isTileRemovable", __ -> false);
@@ -76,7 +78,6 @@ public class PickedTilesPane extends Pane {
                 tiles.remove(2);
         });
 
-        var tileDataFormat = new DataFormat("my-shelfie/swap-tile-n-coords");
         BiConsumer<TileComponent, Integer> installDnD = (component, tileIdx) -> {
             var tileVal = tiles.map(tiles -> tiles.size() >= tileIdx + 1 ? tiles.get(tileIdx).tile() : null);
             component.setOnDragDetected(event -> {
@@ -95,14 +96,14 @@ public class PickedTilesPane extends Pane {
 
                 Dragboard db = component.startDragAndDrop(TransferMode.ANY);
                 ClipboardContent content = new ClipboardContent();
-                content.put(tileDataFormat, tileIdx);
+                content.put(TILE_DATA_FORMAT, tileIdx);
                 content.putImage(img);
                 db.setContent(content);
                 event.consume();
             });
             component.setOnDragOver(event -> {
                 var tile = tileVal.getValue();
-                if (tile != null && event.getGestureSource() != component && event.getDragboard().hasContent(tileDataFormat))
+                if (tile != null && event.getGestureSource() != component && event.getDragboard().hasContent(TILE_DATA_FORMAT))
                     event.acceptTransferModes(TransferMode.ANY);
                 event.consume();
             });
@@ -110,8 +111,8 @@ public class PickedTilesPane extends Pane {
                 boolean success = false;
 
                 Dragboard db = event.getDragboard();
-                if (event.getDragboard().hasContent(tileDataFormat)) {
-                    var toReceive_ = db.getContent(tileDataFormat);
+                if (event.getDragboard().hasContent(TILE_DATA_FORMAT)) {
+                    var toReceive_ = db.getContent(TILE_DATA_FORMAT);
                     if (toReceive_ instanceof Integer toReceive) {
                         Collections.swap(tiles, toReceive, tileIdx);
                         success = true;
