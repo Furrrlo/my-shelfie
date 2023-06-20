@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.tui;
 
+import it.polimi.ingsw.model.CommonGoalView;
 import it.polimi.ingsw.model.Type;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -12,6 +13,11 @@ import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
+/**
+ * Printer for {@link CommonGoalView}.
+ * <p>
+ * Prints a detailed drawing of the given common goal card, according to its {@link Type}
+ */
 class TuiDetailedCommonGoalPrinter implements TuiPrinter {
     public static final int PXL_FOR_COMMON_GOAL = 24;
     private static final @Unmodifiable List<String> TWO_SQUARES = List.of(
@@ -111,7 +117,7 @@ class TuiDetailedCommonGoalPrinter implements TuiPrinter {
         this.type = type;
     }
 
-    public static StringBuilder CommonGoalLine(int lineIndex, Type type) {
+    public static StringBuilder commonGoalLine(int lineIndex, Type type) {
         String spriteLine = switch (type) {
             case TWO_SQUARES -> TWO_SQUARES.get(lineIndex);
             case TWO_ALL_DIFF_COLUMNS -> TWO_ALL_DIFF_COLUMNS.get(lineIndex);
@@ -127,8 +133,8 @@ class TuiDetailedCommonGoalPrinter implements TuiPrinter {
             case TRIANGLE -> TRIANGLE.get(lineIndex);
         };
 
-        StringBuilder ss = new StringBuilder();
-        ss.append(ConsoleColors.RESET);
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.RESET);
         for (int i = 0; i < 24; i++) {
             String consoleColor = switch (spriteLine.charAt(i)) {
                 case 'B' -> ConsoleColors.BLACK_BACKGROUND;
@@ -136,17 +142,17 @@ class TuiDetailedCommonGoalPrinter implements TuiPrinter {
                 case 'W' -> ConsoleColors.WHITE_BACKGROUND_BRIGHT;
                 default -> ConsoleColors.RESET;
             };
-            ss.append(consoleColor).append(pxl);
+            sb.append(consoleColor).append(pxl);
         }
-        ss.append(ConsoleColors.RESET);
-        return ss;
+        sb.append(ConsoleColors.RESET);
+        return sb;
     }
 
     @Override
     public void print(TuiPrintStream out) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < PXL_FOR_COMMON_GOAL; i++)
-            sb.append(CommonGoalLine(i, type)).append('\n');
+            sb.append(commonGoalLine(i, type)).append('\n');
         out.print(sb);
     }
 

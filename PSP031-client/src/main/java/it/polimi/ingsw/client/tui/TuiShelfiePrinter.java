@@ -11,6 +11,10 @@ import java.util.function.BiPredicate;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
+/**
+ * Printer for {@link ShelfieView}
+ * Prints a matrix of colored tiles, representing the given shelfie
+ */
 class TuiShelfiePrinter implements TuiPrinter {
 
     public static TuiShelfiePrinter EMPTY = new TuiShelfiePrinter(new Shelfie()) {

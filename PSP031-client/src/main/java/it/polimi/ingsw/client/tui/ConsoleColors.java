@@ -1,7 +1,11 @@
 package it.polimi.ingsw.client.tui;
 
+/**
+ * Ansi escapes strings of colors, to be printed in terminal.
+ * 
+ * @apiNote to use with: <code>System.out.println(ConsoleColors.RED + "RED COLORED" + ConsoleColors.RESET + " NORMAL");</code>
+ */
 public class ConsoleColors {
-    /** to use with : System.out.println(ConsoleColors.RED + "RED COLORED" + ConsoleColors.RESET + " NORMAL"); */
     //if you use colors with RGB scheme, it becomes GRB ( remeber !!! )
     // Reset
     public static final String RESET = "\033[0m"; // Text Reset

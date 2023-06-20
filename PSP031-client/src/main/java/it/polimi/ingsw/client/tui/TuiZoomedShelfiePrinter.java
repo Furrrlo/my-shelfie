@@ -4,6 +4,15 @@ import it.polimi.ingsw.model.GameView;
 
 import java.util.List;
 
+/**
+ * Printer for a zoomed view of the game
+ * <p>
+ * Prints a detailed drawing of board, shelfie and personal goal
+ * 
+ * @see TuiDetailedBoardPrinter
+ * @see TuiDetailedShelfiePrinter
+ * @see TuiDetailedPersonalGoalPrinter
+ */
 class TuiZoomedShelfiePrinter extends TuiZoomedScene {
     private final GameView game;
 

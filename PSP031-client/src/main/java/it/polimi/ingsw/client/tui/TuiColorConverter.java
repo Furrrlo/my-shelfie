@@ -2,11 +2,22 @@ package it.polimi.ingsw.client.tui;
 
 import it.polimi.ingsw.model.Color;
 
+/**
+ * Converter from {@link Color} to {@link ConsoleColors}
+ */
 class TuiColorConverter {
 
     private TuiColorConverter() {
     }
 
+    /**
+     * Converts a tile color to a console color
+     * 
+     * @param color color of a tile
+     * @param highlight boolean
+     * @return string representing the console color
+     * @see ConsoleColors
+     */
     public static String color(Color color, boolean highlight) {
         if (!highlight) {
             return switch (color) {

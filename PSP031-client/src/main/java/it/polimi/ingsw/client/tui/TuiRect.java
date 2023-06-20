@@ -1,5 +1,12 @@
 package it.polimi.ingsw.client.tui;
 
+/**
+ * Rectangle in the console (position and size)
+ * 
+ * @param row
+ * @param col
+ * @param size
+ */
 record TuiRect(int row, int col, TuiSize size) {
 
     static TuiRect fromCoords(int row1, int col1, int row2, int col2) {

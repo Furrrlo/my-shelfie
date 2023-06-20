@@ -11,6 +11,13 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
+/**
+ * Printer for {@link ShelfieView}.
+ * <p>
+ * Prints a detailed drawing of the given shelfie
+ * 
+ * @see TuiDetailedTilePrinter
+ */
 class TuiDetailedShelfiePrinter implements TuiPrinter {
 
     public static final TuiDetailedShelfiePrinter EMPTY = new TuiDetailedShelfiePrinter(new Shelfie()) {

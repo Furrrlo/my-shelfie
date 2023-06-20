@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Textual prompt which can be displayed to the player, which can then answer it.
- *
+ * <p>
  * This is the main way the TUI can request input from the player.
  * 
  * @see TuiRenderer#setPrompt(Prompt)

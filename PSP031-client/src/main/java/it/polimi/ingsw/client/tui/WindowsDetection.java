@@ -15,6 +15,10 @@ import java.util.function.IntConsumer;
 import static it.polimi.ingsw.client.tui.TuiPrintStream.*;
 import static org.fusesource.jansi.internal.Kernel32.*;
 
+/**
+ * Detect which color modes are supported by the current terminal, on Windows.
+ * Windows terminal supports truecolor, but doesn't set any environment variables, so jansi doesn't work properly
+ */
 @SuppressWarnings("SameParameterValue")
 class WindowsDetection {
 

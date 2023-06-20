@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.tui;
 
 import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.model.CommonGoalView;
 import it.polimi.ingsw.model.ShelfieView;
 import it.polimi.ingsw.model.Type;
 
@@ -9,6 +10,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Printer for {@link CommonGoalView}.
+ * <p>
+ * Prints a description of the given common goal card and an example shelfie that achieve the goal,
+ * according to its {@link Type}
+ * 
+ * @see TuiShelfiePrinter
+ */
 public class TuiCommonGoalPrinter implements TuiPrinter {
     private final Type type;
     private static final Color[][] SIX_COUPLES = new Color[][] {
@@ -139,7 +148,7 @@ public class TuiCommonGoalPrinter implements TuiPrinter {
     private static final Map<Type, TuiCommonGoalPrinter> COMMON_GOALS_PRINTERS = Arrays.stream(Type.values())
             .collect(Collectors.toUnmodifiableMap(Function.identity(), TuiCommonGoalPrinter::new));
 
-    private static Color[][] CommonGoalType(Type type) {
+    private static Color[][] commonGoalType(Type type) {
         return switch (type) {
             case TWO_SQUARES -> TWO_SQUARES;
             case TWO_ALL_DIFF_COLUMNS -> TWO_ALL_DIFF_COLUMNS;
@@ -158,7 +167,7 @@ public class TuiCommonGoalPrinter implements TuiPrinter {
 
     @Override
     public void print(TuiPrintStream out) {
-        TuiShelfiePrinter.printShelfieMatrixByColor(out, (row, col) -> CommonGoalType(type)[row][col], (row, col) -> true);
+        TuiShelfiePrinter.printShelfieMatrixByColor(out, (row, col) -> commonGoalType(type)[row][col], (row, col) -> true);
     }
 
     @Override

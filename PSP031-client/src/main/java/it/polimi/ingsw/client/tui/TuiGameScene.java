@@ -11,6 +11,11 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
+/**
+ * Represent the game scene
+ * 
+ * @see TuiScene
+ */
 class TuiGameScene implements TuiScene {
 
     private final GameView game;

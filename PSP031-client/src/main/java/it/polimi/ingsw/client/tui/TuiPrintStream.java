@@ -24,6 +24,9 @@ import java.util.Objects;
 import static org.fusesource.jansi.internal.CLibrary.ioctl;
 import static org.fusesource.jansi.internal.Kernel32.*;
 
+/**
+ * Console PrintStream, supporting ansi escape characters
+ */
 class TuiPrintStream extends PrintStream {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TuiPrintStream.class);

@@ -14,6 +14,13 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.BoardView.BOARD_COLUMNS;
 import static it.polimi.ingsw.model.BoardView.BOARD_ROWS;
 
+/**
+ * Printer for {@link BoardView}.
+ * <p>
+ * Prints a detailed drawing of the board
+ * 
+ * @see TuiDetailedTilePrinter
+ */
 class TuiDetailedBoardPrinter implements TuiPrinter {
 
     public static final TuiDetailedBoardPrinter EMPTY = new TuiDetailedBoardPrinter(new Board(2),

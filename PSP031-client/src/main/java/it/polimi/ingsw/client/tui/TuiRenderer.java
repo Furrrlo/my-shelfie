@@ -14,6 +14,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.IntStream;
 
+/**
+ * Render TUI scenes and prompts
+ */
 class TuiRenderer implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TuiRenderer.class);

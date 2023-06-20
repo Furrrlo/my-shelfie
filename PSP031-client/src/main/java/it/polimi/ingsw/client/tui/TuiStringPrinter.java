@@ -1,5 +1,8 @@
 package it.polimi.ingsw.client.tui;
 
+/**
+ * Printer for {@link String}
+ */
 public class TuiStringPrinter implements TuiPrinter {
     private final String string;
     private final TuiSize size;

@@ -7,6 +7,11 @@ import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
+/**
+ * Printer for {@link PersonalGoalView}.
+ * <p>
+ * Prints a detailed drawing of the given personal goal card
+ */
 class TuiDetailedPersonalGoalPrinter implements TuiPrinter {
 
     private static final int PXL_FOR_PERSONAL_GOAL = 12;
@@ -20,8 +25,8 @@ class TuiDetailedPersonalGoalPrinter implements TuiPrinter {
     @Override
     public void print(TuiPrintStream out) {
         for (int row = 0; row < ROWS; row++) {
-            out.println(PersonalGoalMidShelf1());
-            out.println(PersonalGoalMidShelf2());
+            out.println(personalGoalMidShelf1());
+            out.println(personalGoalMidShelf2());
             for (int i = 0; i < PXL_FOR_PERSONAL_GOAL; i++) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(ConsoleColors.RESET);
@@ -33,7 +38,7 @@ class TuiDetailedPersonalGoalPrinter implements TuiPrinter {
                     if (tile == null)
                         sb.append(ConsoleColors.RESET).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL));
                     else
-                        sb.append(PersonalGoalLine(tile.getColor()));
+                        sb.append(personalGoalLine(tile.getColor()));
                     sb.append(ConsoleColors.BROWN_DARK_BACKGROUND).append(pxl)
                             .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl);
                     sb.append(ConsoleColors.RESET);
@@ -41,10 +46,10 @@ class TuiDetailedPersonalGoalPrinter implements TuiPrinter {
                 out.println(sb);
             }
         }
-        out.println(PersonalGoalMidShelf1());
+        out.println(personalGoalMidShelf1());
     }
 
-    private static StringBuilder PersonalGoalMidShelf1() {
+    private static StringBuilder personalGoalMidShelf1() {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.RESET).append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl)
                 .append(ConsoleColors.ORANGE_BACKGROUND).append(pxl.repeat(COLUMNS * (PXL_FOR_PERSONAL_GOAL + 2)));
@@ -52,7 +57,7 @@ class TuiDetailedPersonalGoalPrinter implements TuiPrinter {
         return sb;
     }
 
-    private static StringBuilder PersonalGoalMidShelf2() {
+    private static StringBuilder personalGoalMidShelf2() {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColors.RESET).append(ConsoleColors.WHITE_BACKGROUND_BRIGHT).append(pxl);
         for (int i = 0; i < COLUMNS; i++)
@@ -63,7 +68,7 @@ class TuiDetailedPersonalGoalPrinter implements TuiPrinter {
     }
 
     /** returns the colored String, at given index, of a specified PersonalGoal as StringBuilder */
-    private static StringBuilder PersonalGoalLine(Color color) {
+    private static StringBuilder personalGoalLine(Color color) {
         StringBuilder sb = new StringBuilder();
         return switch (color) {
             case GREEN -> sb.append(ConsoleColors.GREEN_BACKGROUND_BRIGHT).append(pxl.repeat(PXL_FOR_PERSONAL_GOAL))

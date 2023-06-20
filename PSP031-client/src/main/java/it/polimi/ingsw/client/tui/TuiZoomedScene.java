@@ -6,6 +6,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
 
+/**
+ * Abstract scene that zoom in the console before rendering
+ */
 @SuppressWarnings("SameParameterValue")
 abstract class TuiZoomedScene implements TuiScene {
 

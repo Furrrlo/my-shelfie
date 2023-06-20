@@ -14,17 +14,25 @@ import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
+/**
+ * Printer for {@link Tile}.
+ * <p>
+ * Prints a detailed drawing of the given tile in {@value #PXL_FOR_SPRITE} x {@value #PXL_FOR_SPRITE} pxl
+ */
 class TuiDetailedTilePrinter implements TuiPrinter {
 
     /**
      * pxl sets the basic unit for printing complex design, while PXL_FOR_SPRITE, PXL_FOR_NUMBERS and
      * PXL_FOR_PERSONAL_GOAL sets the number of pxl respectively for printing tiles' sprites, number of shelfie and board,
      * and personal goals' tile;
+     */
+    public static final int PXL_FOR_SPRITE = 24;
+
+    /*
      * List<String> of CAT, TREE, BOOK, TROPHY, GAME and Frame ( and all the other numbers ) represents the
      * lines of each design composed by letters that represent colors that methods in TuiPrinter class handles in order
      * to print different color of pxl
      */
-    public static final int PXL_FOR_SPRITE = 24;
     private static final @Unmodifiable List<String> CAT = List.of("GGGGGGGGGGGGGGGGGGGGGGGG", "GGGGGGGGGGGGGBBGGGBBGGGG",
             "GGGGGBBGGGGGBBPBGBBPBGGG", "GGGGGBBBGGGBAACAAAACAGGG", "GGGGGGBBGGBAAAAAAAAAAAGG", "GGGGGGBBGGBAAAABBBBAAAGG",
             "GGGGBBBBGGBAABDBBBBDBAGG", "GGGBBBBGGGWWABDBBBBDBAWG", "GGGBBGGGGGBAAAAAACAAAAGG", "GGGBBGGGGGWWAAAAWAWAAAWG",
@@ -99,12 +107,12 @@ class TuiDetailedTilePrinter implements TuiPrinter {
     public void print(TuiPrintStream out) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < PXL_FOR_SPRITE; i++)
-            sb.append(tileColor != null ? SpriteLine(i, tileColor) : EmptyLine()).append('\n');
+            sb.append(tileColor != null ? spriteLine(i, tileColor) : emptyLine()).append('\n');
         out.print(sb);
     }
 
     /** returns the colored String, at given index, of a specified coloredTile as StringBuilder */
-    private static StringBuilder SpriteLine(int lineIndex, Color color) {
+    private static StringBuilder spriteLine(int lineIndex, Color color) {
         String spriteLine = switch (color) {
             case GREEN -> CAT.get(lineIndex);
             case PINK -> TREE.get(lineIndex);
@@ -114,9 +122,9 @@ class TuiDetailedTilePrinter implements TuiPrinter {
             case BLUE -> FRAME.get(lineIndex);
         };
 
-        StringBuilder ss = new StringBuilder();
-        ss.append(ConsoleColors.RESET);
-        for (int i = 0; i < 24; i++) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColors.RESET);
+        for (int i = 0; i < PXL_FOR_SPRITE; i++) {
             String consoleColor = switch (spriteLine.charAt(i)) {
                 case 'B' -> ConsoleColors.BLACK_BACKGROUND;
                 case 'G' -> ConsoleColors.GREEN_BACKGROUND_BRIGHT;
@@ -139,14 +147,14 @@ class TuiDetailedTilePrinter implements TuiPrinter {
                 case 'U', 'X' -> ConsoleColors.PINK_BACKGROUND;
                 default -> ConsoleColors.RESET;
             };
-            ss.append(consoleColor).append(pxl);
+            sb.append(consoleColor).append(pxl);
         }
-        ss.append(ConsoleColors.RESET);
-        return ss;
+        sb.append(ConsoleColors.RESET);
+        return sb;
     }
 
-    private static StringBuilder EmptyLine() {
-        return new StringBuilder(pxl.repeat(PXL_FOR_SPRITE));
+    private static String emptyLine() {
+        return pxl.repeat(PXL_FOR_SPRITE);
     }
 
     @Override

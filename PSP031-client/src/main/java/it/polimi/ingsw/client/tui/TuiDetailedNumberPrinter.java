@@ -9,6 +9,11 @@ import java.util.List;
 import static it.polimi.ingsw.client.tui.TuiDetailedTilePrinter.PXL_FOR_SPRITE;
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
+/**
+ * Printer for numbers between 0 and 9.
+ * <p>
+ * Print a detailed drawing of a number, in portrait or landscape orientation
+ */
 class TuiDetailedNumberPrinter implements TuiPrinter {
 
     public static final int PXL_ROWS_FOR_NUMBERS = 5;
@@ -84,12 +89,12 @@ class TuiDetailedNumberPrinter implements TuiPrinter {
     private void printNumber(TuiPrintStream out) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < PXL_ROWS_FOR_NUMBERS; i++)
-            sb.append(NumberLine(num, i)).append('\n');
+            sb.append(numberLine(num, i)).append('\n');
         out.print(sb);
     }
 
     /** returns the colored String, at given index, of a specified number as StringBuilder */
-    private static StringBuilder NumberLine(int number, int index) {
+    private static StringBuilder numberLine(int number, int index) {
         String numberLine = switch (number) {
             case 1 -> ONE.get(index);
             case 2 -> TWO.get(index);
@@ -119,12 +124,12 @@ class TuiDetailedNumberPrinter implements TuiPrinter {
     private void printVerticalNumber(TuiPrintStream out) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < PXL_COLS_FOR_NUMBERS; i++)
-            sb.append(VerticalNumberLine(num, i)).append('\n');
+            sb.append(verticalNumberLine(num, i)).append('\n');
         out.print(sb);
     }
 
     /** returns the colored String, at given index, of a specified VerticalNumber as StringBuilder */
-    private static StringBuilder VerticalNumberLine(int number, int index) {
+    private static StringBuilder verticalNumberLine(int number, int index) {
         String verticalNumberLine = switch (number) {
             case 1 -> convertToVerticalNumber(ONE).get(index);
             case 2 -> convertToVerticalNumber(TWO).get(index);

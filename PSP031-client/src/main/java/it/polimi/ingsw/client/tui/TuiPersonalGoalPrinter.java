@@ -3,6 +3,13 @@ package it.polimi.ingsw.client.tui;
 import it.polimi.ingsw.model.PersonalGoalView;
 import it.polimi.ingsw.model.ShelfieView;
 
+/**
+ * Printer for {@link PersonalGoalView}.
+ * <p>
+ * Prints a shelfie representing the given personal goal
+ * 
+ * @see TuiShelfiePrinter
+ */
 public class TuiPersonalGoalPrinter implements TuiPrinter {
 
     private final PersonalGoalView personalGoal;

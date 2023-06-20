@@ -25,6 +25,9 @@ import java.util.stream.Stream;
 
 import static it.polimi.ingsw.client.tui.TuiPrintStream.pxl;
 
+/**
+ * Prompts for the TUI version of the game
+ */
 class TuiPrompts {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TuiPrompts.class);
