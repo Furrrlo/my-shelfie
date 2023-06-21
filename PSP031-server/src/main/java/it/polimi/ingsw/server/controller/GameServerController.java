@@ -146,7 +146,7 @@ public class GameServerController {
                 game.refillBoard();
 
             // Board is empty, and we can't refill it, end the game
-            if (game.getBoard().isEmpty() && game.getBag().isEmpty()) {
+            if (game.getBoard().isEmpty() && game.getBagView().isEmpty()) {
                 game.endGame().set(true);
             } else {
                 // Change current turn

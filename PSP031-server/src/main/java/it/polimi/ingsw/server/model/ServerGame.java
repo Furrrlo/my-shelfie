@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +65,7 @@ public class ServerGame implements ServerGameView {
         return bagView;
     }
 
+    @VisibleForTesting
     public List<Tile> getBag() {
         return bag;
     }
