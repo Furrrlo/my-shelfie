@@ -403,6 +403,7 @@ public class GamePane extends Pane {
         //chat button
         getChildren().add(this.chatPane = new ChatComponent(
                 resources,
+                threadPool,
                 game.getPlayers()
                         .stream().map(PlayerView::getNick)
                         .filter(nick -> !nick.equals(game.thePlayer().getNick()))

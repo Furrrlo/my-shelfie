@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
@@ -28,6 +29,7 @@ public class ChatComponent extends VBox {
     public final static int INNER_INSET = INSET / 2;
 
     public ChatComponent(FxResourcesLoader resources,
+                         ExecutorService threadPool,
                          List<String> recipients,
                          String thePlayer,
                          GameController controller,
@@ -64,22 +66,25 @@ public class ChatComponent extends VBox {
         imgView.setFitHeight(20);
         send.setGraphic(imgView);
 
+        send.disableProperty().bind(text.textProperty().map(String::isBlank));
         send.setOnAction(event -> {
-            try {
-                String message = text.getText();
-                if (message.equals(""))
-                    throw new IllegalArgumentException();
-                String nickRecipient = recipient.getValue();
-                if (!recipients.contains(nickRecipient) && !nickRecipient.equals(UserMessage.EVERYONE_RECIPIENT))
-                    throw new IllegalArgumentException("There is no such a player");
+            String message = text.getText();
+            // Should never happen, but just in case
+            if (message.isBlank())
+                return;
 
-                controller.sendMessage(message, nickRecipient);
+            String nickRecipient = recipient.getValue();
+            if (!recipients.contains(nickRecipient) && !nickRecipient.equals(UserMessage.EVERYONE_RECIPIENT))
+                throw new IllegalArgumentException("There is no such a player " + nickRecipient);
 
-                //restores TextArea after message is sent
-                text.setText("");
-            } catch (DisconnectedException e) {
-                onDisconnect.accept(e);
-            }
+            text.setText(""); // restore TextArea as soon as we know it's a valid message
+            threadPool.execute(() -> {
+                try {
+                    controller.sendMessage(message, nickRecipient);
+                } catch (DisconnectedException e) {
+                    onDisconnect.accept(e);
+                }
+            });
         });
 
         var hbox = new HBox();
