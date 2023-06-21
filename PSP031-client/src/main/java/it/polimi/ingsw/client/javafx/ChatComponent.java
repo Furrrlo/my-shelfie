@@ -7,7 +7,6 @@ import it.polimi.ingsw.model.UserMessage;
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
@@ -55,11 +54,11 @@ public class ChatComponent extends VBox {
 
         TextArea text = new TextArea();
 
-        Button send = new Button();
-        send.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(50, 50 * (width.doubleValue() / 210d))),
-                new Insets(-INNER_INSET)))));
+        InGameButton send = new InGameButton(Color.LIGHTSEAGREEN);
+        send.backgroundRadiusProperty().bind(parentProperty()
+                .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
+                .map(w -> new CornerRadii(Math.min(50, 50 * (w.doubleValue() / 210d)))));
+        send.setBackgroundInsets(new Insets(-INNER_INSET));
 
         var imgView = new ImageView(resources.loadImage("fa/paper-plane.png"));
         imgView.setPreserveRatio(true);

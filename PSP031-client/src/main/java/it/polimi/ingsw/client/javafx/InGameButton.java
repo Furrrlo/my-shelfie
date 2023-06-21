@@ -23,6 +23,10 @@ public class InGameButton extends Button {
         this("", null);
     }
 
+    public InGameButton(Color bgColor) {
+        this("", bgColor);
+    }
+
     public InGameButton(String text, @Nullable Color bgColor) {
         super(text);
         backgroundColor.set(bgColor);
