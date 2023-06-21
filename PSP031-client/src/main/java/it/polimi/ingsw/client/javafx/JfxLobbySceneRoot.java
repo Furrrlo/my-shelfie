@@ -18,6 +18,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -105,11 +107,12 @@ class JfxLobbySceneRoot extends AnchorPane {
 
         //TODO:
         //X-change scene only when everyone is ready
+        //-first player chooses number of players
         //-back to lobby button
         //X-threads
-        //change ready button to not ready when player is ready and make player not ready when pressed
+        //X-change ready button to not ready when player is ready and make player not ready when pressed
         //-if player is first to connect -> set number of players
-        //      -change number of players when already in the lobby
+        //-change number of players when already in the lobby (has to be lobby creator) (what happens if other lobby creator quit?)
         //when player disconnects from game and later reconnects he shouldn't go trough lobby
 
         AtomicBoolean isReady = new AtomicBoolean(false);
@@ -153,9 +156,45 @@ class JfxLobbySceneRoot extends AnchorPane {
                 .toFxProperty("messages", lobbyPlayersVbox, lobbyAndController.lobby().joinedPlayers()));
         lobbyPlayersVbox.setAlignment(Pos.CENTER);
 
-        // Create start button
-
         readyButton.setOnAction(eventIpCHeck);
+
+        //hbox
+        Label playerNumberLabel = new Label("Select number of players");
+        ChoiceBox<String> playerNumberChoice = new ChoiceBox<>();
+        playerNumberChoice.getItems().addAll("2", "3", "4");
+        playerNumberChoice.setValue("2");
+        AtomicInteger requiredPlayers = new AtomicInteger();
+        playerNumberChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            switch (newValue) {
+                case "2":
+                    requiredPlayers.set(2);
+                case "3":
+                    requiredPlayers.set(3);
+                    break;
+                case "4":
+                    requiredPlayers.set(4);
+                    break;
+                default:
+                    requiredPlayers.set(2);
+                    break;
+            }
+            try {
+                lobbyAndController.controller().setRequiredPlayers(requiredPlayers.get());
+            } catch (DisconnectedException e) {
+
+            }
+        });
+
+        HBox playerNumberBox = new HBox();
+        playerNumberBox.setPadding(new Insets(10, 10, 10, 10));
+        playerNumberBox.setSpacing(10);
+        playerNumberBox.getChildren().addAll(playerNumberLabel, playerNumberChoice);
+        playerNumberBox.setAlignment(Pos.CENTER);
+        playerNumberBox.setSpacing(10d);
+        playerNumberBox.setVisible(false);
+        if (lobbyAndController.lobby().requiredPlayers().get() == null) {
+            playerNumberBox.setVisible(true);
+        }
 
         //vbox
         VBox vbox = new VBox();
@@ -169,7 +208,7 @@ class JfxLobbySceneRoot extends AnchorPane {
         AnchorPane.setBottomAnchor(vbox, 10d);
         AnchorPane.setLeftAnchor(vbox, 10d);
         AnchorPane.setRightAnchor(vbox, 10d);
-        getChildren().add(vbox);
+        getChildren().addAll(vbox, playerNumberBox);
         //prefWidthProperty().bind(scene.widthProperty());
         //prefHeightProperty().bind(scene.heightProperty());
 
