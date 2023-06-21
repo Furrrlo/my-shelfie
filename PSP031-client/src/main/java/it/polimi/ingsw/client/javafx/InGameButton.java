@@ -43,8 +43,8 @@ public class InGameButton extends Button {
                     var color = backgroundColor.get();
                     return new Background(new BackgroundFill(
                             color == null ? null
-                                    : isArmed() ? color.darker().darker()
-                                            : isHover() ? color.darker()
+                                    : isArmed() ? color.darker()
+                                            : isHover() ? color.brighter()
                                                     : color,
                             getBackgroundRadius(),
                             getBackgroundInsets()));
