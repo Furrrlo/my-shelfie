@@ -1,5 +1,7 @@
 package it.polimi.ingsw.client.javafx;
 
+import it.polimi.ingsw.model.GameView;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -21,16 +23,17 @@ class SuspendedGameDialog extends DialogVbox {
         super("Player has disconnected",
                 Color.LIGHTGRAY, Color.LIGHTSEAGREEN,
                 "The game is suspended because all other players have disconnected.\n" +
-                        "If no one reconnects within 30 seconds, the game will end");
+                        "If no one reconnects within " +
+                        GameView.SUSPENDED_GAME_TIMEOUT.toSeconds() + " seconds, the game will end");
 
         ProgressBar progress = new ProgressBar();
         AnchorPane progressPane = new AnchorPane(progress);
 
         this.timeline = new Timeline(
                 new KeyFrame(Duration.ZERO, new KeyValue(progress.progressProperty(), 0)),
-                new KeyFrame(Duration.minutes(0.5), e -> {
-                    System.out.println("Minute over");
-                }, new KeyValue(progress.progressProperty(), 1)));
+                new KeyFrame(
+                        Duration.millis(GameView.SUSPENDED_GAME_TIMEOUT.toMillis()),
+                        new KeyValue(progress.progressProperty(), 1)));
         timeline.setCycleCount(Animation.INDEFINITE);
 
         // Stop it if the pane becomes invisible or disabled

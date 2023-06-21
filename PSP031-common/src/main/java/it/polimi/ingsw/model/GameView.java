@@ -4,9 +4,14 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public interface GameView extends Serializable {
+
+    // TODO: remember to bring back to 30 second
+    Duration SUSPENDED_GAME_TIMEOUT = Duration.of(120, ChronoUnit.SECONDS);
 
     /** Returns game ID */
     int getGameID();

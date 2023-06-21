@@ -1,9 +1,6 @@
 package it.polimi.ingsw.server.controller;
 
-import it.polimi.ingsw.model.BoardCoord;
-import it.polimi.ingsw.model.Property;
-import it.polimi.ingsw.model.Tile;
-import it.polimi.ingsw.model.UserMessage;
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -70,8 +67,7 @@ public class GameServerController {
                             endGameFuture = executor.schedule(() -> {
                                 LOGGER.info("Game " + game.getGameID() + " is over because players have disconnected");
                                 game.endGame().set(true);
-                            }, 120, TimeUnit.SECONDS);
-                            //TODO: remember to bring back to 30 second
+                            }, GameView.SUSPENDED_GAME_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
                         }
 
                         // If the current player disconnects, skip his turn
