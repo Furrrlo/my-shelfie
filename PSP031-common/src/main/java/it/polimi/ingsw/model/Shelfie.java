@@ -172,8 +172,11 @@ public class Shelfie implements ShelfieView {
     public void placeTiles(List<Tile> selectedTiles, int shelfCol) {
         //place tiles in the selected column from the bottom and first free space
         for (Tile tile : selectedTiles) {
-            if (shelfie[getColumnFreeSpace(shelfCol) - 1][shelfCol].get() == null)
-                shelfie[getColumnFreeSpace(shelfCol) - 1][shelfCol].set(tile);
+            int freeSpace = getColumnFreeSpace(shelfCol);
+            if (freeSpace > 0)
+                shelfie[freeSpace - 1][shelfCol].set(tile);
+            else
+                throw new IndexOutOfBoundsException("This column is full");
         }
     }
 
