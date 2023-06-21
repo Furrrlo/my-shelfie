@@ -7,7 +7,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -52,8 +51,8 @@ public class FirstFinisherDescription extends Pane {
         achieved.setFitWidth(width);
         notAchieved.setFitWidth(width);
         description.setWrappingWidth(getWidth() - 2 * border);
-        description.setFont(Font.font(text_height));
-        arrow.setFont(Font.font(40 * scale));
+        Fonts.changeSize(description.fontProperty(), text_height);
+        Fonts.changeSize(arrow.fontProperty(), 40 * scale);
 
         description.resizeRelocate(border, border, getWidth() - 2 * border, text_height);
         notAchieved.resizeRelocate(middleW - width - 4 * border, middleH + 3 * border, width, width);

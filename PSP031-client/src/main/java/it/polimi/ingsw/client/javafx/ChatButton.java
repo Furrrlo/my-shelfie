@@ -7,7 +7,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -29,6 +28,9 @@ public class ChatButton extends Pane {
 
         open.setTextAlignment(TextAlignment.CENTER);
         close.setTextAlignment(TextAlignment.CENTER);
+
+        Fonts.enforceWeight(open.fontProperty(), FontWeight.EXTRA_BOLD);
+        Fonts.enforceWeight(close.fontProperty(), FontWeight.EXTRA_BOLD);
 
         close.setVisible(false);
         getChildren().add(open);
@@ -62,8 +64,8 @@ public class ChatButton extends Pane {
         closedMail.setFitWidth(30 * scale);
         openedMail.setFitHeight(30 * scale);
 
-        open.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, 14 * scale));
-        close.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, 14 * scale));
+        Fonts.changeSize(open.fontProperty(), 14 * scale);
+        Fonts.changeSize(close.fontProperty(), 14 * scale);
 
         open.resizeRelocate(7 * scale, (getHeight() - 15 * scale) / 2, getWidth() / 2, getHeight());
         close.resizeRelocate(7 * scale, (getHeight() - 15 * scale) / 2, getWidth() / 2, getHeight());

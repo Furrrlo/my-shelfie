@@ -7,7 +7,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 
@@ -21,7 +20,7 @@ abstract class DialogVbox extends VBox {
                 new Insets(-10)))));
 
         Label errorName = new Label("Error: " + errorTitle);
-        errorName.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, Font.getDefault().getSize()));
+        Fonts.enforceWeight(errorName.fontProperty(), FontWeight.EXTRA_BOLD);
         errorName.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 errorBgColor,
                 new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),

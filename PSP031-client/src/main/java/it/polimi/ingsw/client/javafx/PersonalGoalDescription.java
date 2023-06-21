@@ -6,8 +6,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -32,7 +30,7 @@ public class PersonalGoalDescription extends Pane {
         double scale = Math.min(getWidth() / 120d, getHeight() / 190d);
         double border = 6 * scale;
 
-        text.setFont(Font.font(Font.getDefault().getName(), FontWeight.NORMAL, 11 * scale));
+        Fonts.changeSize(text.fontProperty(), 11 * scale);
         text.setWrappingWidth(getWidth() - 2 * border);
         text.resizeRelocate(border, border, getWidth() - 2 * border, getHeight() - 2 * border);
     }

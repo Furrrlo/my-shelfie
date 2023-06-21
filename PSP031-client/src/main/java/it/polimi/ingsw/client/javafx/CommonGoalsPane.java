@@ -12,8 +12,6 @@ import javafx.geometry.VPos;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -120,7 +118,7 @@ public class CommonGoalsPane extends Pane {
 
         description.setTextOrigin(VPos.CENTER);
 
-        description.setFont(Font.font(Font.getDefault().getName(), FontWeight.NORMAL, 13 * scale));
+        Fonts.changeSize(description.fontProperty(), 13 * scale);
         description.setWrappingWidth(getWidth() - 4 * border);
 
         goal1.resizeRelocate(getWidth() - width - border, border, width, height);

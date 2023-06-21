@@ -6,7 +6,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -24,7 +23,7 @@ public class AdjacentItemTilesDescription extends Pane {
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
         title.setTextAlignment(TextAlignment.CENTER);
-        title.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, Font.getDefault().getSize()));
+        Fonts.enforceWeight(title.fontProperty(), FontWeight.EXTRA_BOLD);
         description.setTextAlignment(TextAlignment.CENTER);
 
         getChildren().add(title);
@@ -40,9 +39,9 @@ public class AdjacentItemTilesDescription extends Pane {
         double border = 6 * scale;
 
         description.setWrappingWidth(getWidth() - 2 * border);
-        description.setFont(Font.font(textHeight));
+        Fonts.changeSize(description.fontProperty(), textHeight);
         title.setWrappingWidth(getWidth() - 2 * border);
-        title.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, titleHeight));
+        Fonts.changeSize(title.fontProperty(), titleHeight);
 
         title.resizeRelocate(border, 2 * border, getWidth() - 2 * border, titleHeight);
         description.resizeRelocate(border, 4 * border + titleHeight, getWidth() - 2 * border,

@@ -5,6 +5,8 @@ import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.LobbyPlayer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -20,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +30,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class JfxLobbySceneRoot extends AnchorPane {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JfxLobbySceneRoot.class);
 
     /**
      * Returns the appropriate scene root for the given lobby.
@@ -55,8 +60,12 @@ public class JfxLobbySceneRoot extends AnchorPane {
                 : new JfxGameSceneRoot(resources, threadPool, stage, game.game(), game.controller(), netManager);
     }
 
+    private final DisconnectedDialog disconnectedMessage;
+
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the game observable, we need to keep a strong ref
     private final Consumer<? super GameAndController<?>> gameObserver;
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the observable, we need to keep a strong ref
+    private final Consumer<? super Boolean> disconnectObserver;
 
     private JfxLobbySceneRoot(FxResourcesLoader resources,
                               ExecutorService threadPool,
@@ -64,7 +73,30 @@ public class JfxLobbySceneRoot extends AnchorPane {
                               LobbyAndController<?> lobbyAndController,
                               Consumer<? super GameAndController<?>> gameObserver,
                               ClientNetManager netManager) {
+        var dialogs = Dialogs.setupDialogSupport(this);
+        this.disconnectedMessage = new DisconnectedDialog(resources, threadPool, stage, netManager);
+        dialogs.register(disconnectedMessage, true);
+        disconnectedMessage.setManaged(false); // Do not make the layout manager manage this
+        getChildren().add(disconnectedMessage);
+
+        // Create a disconnection handler that shows the appropriate dialog and logs the exception
+        final Consumer<Throwable> onDisconnect = cause -> threadPool.execute(() -> {
+            try {
+                netManager.close();
+            } catch (Throwable t) {
+                cause.addSuppressed(new IOException("Failed to close ClientNetManager", t));
+            }
+
+            LOGGER.error("Connection with the server was lost", cause);
+            Platform.runLater(() -> dialogs.setVisible(disconnectedMessage));
+        });
+
         this.gameObserver = gameObserver;
+        lobbyAndController.lobby().thePlayerConnected()
+                .registerWeakObserver(disconnectObserver = newValue -> Platform.runLater(() -> {
+                    if (!newValue)
+                        onDisconnect.accept(new Exception("thePlayer connected state is false"));
+                }));
 
         //TODO:
         //X-change scene only when everyone is ready
@@ -101,7 +133,7 @@ public class JfxLobbySceneRoot extends AnchorPane {
                     }
 
                 } catch (DisconnectedException ex) {
-                    throw new RuntimeException(ex); //TODO
+                    onDisconnect.accept(ex);
                 }
             });
         };
@@ -137,6 +169,16 @@ public class JfxLobbySceneRoot extends AnchorPane {
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(100, 100, true, true, false, true))));
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+
+        // Layout unmanaged children
+        final double scale = Math.min(getWidth() / 1040d, getHeight() / 585d);
+        this.disconnectedMessage.resizeRelocate((getWidth() - 230 * scale) / 2, (getHeight() - 230 * scale) / 2,
+                230 * scale, 230.0 * scale);
     }
 
     private static class LobbyPlayersVbox extends VBox {
