@@ -155,6 +155,8 @@ public class PlayerShelfieComponent extends Pane {
 
     private static class NickLabel extends HBox {
 
+        private final Label label;
+
         public NickLabel(String nick, Provider<Integer> score, boolean showScore) {
             backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                     Color.WHITE,
@@ -168,12 +170,18 @@ public class PlayerShelfieComponent extends Pane {
 
             setAlignment(Pos.CENTER);
 
-            var label = new Label();
+            label = new Label();
             if (showScore)
                 label.textProperty().bind(FxProperties.toFxProperty("score", this, score).map(s -> nick + ": " + s + " pt"));
             else
                 label.setText(nick);
             getChildren().add(label);
+        }
+
+        @Override
+        protected void layoutChildren() {
+            Fonts.changeSize(label.fontProperty(), 12d * getHeight() / 28d);
+            super.layoutChildren();
         }
     }
 }

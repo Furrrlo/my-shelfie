@@ -10,6 +10,8 @@ import javafx.scene.paint.Color;
 
 public class PlayerPointsComponent extends HBox {
 
+    private final Label label;
+
     public PlayerPointsComponent(Provider<Integer> score) {
         backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.WHITE,
@@ -24,8 +26,14 @@ public class PlayerPointsComponent extends HBox {
         spacingProperty().bind(widthProperty().map(w -> 10 * (w.doubleValue() / 210d)));
         setAlignment(Pos.CENTER);
 
-        var label = new Label();
+        label = new Label();
         label.textProperty().bind(FxProperties.toFxProperty("score", this, score).map(s -> s + " pt"));
         getChildren().add(label);
+    }
+
+    @Override
+    protected void layoutChildren() {
+        Fonts.changeSize(label.fontProperty(), 12d * getHeight() / 28d);
+        super.layoutChildren();
     }
 }
