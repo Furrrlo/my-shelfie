@@ -89,17 +89,6 @@ public class JfxLobbySceneRoot extends AnchorPane {
         mainPane.add(connectionTypeLabel, 0, 0);
         mainPane.setAlignment(Pos.CENTER);
 
-        var game = lobbyAndController.lobby().game().get();
-        if (game != null) {
-            // TODO: can this somehow be overridden?
-            Runnable changeScene = () -> stage.getScene()
-                    .setRoot(new JfxGameSceneRoot(resources, threadPool, stage, game.game(), game.controller(), netManager));
-            if (Platform.isFxApplicationThread())
-                changeScene.run();
-            else
-                Platform.runLater(changeScene);
-        }
-
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             threadPool.execute(() -> {
                 try {
