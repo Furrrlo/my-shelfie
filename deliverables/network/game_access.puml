@@ -13,15 +13,28 @@ entity      Server                           as server
 create serverController
 server -> serverController : new(port)
 
-client -> clientNetManager ++ : joinGame("Bob")
+client -> clientNetManager ++ : connect(serverAddress, "Bob")
 clientNetManager -> clientSocketManager ** : new(serverAddress)
 clientSocketManager -> serverController ++ : connect
 serverSocketManager <- serverController ** : new(socket)
 deactivate serverController
-serverSocketManager <- serverController ++ : receive(JoinGamePacket.class)
-clientNetManager -> clientSocketManager ++ : send(new JoinGamePacket("Bob"))
-clientSocketManager --> serverSocketManager : JoinGamePacket("Bob")
-serverSocketManager -> serverController --++ : returns JoinGamePacket("Bob")
+serverSocketManager <- serverController ++ : receive(JoinPacket.class)
+clientNetManager -> clientSocketManager ++ : send(new JoinPacket("Bob"))
+clientSocketManager --> serverSocketManager : JoinPacket("Bob")
+serverSocketManager -> serverController --++ : returns JoinPacket("Bob")
+serverController -> server : connectPlayer("Bob")
+serverController -> serverSocketManager --++ : reply(new JoinedPacket())
+serverSocketManager --> clientSocketManager : JoinedPacket()
+serverController -> serverSocketManager ++ : receive(JoinGamePacket.class)
+clientSocketManager -> clientNetManager -- : returns JoinedPacket
+clientSocketManager --> serverSocketManager : ack
+serverSocketManager -> serverController -- : ack
+clientNetManager -> client --
+
+client -> clientNetManager ++ : joinGame("Bob")
+clientNetManager -> clientSocketManager ++ : send(new JoinGamePacket())
+clientSocketManager --> serverSocketManager : JoinGamePacket()
+serverSocketManager -> serverController --++ : returns JoinGamePacket
 serverController -> server ++ : joinGame("Bob")
 serverController <- server -- : returns Lobby
 serverController -> serverLobbyUpdater ** : new()
