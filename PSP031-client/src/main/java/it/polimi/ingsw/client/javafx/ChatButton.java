@@ -1,82 +1,56 @@
 package it.polimi.ingsw.client.javafx;
 
 import javafx.geometry.Insets;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 
-public class ChatButton extends Pane {
+public class ChatButton extends InGameButton {
+
     private final ImageView openedMail;
     private final ImageView closedMail;
-    private final Text open;
-    private final Text close;
+    private final String open;
+    private final String close;
 
     public ChatButton(FxResourcesLoader resources) {
-        backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
-                new Insets(0)))));
+        super(Color.LIGHTSEAGREEN);
 
-        open = new Text("Show chat");
-        close = new Text("Close chat");
+        backgroundRadiusProperty().bind(widthProperty()
+                .map(w -> new CornerRadii(Math.min(10, 10 * (w.doubleValue() / 210d)))));
+        setBackgroundInsets(new Insets(0));
 
-        open.setTextAlignment(TextAlignment.CENTER);
-        close.setTextAlignment(TextAlignment.CENTER);
+        open = "Show chat";
+        close = "Close chat";
 
-        Fonts.enforceWeight(open.fontProperty(), FontWeight.EXTRA_BOLD);
-        Fonts.enforceWeight(close.fontProperty(), FontWeight.EXTRA_BOLD);
-
-        close.setVisible(false);
-        getChildren().add(open);
-        getChildren().add(close);
+        setText(open);
+        Fonts.enforceWeight(fontProperty(), FontWeight.BOLD);
 
         closedMail = new ImageView(resources.loadImage("fa/message.png"));
-        openedMail = new ImageView(resources.loadImage("fa/open-message.png"));
-        openedMail.setVisible(false);
-
         closedMail.setPreserveRatio(true);
+        openedMail = new ImageView(resources.loadImage("fa/open-message.png"));
         openedMail.setPreserveRatio(true);
 
-        getChildren().add(closedMail);
-        getChildren().add(openedMail);
-
-        setOnMouseEntered(event -> backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.web("#67e4de"),
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
-                new Insets(0))))));
-        setOnMouseExited(event -> backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
-                new Insets(0))))));
+        setGraphic(closedMail);
+        setContentDisplay(ContentDisplay.RIGHT);
     }
 
     @Override
     protected void layoutChildren() {
+        super.layoutChildren();
+
         double scale = Math.min(getWidth() / 115d, getHeight() / 46d);
-        double border = 6 * scale;
 
         closedMail.setFitWidth(30 * scale);
         openedMail.setFitHeight(30 * scale);
 
-        Fonts.changeSize(open.fontProperty(), 14 * scale);
-        Fonts.changeSize(close.fontProperty(), 14 * scale);
-
-        open.resizeRelocate(7 * scale, (getHeight() - 15 * scale) / 2, getWidth() / 2, getHeight());
-        close.resizeRelocate(7 * scale, (getHeight() - 15 * scale) / 2, getWidth() / 2, getHeight());
-        openedMail.resizeRelocate(getWidth() / 2 + 3 * border, (getHeight() - 30 * scale) / 2, getWidth(), getHeight());
-        closedMail.resizeRelocate(getWidth() / 2 + 3 * border, (getHeight() - 30 * scale) / 2, getWidth(), getHeight());
+        Fonts.changeSize(fontProperty(), 14 * scale);
     }
 
     public void swap() {
-        open.setVisible(!open.isVisible());
-        close.setVisible(!close.isVisible());
-        openedMail.setVisible(!openedMail.isVisible());
-        closedMail.setVisible(!closedMail.isVisible());
+        boolean isOpen = getText().equals(open);
+        setText(isOpen ? close : open);
+        setGraphic(isOpen ? openedMail : closedMail);
     }
 }
