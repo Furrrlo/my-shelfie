@@ -442,12 +442,16 @@ public class GamePane extends Pane {
         this.getChildren().add(newChatBtn);
 
         this.chatPane.messagesProperty().addListener((observable, oldValue, newValue) -> {
-            if (chatPane.isVisible())
+            if (chatPane.isVisible()) {
                 this.newMsg.setVisible(false);
-            if (oldValue.size() == 0 && newValue.size() == 1 && !chatPane.isVisible())
-                this.newMsg.setVisible(true);
-            else if (!oldValue.get(oldValue.size() - 1).equals(newValue.get(newValue.size() - 1)) && !chatPane.isVisible()) {
-                this.newMsg.setVisible(true);
+            } else {
+                if (oldValue.isEmpty() && !newValue.isEmpty()) {
+                    this.newMsg.setVisible(true);
+                } else if (!oldValue.isEmpty() &&
+                        !newValue.isEmpty() &&
+                        !oldValue.get(oldValue.size() - 1).equals(newValue.get(newValue.size() - 1))) {
+                    this.newMsg.setVisible(true);
+                }
             }
         });
 
