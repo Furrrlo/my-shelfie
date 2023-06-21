@@ -126,15 +126,20 @@ class JfxLobbySceneRoot extends AnchorPane {
         mainPane.add(connectionTypeLabel, 0, 0);
         mainPane.setAlignment(Pos.CENTER);
 
+        Button readyButton = new Button("Ready");
+
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             threadPool.execute(() -> {
                 try {
                     if (!isReady.get()) {
                         lobbyAndController.controller().ready(true);
                         isReady.set(true);
+                        Platform.runLater(() -> readyButton.setText("Not ready"));
+
                     } else if (isReady.get()) {
                         lobbyAndController.controller().ready(false);
                         isReady.set(false);
+                        Platform.runLater(() -> readyButton.setText("Ready!"));
                     }
 
                 } catch (DisconnectedException ex) {
@@ -149,7 +154,7 @@ class JfxLobbySceneRoot extends AnchorPane {
         lobbyPlayersVbox.setAlignment(Pos.CENTER);
 
         // Create start button
-        Button readyButton = new Button("Ready");
+
         readyButton.setOnAction(eventIpCHeck);
 
         //vbox
