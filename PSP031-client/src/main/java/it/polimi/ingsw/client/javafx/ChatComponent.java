@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -34,42 +35,13 @@ public class ChatComponent extends VBox {
                          String thePlayer,
                          GameController controller,
                          Consumer<Throwable> onDisconnect) {
-        this.chatScrollComponent = new ChatScrollComponent(thePlayer);
-        chatScrollComponent.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.WHITE,
-                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
-                new Insets(-INNER_INSET)))));
-
         ChoiceBox<String> recipient = new ChoiceBox<>();
-        recipient.getItems().add(UserMessage.EVERYONE_RECIPIENT);
-        recipient.getItems().addAll(recipients);
-        recipient.getSelectionModel().selectFirst();
-        recipient.prefWidthProperty().bind(chatScrollComponent.widthProperty());
-        recipient.minWidth(USE_PREF_SIZE);
-        recipient.maxWidth(USE_PREF_SIZE);
-        recipient.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
-                new Insets(-INNER_INSET)))));
-
         TextArea text = new TextArea();
-
         InGameButton send = new InGameButton(Color.LIGHTSEAGREEN);
-        send.backgroundRadiusProperty().bind(parentProperty()
-                .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
-                .map(w -> new CornerRadii(Math.min(50, 50 * (w.doubleValue() / 210d)))));
-        send.setBackgroundInsets(new Insets(-INNER_INSET));
 
-        var imgView = new ImageView(resources.loadImage("fa/paper-plane.png"));
-        imgView.setPreserveRatio(true);
-        imgView.setFitWidth(20);
-        imgView.setFitHeight(20);
-        send.setGraphic(imgView);
-
-        send.disableProperty().bind(text.textProperty().map(String::isBlank));
-        send.setOnAction(event -> {
+        Runnable sendMessage = () -> {
             String message = text.getText();
-            // Should never happen, but just in case
+            // Ignore empty messages
             if (message.isBlank())
                 return;
 
@@ -85,7 +57,38 @@ public class ChatComponent extends VBox {
                     onDisconnect.accept(e);
                 }
             });
-        });
+        };
+
+        this.chatScrollComponent = new ChatScrollComponent(thePlayer);
+        chatScrollComponent.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.WHITE,
+                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
+                new Insets(-INNER_INSET)))));
+
+        recipient.getItems().add(UserMessage.EVERYONE_RECIPIENT);
+        recipient.getItems().addAll(recipients);
+        recipient.getSelectionModel().selectFirst();
+        recipient.prefWidthProperty().bind(chatScrollComponent.widthProperty());
+        recipient.minWidth(USE_PREF_SIZE);
+        recipient.maxWidth(USE_PREF_SIZE);
+        recipient.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTSEAGREEN,
+                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
+                new Insets(-INNER_INSET)))));
+
+        send.backgroundRadiusProperty().bind(parentProperty()
+                .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
+                .map(w -> new CornerRadii(Math.min(50, 50 * (w.doubleValue() / 210d)))));
+        send.setBackgroundInsets(new Insets(-INNER_INSET));
+
+        var imgView = new ImageView(resources.loadImage("fa/paper-plane.png"));
+        imgView.setPreserveRatio(true);
+        imgView.setFitWidth(20);
+        imgView.setFitHeight(20);
+        send.setGraphic(imgView);
+
+        send.disableProperty().bind(text.textProperty().map(String::isBlank));
+        send.setOnAction(event -> sendMessage.run());
 
         var hbox = new HBox();
         hbox.setAlignment(Pos.BOTTOM_CENTER);
@@ -95,6 +98,18 @@ public class ChatComponent extends VBox {
         hbox.setMaxHeight(USE_PREF_SIZE);
 
         text.setWrapText(true);
+        // Special handling for enter
+        text.setOnKeyPressed(event -> {
+            if (event.getCode() != KeyCode.ENTER)
+                return;
+
+            event.consume();
+            // On shift+enter append a new line, otherwise send the message
+            if (event.isShiftDown())
+                text.appendText("\n"); // We need to do this explicitly 'cause by default shit+enter does nothing 
+            else
+                sendMessage.run();
+        });
         text.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.WHITE,
                 new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
