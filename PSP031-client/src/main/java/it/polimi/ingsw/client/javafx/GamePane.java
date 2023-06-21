@@ -117,8 +117,10 @@ public class GamePane extends Pane {
 
                 if (Objects.equals(oldV, currComponent))
                     currComponent.setVisible(false);
-                if (Objects.equals(newV, currComponent))
+                if (Objects.equals(newV, currComponent)) {
+                    currComponent.toFront();
                     currComponent.setVisible(true);
+                }
             });
             visibleDialog.addListener(visibleListenerRef.get());
         };
@@ -406,7 +408,6 @@ public class GamePane extends Pane {
             if (newValue) {
                 this.endGamePane = new EndGamePane(resources, threadPool, stage, game.getSortedPlayers(), netManager);
                 bindBidirectionalVisibility.accept(endGamePane);
-                endGamePane.toFront();
 
                 // Add a listener to remove the child and the listener itself once the endGamePane is closed
                 final var visibleListenerRef = new AtomicReference<ChangeListener<? super Parent>>();
@@ -523,14 +524,6 @@ public class GamePane extends Pane {
         getChildren().add(this.quitGameMessage);
         getChildren().add(this.newMsg);
         getChildren().add(this.disconnectedMessage);
-        //adding the Alerts as last nodes so that they will be on front
-        this.newMsg.toFront();
-        this.notCurrentTurnMessage.toFront();
-        this.suspendedGameMessage.toFront();
-        this.quitGameMessage.toFront();
-        this.disconnectedMessage.toFront();
-
-        finishToken.toFront();
         getChildren().add(this.finishToken);
     }
 
