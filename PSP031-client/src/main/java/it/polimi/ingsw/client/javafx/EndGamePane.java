@@ -3,8 +3,6 @@ package it.polimi.ingsw.client.javafx;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.model.PlayerView;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
@@ -24,8 +22,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 class EndGamePane extends Pane {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EndGamePane.class);
 
     private final ImageView teamPicture;
     /**
