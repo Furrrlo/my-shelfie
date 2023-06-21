@@ -15,6 +15,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Pane containing common goal cards and score tokens
+ */
 class CommonGoalsPane extends Pane {
 
     private final StackPane textBackground;

@@ -21,6 +21,9 @@ import java.util.function.Consumer;
 
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 
+/**
+ * VBox containing the {@link ChatScrollComponent} and components needed to send a message
+ */
 class ChatComponent extends VBox {
 
     private final ChatScrollComponent chatScrollComponent;

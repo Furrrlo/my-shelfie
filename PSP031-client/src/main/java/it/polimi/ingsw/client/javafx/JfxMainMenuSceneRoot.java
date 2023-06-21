@@ -29,6 +29,11 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * Root node for the main menu scene
+ * <p>
+ * Allows the player to choose the connection mode, the server address and the username
+ */
 class JfxMainMenuSceneRoot extends AnchorPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuSceneRoot.class);

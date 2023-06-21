@@ -11,6 +11,9 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * ImageButton representing a tile.
+ */
 public class TileComponent extends ImageButton {
 
     /** Used instead of null for mapping the tile property, as otherwise the map method discards null tiles */

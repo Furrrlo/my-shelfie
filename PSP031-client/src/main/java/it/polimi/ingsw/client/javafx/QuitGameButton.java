@@ -5,6 +5,9 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
 
+/**
+ * Button to quit the game
+ */
 class QuitGameButton extends InGameButton {
 
     public QuitGameButton() {

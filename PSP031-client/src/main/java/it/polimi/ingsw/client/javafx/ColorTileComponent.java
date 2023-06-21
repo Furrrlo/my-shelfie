@@ -12,6 +12,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Component representing the color of a tile.
+ * <p>
+ * Does not distinguish between different tiles of the same color
+ */
 class ColorTileComponent extends AnchorPane {
 
     public ColorTileComponent(FxResourcesLoader resources, @Nullable Tile tile) {

@@ -18,6 +18,9 @@ import javafx.scene.text.Text;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ScrollPane containing all chat messages
+ */
 class ChatScrollComponent extends ScrollPane {
     private final MessageVBox messagesVBox;
 

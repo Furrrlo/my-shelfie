@@ -10,6 +10,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Base class for all message dialogs
+ */
 abstract class DialogVbox extends VBox {
 
     public DialogVbox(String errorTitle, Color bgColor, Color errorBgColor, String errorMessage) {

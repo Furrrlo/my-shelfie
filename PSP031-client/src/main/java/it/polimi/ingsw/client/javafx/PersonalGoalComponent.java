@@ -8,6 +8,9 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Component representing the personal goal card
+ */
 class PersonalGoalComponent extends ImageButton {
 
     public PersonalGoalComponent(FxResourcesLoader resources, PersonalGoalView personalGoal) {

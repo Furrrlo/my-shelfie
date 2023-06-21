@@ -29,6 +29,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+/**
+ * Root node for the lobby scene
+ * <p>
+ * Allows the player to set the ready state
+ */
 class JfxLobbySceneRoot extends AnchorPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxLobbySceneRoot.class);

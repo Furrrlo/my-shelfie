@@ -10,6 +10,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Component representing a description of the first finisher token
+ */
 class FirstFinisherDescription extends Pane {
     private final ImageView notAchieved;
     private final ImageView achieved;

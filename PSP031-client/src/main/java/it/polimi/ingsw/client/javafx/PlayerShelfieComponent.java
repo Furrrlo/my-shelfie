@@ -15,6 +15,12 @@ import javafx.scene.paint.Color;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
+/**
+ * Component containing the shelfie and goal patterns of the local player.
+ *
+ * @see ShelfieComponent
+ * @see GoalPatternComponent
+ */
 class PlayerShelfieComponent extends Pane {
 
     private final NickLabel label;

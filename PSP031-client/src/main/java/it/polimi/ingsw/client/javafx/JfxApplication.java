@@ -17,6 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Java-fx application.
+ * <p>
+ * Starts the main menu scene
+ * 
+ * @see JfxMainMenuSceneRoot
+ */
 public class JfxApplication extends Application {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxApplication.class);

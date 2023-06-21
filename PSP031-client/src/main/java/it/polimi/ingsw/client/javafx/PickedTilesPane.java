@@ -24,6 +24,10 @@ import java.util.Collections;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
+/**
+ * Pane containing the tiles picked from the board.
+ * It allows the player to order the tiles with drag and drop
+ */
 class PickedTilesPane extends Pane {
 
     private static final DataFormat TILE_DATA_FORMAT = new DataFormat("my-shelfie/swap-tile-n-coords");

@@ -15,6 +15,9 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
+/**
+ * Message dialog warning you that the game is suspended
+ */
 class SuspendedGameDialog extends DialogVbox {
 
     private final Timeline timeline;

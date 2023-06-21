@@ -8,6 +8,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
+/**
+ * Component representing the score of a player
+ */
 class PlayerPointsComponent extends HBox {
 
     private final Label label;

@@ -12,6 +12,9 @@ import javafx.beans.value.ObservableValue;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Contains methods to convert {@link Provider} to javafx {@link ReadOnlyObjectProperty}
+ */
 class FxProperties {
 
     private FxProperties() {

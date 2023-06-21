@@ -5,6 +5,9 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
+/**
+ * Message dialog warning you that it is not your turn
+ */
 class NotCurrentTurnDialog extends DialogVbox {
 
     public NotCurrentTurnDialog() {

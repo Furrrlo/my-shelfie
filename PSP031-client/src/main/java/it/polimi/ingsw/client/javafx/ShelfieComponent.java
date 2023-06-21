@@ -24,6 +24,11 @@ import java.util.function.IntPredicate;
 
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 
+/**
+ * Component representing the shelfie of a player.
+ * 
+ * @see TileComponent
+ */
 @SuppressWarnings("NotNullFieldNotInitialized")
 public class ShelfieComponent extends AnchorPane {
     //@formatter:off

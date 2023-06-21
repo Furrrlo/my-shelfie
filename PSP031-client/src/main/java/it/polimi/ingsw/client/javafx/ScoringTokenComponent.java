@@ -3,6 +3,9 @@ package it.polimi.ingsw.client.javafx;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+/**
+ * Component representing the score tokens of common goals and first finisher
+ */
 class ScoringTokenComponent extends ImageButton {
     private final ObjectProperty<Integer> score = new SimpleObjectProperty<>(this, "score");
 

@@ -7,6 +7,9 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
 
+/**
+ * Button that allows opening and closing the chat
+ */
 class ChatButton extends InGameButton {
 
     private final ImageView openedMail;

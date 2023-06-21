@@ -35,7 +35,7 @@ class RemappableObjectProperty<T> extends ReadOnlyObjectWrapper<T> {
      * {@code ObservableValue} changes. If this value is {@code null}, no
      * mapping is applied and the resulting value is also {@code null}.
      * </p>
-     * Thi method is similar to the {@link #map(Function)} method, but it allows to
+     * This method is similar to the {@link #map(Function)} method, but it allows to
      * map a value and rebind it to the value itself, enabling the pattern:
      * <code>{@code
      * prop.bind(new SimpleStringProperty("abcd"));

@@ -34,15 +34,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Main game pane.
+ * <p>
+ * It appears when the game is started.
+ * It displays all the game's components needed for the player to play, including the other players'
+ * shelfies and the chat
+ *
+ * @see PlayerShelfieComponent
+ * @see ShelfieComponent
+ * @see BoardComponent
+ * @see PickedTilesPane
+ * @see PersonalGoalComponent
+ * @see CommonGoalsPane
+ * @see ChatComponent
+ */
 class GamePane extends Pane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GamePane.class);
 
-    /**
-     * set to appear when the required number of players for a game is achieved, and they are all ready.
-     * It displays all the game's components needed for the player to play, including the other players'
-     * shelfies and the chat
-     */
     private final PlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
     private final CommonGoalsPane commonGoalCardsPane;

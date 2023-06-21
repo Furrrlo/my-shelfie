@@ -24,6 +24,11 @@ import java.util.Objects;
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 import static javafx.beans.binding.BooleanExpression.booleanExpression;
 
+/**
+ * Component representing the board
+ *
+ * @see TileComponent
+ */
 @SuppressWarnings("NotNullFieldNotInitialized")
 public class BoardComponent extends AnchorPane {
 

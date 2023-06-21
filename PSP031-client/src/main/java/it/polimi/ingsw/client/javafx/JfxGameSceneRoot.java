@@ -13,6 +13,13 @@ import javafx.stage.Stage;
 
 import java.util.concurrent.ExecutorService;
 
+/**
+ * Root node for the game scene.
+ * <p>
+ * It displays a progress indicator while loading the game scene
+ *
+ * @see GamePane
+ */
 class JfxGameSceneRoot extends CenteringFitPane {
 
     public JfxGameSceneRoot(FxResourcesLoader resources,

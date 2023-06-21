@@ -6,6 +6,11 @@ import it.polimi.ingsw.model.PersonalGoalView;
 
 import javafx.scene.layout.Pane;
 
+/**
+ * Component representing a goal pattern.
+ * <p>
+ * Colored tiles are printed on the local player's shelfie
+ */
 class GoalPatternComponent extends Pane {
     private static final Color[][] SIX_COUPLES = new Color[][] {
             //@formatter:off
@@ -159,7 +164,6 @@ class GoalPatternComponent extends Pane {
     public ColorTileComponent t5x4;
 
     public GoalPatternComponent(FxResourcesLoader resources, PersonalGoalView personalGoal) {
-
         getChildren().add(t0x0 = new ColorTileComponent(resources, personalGoal.get(0, 0)));
         getChildren().add(t0x1 = new ColorTileComponent(resources, personalGoal.get(0, 1)));
         getChildren().add(t0x2 = new ColorTileComponent(resources, personalGoal.get(0, 2)));

@@ -10,6 +10,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Component representing the description of adjacent tiles' scores
+ */
 class AdjacentItemTilesDescription extends Pane {
     private final Text title = new Text("Adjacent Item Tiles");
     private final Text description = new Text(

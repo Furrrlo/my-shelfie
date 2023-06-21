@@ -5,6 +5,9 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
+/**
+ * Message dialog asking for confirmation to exit the game
+ */
 class QuitGameDialog extends DialogVbox {
 
     public QuitGameDialog() {

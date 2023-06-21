@@ -17,6 +17,9 @@ import javafx.scene.paint.Color;
 
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 
+/**
+ * Button with an image as background
+ */
 class ImageButton extends Button {
 
     private final ObjectProperty<Image> image = new SimpleObjectProperty<>(this, "image");
