@@ -11,20 +11,14 @@ public class ChatButton extends InGameButton {
 
     private final ImageView openedMail;
     private final ImageView closedMail;
-    private final String open;
-    private final String close;
 
     public ChatButton(FxResourcesLoader resources) {
-        super(Color.LIGHTSEAGREEN);
+        super("Chat", Color.LIGHTSEAGREEN);
 
         backgroundRadiusProperty().bind(widthProperty()
                 .map(w -> new CornerRadii(Math.min(10, 10 * (w.doubleValue() / 210d)))));
         setBackgroundInsets(new Insets(0));
 
-        open = "Show chat";
-        close = "Close chat";
-
-        setText(open);
         Fonts.enforceWeight(fontProperty(), FontWeight.BOLD);
 
         closedMail = new ImageView(resources.loadImage("fa/message.png"));
@@ -49,8 +43,7 @@ public class ChatButton extends InGameButton {
     }
 
     public void swap() {
-        boolean isOpen = getText().equals(open);
-        setText(isOpen ? close : open);
+        boolean isOpen = getGraphic().equals(closedMail);
         setGraphic(isOpen ? openedMail : closedMail);
     }
 }
