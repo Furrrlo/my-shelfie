@@ -22,7 +22,7 @@ public class JfxGameSceneRoot extends CenteringFitPane {
                             GameController controller,
                             ClientNetManager netManager) {
 
-        setStyle(getStyle() + "-fx-font-family: \"Inter Regular\";");
+        setStyle(getStyle() + "-fx-font-family: \"Inter\";");
         setPadding(new Insets(10));
         setBackground(new Background(new BackgroundImage(
                 resources.loadImage("assets/misc/sfondo parquet.jpg"),

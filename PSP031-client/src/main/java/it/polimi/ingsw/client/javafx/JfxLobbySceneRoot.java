@@ -163,7 +163,7 @@ public class JfxLobbySceneRoot extends AnchorPane {
         //prefWidthProperty().bind(scene.widthProperty());
         //prefHeightProperty().bind(scene.heightProperty());
 
-        setStyle(getStyle() + "-fx-font-family: \"Inter Regular\";");
+        setStyle(getStyle() + "-fx-font-family: \"Inter\";");
         setBackground(new Background(new BackgroundImage(
                 resources.loadImage("assets/misc/sfondo parquet.jpg"),
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
