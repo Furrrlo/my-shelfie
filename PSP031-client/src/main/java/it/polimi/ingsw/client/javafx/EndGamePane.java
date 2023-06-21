@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 public class EndGamePane extends Pane {
 
@@ -41,7 +42,8 @@ public class EndGamePane extends Pane {
                        ExecutorService threadPool,
                        Stage stage,
                        List<? extends PlayerView> sortedPlayers,
-                       ClientNetManager netManager) {
+                       ClientNetManager netManager,
+                       Consumer<Throwable> onDisconnect) {
 
         teamPicture = new ImageView(resources.loadImage("fa/teamPicture.png"));
         teamPicture.setPreserveRatio(true);
@@ -80,9 +82,7 @@ public class EndGamePane extends Pane {
                     Platform.runLater(() -> stage.getScene().setRoot(
                             JfxLobbySceneRoot.getSceneRootFor(resources, threadPool, stage, lobbyAndController, netManager)));
                 } catch (Exception e) {
-                    LOGGER.error("Failed to join a new game", e);
-                    // TODO: reconnect
-                    throw new RuntimeException(e);
+                    onDisconnect.accept(e);
                 } finally {
                     Platform.runLater(() -> isRejoiningAGame.set(false));
                 }

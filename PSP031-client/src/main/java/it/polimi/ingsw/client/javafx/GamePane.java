@@ -337,7 +337,8 @@ public class GamePane extends Pane {
         //disables all nodes in the game and displays the endGamePane
         game.endGame().registerWeakObserver(endGameObserver = newValue -> Platform.runLater(() -> {
             if (newValue) {
-                this.endGamePane = new EndGamePane(resources, threadPool, stage, game.getSortedPlayers(), netManager);
+                this.endGamePane = new EndGamePane(resources, threadPool, stage, game.getSortedPlayers(), netManager,
+                        onDisconnect);
                 dialogs.register(endGamePane, true);
 
                 // Add a listener to remove the child and the listener itself once the endGamePane is closed
