@@ -32,8 +32,6 @@ public class ChatComponent extends VBox {
                          String thePlayer,
                          GameController controller,
                          Consumer<Throwable> onDisconnect) {
-        setSpacing(SPACING);
-
         this.chatScrollComponent = new ChatScrollComponent(thePlayer);
         chatScrollComponent.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.WHITE,
@@ -88,23 +86,17 @@ public class ChatComponent extends VBox {
         hbox.setAlignment(Pos.BOTTOM_CENTER);
         hbox.setPadding(Insets.EMPTY);
         hbox.setSpacing(SPACING);
-        hbox.getChildren().add(text);
-        text.prefWidthProperty().bind(hbox.widthProperty().subtract(imgView.getFitWidth()));
-        text.setBackground(Background.EMPTY);
+        hbox.setMinHeight(USE_PREF_SIZE);
+        hbox.setMaxHeight(USE_PREF_SIZE);
+
+        text.setWrapText(true);
         text.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.WHITE,
                 new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
                 new Insets(-INNER_INSET)))));
+        text.prefWidthProperty().bind(hbox.widthProperty().subtract(imgView.getFitWidth()));
         text.minWidth(USE_PREF_SIZE);
         text.maxWidth(USE_PREF_SIZE);
-        hbox.getChildren().add(send);
-
-        setVgrow(chatScrollComponent, Priority.SOMETIMES);
-        getChildren().add(chatScrollComponent);
-        getChildren().add(recipient);
-        setVgrow(hbox, Priority.ALWAYS);
-        text.setWrapText(true);
-
         text.prefRowCountProperty()
                 .bind(compositeObservableValue(text.fontProperty(), text.textProperty(), text.widthProperty()).map(i -> {
                     var textComponent = new Text("");
@@ -117,8 +109,15 @@ public class ChatComponent extends VBox {
                     var rows = (int) Math.round(wrappedHeight / singleLineHeight);
                     return Math.min(4, rows);
                 }));
-        hbox.setMinHeight(USE_PREF_SIZE);
-        hbox.setMaxHeight(USE_PREF_SIZE);
+
+        hbox.getChildren().add(text);
+        hbox.getChildren().add(send);
+
+        setSpacing(SPACING);
+        setVgrow(chatScrollComponent, Priority.SOMETIMES);
+        getChildren().add(chatScrollComponent);
+        getChildren().add(recipient);
+        setVgrow(hbox, Priority.ALWAYS);
         getChildren().add(hbox);
     }
 
