@@ -23,7 +23,7 @@ public class AdjacentItemTilesDescription extends Pane {
                 new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                 new Insets(0)))));
         title.setTextAlignment(TextAlignment.CENTER);
-        Fonts.enforceWeight(title.fontProperty(), FontWeight.EXTRA_BOLD);
+        Fonts.changeWeight(title.fontProperty(), FontWeight.EXTRA_BOLD);
         description.setTextAlignment(TextAlignment.CENTER);
 
         getChildren().add(title);

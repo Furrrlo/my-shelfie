@@ -84,7 +84,7 @@ public class ChatScrollComponent extends ScrollPane {
 
         public MessageComponent(UserMessage message, String thePlayer) {
             Text nick = new Text();
-            Fonts.enforceWeight(nick.fontProperty(), FontWeight.EXTRA_BOLD);
+            Fonts.changeWeight(nick.fontProperty(), FontWeight.EXTRA_BOLD);
             text = new Label();
             text.setWrapText(true);
             if (!message.nickSendingPlayer().equals(thePlayer)) {

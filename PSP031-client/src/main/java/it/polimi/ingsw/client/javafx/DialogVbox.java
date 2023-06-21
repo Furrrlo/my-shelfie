@@ -20,7 +20,7 @@ abstract class DialogVbox extends VBox {
                 new Insets(-10)))));
 
         Label errorName = new Label("Error: " + errorTitle);
-        Fonts.enforceWeight(errorName.fontProperty(), FontWeight.EXTRA_BOLD);
+        Fonts.changeWeight(errorName.fontProperty(), FontWeight.EXTRA_BOLD);
         errorName.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 errorBgColor,
                 new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),

@@ -14,7 +14,7 @@ public class QuitGameButton extends InGameButton {
                 .map(w -> new CornerRadii(Math.min(10, 10 * (w.doubleValue() / 210d)))));
         setBackgroundInsets(new Insets(0));
 
-        Fonts.enforceWeight(fontProperty(), FontWeight.BOLD);
+        Fonts.changeWeight(fontProperty(), FontWeight.BOLD);
     }
 
     @Override
