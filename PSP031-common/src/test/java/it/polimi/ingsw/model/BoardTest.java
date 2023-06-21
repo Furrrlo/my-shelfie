@@ -236,6 +236,22 @@ class BoardTest {
         //tiles are  linked
         Boards.refillBoardCoord(board, bc);
         assertFalse(board.needsRefill());
+
+        Boards.emptyBoard(board);
+        bc.clear();
+        bc.add(new BoardCoord(3, 3));
+        bc.add(new BoardCoord(3, 4));
+        Boards.refillBoardCoord(board, bc);
+        assertFalse(board.needsRefill());
+
+        //invalid
+        Boards.emptyBoard(board);
+        bc.clear();
+        bc.add(new BoardCoord(3, 7));
+        bc.add(new BoardCoord(7, 4));
+        Boards.refillBoardCoord(board, bc);
+        assertTrue(board.needsRefill());
+
     }
 
     @Test
@@ -327,6 +343,11 @@ class BoardTest {
                 }
             }
         }
+
+        //Remove two tiles so I can pick three adjacent tiles
+        Property.setNullable(board.tile(1, 3), null);
+        Property.setNullable(board.tile(1, 4), null);
+
         //if selected size is 3, tiles are not the same, not null and have common sides, should return true
         for (int row = 0; row < BoardView.BOARD_ROWS; row++) {
             for (int col = 0; col < BoardView.BOARD_COLUMNS; col++) {
@@ -334,14 +355,14 @@ class BoardTest {
                     for (int row1 = 0; row1 < BoardView.BOARD_ROWS; row1++) {
                         for (int col1 = 0; col1 < BoardView.BOARD_COLUMNS; col1++) {
                             if (board.isValidTile(row1, col1) && board.tile(row1, col1).get() != null
-                                    && board.hasCommonSide(row, col, row1, col1) && board.hasFreeSide(row1, col1) && row != row1
-                                    && col != col1) {
+                                    && board.hasCommonSide(row, col, row1, col1) && board.hasFreeSide(row1, col1) &&
+                                    (row != row1 || col != col1)) {
                                 for (int row2 = 0; row2 < BoardView.BOARD_ROWS; row2++) {
                                     for (int col2 = 0; col2 < BoardView.BOARD_COLUMNS; col2++) {
                                         if (board.isValidTile(row2, col2) && board.tile(row2, col2).get() != null
                                                 && board.hasCommonSide(row, col, row1, col1, row2, col2)
                                                 && board.hasFreeSide(row2, col2)
-                                                && row2 != row1 && row2 != row && col1 != col2 && col != col2)
+                                                && (row2 != row1 || col1 != col2) && (row != row2 || col != col2))
                                             assertTrue(board.checkBoardCoord(List.of(new BoardCoord(row, col),
                                                     new BoardCoord(row1, col1), new BoardCoord(row2, col2))));
                                     }
@@ -361,6 +382,27 @@ class BoardTest {
         Boards.refillBoardRandom(board);
         List<BoardCoord> bc = new ArrayList<>();
 
+        //Invalid side
+        assertTrue(board.hasFreeSide(1, 3));
+        assertTrue(board.hasFreeSide(7, 5));
+        assertTrue(board.hasFreeSide(2, 3));
+        assertTrue(board.hasFreeSide(6, 5));
+
+        //null side
+        Boards.emptyBoard(board);
+        bc.add(new BoardCoord(3, 2));
+        bc.add(new BoardCoord(3, 3));
+        bc.add(new BoardCoord(4, 2));
+        bc.add(new BoardCoord(4, 3));
+        bc.add(new BoardCoord(5, 2));
+        bc.add(new BoardCoord(5, 3));
+        Boards.refillBoardCoord(board, bc);
+        assertTrue(board.hasFreeSide(3, 3));
+        assertTrue(board.hasFreeSide(5, 3));
+        assertTrue(board.hasFreeSide(4, 2));
+        assertTrue(board.hasFreeSide(4, 3));
+        bc.clear();
+
         //no free sides
         bc.add(new BoardCoord(3, 2));
         bc.add(new BoardCoord(3, 4));
@@ -368,92 +410,50 @@ class BoardTest {
         bc.add(new BoardCoord(4, 3));
         Boards.refillBoardCoord(board, bc);
         assertFalse(board.hasFreeSide(3, 3));
-        Boards.emptyBoard(board);
-        bc.clear();
-
-        //only one free invalid side
-        bc.add(new BoardCoord(6, 4));
-        bc.add(new BoardCoord(6, 5));
-        bc.add(new BoardCoord(7, 3));
-        bc.add(new BoardCoord(6, 5));
-        Boards.refillBoardCoord(board, bc);
-        assertTrue(board.hasFreeSide(6, 5));
     }
 
     @Test
     void hasCommonSides2() {
         var board = new Board(2);
-        Boards.refillBoardRandom(board);
-        List<BoardCoord> bc = new ArrayList<>();
 
         //2 in a row
-        bc.add(new BoardCoord(1, 3));
-        bc.add(new BoardCoord(1, 4));
-        Boards.refillBoardCoord(board, bc);
         assertTrue(board.hasCommonSide(1, 3, 1, 4));
-        Boards.emptyBoard(board);
-        bc.clear();
 
         //2 in a column
-        bc.add(new BoardCoord(1, 3));
-        bc.add(new BoardCoord(2, 3));
-        Boards.refillBoardCoord(board, bc);
         assertTrue(board.hasCommonSide(1, 3, 2, 3));
-        Boards.emptyBoard(board);
-        bc.clear();
 
         //2 in diagonal
-        bc.add(new BoardCoord(1, 3));
-        bc.add(new BoardCoord(2, 4));
-        Boards.refillBoardCoord(board, bc);
         assertFalse(board.hasCommonSide(1, 3, 2, 4));
-        Boards.emptyBoard(board);
-        bc.clear();
-
     }
 
     @Test
     void hasCommonSides3() {
         var board = new Board(2);
-        Boards.refillBoardRandom(board);
-        List<BoardCoord> bc = new ArrayList<>();
+
+        assertFalse(board.hasCommonSide(3, 2, 4, 3, 5, 2));
+        assertFalse(board.hasCommonSide(3, 2, 3, 2, 5, 3));
+        assertFalse(board.hasCommonSide(3, 2, 4, 2, 6, 2));
+        assertFalse(board.hasCommonSide(3, 2, 6, 2, 4, 2));
 
         //3 in a row
-        bc.add(new BoardCoord(2, 3));
-        bc.add(new BoardCoord(2, 4));
-        bc.add(new BoardCoord(2, 5));
-        Boards.refillBoardCoord(board, bc);
         //coordinates given in order
         assertTrue(board.hasCommonSide(2, 3, 2, 4, 2, 5));
         //coordinates given in  reverse order
         assertTrue(board.hasCommonSide(2, 5, 2, 4, 2, 3));
         //coordinates given from middle one
         assertTrue(board.hasCommonSide(2, 4, 2, 3, 2, 5));
-        Boards.emptyBoard(board);
-        bc.clear();
+        assertTrue(board.hasCommonSide(2, 5, 2, 3, 2, 4));
 
         //3 in a column
-        bc.add(new BoardCoord(3, 2));
-        bc.add(new BoardCoord(4, 2));
-        bc.add(new BoardCoord(5, 2));
-        Boards.refillBoardCoord(board, bc);
         //coordinates given in order
         assertTrue(board.hasCommonSide(3, 2, 4, 2, 5, 2));
         //coordinates given in  reverse order
         assertTrue(board.hasCommonSide(5, 2, 4, 2, 3, 2));
         //coordinates given from middle one
         assertTrue(board.hasCommonSide(4, 2, 3, 2, 5, 2));
-        Boards.emptyBoard(board);
-        bc.clear();
 
         //3 in a L shape
-        bc.add(new BoardCoord(3, 2));
-        bc.add(new BoardCoord(4, 2));
-        bc.add(new BoardCoord(4, 3));
-        Boards.refillBoardCoord(board, bc);
         //coordinates given in order
         assertFalse(board.hasCommonSide(3, 2, 4, 2, 4, 3));
-        Boards.emptyBoard(board);
-        bc.clear();
     }
 }

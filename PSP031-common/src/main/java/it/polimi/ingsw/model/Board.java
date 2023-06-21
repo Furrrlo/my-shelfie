@@ -146,9 +146,7 @@ public class Board implements BoardView {
         return tiles()
                 .filter(t -> t.tile().get() != null)
                 .allMatch(t -> (!isValidTile(t.row() + 1, t.col()) || tile(t.row() + 1, t.col()).get() == null) &&
-                        (!isValidTile(t.row() - 1, t.col()) || tile(t.row() - 1, t.col()).get() == null) &&
-                        (!isValidTile(t.row(), t.col() + 1) || tile(t.row(), t.col() + 1).get() == null) &&
-                        (!isValidTile(t.row(), t.col() - 1) || tile(t.row(), t.col() - 1).get() == null));
+                        (!isValidTile(t.row(), t.col() + 1) || tile(t.row(), t.col() + 1).get() == null));
     }
 
     @Override
