@@ -48,5 +48,19 @@ class PropertyProxyTest {
 
         assertDoesNotThrow(() -> proxy.unregisterObserver(observer));
         assertFalse(proxied.getObservers().contains(observer));
+
+        Consumer<? super Object> weakObserver = c -> {
+        };
+        assertDoesNotThrow(() -> proxy.registerWeakObserver(weakObserver));
+        assertTrue(proxied.getObservers().contains(weakObserver));
+
+        assertDoesNotThrow(() -> proxy.unregisterObserver(weakObserver));
+        assertFalse(proxied.getObservers().contains(weakObserver));
+    }
+
+    @Test
+    void testToString() {
+        var proxy = new PropertyProxy<@Nullable Object>();
+        assertDoesNotThrow(proxy::toString);
     }
 }

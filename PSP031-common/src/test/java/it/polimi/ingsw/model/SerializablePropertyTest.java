@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -44,6 +45,7 @@ class SerializablePropertyTest {
 
     void doTestSerializable(SerializableProperty<?> property) throws IOException, ClassNotFoundException {
         property.registerObserver(v -> System.out.println("random observer"));
+        property.registerWeakObserver(v -> System.out.println("random weak observer"));
 
         final SerializableProperty<?> deserialized;
         try (var pipe = new PipedInputStream();
@@ -71,6 +73,35 @@ class SerializablePropertyTest {
     }
 
     @Test
+    void testSetThrowingObservable() throws ExecutionException, InterruptedException, TimeoutException {
+        final var property = new SerializableProperty<>("empty");
+        final var observed = new CompletableFuture<String>();
+        property.registerObserver(value -> {
+            observed.complete(value);
+            throw new RuntimeException();
+        });
+        assertDoesNotThrow(() -> property.set("set"));
+        assertEquals("set", property.get());
+        assertEquals(property.get(), observed.get(500, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    void testSetWeakObservable() throws ExecutionException, InterruptedException, TimeoutException {
+        final var property = new SerializableProperty<>("empty");
+        {
+            final var observed = new CompletableFuture<String>();
+            property.registerWeakObserver(observed::complete);
+            property.set("set");
+            assertEquals("set", property.get());
+            assertEquals(property.get(), observed.get(500, TimeUnit.MILLISECONDS));
+        }
+        System.gc();
+        property.set("test");
+        assertEquals("test", property.get());
+        assertTrue(property.getObservers().isEmpty());
+    }
+
+    @Test
     void testUpdateObservable() throws ExecutionException, InterruptedException, TimeoutException {
         final var property = new SerializableProperty<>("empty");
         final var observed = new CompletableFuture<String>();
@@ -81,11 +112,22 @@ class SerializablePropertyTest {
     }
 
     @Test
+    void testUpdateWeakObservable() throws ExecutionException, InterruptedException, TimeoutException {
+        final var property = new SerializableProperty<>("empty");
+        final var observed = new CompletableFuture<String>();
+        property.registerWeakObserver(observed::complete);
+        property.update(v -> v + "_updated");
+        assertEquals("empty_updated", property.get());
+        assertEquals(property.get(), observed.get(500, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     void testUnregistering() throws InterruptedException {
         final var property = new SerializableProperty<>("empty");
         final var observed = IntStream.range(0, 100)
-                .mapToObj(i -> (Consumer<? super String>) str -> {
-                })
+                //Avoid using the same consume 100 times
+                .mapToObj(i -> (Consumer<String>) Function.identity()::apply)
                 .collect(Collectors.toList());
         // Register observers with a few millis of time diff each
         for (Consumer<? super String> p : observed) {
@@ -108,5 +150,10 @@ class SerializablePropertyTest {
             property.unregisterObserver(toRemove);
             assertFalse(property.getObservers().contains(toRemove), "Property still contains " + toRemove);
         }
+    }
+
+    @Test
+    void testToString() {
+        assertDoesNotThrow(() -> new SerializableProperty<>("").toString());
     }
 }

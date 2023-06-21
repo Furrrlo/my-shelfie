@@ -90,6 +90,12 @@ class PersonalGoalTest {
     }
 
     @Test
+    void testGetIndex() {
+        var p = new PersonalGoal(0);
+        assertEquals(0, p.getIndex());
+    }
+
+    @Test
     @SuppressWarnings("EqualsWithItself")
     void testEquals() {
         final var personalGoal1 = new PersonalGoal(0);

@@ -131,6 +131,8 @@ class ShelfieTest {
         assertEquals(new Tile(Color.BLUE), shelfie.tile(0, 0).get());
         assertNotEquals(new Tile(Color.BLUE), shelfie.tile(1, 0).get());
         assertNotEquals(new Tile(Color.GREEN), shelfie.tile(0, 0).get());
+
+        assertThrows(IndexOutOfBoundsException.class, () -> shelfie.placeTiles(selected, 3));
     }
 
     @Test

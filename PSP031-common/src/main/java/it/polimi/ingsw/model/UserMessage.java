@@ -32,9 +32,8 @@ public record UserMessage(String nickSendingPlayer,
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || getClass() != o.getClass())
+        if (!(o instanceof UserMessage that))
             return false;
-        UserMessage that = (UserMessage) o;
         return nickSendingPlayer.equals(that.nickSendingPlayer) && message.equals(that.message)
                 && nickReceivingPlayer.equals(that.nickReceivingPlayer);
     }

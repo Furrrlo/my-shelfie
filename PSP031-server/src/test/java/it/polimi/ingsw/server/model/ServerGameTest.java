@@ -2,6 +2,7 @@ package it.polimi.ingsw.server.model;
 
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.LobbyPlayer;
+import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.server.controller.LobbyServerController;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,25 @@ class ServerGameTest {
         assertEquals(game.getBag(), game.getBagView());
         game.getBag().add(new Tile(Color.BLUE));
         assertEquals(game.getBag(), game.getBagView());
+    }
+
+    @Test
+    void testRefillBoard() {
+        final var game = LobbyServerController.createGame(
+                0,
+                List.of(new LobbyPlayer("example_player_1"), new LobbyPlayer("example_player_2")));
+
+        Property.setNullable(game.getBoard().tile(3, 3), null);
+        game.refillBoard();
+        assertNotNull(game.getBoard().tile(3, 3).get());
+
+        Property.setNullable(game.getBoard().tile(3, 3), null);
+        Property.setNullable(game.getBoard().tile(3, 4), null);
+        game.getBag().clear();
+        game.getBag().add(new Tile(Color.GREEN));
+        game.refillBoard();
+        assertNotNull(game.getBoard().tile(3, 3).get());
+        assertNull(game.getBoard().tile(3, 4).get());
     }
 
     @Test

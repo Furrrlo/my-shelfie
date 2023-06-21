@@ -222,6 +222,23 @@ class GameTest {
                 null, false, true);
         assertNotEquals(game1, gameDiffSuspended, "Instances with different suspended should not be equals");
 
+        final var gameDiffMessages = new Game(
+                0,
+                new Board(2),
+                List.of(
+                        (sp, ct, ff) -> new Player("player1", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player2", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("player3", new Shelfie(), sp, true, ct, ff, 0),
+                        (sp, ct, ff) -> new Player("thePlayer", new Shelfie(), sp, true, ct, ff, 0)),
+                3,
+                1,
+                2,
+                players -> List.of(new CommonGoal(Type.DIAGONAL, List.of()), new CommonGoal(Type.CROSS, List.of())),
+                new PersonalGoal(1),
+                null, false, false);
+        gameDiffMessages.messageList().set(List.of(UserMessage.forEveryone("", "", "")));
+        assertNotEquals(game1, gameDiffMessages, "Instances with different messages should not be equals");
+
     }
 
     @Test

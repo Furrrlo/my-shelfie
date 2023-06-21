@@ -11,6 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class LobbyTest {
 
     @Test
+    void testIsLobbyCreator() {
+        final var lobby1 = new Lobby(4, List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")),
+                "test_player_2");
+        assertTrue(lobby1.isLobbyCreator("test_player_1"));
+    }
+
+    @Test
     @SuppressWarnings("EqualsWithItself")
     void testEquals() {
         final var lobby1 = new Lobby(4, List.of(new LobbyPlayer("test_player_1")), "test_player_1");
