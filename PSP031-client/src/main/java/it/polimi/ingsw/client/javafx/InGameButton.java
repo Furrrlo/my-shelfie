@@ -31,6 +31,7 @@ public class InGameButton extends Button {
         super(text);
         backgroundColor.set(bgColor);
 
+        setTextFill(Color.BLACK);
         setAlignment(Pos.CENTER);
         backgroundProperty().bind(FxProperties
                 .compositeObservableValue(
