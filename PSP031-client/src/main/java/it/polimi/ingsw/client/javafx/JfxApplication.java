@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JfxApplication extends Application {
 
@@ -37,7 +39,30 @@ public class JfxApplication extends Application {
     public void start(Stage stage) throws Exception {
         var resources = new FxCachingResourcesLoader();
         // Load fonts from ttf files
-        Font.loadFonts(FxResources.getResourceAsStream("Inter-VariableFont_slnt,wght.ttf"), 0);
+        // Sadly JavaFX does not support variable fonts, so we need to load each combination by hand
+        var loadedFonts = Stream.of(
+                "Inter-Black.otf",
+                "Inter-BlackItalic.otf",
+                "Inter-Bold.otf",
+                "Inter-BoldItalic.otf",
+                "Inter-ExtraBold.otf",
+                "Inter-ExtraBoldItalic.otf",
+                "Inter-ExtraLight.otf",
+                "Inter-ExtraLightItalic.otf",
+                "Inter-Italic.otf",
+                "Inter-Light.otf",
+                "Inter-LightItalic.otf",
+                "Inter-Medium.otf",
+                "Inter-MediumItalic.otf",
+                "Inter-Regular.otf",
+                "Inter-SemiBold.otf",
+                "Inter-SemiBoldItalic.otf",
+                "Inter-Thin.otf",
+                "Inter-ThinItalic.otf")
+                .map(f -> Font.loadFont(FxResources.getResourceAsStream("fonts/" + f), 0))
+                .collect(Collectors.toUnmodifiableSet());
+        LOGGER.info("Loaded fonts {}", loadedFonts);
+
         threadPool.execute(ThreadPools.giveNameToTask("JFX-resources-preload-thread", resources::populateCache));
 
         Scene scene = new Scene(new JfxMainMenuSceneRoot(resources, threadPool, stage));
