@@ -7,6 +7,8 @@ import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.model.GameView;
 import it.polimi.ingsw.model.PlayerView;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -27,6 +29,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class GamePane extends Pane {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GamePane.class);
+
     /**
      * set to appear when the required number of players for a game is achieved, and they are all ready.
      * It displays all the game's components needed for the player to play, including the other players'
@@ -63,14 +69,15 @@ public class GamePane extends Pane {
 
     private final NotCurrentTurnDialog notCurrentTurnMessage;
     private final SuspendedGameDialog suspendedGameMessage;
+    private final DisconnectedDialog disconnectedMessage;
     private final QuitGameDialog quitGameMessage;
     private @Nullable EndGamePane endGamePane;
     private final ScoringTokenComponent finishToken;
 
-    private final ObjectProperty<Consumer<@Nullable Throwable>> onDisconnect = new SimpleObjectProperty<>();
-
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
     private final Consumer<Boolean> suspendedObserver;
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
+    private final Consumer<Boolean> disconnectedObserver;
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
     private final Consumer<Boolean> endGameObserver;
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
@@ -121,6 +128,8 @@ public class GamePane extends Pane {
         bindBidirectionalVisibility.accept(notCurrentTurnMessage);
         this.suspendedGameMessage = new SuspendedGameDialog();
         bindBidirectionalVisibility.accept(suspendedGameMessage);
+        this.disconnectedMessage = new DisconnectedDialog(resources, threadPool, stage, netManager);
+        bindBidirectionalVisibility.accept(disconnectedMessage);
         //set alert for quitGame message
         this.quitGameMessage = new QuitGameDialog();
         bindBidirectionalVisibility.accept(quitGameMessage);
@@ -129,8 +138,8 @@ public class GamePane extends Pane {
         visibleDialog.addListener((obs, oldVal, newVal) -> {
             // can't use a constant as endGamePane can be set at any point
             var blurredBgPanes = endGamePane != null
-                    ? List.of(quitGameMessage, endGamePane, suspendedGameMessage)
-                    : List.of(quitGameMessage, suspendedGameMessage);
+                    ? List.of(quitGameMessage, endGamePane, suspendedGameMessage, disconnectedMessage)
+                    : List.of(quitGameMessage, suspendedGameMessage, disconnectedMessage);
 
             boolean isShowingPaneWithBlurredBg = blurredBgPanes.stream().anyMatch(v -> Objects.equals(newVal, v));
             boolean wasShowingPaneWithBlurredBg = blurredBgPanes.stream().anyMatch(v -> Objects.equals(oldVal, v));
@@ -159,6 +168,18 @@ public class GamePane extends Pane {
                     n.setOpacity(1);
                 }
             }
+        });
+
+        // Create a disconnection handler that shows the appropriate dialog and logs the exception
+        final Consumer<Throwable> onDisconnect = cause -> threadPool.execute(() -> {
+            try {
+                netManager.close();
+            } catch (Throwable t) {
+                cause.addSuppressed(new IOException("Failed to close ClientNetManager", t));
+            }
+
+            LOGGER.error("Connection with the server was lost", cause);
+            Platform.runLater(() -> visibleDialog.set(disconnectedMessage));
         });
 
         //adding first finisher token on game pane otherwise it would have been disabled when is not
@@ -372,6 +393,13 @@ public class GamePane extends Pane {
         }));
         suspendedObserver.accept(game.suspended().get()); // Trigger suspension in case it's true
 
+        // add listener to handle disconnections properly
+        game.thePlayer().connected().registerWeakObserver(disconnectedObserver = newValue -> Platform.runLater(() -> {
+            if (!newValue)
+                onDisconnect.accept(new Exception("thePlayer connected state is false"));
+        }));
+        disconnectedObserver.accept(game.thePlayer().connected().get()); // Trigger disconnection in case it's true
+
         //binding this.endGame to game's Provider endGame and adding listener that when listens endGame being true
         //disables all nodes in the game and displays the endGamePane
         game.endGame().registerWeakObserver(endGameObserver = newValue -> Platform.runLater(() -> {
@@ -417,9 +445,7 @@ public class GamePane extends Pane {
                         try {
                             controller.makeMove(choosenCoords, tileAndCoords.col());
                         } catch (DisconnectedException e) {
-                            var disc = onDisconnect.get();
-                            if (disc != null)
-                                disc.accept(e);
+                            onDisconnect.accept(e);
                         } finally {
                             Platform.runLater(() -> isMakingMove.set(false));
                         }
@@ -449,7 +475,7 @@ public class GamePane extends Pane {
                         .stream().map(PlayerView::getNick)
                         .filter(nick -> !nick.equals(game.thePlayer().getNick()))
                         .toList(),
-                game.thePlayer().getNick(), controller));
+                game.thePlayer().getNick(), controller, onDisconnect));
         this.chatPane.messagesProperty().bind(FxProperties
                 .toFxProperty("messages", this, game.messageList()));
         this.chatPane.setVisible(false);
@@ -496,11 +522,13 @@ public class GamePane extends Pane {
         getChildren().add(this.suspendedGameMessage);
         getChildren().add(this.quitGameMessage);
         getChildren().add(this.newMsg);
+        getChildren().add(this.disconnectedMessage);
         //adding the Alerts as last nodes so that they will be on front
         this.newMsg.toFront();
         this.notCurrentTurnMessage.toFront();
         this.suspendedGameMessage.toFront();
         this.quitGameMessage.toFront();
+        this.disconnectedMessage.toFront();
 
         finishToken.toFront();
         getChildren().add(this.finishToken);
@@ -550,6 +578,8 @@ public class GamePane extends Pane {
         if (endGamePane != null)
             this.endGamePane.resizeRelocate((getWidth() - 690 * scale) / 2, (getHeight() - 490 * scale) / 2,
                     690 * scale, 490 * scale);
+        this.disconnectedMessage.resizeRelocate((getWidth() - 230 * scale) / 2, (getHeight() - 230 * scale) / 2, 230 * scale,
+                230.0 * scale);
 
         final var newMsgSize = 13 * scale;
         final var chatPaneWidth = 200.0 * scale;

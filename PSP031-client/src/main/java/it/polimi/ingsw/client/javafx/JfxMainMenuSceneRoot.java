@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 public class JfxMainMenuSceneRoot extends AnchorPane {
@@ -89,7 +90,7 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
 
         // ip validation
         Label errorLabel = new Label("");
-        BooleanProperty isConnecting = new SimpleBooleanProperty(false);
+        BooleanProperty isConnecting = new SimpleBooleanProperty(this, "isConnecting", false);
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             String host = ipTextField.getText().isBlank()
                     ? ipTextField.getPromptText().strip()
@@ -98,48 +99,23 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                     ? portTextField.getPromptText().strip()
                     : portTextField.getText().strip());
             String username = usernameTextField.getText();
+            String networkProtocol = connectionTypeChoice.getValue();
 
             isConnecting.set(true);
             threadPool.execute(() -> {
-                ClientNetManager netManager = null;
                 try {
-                    netManager = switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {
-                        case "rmi" -> RmiClientNetManager.connect(host, port, username);
-                        case "socket" -> SocketClientNetManager.connect(new InetSocketAddress(host, port), username);
-                        default -> throw new IllegalStateException("Unexpected value: " + connectionTypeChoice.getValue());
-                    };
-                    var lobbyAndController = netManager.joinGame();
-
-                    final var netManager0 = netManager;
-                    Platform.runLater(() -> {
-                        EventHandler<WindowEvent> onClose = evt -> {
-                            int exitCode = 0;
-                            try {
-                                netManager0.close();
-                            } catch (IOException ex) {
-                                LOGGER.error("Failed to disconnect from the server while closing", ex);
-                                exitCode = -1;
-                            }
-
-                            Platform.exit();
-                            System.exit(exitCode);
-                        };
-                        stage.getScene().setRoot(JfxLobbySceneRoot
-                                .getSceneRootFor(resources, threadPool, stage, lobbyAndController, netManager0));
-                        stage.setOnCloseRequest(onClose);
-                        stage.setOnHiding(onClose);
-                    });
+                    connectAndJoinGame(
+                            resources,
+                            threadPool,
+                            stage,
+                            () -> switch (networkProtocol.toLowerCase(Locale.ROOT)) {
+                                case "rmi" -> RmiClientNetManager.connect(host, port, username);
+                                case "socket" -> SocketClientNetManager.connect(new InetSocketAddress(host, port), username);
+                                default -> throw new IllegalStateException("Unexpected value: " + networkProtocol);
+                            });
                 } catch (NickNotValidException ex) {
                     Platform.runLater(() -> errorLabel.setText(ex.getMessage()));
                 } catch (Throwable ex) {
-                    if (netManager != null) {
-                        try {
-                            netManager.close();
-                        } catch (IOException exc) {
-                            ex.addSuppressed(ex);
-                        }
-                    }
-
                     LOGGER.error("Failed to connect", ex);
                     Platform.runLater(() -> errorLabel.setText("Failed to connect to the server. Check ip and port"));
                 } finally {
@@ -177,5 +153,49 @@ public class JfxMainMenuSceneRoot extends AnchorPane {
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(100, 100, true, true, false, true))));
+    }
+
+    public static void connectAndJoinGame(FxResourcesLoader resources,
+                                          ExecutorService threadPool,
+                                          Stage stage,
+                                          Callable<ClientNetManager> netManagerFactory)
+            throws Exception {
+        ClientNetManager netManager = null;
+        try {
+            netManager = netManagerFactory.call();
+            var lobbyAndController = netManager.joinGame();
+
+            final var netManager0 = netManager;
+            Platform.runLater(() -> {
+                EventHandler<WindowEvent> onClose = evt -> {
+                    int exitCode = 0;
+                    try {
+                        netManager0.close();
+                    } catch (IOException ex) {
+                        LOGGER.error("Failed to disconnect from the server while closing", ex);
+                        exitCode = -1;
+                    }
+
+                    Platform.exit();
+                    System.exit(exitCode);
+                };
+                stage.getScene().setRoot(JfxLobbySceneRoot
+                        .getSceneRootFor(resources, threadPool, stage, lobbyAndController, netManager0));
+                stage.setOnCloseRequest(onClose);
+                stage.setOnHiding(onClose);
+            });
+        } catch (NickNotValidException ex) {
+            throw ex;
+        } catch (Throwable ex) {
+            if (netManager != null) {
+                try {
+                    netManager.close();
+                } catch (IOException exc) {
+                    ex.addSuppressed(ex);
+                }
+            }
+
+            throw ex;
+        }
     }
 }

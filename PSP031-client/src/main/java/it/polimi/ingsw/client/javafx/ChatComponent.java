@@ -16,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 
@@ -30,7 +31,8 @@ public class ChatComponent extends VBox {
     public ChatComponent(FxResourcesLoader resources,
                          List<String> recipients,
                          String thePlayer,
-                         GameController controller) {
+                         GameController controller,
+                         Consumer<Throwable> onDisconnect) {
         setSpacing(SPACING);
 
         this.chatScrollComponent = new ChatScrollComponent(thePlayer);
@@ -79,7 +81,7 @@ public class ChatComponent extends VBox {
                 //restores TextArea after message is sent
                 text.setText("");
             } catch (DisconnectedException e) {
-                throw new RuntimeException(e);
+                onDisconnect.accept(e);
             }
         });
 
