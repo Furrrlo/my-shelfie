@@ -43,6 +43,15 @@ public class ChatButton extends Pane {
 
         getChildren().add(closedMail);
         getChildren().add(openedMail);
+
+        setOnMouseEntered(event -> backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.web("#67e4de"),
+                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                new Insets(0))))));
+        setOnMouseExited(event -> backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTSEAGREEN,
+                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                new Insets(0))))));
     }
 
     @Override
