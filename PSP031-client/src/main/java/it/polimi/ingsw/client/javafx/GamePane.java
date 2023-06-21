@@ -491,7 +491,12 @@ public class GamePane extends Pane {
         this.board.resize(460.0 * scale, 460.0 * scale);
         this.finishToken.resizeRelocate(743.0 * scale, 322.0 * scale, 46 * scale, 46 * scale);
         this.boardPane.resizeRelocate(370.0 * scale, 0, 460.0 * scale, 460.0 * scale);
-        this.adjacentItemTiles.resizeRelocate((370.0 + 305.0) * scale, 380 * scale, 147 * scale, 70 * scale);
+        // toFind / cropCoord[x, y, w or h used to crop] = 460[image size copied from the above line] / 2965[original image size]
+        this.adjacentItemTiles.resizeRelocate(
+                (370.0 + 1977 * 460d / 2965d) * scale,
+                2465 * 460d / 2965d * scale,
+                889 * 460d / 2965d * scale,
+                394 * 460d / 2965d * scale);
         this.firstFinisherDescription.resizeRelocate((370.0 + 305.0) * scale, 5 * scale, 150 * scale, 150 * scale);
         this.adjacentItemTilesDescription.resizeRelocate((370.0 + 305.0) * scale, 5 * scale, 150 * scale, 150 * scale);
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
