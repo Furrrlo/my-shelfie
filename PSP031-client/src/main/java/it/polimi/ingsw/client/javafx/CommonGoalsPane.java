@@ -15,7 +15,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class CommonGoalsPane extends Pane {
+class CommonGoalsPane extends Pane {
 
     private final StackPane textBackground;
     private final Text description;

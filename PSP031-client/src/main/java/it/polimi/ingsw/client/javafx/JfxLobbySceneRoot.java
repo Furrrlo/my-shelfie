@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class JfxLobbySceneRoot extends AnchorPane {
+class JfxLobbySceneRoot extends AnchorPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxLobbySceneRoot.class);
 

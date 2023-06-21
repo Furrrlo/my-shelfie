@@ -7,7 +7,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
 
-public class ChatButton extends InGameButton {
+class ChatButton extends InGameButton {
 
     private final ImageView openedMail;
     private final ImageView closedMail;

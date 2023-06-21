@@ -29,7 +29,7 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-public class JfxMainMenuSceneRoot extends AnchorPane {
+class JfxMainMenuSceneRoot extends AnchorPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuSceneRoot.class);
 

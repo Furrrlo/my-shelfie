@@ -8,7 +8,7 @@ import javafx.beans.value.ObservableValue;
 
 import java.util.function.Function;
 
-public class RemappableObjectProperty<T> extends ReadOnlyObjectWrapper<T> {
+class RemappableObjectProperty<T> extends ReadOnlyObjectWrapper<T> {
 
     private static final Object NULL_MARKER = new Object();
 

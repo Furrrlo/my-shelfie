@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-public class PickedTilesPane extends Pane {
+class PickedTilesPane extends Pane {
 
     private static final DataFormat TILE_DATA_FORMAT = new DataFormat("my-shelfie/swap-tile-n-coords");
 

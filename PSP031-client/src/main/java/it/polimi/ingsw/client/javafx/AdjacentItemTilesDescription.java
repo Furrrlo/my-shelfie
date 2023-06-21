@@ -10,7 +10,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class AdjacentItemTilesDescription extends Pane {
+class AdjacentItemTilesDescription extends Pane {
     private final Text title = new Text("Adjacent Item Tiles");
     private final Text description = new Text(
             "Groups of adjacent tiles of the same type on your shelfie " +

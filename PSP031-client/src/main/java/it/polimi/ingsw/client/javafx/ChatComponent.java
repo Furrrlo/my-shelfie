@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 
-public class ChatComponent extends VBox {
+class ChatComponent extends VBox {
 
     private final ChatScrollComponent chatScrollComponent;
     public final static int INSET = 10;

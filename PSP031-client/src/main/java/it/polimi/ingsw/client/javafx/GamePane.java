@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public class GamePane extends Pane {
+class GamePane extends Pane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GamePane.class);
 

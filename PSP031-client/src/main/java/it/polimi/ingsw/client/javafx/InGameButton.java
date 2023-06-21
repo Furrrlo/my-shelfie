@@ -13,7 +13,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 
 /** Button styled in order to be used in-game */
-public class InGameButton extends Button {
+class InGameButton extends Button {
 
     private final ObjectProperty<Color> backgroundColor = new SimpleObjectProperty<>(this, "backgroundColor");
     private final ObjectProperty<CornerRadii> backgroundRadius = new SimpleObjectProperty<>(this, "backgroundRadius");

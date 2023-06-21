@@ -10,7 +10,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class FirstFinisherDescription extends Pane {
+class FirstFinisherDescription extends Pane {
     private final ImageView notAchieved;
     private final ImageView achieved;
     private final Text description = new Text(

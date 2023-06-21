@@ -12,7 +12,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.shape.Rectangle;
 
-public class ColorTileComponent extends AnchorPane {
+class ColorTileComponent extends AnchorPane {
 
     public ColorTileComponent(FxResourcesLoader resources, @Nullable Tile tile) {
         this(resources, tile == null ? null : tile.getColor());

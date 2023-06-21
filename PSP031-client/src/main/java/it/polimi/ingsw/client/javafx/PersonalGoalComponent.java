@@ -8,7 +8,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-public class PersonalGoalComponent extends ImageButton {
+class PersonalGoalComponent extends ImageButton {
 
     public PersonalGoalComponent(FxResourcesLoader resources, PersonalGoalView personalGoal) {
         var img = resources.loadImage(personalGoal.getIndex() == 0

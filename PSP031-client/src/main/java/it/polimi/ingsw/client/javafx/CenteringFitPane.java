@@ -7,7 +7,7 @@ import javafx.scene.layout.Pane;
  * Pane component which lays out children in its center and tries to maximize their size,
  * but still fits them to its layout bounds
  */
-public class CenteringFitPane extends Pane {
+class CenteringFitPane extends Pane {
 
     @Override
     protected void layoutChildren() {

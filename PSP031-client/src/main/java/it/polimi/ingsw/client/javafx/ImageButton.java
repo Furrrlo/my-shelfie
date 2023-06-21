@@ -17,7 +17,7 @@ import javafx.scene.paint.Color;
 
 import static it.polimi.ingsw.client.javafx.FxProperties.compositeObservableValue;
 
-public class ImageButton extends Button {
+class ImageButton extends Button {
 
     private final ObjectProperty<Image> image = new SimpleObjectProperty<>(this, "image");
     private final BooleanProperty highlight = new SimpleBooleanProperty(this, "highlight");

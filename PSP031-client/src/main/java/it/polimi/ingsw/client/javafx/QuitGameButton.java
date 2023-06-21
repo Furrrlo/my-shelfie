@@ -5,7 +5,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
 
-public class QuitGameButton extends InGameButton {
+class QuitGameButton extends InGameButton {
 
     public QuitGameButton() {
         super("Quit game", Color.INDIANRED);

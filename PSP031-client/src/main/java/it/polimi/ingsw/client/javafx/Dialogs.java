@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** Utility class which allows to add support and manage in-window dialogs to any pane */
-public class Dialogs {
+class Dialogs {
 
     public static Dialogs setupDialogSupport(Parent parent) {
         var dialogs = new Dialogs(new SimpleObjectProperty<>(parent, "visibleDialog"));

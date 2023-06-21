@@ -15,7 +15,7 @@ import javafx.scene.paint.Color;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
-public class PlayerShelfieComponent extends Pane {
+class PlayerShelfieComponent extends Pane {
 
     private final NickLabel label;
     private final ShelfieComponent shelfieComponent;

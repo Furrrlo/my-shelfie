@@ -6,7 +6,7 @@ import it.polimi.ingsw.model.PersonalGoalView;
 
 import javafx.scene.layout.Pane;
 
-public class GoalPatternComponent extends Pane {
+class GoalPatternComponent extends Pane {
     private static final Color[][] SIX_COUPLES = new Color[][] {
             //@formatter:off
             new Color[] { Color.WHITE    , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , Color.BLUE      },

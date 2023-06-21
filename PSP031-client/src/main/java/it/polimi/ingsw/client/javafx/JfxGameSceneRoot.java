@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 
 import java.util.concurrent.ExecutorService;
 
-public class JfxGameSceneRoot extends CenteringFitPane {
+class JfxGameSceneRoot extends CenteringFitPane {
 
     public JfxGameSceneRoot(FxResourcesLoader resources,
                             ExecutorService threadPool,

@@ -9,7 +9,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class PersonalGoalDescription extends Pane {
+class PersonalGoalDescription extends Pane {
     private final Text text = new Text("The personal goal card grants points if you match the highlighted " +
             "spaces with the corresponding item tiles.\n1 pt for one matched tile, 2 pts for two, 4 pts for three, " +
             "6 pts for four, 9 pts for five, 12 pts for six.");

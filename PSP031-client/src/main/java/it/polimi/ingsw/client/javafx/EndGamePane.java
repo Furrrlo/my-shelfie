@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-public class EndGamePane extends Pane {
+class EndGamePane extends Pane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndGamePane.class);
 

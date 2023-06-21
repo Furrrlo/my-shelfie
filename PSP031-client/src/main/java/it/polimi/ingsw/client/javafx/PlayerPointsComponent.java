@@ -8,7 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
-public class PlayerPointsComponent extends HBox {
+class PlayerPointsComponent extends HBox {
 
     private final Label label;
 

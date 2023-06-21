@@ -18,7 +18,7 @@ import javafx.scene.text.Text;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatScrollComponent extends ScrollPane {
+class ChatScrollComponent extends ScrollPane {
     private final MessageVBox messagesVBox;
 
     public ChatScrollComponent(String thePlayer) {
