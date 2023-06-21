@@ -32,14 +32,14 @@ public class ChatButton extends InGameButton {
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
-
         double scale = Math.min(getWidth() / 115d, getHeight() / 46d);
 
         closedMail.setFitWidth(30 * scale);
         openedMail.setFitHeight(30 * scale);
 
         Fonts.changeSize(fontProperty(), 14 * scale);
+
+        super.layoutChildren();
     }
 
     public void swap() {
