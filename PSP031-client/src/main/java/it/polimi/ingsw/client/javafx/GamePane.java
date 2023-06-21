@@ -13,13 +13,10 @@ import org.slf4j.LoggerFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
@@ -30,7 +27,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -94,83 +90,18 @@ public class GamePane extends Pane {
                     GameController controller,
                     ClientNetManager netManager) {
 
-        ObjectProperty<Parent> visibleDialog = new SimpleObjectProperty<>();
-        Consumer<Parent> bindBidirectionalVisibility = (component) -> {
-            var weakComponentRef = new WeakReference<>(component);
-            component.setVisible(Objects.equals(visibleDialog.get(), component));
-            component.visibleProperty().addListener((obs, oldV, newV) -> {
-                if (newV)
-                    visibleDialog.set(component);
-                else if (Objects.equals(component, visibleDialog.get()))
-                    visibleDialog.set(null);
-            });
-            // Use a weak ref to allow component to be garbage collected if nobody else is holding it
-            final var visibleListenerRef = new AtomicReference<ChangeListener<? super Parent>>();
-            visibleListenerRef.set((obs, oldV, newV) -> {
-                var currComponent = weakComponentRef.get();
-                if (currComponent == null) {
-                    ChangeListener<? super Parent> visibleListener = visibleListenerRef.getAndSet(null);
-                    if (visibleListener != null)
-                        visibleDialog.removeListener(visibleListener);
-                    return;
-                }
-
-                if (Objects.equals(oldV, currComponent))
-                    currComponent.setVisible(false);
-                if (Objects.equals(newV, currComponent)) {
-                    currComponent.toFront();
-                    currComponent.setVisible(true);
-                }
-            });
-            visibleDialog.addListener(visibleListenerRef.get());
-        };
+        var dialogs = Dialogs.setupDialogSupport(this);
         //set new alerts for suspended game and disconnected player ( making them initially not visible,
         // will be later made visible when corresponding state is caught )
         this.notCurrentTurnMessage = new NotCurrentTurnDialog();
-        bindBidirectionalVisibility.accept(notCurrentTurnMessage);
+        dialogs.register(notCurrentTurnMessage, false);
         this.suspendedGameMessage = new SuspendedGameDialog();
-        bindBidirectionalVisibility.accept(suspendedGameMessage);
+        dialogs.register(suspendedGameMessage, true);
         this.disconnectedMessage = new DisconnectedDialog(resources, threadPool, stage, netManager);
-        bindBidirectionalVisibility.accept(disconnectedMessage);
+        dialogs.register(disconnectedMessage, true);
         //set alert for quitGame message
         this.quitGameMessage = new QuitGameDialog();
-        bindBidirectionalVisibility.accept(quitGameMessage);
-
-        // Hide and disable / un-hide and enable all nodes when a dialog displayed/hidden
-        visibleDialog.addListener((obs, oldVal, newVal) -> {
-            // can't use a constant as endGamePane can be set at any point
-            var blurredBgPanes = endGamePane != null
-                    ? List.of(quitGameMessage, endGamePane, suspendedGameMessage, disconnectedMessage)
-                    : List.of(quitGameMessage, suspendedGameMessage, disconnectedMessage);
-
-            boolean isShowingPaneWithBlurredBg = blurredBgPanes.stream().anyMatch(v -> Objects.equals(newVal, v));
-            boolean wasShowingPaneWithBlurredBg = blurredBgPanes.stream().anyMatch(v -> Objects.equals(oldVal, v));
-
-            if (newVal != null) {
-                // Make sure the new pane is not disabled and opaque, as it could happen if it was previously set
-                // by another pane
-                newVal.setDisable(false);
-                newVal.setOpacity(1);
-            }
-
-            if (isShowingPaneWithBlurredBg == wasShowingPaneWithBlurredBg)
-                return;
-
-            if (isShowingPaneWithBlurredBg) {
-                for (Node n : getChildren()) {
-                    if (!n.equals(newVal)) {
-                        n.setDisable(true);
-                        n.setOpacity(0.5);
-                    }
-                }
-            } else /* if (wasShowingPaneWithBlurredBg) */ {
-                // restore all the children ( setDisable = true )
-                for (Node n : getChildren()) {
-                    n.setDisable(false);
-                    n.setOpacity(1);
-                }
-            }
-        });
+        dialogs.register(quitGameMessage, true);
 
         // Create a disconnection handler that shows the appropriate dialog and logs the exception
         final Consumer<Throwable> onDisconnect = cause -> threadPool.execute(() -> {
@@ -181,7 +112,7 @@ public class GamePane extends Pane {
             }
 
             LOGGER.error("Connection with the server was lost", cause);
-            Platform.runLater(() -> visibleDialog.set(disconnectedMessage));
+            Platform.runLater(() -> dialogs.setVisible(disconnectedMessage));
         });
 
         //adding first finisher token on game pane otherwise it would have been disabled when is not
@@ -338,7 +269,7 @@ public class GamePane extends Pane {
         board.disableProperty().bind(isCurrentTurn.not());
         boardPane.setOnMouseClicked(event -> {
             if (isCurrentTurn.not().get())
-                visibleDialog.set(notCurrentTurnMessage);
+                dialogs.setVisible(notCurrentTurnMessage);
         });
         pickedTilesPane.tilesProperty().bindBidirectional(board.pickedTilesProperty());
         pickedTilesPane.setIsTileRemovable(tileAndCoords -> {
@@ -386,11 +317,11 @@ public class GamePane extends Pane {
         //no other player reconnects therefore forcing the game to end )
         game.suspended().registerWeakObserver(suspendedObserver = newValue -> Platform.runLater(() -> {
             if (newValue) {
-                visibleDialog.set(suspendedGameMessage);
+                dialogs.setVisible(suspendedGameMessage);
                 suspendedGameMessage.play();
             } else {
                 //when suspended comes back to false it restores the game properties back to normal
-                visibleDialog.set(null);
+                dialogs.setVisible(null);
             }
         }));
         suspendedObserver.accept(game.suspended().get()); // Trigger suspension in case it's true
@@ -407,7 +338,7 @@ public class GamePane extends Pane {
         game.endGame().registerWeakObserver(endGameObserver = newValue -> Platform.runLater(() -> {
             if (newValue) {
                 this.endGamePane = new EndGamePane(resources, threadPool, stage, game.getSortedPlayers(), netManager);
-                bindBidirectionalVisibility.accept(endGamePane);
+                dialogs.register(endGamePane, true);
 
                 // Add a listener to remove the child and the listener itself once the endGamePane is closed
                 final var visibleListenerRef = new AtomicReference<ChangeListener<? super Parent>>();
@@ -419,11 +350,11 @@ public class GamePane extends Pane {
                     getChildren().remove(endGamePane);
                     var visibleListener = visibleListenerRef.getAndSet(null);
                     if (visibleListener != null)
-                        visibleDialog.removeListener(visibleListener);
+                        dialogs.visibleProperty().removeListener(visibleListener);
                 });
-                visibleDialog.addListener(visibleListenerRef.get());
+                dialogs.visibleProperty().addListener(visibleListenerRef.get());
                 getChildren().add(endGamePane);
-                visibleDialog.set(endGamePane);
+                dialogs.setVisible(endGamePane);
             }
         }));
         endGameObserver.accept(game.endGame().get()); // Trigger end game in case it's true
@@ -497,7 +428,7 @@ public class GamePane extends Pane {
         //adding chat button and quit game button over pickedTilesPane
         this.quitGameBtn = new QuitGameButton();
 
-        quitGameBtn.setOnMouseClicked(event -> visibleDialog.set(quitGameMessage));
+        quitGameBtn.setOnMouseClicked(event -> dialogs.setVisible(quitGameMessage));
         this.getChildren().add(quitGameBtn);
 
         this.newChatBtn = new ChatButton(resources);
