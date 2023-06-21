@@ -13,7 +13,7 @@ public interface PersonalGoalView extends Serializable {
     int getIndex();
 
     /**
-     * Returns the tile in position r & c
+     * Returns the tile in position r {@literal &} c
      * 
      * @param r defines row of personalGoal
      * @param c defines column of personalGoal

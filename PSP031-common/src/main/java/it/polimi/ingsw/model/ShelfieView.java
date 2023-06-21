@@ -12,7 +12,7 @@ public interface ShelfieView extends Serializable {
     int COLUMNS = 5;
 
     /**
-     * Returns the tile in position r & c ('r' specifying the row and 'c' the column)
+     * Returns the tile in position r {@literal &} c ('r' specifying the row and 'c' the column)
      */
     Provider<@Nullable Tile> tile(int r, int c);
 

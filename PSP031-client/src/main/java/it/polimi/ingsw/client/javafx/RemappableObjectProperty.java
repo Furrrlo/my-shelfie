@@ -34,13 +34,13 @@ class RemappableObjectProperty<T> extends ReadOnlyObjectWrapper<T> {
      * given mapping function on this value. The result is updated when this
      * {@code ObservableValue} changes. If this value is {@code null}, no
      * mapping is applied and the resulting value is also {@code null}.
-     * </p>
+     * <p>
      * This method is similar to the {@link #map(Function)} method, but it allows to
      * map a value and rebind it to the value itself, enabling the pattern:
-     * <code>{@code
+     * {@code
      * prop.bind(new SimpleStringProperty("abcd"));
      * prop.bind(prop.remap(String::toUpperCase));
-     * }</code>
+     * }
      *
      * @param <U> the type of values held by the resulting {@code ObservableValue}
      * @param mapper the mapping function to apply to a value, cannot be {@code null}
@@ -60,13 +60,13 @@ class RemappableObjectProperty<T> extends ReadOnlyObjectWrapper<T> {
      * given mapping function on this value. The result is updated when this
      * {@code ObservableValue} changes. If this value is {@code null}, the
      * mapping is still applied.
-     * </p>
+     * <p>
      * Thi method is similar to the {@link #map(Function)} method, but it allows to
      * map a value and rebind it to the value itself, enabling the pattern:
-     * <code>{@code
+     * {@code
      * prop.bind(new SimpleStringProperty("abcd"));
      * prop.bind(prop.remap(String::toUpperCase));
-     * }</code>
+     * }
      *
      * @param <U> the type of values held by the resulting {@code ObservableValue}
      * @param mapper the mapping function to apply to a value, cannot be {@code null}

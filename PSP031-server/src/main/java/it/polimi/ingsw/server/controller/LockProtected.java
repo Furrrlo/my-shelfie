@@ -34,7 +34,7 @@ public class LockProtected<T> {
      * the lock. Otherwise, it will do nothing.
      *
      * @param lock the possibly null LockProtected object
-     * @return a non-null LockCloseable<@Nullable T>
+     * @return a non-null {@code LockCloseable<@Nullable T>}
      * @param <T> type of the held object
      */
     @MustBeClosed

@@ -2,7 +2,7 @@ package it.polimi.ingsw.client.tui;
 
 /**
  * Represents a scene to be rendered by a {@link TuiRenderer}
- * <p/>
+ * <p>
  * A scene represents an entire game screen, excluding the prompt. So a single scene can render the same content,
  * but have different prompts to allow the user to make different actions
  * 

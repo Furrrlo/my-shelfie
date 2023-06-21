@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @param row the row coord of this tile
  * @param col the col coord of this tile
  * @param <P> the type of this tile.
- *        This has no lower boundary as it can be either a Property<Tile> or a Tile
+ *        This has no lower boundary as it can be either a {@code Property<Tile>} or a Tile
  */
 public record TileAndCoords<P>(P tile, int row, int col) implements Coord, Serializable {
 
