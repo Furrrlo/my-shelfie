@@ -25,9 +25,9 @@ import java.util.function.IntPredicate;
  */
 abstract class PlayerShelfieComponent extends Pane {
 
-    private final NickLabel label;
-    private final ShelfieComponent shelfieComponent;
-    private final Pane chair;
+    protected final NickLabel label;
+    protected final ShelfieComponent shelfieComponent;
+    protected final Pane chair;
 
     public PlayerShelfieComponent(FxResourcesLoader resources,
                                   PlayerView player,
@@ -49,22 +49,6 @@ abstract class PlayerShelfieComponent extends Pane {
         chairImgView.fitHeightProperty().bind(chair.heightProperty());
 
         this.chair.setVisible(player.isStartingPlayer());
-    }
-
-    @Override
-    protected void layoutChildren() {
-        double scale = Math.min(getWidth() / 180d, getHeight() / 194d);
-
-        double labelWidth = Math.min(300, getWidth() - 2 * 28 * scale);
-        this.label.resizeRelocate((getWidth() - labelWidth) / 2d, 0, labelWidth, Math.min(30, 21 * scale));
-
-        double shelfieOffsetY = Math.min(20, 14 * scale);
-        double shelfieWidth = 180d * scale;
-        this.shelfieComponent.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
-                getHeight() - shelfieOffsetY);
-
-        double chairWidth = 35 * scale, chairHeight = 33 * scale;
-        this.chair.resizeRelocate(getWidth() - chairWidth, getHeight() - chairHeight, chairWidth, chairHeight);
     }
 
     public void setTilesLowOpacity() {
@@ -111,7 +95,7 @@ abstract class PlayerShelfieComponent extends Pane {
         shelfieComponent.setOnTileAction(onTileAction);
     }
 
-    private static class NickLabel extends HBox {
+    protected static class NickLabel extends HBox {
 
         private final Label label;
 

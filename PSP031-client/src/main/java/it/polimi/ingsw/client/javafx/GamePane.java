@@ -65,9 +65,9 @@ class GamePane extends Pane {
     private final AdjacentItemTilesDescription adjacentItemTilesDescription;
     private final Pane boardPane;
     private final PickedTilesPane pickedTilesPane;
-    private final Pane player1Shelfie;
-    private final Pane player2Shelfie;
-    private final Pane player3Shelfie;
+    private final OtherPlayerShelfieComponent player1Shelfie;
+    private @Nullable OtherPlayerShelfieComponent player2Shelfie = null;
+    private @Nullable OtherPlayerShelfieComponent player3Shelfie = null;
     private final QuitGameButton quitGameBtn;
     private final ChatButton newChatBtn;
     private final Label newMsg;
@@ -289,45 +289,74 @@ class GamePane extends Pane {
             return list.size() == 0 || game.getBoard().checkBoardCoord(list);
         });
 
+        final var otherPlayers = new ArrayList<>(game.getPlayers());
+        otherPlayers.remove(game.thePlayer());
+        getChildren().add(this.player1Shelfie = new OtherPlayerShelfieComponent(resources, otherPlayers.get(0)));
+        if (otherPlayers.size() >= 2)
+            getChildren().add(this.player2Shelfie = new OtherPlayerShelfieComponent(resources, otherPlayers.get(1)));
+        if (otherPlayers.size() >= 3)
+            getChildren().add(this.player3Shelfie = new OtherPlayerShelfieComponent(resources, otherPlayers.get(2)));
+
         //binding this.firstFinisher to game.firstFinisher
-        game.firstFinisher().registerWeakObserver(firstFinisherObserver = newValue -> Platform
-                .runLater(() -> {
-                    if (newValue == game.thePlayer())
-                        pickedTilesPane.displayFirstFinisherImage();
-                    finishToken.setVisible(false);
-                }));
-        if (game.firstFinisher().get() != null && game.thePlayer() == game.firstFinisher().get())
-            pickedTilesPane.displayFirstFinisherImage();
+        game.firstFinisher().registerWeakObserver(firstFinisherObserver = newValue -> Platform.runLater(() -> {
+            if (newValue != null) {
+                finishToken.setVisible(false);
+                if (newValue == game.thePlayer())
+                    pickedTilesPane.displayFirstFinisherImage();
+                else if (newValue == otherPlayers.get(0))
+                    player1Shelfie.displayFirstFinisherImage();
+                else if (player2Shelfie != null && newValue == otherPlayers.get(1))
+                    player2Shelfie.displayFirstFinisherImage();
+                else if (player3Shelfie != null)
+                    player3Shelfie.displayFirstFinisherImage();
+            }
+        }));
+        firstFinisherObserver.accept(game.firstFinisher().get());
 
         //now displaying points for commonGoals if achieved
         game.getCommonGoals().get(0).achieved().registerWeakObserver(achieved1Observer = newValue -> Platform.runLater(() -> {
-            if (newValue.contains(game.thePlayer())) {
-                int index = newValue.indexOf(game.thePlayer());
-                int points;
-                switch (index) {
-                    case 0 -> points = 8;
-                    case 1 -> points = 6;
-                    case 2 -> points = 4;
-                    case 3 -> points = 2;
-                    default -> throw new IllegalStateException("Unexpected value: " + index);
-                }
-                commonGoalCardsPane.setScore1(points);
+            for (int i = 0; i < newValue.size(); i++) {
+                var p = newValue.get(i);
+                int points = switch (i) {
+                    case 0 -> 8;
+                    case 1 -> 6;
+                    case 2 -> 4;
+                    case 3 -> 2;
+                    default -> throw new IllegalStateException("Unexpected value: " + i);
+                };
+                if (p == game.thePlayer())
+                    commonGoalCardsPane.setScore1(points);
+                else if (otherPlayers.get(0) == p)
+                    player1Shelfie.setTokenCommonGoal1Score(points);
+                else if (player2Shelfie != null && otherPlayers.get(1) == p)
+                    player2Shelfie.setTokenCommonGoal1Score(points);
+                else if (player3Shelfie != null)
+                    player3Shelfie.setTokenCommonGoal1Score(points);
             }
         }));
+        achieved1Observer.accept(game.getCommonGoals().get(0).achieved().get());
+
         game.getCommonGoals().get(1).achieved().registerWeakObserver(achieved2Observer = newValue -> Platform.runLater(() -> {
-            if (newValue.contains(game.thePlayer())) {
-                int index = newValue.indexOf(game.thePlayer());
-                int points;
-                switch (index) {
-                    case 0 -> points = 8;
-                    case 1 -> points = 6;
-                    case 2 -> points = 4;
-                    case 3 -> points = 2;
-                    default -> throw new IllegalStateException("Unexpected value: " + index);
-                }
-                commonGoalCardsPane.setScore2(points);
+            for (int i = 0; i < newValue.size(); i++) {
+                var p = newValue.get(i);
+                int points = switch (i) {
+                    case 0 -> 8;
+                    case 1 -> 6;
+                    case 2 -> 4;
+                    case 3 -> 2;
+                    default -> throw new IllegalStateException("Unexpected value: " + i);
+                };
+                if (p == game.thePlayer())
+                    commonGoalCardsPane.setScore2(points);
+                else if (otherPlayers.get(0) == p)
+                    player1Shelfie.setTokenCommonGoal2Score(points);
+                else if (player2Shelfie != null && otherPlayers.get(1) == p)
+                    player2Shelfie.setTokenCommonGoal2Score(points);
+                else if (player3Shelfie != null)
+                    player3Shelfie.setTokenCommonGoal2Score(points);
             }
         }));
+        achieved2Observer.accept(game.getCommonGoals().get(1).achieved().get());
 
         //binding suspended to GameView Provider game.suspended() and adding listener that when detects newValue
         //equals true, disables all current nodes in the game( except suspended game alert and endGamePane, in case
@@ -402,18 +431,6 @@ class GamePane extends Pane {
                     });
                 })));
 
-        final var otherPlayers = new ArrayList<>(game.getPlayers());
-        otherPlayers.remove(game.thePlayer());
-        getChildren().add(this.player1Shelfie = otherPlayers.size() >= 1
-                ? new OtherPlayerShelfieComponent(resources, otherPlayers.get(0))
-                : new Pane());
-        getChildren().add(this.player2Shelfie = otherPlayers.size() >= 2
-                ? new OtherPlayerShelfieComponent(resources, otherPlayers.get(1))
-                : new Pane());
-        getChildren().add(this.player3Shelfie = otherPlayers.size() >= 3
-                ? new OtherPlayerShelfieComponent(resources, otherPlayers.get(2))
-                : new Pane());
-
         //adding chat to the game initially set not visible, its visibility can be modified by pressing over the
         //chat button
         getChildren().add(this.chatPane = new ChatComponent(
@@ -485,7 +502,7 @@ class GamePane extends Pane {
 
     @Override
     protected double computePrefWidth(double height) {
-        return 1040d * (height == -1 ? 1 : height / 585d);
+        return 1055d * (height == -1 ? 1 : height / 585d);
     }
 
     @Override
@@ -495,7 +512,7 @@ class GamePane extends Pane {
 
     @Override
     protected void layoutChildren() {
-        final double scale = Math.min(getWidth() / 1040d, getHeight() / 585d);
+        final double scale = Math.min(getWidth() / 1055d, getHeight() / 585d);
         this.thePlayerShelfie.resizeRelocate(0, 0, 365.0 * scale, 384.0 * scale);
         this.thePlayerPoints.resizeRelocate(0, 386.0 * scale, 221.0 * scale, 34 * scale);
         this.commonGoalCardsPane.resizeRelocate(0, 422.0 * scale, 221.0 * scale, 164.0 * scale);
@@ -516,9 +533,11 @@ class GamePane extends Pane {
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
         this.quitGameBtn.resizeRelocate(707 * scale, (470 + 8) * scale, 115 * scale, 46 * scale);
         this.newChatBtn.resizeRelocate(707 * scale, (470 + 48 + 8 + 5) * scale, 115 * scale, 46 * scale);
-        this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 182.0 * scale, 194.0 * scale);
-        this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 182.0 * scale, 194.0 * scale);
-        this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 182.0 * scale, 194.0 * scale);
+        this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 212 * scale, 194.0 * scale);
+        if (player2Shelfie != null)
+            this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 212 * scale, 194.0 * scale);
+        if (player3Shelfie != null)
+            this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 212 * scale, 194.0 * scale);
         this.notCurrentTurnMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         this.suspendedGameMessage.resizeRelocate((getWidth() - 230 * scale) / 2, (getHeight() - 230 * scale) / 2, 230 * scale,
                 230.0 * scale);

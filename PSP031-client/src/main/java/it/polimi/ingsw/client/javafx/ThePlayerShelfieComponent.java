@@ -37,8 +37,17 @@ class ThePlayerShelfieComponent extends PlayerShelfieComponent {
 
         double scale = Math.min(getWidth() / 180d, getHeight() / 194d);
 
+        double labelWidth = Math.min(300, getWidth() - 2 * 28 * scale);
+        this.label.resizeRelocate((getWidth() - labelWidth) / 2d, 0, labelWidth, Math.min(30, 21 * scale));
+
         double shelfieWidth = 180d * scale;
         double shelfieOffsetY = Math.min(20, 14 * scale);
+
+        this.shelfieComponent.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
+                getHeight() - shelfieOffsetY);
+
+        double chairWidth = 35 * scale, chairHeight = 33 * scale;
+        this.chair.resizeRelocate(getWidth() - chairWidth - 18, getHeight() - chairHeight, chairWidth, chairHeight);
 
         this.personalGoalPattern.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
                 getHeight() - shelfieOffsetY);
