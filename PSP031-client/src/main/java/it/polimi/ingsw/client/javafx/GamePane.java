@@ -53,7 +53,7 @@ class GamePane extends Pane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GamePane.class);
 
-    private final PlayerShelfieComponent thePlayerShelfie;
+    private final ThePlayerShelfieComponent thePlayerShelfie;
     private final Pane thePlayerPoints;
     private final CommonGoalsPane commonGoalCardsPane;
     private final PersonalGoalComponent personalGoalCard;
@@ -134,7 +134,7 @@ class GamePane extends Pane {
             finishToken.setVisible(false);
 
         //adding game components
-        getChildren().add(this.thePlayerShelfie = new PlayerShelfieComponent(resources, game.thePlayer(),
+        getChildren().add(this.thePlayerShelfie = new ThePlayerShelfieComponent(resources, game.thePlayer(),
                 game.getPersonalGoal(), game.getCommonGoals().get(0), game.getCommonGoals().get(1)));
         getChildren().add(this.thePlayerPoints = new PlayerPointsComponent(game.thePlayer().score()));
         getChildren().add(
@@ -405,16 +405,13 @@ class GamePane extends Pane {
         final var otherPlayers = new ArrayList<>(game.getPlayers());
         otherPlayers.remove(game.thePlayer());
         getChildren().add(this.player1Shelfie = otherPlayers.size() >= 1
-                ? new PlayerShelfieComponent(resources, otherPlayers.get(0), game.getPersonalGoal(),
-                        game.getCommonGoals().get(0), game.getCommonGoals().get(0), true, true)
+                ? new OtherPlayerShelfieComponent(resources, otherPlayers.get(0))
                 : new Pane());
         getChildren().add(this.player2Shelfie = otherPlayers.size() >= 2
-                ? new PlayerShelfieComponent(resources, otherPlayers.get(1), game.getPersonalGoal(),
-                        game.getCommonGoals().get(0), game.getCommonGoals().get(0), true, true)
+                ? new OtherPlayerShelfieComponent(resources, otherPlayers.get(1))
                 : new Pane());
         getChildren().add(this.player3Shelfie = otherPlayers.size() >= 3
-                ? new PlayerShelfieComponent(resources, otherPlayers.get(2), game.getPersonalGoal(),
-                        game.getCommonGoals().get(0), game.getCommonGoals().get(0), true, true)
+                ? new OtherPlayerShelfieComponent(resources, otherPlayers.get(2))
                 : new Pane());
 
         //adding chat to the game initially set not visible, its visibility can be modified by pressing over the

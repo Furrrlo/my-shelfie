@@ -1,6 +1,9 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.PlayerView;
+import it.polimi.ingsw.model.Provider;
+import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.TileAndCoords;
 import org.jetbrains.annotations.Nullable;
 
 import javafx.beans.property.BooleanProperty;
@@ -16,42 +19,21 @@ import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
 /**
- * Component containing the shelfie and goal patterns of the local player.
+ * Base component for local and remote players
  *
  * @see ShelfieComponent
- * @see GoalPatternComponent
  */
-class PlayerShelfieComponent extends Pane {
+abstract class PlayerShelfieComponent extends Pane {
 
     private final NickLabel label;
     private final ShelfieComponent shelfieComponent;
-    private final GoalPatternComponent personalGoalPattern;
-    private final GoalPatternComponent commonGoalPattern1;
-    private final GoalPatternComponent commonGoalPattern2;
     private final Pane chair;
 
     public PlayerShelfieComponent(FxResourcesLoader resources,
                                   PlayerView player,
-                                  PersonalGoalView personalGoal,
-                                  CommonGoalView cg1,
-                                  CommonGoalView cg2) {
-        this(resources, player, personalGoal, cg1, cg2, false, false);
-    }
-
-    public PlayerShelfieComponent(FxResourcesLoader resources,
-                                  PlayerView player,
-                                  PersonalGoalView personalGoal,
-                                  CommonGoalView cg1,
-                                  CommonGoalView cg2,
                                   boolean mouseTransparent,
                                   boolean showScore) {
         getChildren().add(this.shelfieComponent = new ShelfieComponent(resources, player.getShelfie()));
-        getChildren().add(this.personalGoalPattern = new GoalPatternComponent(resources, personalGoal));
-        this.personalGoalPattern.setVisible(false);
-        getChildren().add(this.commonGoalPattern1 = new GoalPatternComponent(resources, cg1));
-        getChildren().add(this.commonGoalPattern2 = new GoalPatternComponent(resources, cg2));
-        this.commonGoalPattern1.setVisible(false);
-        this.commonGoalPattern2.setVisible(false);
 
         setMouseTransparent(mouseTransparent);
 
@@ -80,12 +62,6 @@ class PlayerShelfieComponent extends Pane {
         double shelfieWidth = 180d * scale;
         this.shelfieComponent.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
                 getHeight() - shelfieOffsetY);
-        this.personalGoalPattern.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
-                getHeight() - shelfieOffsetY);
-        this.commonGoalPattern1.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
-                getHeight() - shelfieOffsetY);
-        this.commonGoalPattern2.resizeRelocate((getWidth() - shelfieWidth) / 2, shelfieOffsetY, shelfieWidth,
-                getHeight() - shelfieOffsetY);
 
         double chairWidth = 35 * scale, chairHeight = 33 * scale;
         this.chair.resizeRelocate(getWidth() - chairWidth, getHeight() - chairHeight, chairWidth, chairHeight);
@@ -97,30 +73,6 @@ class PlayerShelfieComponent extends Pane {
 
     public void restoreTilesOpacity() {
         this.shelfieComponent.restoreOpacity();
-    }
-
-    public void setPersonalGoalVisible(boolean visible) {
-        this.personalGoalPattern.setVisible(visible);
-    }
-
-    public boolean getPersonalGoalVisible() {
-        return this.personalGoalPattern.isVisible();
-    }
-
-    public void setCommonGoal1Visible(boolean visible) {
-        this.commonGoalPattern1.setVisible(visible);
-    }
-
-    public boolean getCommonGoal1Visible() {
-        return this.commonGoalPattern1.isVisible();
-    }
-
-    public void setCommonGoal2Visible(boolean visible) {
-        this.commonGoalPattern2.setVisible(visible);
-    }
-
-    public boolean getCommonGoal2Visible() {
-        return this.commonGoalPattern2.isVisible();
     }
 
     public boolean isColumnSelectionMode() {
