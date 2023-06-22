@@ -164,7 +164,7 @@ class GamePane extends Pane {
         personalGoalDescription.setVisible(false);
 
         //displaying common goals on shelfie
-        this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getCommonGoal1NodeIndex()).setOnMousePressed(event -> {
+        this.commonGoalCardsPane.setCommonGoal1Action(event -> {
             thePlayerShelfie.setCommonGoal2Visible(false);
             thePlayerShelfie.setPersonalGoalVisible(false);
             personalGoalDescription.setVisible(false);
@@ -178,7 +178,7 @@ class GamePane extends Pane {
             thePlayerShelfie.setCommonGoal1Visible(!thePlayerShelfie.getCommonGoal1Visible());
             commonGoalCardsPane.setDescriptionVisible(!commonGoalCardsPane.getDescriptionVisible(), 1);
         });
-        this.commonGoalCardsPane.getChildren().get(commonGoalCardsPane.getCommonGoal2NodeIndex()).setOnMousePressed(event -> {
+        this.commonGoalCardsPane.setCommonGoal2Action(event -> {
             thePlayerShelfie.setCommonGoal1Visible(false);
             thePlayerShelfie.setPersonalGoalVisible(false);
             personalGoalDescription.setVisible(false);
