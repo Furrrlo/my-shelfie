@@ -158,6 +158,7 @@ class CommonGoalsPane extends Pane {
                                 default -> 0;
                             })));
             next.setRotate(-7.5);
+            next.setManaged(false);
 
             if (Platform.isSupported(ConditionalFeature.SHAPE_CLIP)) {
                 clipProperty().bind(layoutBoundsProperty().map(bounds -> {
