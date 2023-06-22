@@ -68,12 +68,7 @@ class CommonGoalsPane extends Pane {
         textBackground.setVisible(false);
 
         this.description = new Text();
-        //description.setPadding(new Insets(6));
-        //stackPane.getChildren().add(description);
-        //description.setWrapText(true);
-        //stackPane.setVisible(false);
         description.setTextAlignment(TextAlignment.CENTER);
-        //description.setTextOrigin(VPos.CENTER);
 
         getChildren().add(this.goal1 = new CommonGoalComponent(resources, goal1));
         getChildren().add(this.goal2 = new CommonGoalComponent(resources, goal2));
@@ -102,14 +97,12 @@ class CommonGoalsPane extends Pane {
     }
 
     @Override
+    @SuppressWarnings("SuspiciousNameCombination")
     protected void layoutChildren() {
         double scale = Math.min(getWidth() / 221d, getHeight() / 156d);
         double border = 6 * scale;
         double width = 113 * scale;
         double height = 74 * scale;
-
-        int rows = (int) (description.getText().length() * 5.7 * scale / (getWidth() - 2 * border));
-        double textH = 14 * scale * rows;
 
         description.setTextOrigin(VPos.CENTER);
 
@@ -124,8 +117,8 @@ class CommonGoalsPane extends Pane {
     }
 
     private static class CommonGoalComponent extends AnchorPane {
-        private ImageButton card;
-        private ScoringTokenComponent next;
+        private final ImageButton card;
+        private final ScoringTokenComponent next;
 
         public CommonGoalComponent(FxResourcesLoader resources, CommonGoalView commonGoal) {
             getChildren().add(card = new ImageButton());
