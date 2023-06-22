@@ -14,12 +14,10 @@ import javafx.scene.text.TextAlignment;
  * Component representing a description of the first finisher token
  */
 class FirstFinisherDescription extends Pane {
-    private final ImageView notAchieved;
     private final ImageView achieved;
     private final Text description = new Text(
             "The first player who completely fills their bookshelf scores 1 additional point," +
-                    " and receives the end game token as displayed:");
-    private final Text arrow = new Text("☞");
+                    " and receives the end game token:");
 
     public FirstFinisherDescription(FxResourcesLoader resources) {
         backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
@@ -28,17 +26,11 @@ class FirstFinisherDescription extends Pane {
                 new Insets(0)))));
 
         description.setTextAlignment(TextAlignment.CENTER);
-        arrow.setTextAlignment(TextAlignment.CENTER);
-
-        this.notAchieved = new ImageView(resources.loadImage("assets/scoring tokens/scoring_back_EMPTY.jpg"));
-        notAchieved.setPreserveRatio(true);
 
         this.achieved = new ImageView(resources.loadImage("assets/scoring tokens/end game.jpg"));
         achieved.setPreserveRatio(true);
 
         this.getChildren().add(description);
-        this.getChildren().add(arrow);
-        this.getChildren().add(notAchieved);
         this.getChildren().add(achieved);
     }
 
@@ -52,14 +44,10 @@ class FirstFinisherDescription extends Pane {
         double text_height = 16 * scale;
 
         achieved.setFitWidth(width);
-        notAchieved.setFitWidth(width);
         description.setWrappingWidth(getWidth() - 2 * border);
         Fonts.changeSize(description.fontProperty(), text_height);
-        Fonts.changeSize(arrow.fontProperty(), 40 * scale);
 
         description.resizeRelocate(border, border, getWidth() - 2 * border, text_height);
-        notAchieved.resizeRelocate(middleW - width - 4 * border, middleH + 3 * border, width, width);
-        achieved.resizeRelocate(middleW + 4 * border, middleH + 3 * border, width, width);
-        arrow.resizeRelocate(middleW - 3 * border, middleH + width / 2, 6 * border, 40 * scale);
+        achieved.resizeRelocate(middleW - width / 2, middleH + 3 * border, width, width);
     }
 }
