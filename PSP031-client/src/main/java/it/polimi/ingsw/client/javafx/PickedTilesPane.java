@@ -41,6 +41,7 @@ class PickedTilesPane extends Pane {
     private final TileBorder tile2Border;
     private final TileComponent tile3;
     private final TileBorder tile3Border;
+    private final ImageButton firstFinisherImage;
 
     public PickedTilesPane(FxResourcesLoader resources) {
         setBackground(new Background(new BackgroundImage(
@@ -81,6 +82,10 @@ class PickedTilesPane extends Pane {
             if (tiles.size() >= 3 && isTileRemovable.get().test(tiles.get(2)))
                 tiles.remove(2);
         });
+
+        getChildren().add(this.firstFinisherImage = new ImageButton());
+        firstFinisherImage.setVisible(false);
+        firstFinisherImage.setImage(resources.loadImage("assets/scoring tokens/end game.jpg"));
 
         BiConsumer<TileComponent, Integer> installDnD = (component, tileIdx) -> {
             var tileVal = tiles.map(tiles -> tiles.size() >= tileIdx + 1 ? tiles.get(tileIdx).tile() : null);
@@ -148,6 +153,8 @@ class PickedTilesPane extends Pane {
         tile2Border.resizeRelocate(x, border, tileSize + 2 * border, tileSize + 2 * border);
         tile2.resizeRelocate(x + border, 2 * border, tileSize, tileSize);
 
+        firstFinisherImage.resizeRelocate(x + border, 2 * border, tileSize, tileSize);
+
         x += border + tileSize + border + border;
         tile3Border.resizeRelocate(x, border, tileSize + 2 * border, tileSize + 2 * border);
         tile3.resizeRelocate(x + border, 2 * border, tileSize, tileSize);
@@ -171,6 +178,16 @@ class PickedTilesPane extends Pane {
 
     public void setIsTileRemovable(Predicate<TileAndCoords<Tile>> isTileRemovable) {
         this.isTileRemovable.set(isTileRemovable);
+    }
+
+    public void displayFirstFinisherImage() {
+        firstFinisherImage.setVisible(true);
+        tile1Border.setVisible(false);
+        tile2Border.setVisible(false);
+        tile3Border.setVisible(false);
+        tile1.setVisible(false);
+        tile2.setVisible(false);
+        tile3.setVisible(false);
     }
 
     private static class TileBorder extends Pane {

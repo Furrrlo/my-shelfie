@@ -78,7 +78,7 @@ class GamePane extends Pane {
     private final DisconnectedDialog disconnectedMessage;
     private final QuitGameDialog quitGameMessage;
     private @Nullable EndGamePane endGamePane;
-    private final ScoringTokenComponent finishToken;
+    private final ImageButton finishToken;
 
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // It's registered weakly to the provider, so we need to keep a strong ref
     private final Consumer<Boolean> suspendedObserver;
@@ -127,10 +127,11 @@ class GamePane extends Pane {
 
         //adding first finisher token on game pane otherwise it would have been disabled when is not
         //the player's turn
-        this.finishToken = new ScoringTokenComponent(resources);
+        this.finishToken = new ImageButton();
         finishToken.setRotate(9);
-        finishToken.setScore(
-                game.firstFinisher().get() != null && Objects.equals(game.firstFinisher().get(), game.thePlayer()) ? 1 : 0);
+        finishToken.setImage(resources.loadImage("assets/scoring tokens/end game.jpg"));
+        if (game.firstFinisher().get() != null)
+            finishToken.setVisible(false);
 
         //adding game components
         getChildren().add(this.thePlayerShelfie = new PlayerShelfieComponent(resources, game.thePlayer(),
@@ -290,7 +291,13 @@ class GamePane extends Pane {
 
         //binding this.firstFinisher to game.firstFinisher
         game.firstFinisher().registerWeakObserver(firstFinisherObserver = newValue -> Platform
-                .runLater(() -> finishToken.setScore(newValue != null && newValue.equals(game.thePlayer()) ? 1 : 0)));
+                .runLater(() -> {
+                    if (newValue == game.thePlayer())
+                        pickedTilesPane.displayFirstFinisherImage();
+                    finishToken.setVisible(false);
+                }));
+        if (game.firstFinisher().get() != null && game.thePlayer() == game.firstFinisher().get())
+            pickedTilesPane.displayFirstFinisherImage();
 
         //now displaying points for commonGoals if achieved
         game.getCommonGoals().get(0).achieved().registerWeakObserver(achieved1Observer = newValue -> Platform.runLater(() -> {
