@@ -10,7 +10,7 @@ import it.polimi.ingsw.model.ShelfieView;
  * 
  * @see TuiShelfiePrinter
  */
-public class TuiPersonalGoalPrinter implements TuiPrinter {
+class TuiPersonalGoalPrinter implements TuiPrinter {
 
     private final PersonalGoalView personalGoal;
 

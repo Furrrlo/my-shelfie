@@ -13,7 +13,7 @@ import it.polimi.ingsw.model.Type;
  *
  * @see TuiShelfiePrinter
  */
-public class TuiCommonGoalPrinter implements TuiPrinter {
+class TuiCommonGoalPrinter implements TuiPrinter {
     private final Type type;
     private static final Color[][] SIX_COUPLES = new Color[][] {
             //@formatter:off

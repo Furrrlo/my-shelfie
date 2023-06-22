@@ -5,7 +5,7 @@ package it.polimi.ingsw.client.tui;
  * 
  * @apiNote to use with: <code>System.out.println(ConsoleColors.RED + "RED COLORED" + ConsoleColors.RESET + " NORMAL");</code>
  */
-public class ConsoleColors {
+class ConsoleColors {
     //if you use colors with RGB scheme, it becomes GRB ( remeber !!! )
     // Reset
     public static final String RESET = "\033[0m"; // Text Reset
