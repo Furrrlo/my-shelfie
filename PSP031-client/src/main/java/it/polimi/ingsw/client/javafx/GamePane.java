@@ -370,14 +370,12 @@ class GamePane extends Pane {
                 dialogs.setVisible(null);
             }
         }));
-        suspendedObserver.accept(game.suspended().get()); // Trigger suspension in case it's true
 
         // add listener to handle disconnections properly
         game.thePlayer().connected().registerWeakObserver(disconnectedObserver = newValue -> Platform.runLater(() -> {
             if (!newValue)
                 onDisconnect.accept(new Exception("thePlayer connected state is false"));
         }));
-        disconnectedObserver.accept(game.thePlayer().connected().get()); // Trigger disconnection in case it's true
 
         //binding this.endGame to game's Provider endGame and adding listener that when listens endGame being true
         //disables all nodes in the game and displays the endGamePane
@@ -404,7 +402,6 @@ class GamePane extends Pane {
                 dialogs.setVisible(endGamePane);
             }
         }));
-        endGameObserver.accept(game.endGame().get()); // Trigger end game in case it's true
 
         var canSelectColumns = isCurrentTurn.and(
                 BooleanExpression.booleanExpression(pickedTilesPane.tilesProperty().map(t -> !t.isEmpty())));
@@ -493,6 +490,10 @@ class GamePane extends Pane {
         getChildren().add(this.newMsg);
         getChildren().add(this.disconnectedMessage);
         getChildren().add(this.finishToken);
+
+        endGameObserver.accept(game.endGame().get()); // Trigger end game in case it's true
+        disconnectedObserver.accept(game.thePlayer().connected().get()); // Trigger disconnection in case it's true
+        suspendedObserver.accept(game.suspended().get()); // Trigger suspension in case it's true
     }
 
     @Override
