@@ -398,6 +398,7 @@ public class ServerController implements Closeable {
             if (gameOver) {
                 onGameOver.run();
                 lobbies.remove(serverLobbyAndController);
+                LOGGER.info("Lobby with game " + game.getGameID() + " removed");
             }
         });
     }
@@ -417,6 +418,7 @@ public class ServerController implements Closeable {
 
                 if (lobby.joinedPlayers().get().size() == 0) {
                     lobbies.remove(lobbyAndController);
+                    LOGGER.info("Empty lobby deleted");
                 }
             }
         }
