@@ -491,9 +491,9 @@ class GamePane extends Pane {
         getChildren().add(this.disconnectedMessage);
         getChildren().add(this.finishToken);
 
-        endGameObserver.accept(game.endGame().get()); // Trigger end game in case it's true
         disconnectedObserver.accept(game.thePlayer().connected().get()); // Trigger disconnection in case it's true
         suspendedObserver.accept(game.suspended().get()); // Trigger suspension in case it's true
+        endGameObserver.accept(game.endGame().get()); // Trigger end game in case it's true
     }
 
     @Override
