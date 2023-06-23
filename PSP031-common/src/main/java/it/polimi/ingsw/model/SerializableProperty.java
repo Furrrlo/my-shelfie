@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SerializableProperty<T> implements Property<T>, Serializable {
 
@@ -78,8 +79,8 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
 
     @VisibleForTesting
     Set<Consumer<? super T>> getObservers() {
-        return observersToInsertionTime.keySet().stream()
-                .map(o -> o.supplier().get())
+        return Stream.concat(observersToInsertionTime.keySet().stream(), sortedObservers.stream().map(ObserverInsertion::body))
+                .map(b -> b.supplier().get())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet());
     }
