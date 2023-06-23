@@ -1,7 +1,6 @@
 package it.polimi.ingsw.client.javafx;
 
 import it.polimi.ingsw.model.PlayerView;
-import it.polimi.ingsw.model.Provider;
 import it.polimi.ingsw.model.Tile;
 import it.polimi.ingsw.model.TileAndCoords;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.FontWeight;
 
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
@@ -29,15 +29,18 @@ abstract class PlayerShelfieComponent extends Pane {
     protected final ShelfieComponent shelfieComponent;
     protected final Pane chair;
 
+    private final PlayerView player;
+
     public PlayerShelfieComponent(FxResourcesLoader resources,
                                   PlayerView player,
                                   boolean mouseTransparent,
                                   boolean showScore) {
+        this.player = player;
         getChildren().add(this.shelfieComponent = new ShelfieComponent(resources, player.getShelfie()));
 
         setMouseTransparent(mouseTransparent);
 
-        getChildren().add(this.label = new NickLabel(player.getNick(), player.score(), showScore));
+        getChildren().add(this.label = new NickLabel(showScore));
 
         final var chairImgView = new ImageView(resources.loadImage("assets/misc/firstplayertoken.png"));
         getChildren().add(this.chair = new AnchorPane(chairImgView));
@@ -95,11 +98,11 @@ abstract class PlayerShelfieComponent extends Pane {
         shelfieComponent.setOnTileAction(onTileAction);
     }
 
-    protected static class NickLabel extends HBox {
+    protected class NickLabel extends HBox {
 
         private final Label label;
 
-        public NickLabel(String nick, Provider<Integer> score, boolean showScore) {
+        public NickLabel(boolean showScore) {
             backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                     Color.WHITE,
                     new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
@@ -112,11 +115,23 @@ abstract class PlayerShelfieComponent extends Pane {
 
             setAlignment(Pos.CENTER);
 
+            final String nick = player.getNick();
+
             label = new Label();
             if (showScore)
-                label.textProperty().bind(FxProperties.toFxProperty("score", this, score).map(s -> nick + ": " + s + " pt"));
+                label.textProperty()
+                        .bind(FxProperties.toFxProperty("score", this, player.score()).map(s -> nick + ": " + s + " pt"));
             else
                 label.setText(nick);
+
+            label.textFillProperty().bind(FxProperties.toFxProperty("connected", this, player.connected())
+                    .map(connected -> connected ? Color.BLACK : Color.RED));
+
+            Consumer<Boolean> obs;
+            player.isCurrentTurn().registerWeakObserver(obs = isCurrentTurn -> Fonts.changeWeight(label.fontProperty(),
+                    isCurrentTurn ? FontWeight.BOLD : FontWeight.NORMAL));
+            obs.accept(player.isCurrentTurn().get());
+
             getChildren().add(label);
         }
 
