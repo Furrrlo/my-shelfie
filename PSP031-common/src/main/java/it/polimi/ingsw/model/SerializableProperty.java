@@ -162,6 +162,9 @@ public class SerializableProperty<T> implements Property<T>, Serializable {
             var discriminant = Long.compare(insertionMillis, o.insertionMillis);
             if (discriminant != 0)
                 return discriminant;
+            // Ensure that comparing the same body returns 0, to respect equals and hashcode
+            if (Objects.equals(body, o.body))
+                return 0;
             // We have the same discriminant but the two objects are different, so we can't return 0
             // Differentiate them by using their ref pointer value
             return Integer.compare(System.identityHashCode(this), System.identityHashCode(o));
