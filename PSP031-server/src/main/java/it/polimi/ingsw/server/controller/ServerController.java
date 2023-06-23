@@ -401,8 +401,8 @@ public class ServerController implements Closeable {
         });
 
         game.endGame().registerObserver(gameOver -> {
-            lobbies.remove(serverLobbyAndController);
-            LOGGER.info("Lobby with game " + game.getGameID() + " removed");
+            if (lobbies.remove(serverLobbyAndController))
+                LOGGER.info("Lobby with game " + game.getGameID() + " removed");
         });
     }
 
@@ -420,8 +420,8 @@ public class ServerController implements Closeable {
                 lobbyAndController.controller().onDisconnectPlayer(nick);
 
                 if (lobby.joinedPlayers().get().size() == 0) {
-                    lobbies.remove(lobbyAndController);
-                    LOGGER.info("Empty lobby deleted");
+                    if (lobbies.remove(lobbyAndController))
+                        LOGGER.info("Empty lobby deleted");
                 }
             }
         }
