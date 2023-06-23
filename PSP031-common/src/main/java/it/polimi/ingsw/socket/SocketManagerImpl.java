@@ -143,11 +143,15 @@ public class SocketManagerImpl<IN extends Packet, ACK_IN extends /* Packet & */ 
         recvTask.cancel(true);
         sendTask.cancel(true);
 
-        // Use a try-with-resources so everything is closed even if any of the close methods fail
-        try (var ignoredOos = this.oos;
-             var ignoredOis = this.ois) {
-            if (socket != null)
-                socket.close();
+        if (socket != null) {
+            // This should take care of closing the in/out streams
+            socket.close();
+        } else {
+            // Use a try-with-resources so everything is closed even if any of the close methods fail
+            //noinspection EmptyTryBlock
+            try (var ignoredOos = this.oos; var ignoredOis = this.ois) {
+                // Empty body just to close
+            }
         }
     }
 
