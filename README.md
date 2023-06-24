@@ -5,6 +5,23 @@ See specs [here](docs/Requisiti.pdf) and the rules
 
 For documentation regarding the architecture see the [deliverables folder](deliverables)
 
+## Team (Group 31)
+- [Francesco Ferlin](https://github.com/Furrrlo)
+- [Francesco Guarda](https://github.com/FrancescoGuarda)
+- [Giacomo Orsenigo](https://github.com/jackorse)
+- [Giovanni Alberto Sartorato](https://github.com/giovannialbertos)
+
+## Implemented features
+- Complete rules
+- TUI/CLI
+- GUI
+- Socket
+- RMI
+- Advanced Features:
+  - Multiple games
+  - Resilience to disconnections
+  - Chat
+
 ## Coverage
 
 |            |                                                                    Instructions                                                                    |                                                                          Branches                                                                           |
