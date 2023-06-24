@@ -508,7 +508,7 @@ class GamePane extends Pane {
 
     @Override
     protected double computePrefHeight(double width) {
-        return 585d * (width == -1 ? 1 : width / 1040d);
+        return 585d * (width == -1 ? 1 : width / 1055d);
     }
 
     @Override
