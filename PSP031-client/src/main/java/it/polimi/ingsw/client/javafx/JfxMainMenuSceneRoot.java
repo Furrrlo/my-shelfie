@@ -51,7 +51,7 @@ class JfxMainMenuSceneRoot extends AnchorPane {
         Label usernameLabel = new Label("Username:");
 
         // Create choice dialog for connection type
-        ChoiceBox<String> connectionTypeChoice = new ChoiceBox<>();
+        ChoiceBox<String> connectionTypeChoice = new MenuChoiceBox<>();
         connectionTypeChoice.getItems().addAll("RMI", "Socket");
 
         // Create text fields
@@ -128,13 +128,6 @@ class JfxMainMenuSceneRoot extends AnchorPane {
                 }
             });
         };
-
-        // Create start button
-        Button startButton = new Button("Connect");
-        startButton.setOnAction(eventIpCHeck);
-        startButton.setDefaultButton(true);
-        startButton.disableProperty().bind(isConnecting
-                .or(BooleanExpression.booleanExpression(usernameTextField.textProperty().map(String::isBlank))));
 
         PlayButton playButton = new PlayButton("Connect");
         playButton.setOnAction(eventIpCHeck);
