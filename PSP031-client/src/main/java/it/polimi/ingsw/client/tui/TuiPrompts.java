@@ -360,7 +360,8 @@ class TuiPrompts {
                 """
                         The game is suspended because
                         all other player have disconnected.
-                        If no one reconnects within 30 seconds, the game will end.""",
+                        If no one reconnects within %d seconds, the game will end."""
+                        .formatted(GameView.SUSPENDED_GAME_TIMEOUT.toSeconds()),
                 (renderer0, ctx, ignored) -> ctx.invalid("Waiting for other players..."));
     }
 
