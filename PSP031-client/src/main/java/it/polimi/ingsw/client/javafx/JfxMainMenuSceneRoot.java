@@ -136,11 +136,17 @@ class JfxMainMenuSceneRoot extends AnchorPane {
         startButton.disableProperty().bind(isConnecting
                 .or(BooleanExpression.booleanExpression(usernameTextField.textProperty().map(String::isBlank))));
 
+        PlayButton playButton = new PlayButton("Connect");
+        playButton.setOnAction(eventIpCHeck);
+        playButton.setDefaultButton(true);
+        playButton.disableProperty().bind(isConnecting
+                .or(BooleanExpression.booleanExpression(usernameTextField.textProperty().map(String::isBlank))));
+
         //vbox
         VBox vbox = new VBox();
         vbox.setPadding(new Insets(10, 10, 10, 10));
         vbox.setSpacing(10);
-        vbox.getChildren().addAll(titleView, mainPane, startButton, errorLabel);
+        vbox.getChildren().addAll(titleView, mainPane, playButton, errorLabel);
         vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(10d);
 
