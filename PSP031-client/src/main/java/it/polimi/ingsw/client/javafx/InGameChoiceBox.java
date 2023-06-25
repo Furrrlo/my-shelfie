@@ -18,14 +18,8 @@ public class InGameChoiceBox<T> extends ChoiceBox<T> {
     private final ObjectProperty<Insets> backgroundInsets = new SimpleObjectProperty<>(this, "backgroundInsets");
 
     public InGameChoiceBox() {
-        super();
-        //  initialize();
+        this(null);
     }
-
-    // public InGameChoiceBox(T... items) {
-    //   super();
-    //initialize();
-    //}
 
     public InGameChoiceBox(@Nullable Color bgColor) {
         backgroundColor.set(bgColor);
@@ -43,8 +37,6 @@ public class InGameChoiceBox<T> extends ChoiceBox<T> {
                             getBackgroundRadius(),
                             getBackgroundInsets()));
                 }));
-
-        //  setSkin(createCustomSkin());
     }
 
     public Color getBackgroundColor() {

@@ -7,7 +7,6 @@ import it.polimi.ingsw.model.UserMessage;
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -38,7 +37,7 @@ class ChatComponent extends VBox {
                          String thePlayer,
                          GameController controller,
                          Consumer<Throwable> onDisconnect) {
-        ChoiceBox<String> recipient = new ChoiceBox<>();
+        InGameChoiceBox<String> recipient = new InGameChoiceBox<>();
         TextArea text = new TextArea();
         InGameButton send = new InGameButton(Color.LIGHTSEAGREEN);
 
@@ -68,16 +67,17 @@ class ChatComponent extends VBox {
                 new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
                 new Insets(-INNER_INSET)))));
 
+        recipient.backgroundColorProperty().set(Color.LIGHTSEAGREEN);
+        recipient.backgroundRadiusProperty().bind(parentProperty()
+                .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
+                .map(w -> new CornerRadii(Math.min(RADIUS, RADIUS * (w.doubleValue() / 210d)))));
+        recipient.setBackgroundInsets(new Insets(-INNER_INSET));
         recipient.getItems().add(UserMessage.EVERYONE_RECIPIENT);
         recipient.getItems().addAll(recipients);
         recipient.getSelectionModel().selectFirst();
         recipient.prefWidthProperty().bind(chatScrollComponent.widthProperty());
         recipient.minWidth(USE_PREF_SIZE);
         recipient.maxWidth(USE_PREF_SIZE);
-        recipient.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTSEAGREEN,
-                new CornerRadii(Math.min(RADIUS, RADIUS * (width.doubleValue() / 210d))),
-                new Insets(-INNER_INSET)))));
 
         send.backgroundRadiusProperty().bind(parentProperty()
                 .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
