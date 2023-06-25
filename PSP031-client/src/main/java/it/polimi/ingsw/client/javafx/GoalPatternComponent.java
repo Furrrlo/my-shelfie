@@ -106,9 +106,9 @@ class GoalPatternComponent extends Pane {
             //@formatter:off
             new Color[] { null           , null           , null           , null           , null            },
             new Color[] { null           , null           , null           , null           , null            },
-            new Color[] { Color.BLUE     , Color.BLUE     , Color.GREEN    , Color.GREEN    , Color.YELLOW    },
+            new Color[] { Color.BLUE     , Color.PINK     , Color.GREEN    , Color.WHITE    , Color.YELLOW    },
             new Color[] { null           , null           , null           , null           , null            },
-            new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE     },
+            new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.BLUE     , Color.PINK      },
             new Color[] { null           , null           , null           , null           , null            },
             //@formatter:on
     };
