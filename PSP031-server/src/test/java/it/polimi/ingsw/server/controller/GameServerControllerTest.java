@@ -2,9 +2,7 @@ package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.server.model.ServerGame;
-import it.polimi.ingsw.server.model.ServerGameView;
 import it.polimi.ingsw.server.model.ServerPlayer;
-import it.polimi.ingsw.server.model.ServerPlayerView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -246,34 +244,6 @@ class GameServerControllerTest {
 
         assertSame(t1, game.getBoard().tile(3, 3).get());
         assertSame(t2, game.getBoard().tile(3, 7).get());
-    }
-
-    private String getPlayerColor(String nick, ServerGameView game) {
-        if (nick.equals("all"))
-            return "";
-        int index = 0;
-        for (ServerPlayerView player : game.getPlayers()) {
-            if (player.getNick().equals(nick)) {
-                index = game.getPlayers().indexOf(player);
-            }
-        }
-        switch (index) {
-            case 0 -> {
-                return "\033[0;31m";//RED
-            }
-            case 1 -> {
-                return "\033[0;32m"; // GREEN
-            }
-            case 2 -> {
-                return "\033[0;33m"; // YELLOW
-            }
-            case 3 -> {
-                return "\033[0;36m"; // CYAN
-            }
-            default -> {
-                return "";
-            }
-        }
     }
 
     @Test

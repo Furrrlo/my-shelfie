@@ -92,7 +92,7 @@ class ChatScrollComponent extends ScrollPane {
             text.setWrapText(true);
             if (!message.nickSendingPlayer().equals(thePlayer)) {
                 //message from other players
-                if (message.nickReceivingPlayer().equals("all"))
+                if (message.isForEveryone())
                     nick.setText(message.nickSendingPlayer());
                 else
                     nick.setText(message.nickSendingPlayer() + " @" + message.nickReceivingPlayer());
@@ -107,7 +107,7 @@ class ChatScrollComponent extends ScrollPane {
                 this.getChildren().add(text);
             } else {
                 //message sent by the player
-                if (!message.nickReceivingPlayer().equals("all")) {
+                if (!message.isForEveryone()) {
                     nick.setText(" @" + message.nickReceivingPlayer());
                     this.getChildren().add(nick);
                 }
