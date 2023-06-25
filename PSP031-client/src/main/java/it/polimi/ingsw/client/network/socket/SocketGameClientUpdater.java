@@ -10,6 +10,13 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 
+/**
+ * Socket GameClientUpdater implementation which listens for incoming packets from a socket
+ * and calls the corresponding updaters methods
+ *
+ * @see GameClientUpdater
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketGameClientUpdater extends GameClientUpdater implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketGameClientUpdater.class);

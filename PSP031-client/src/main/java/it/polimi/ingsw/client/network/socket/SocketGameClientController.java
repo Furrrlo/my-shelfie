@@ -9,6 +9,11 @@ import it.polimi.ingsw.socket.packets.SendMessagePacket;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Socket GameController implementation which forwards requests to the server using packets
+ *
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketGameClientController implements GameController {
     private final ClientSocketManager socketManager;
 

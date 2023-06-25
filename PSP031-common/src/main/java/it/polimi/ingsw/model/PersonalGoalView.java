@@ -10,6 +10,7 @@ public interface PersonalGoalView extends Serializable {
     int ROWS = Shelfie.ROWS;
     int COLUMNS = Shelfie.COLUMNS;
 
+    /** Returns the index of this personal goal used as an identifier for assets */
     int getIndex();
 
     /**
@@ -22,7 +23,9 @@ public interface PersonalGoalView extends Serializable {
     @Nullable
     Tile get(int r, int c);
 
+    /** Returns whether the personal goal was achieved (all the tiles where successfully matched) */
     boolean achievedPersonalGoal(ShelfieView shelfie);
 
+    /** Returns a stream of the tiles which make up this personal goal and their coords */
     Stream<TileAndCoords<@Nullable Tile>> tiles();
 }

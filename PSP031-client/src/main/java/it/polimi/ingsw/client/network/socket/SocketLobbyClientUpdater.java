@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.network.socket;
 
 import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.client.updater.GameClientUpdater;
 import it.polimi.ingsw.client.updater.LobbyClientUpdater;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Lobby;
@@ -13,6 +14,13 @@ import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.util.function.Supplier;
 
+/**
+ * Socket LobbyClientUpdater implementation which listens for incoming packets from a socket
+ * and calls the corresponding updaters methods
+ *
+ * @see GameClientUpdater
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supplier<@Nullable SocketGameClientUpdater> {
 
     private final ClientSocketManager socketManager;

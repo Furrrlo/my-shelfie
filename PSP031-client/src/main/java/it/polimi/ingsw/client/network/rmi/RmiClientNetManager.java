@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+/** NetManager implementation which uses a protocol built on top of RMI */
 public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmiClientNetManager.class);

@@ -12,6 +12,13 @@ import it.polimi.ingsw.updater.GameUpdater;
 
 import java.rmi.RemoteException;
 
+/**
+ * RMI LobbyClientUpdater implementation which is exported as a remotable object
+ * which will be given to the server
+ *
+ * @see LobbyClientUpdater
+ * @see it.polimi.ingsw.controller
+ */
 class RmiLobbyClientUpdater extends LobbyClientUpdater implements RmiLobbyUpdater {
 
     private final UnicastRemoteObjects.Exporter unicastRemoteObjects;

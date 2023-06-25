@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 
+/** Possible types of goals that a given {@link CommonGoal} can be */
 public enum Type implements Serializable {
     SIX_COUPLES(new SixCouplesCommonGoalChecker(), """
             Six groups each containing at least 2 tiles of
@@ -196,13 +197,12 @@ public enum Type implements Serializable {
         this.example = new ImmutableColorMatrix(example);
     }
 
+    /** Returns a brief description of the common goal */
     public String getDescription() {
         return description;
     }
 
-    /**
-     * Returns true if the common goal of given type is achieved
-     **/
+    /** Returns true if the common goal of given type is achieved */
     public boolean checkCommonGoal(Shelfie shelfie) {
         return checker.checkCommonGoal(shelfie);
     }

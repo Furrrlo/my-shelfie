@@ -14,7 +14,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ClientSocketManagerImpl
+/** Actual implementation of {@link ClientSocketManager} */
+class ClientSocketManagerImpl
         extends SocketManagerImpl<S2CPacket, S2CAckPacket, C2SAckPacket, C2SPacket>
         implements ClientSocketManager {
 

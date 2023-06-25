@@ -40,5 +40,6 @@ public interface ShelfieView extends Serializable {
     /** returns true if the free space in a given column of the shelfie is grater or equal then selected */
     boolean checkColumnSpace(int shelfCol, int selected);
 
+    /** Returns true if this shelfie has no more free space (not even for a single tile) */
     boolean isFull();
 }

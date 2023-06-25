@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 
+/** Socket implementation of the heartbeat which is in charge of answering the server's ping request */
 class SocketClientHeartbeatHandler implements Runnable {
 
     private final ClientSocketManager socketManager;

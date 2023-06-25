@@ -17,6 +17,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * RMI implementation of the heartbeat, which is in charge of answering the server's ping request
+ * and additionally detecting unexpected disconnections if too much time has passed between
+ * subsequent pings
+ */
 class RmiHeartbeatClientHandler implements RmiHeartbeatHandler, Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmiHeartbeatClientHandler.class);

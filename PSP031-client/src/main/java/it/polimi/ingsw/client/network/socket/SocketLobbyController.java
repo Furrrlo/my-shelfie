@@ -7,6 +7,11 @@ import it.polimi.ingsw.socket.packets.RequiredPlayersPacket;
 
 import java.io.IOException;
 
+/**
+ * Socket LobbyController implementation which forwards requests to the server using packets
+ *
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketLobbyController implements LobbyController {
 
     private final ClientSocketManager socketManager;

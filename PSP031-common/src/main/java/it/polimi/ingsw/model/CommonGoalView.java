@@ -9,5 +9,6 @@ public interface CommonGoalView extends Serializable {
 
     Type getType();
 
+    /** Returns a provider of the list of players which achieved this goal, in order of time of achieving */
     Provider<? extends @Unmodifiable List<? extends PlayerView>> achieved();
 }

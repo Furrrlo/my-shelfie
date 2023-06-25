@@ -9,6 +9,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Base client GameUpdater implementation which updates the game accordingly
+ * based on the method calls it receives
+ * <p>
+ * This class must be extended by network implementations which need to call
+ * the updaters method when the server sends notifications to do so.
+ *
+ * @see it.polimi.ingsw.controller
+ */
 public abstract class GameClientUpdater implements GameUpdater {
 
     public static final int MAX_MESSAGES_HISTORY = 100;

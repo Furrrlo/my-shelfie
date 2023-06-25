@@ -10,8 +10,10 @@ public interface BoardView extends Serializable {
     int BOARD_ROWS = 9;
     int BOARD_COLUMNS = 9;
 
+    /** Returns the number of rows of the board */
     int getRows();
 
+    /** Returns the number of cols of the board */
     int getCols();
 
     /**
@@ -22,8 +24,17 @@ public interface BoardView extends Serializable {
      */
     boolean isValidTile(int r, int c);
 
+    /**
+     * Returns the tile at the given coordinates
+     *
+     * @param r board row
+     * @param c board col
+     * @return the tile at the given coordinates
+     * @throws IndexOutOfBoundsException if {@link #isValidTile(int, int)} returns false for the given coords
+     */
     Provider<@Nullable Tile> tile(int r, int c);
 
+    /** Returns a stream of all the tiles and their corresponding positions on the board */
     Stream<? extends TileAndCoords<? extends Provider<@Nullable Tile>>> tiles();
 
     /**

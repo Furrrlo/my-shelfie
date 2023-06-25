@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+/** NetManager implementation which uses a protocol built on top of raw TCP sockets */
 public class SocketClientNetManager implements ClientNetManager {
 
     public static final int DEFAULT_PORT = 1234;

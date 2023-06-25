@@ -11,6 +11,11 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Actual implementation of {@link ServerSocketManager}.
+ * <p>
+ * This is mostly needed to respect the packet flow defined by ServerSocketManager
+ */
 public class ServerSocketManagerImpl
         extends SocketManagerImpl<C2SPacket, C2SAckPacket, S2CAckPacket, S2CPacket>
         implements ServerSocketManager {
