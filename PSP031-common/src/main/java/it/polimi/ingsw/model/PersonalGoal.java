@@ -140,12 +140,6 @@ public class PersonalGoal implements PersonalGoalView {
 
     @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
     private PersonalGoal(int index, @Nullable Tile[][] personalGoal) {
-        if (personalGoal.length != ROWS)
-            throw new IllegalArgumentException("Provided shelf combination has the wrong row size");
-        for (int row = 0; row < personalGoal.length; row++) {
-            if (personalGoal[row].length != COLUMNS)
-                throw new IllegalArgumentException("Provided shelf combination has the wrong column size at row " + row);
-        }
         this.personalGoal = personalGoal;
         this.index = index;
     }
