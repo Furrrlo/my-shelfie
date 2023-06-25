@@ -123,7 +123,7 @@ class TuiGameScene implements TuiScene {
         var leftPlayer = otherPlayers.size() >= 2 ? otherPlayers.get(1) : null;
         var leftPlayerRect = out.printAligned(
                 leftPlayer != null ? new TuiShelfiePrinter(leftPlayer.getShelfie()) : TuiShelfiePrinter.EMPTY,
-                TuiRect.fromCoords(2, 0, terminalSize.rows(), boardRect.col() - 1),
+                TuiRect.fromCoords(boardRect.row(), 0, boardRect.lastRow(), boardRect.col() - 1),
                 TuiHAlignment.RIGHT, TuiVAlignment.CENTER);
         if (leftPlayer != null)
             printPlayerNick.accept(leftPlayer, leftPlayerRect);
@@ -137,7 +137,7 @@ class TuiGameScene implements TuiScene {
         var rightPlayer = otherPlayers.size() >= 3 ? otherPlayers.get(2) : null;
         var rightPlayerRect = out.printAligned(
                 rightPlayer != null ? new TuiShelfiePrinter(rightPlayer.getShelfie()) : TuiShelfiePrinter.EMPTY,
-                TuiRect.fromCoords(2, boardRect.lastCol() + 1, terminalSize.rows(), terminalSize.cols()),
+                TuiRect.fromCoords(boardRect.row(), boardRect.lastCol() + 1, boardRect.lastRow(), terminalSize.cols()),
                 TuiHAlignment.LEFT, TuiVAlignment.CENTER);
         if (rightPlayer != null)
             printPlayerNick.accept(rightPlayer, rightPlayerRect);
