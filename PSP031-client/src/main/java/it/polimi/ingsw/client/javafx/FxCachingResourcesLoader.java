@@ -99,6 +99,11 @@ class FxCachingResourcesLoader implements FxResourcesLoader {
                 getImageResource("assets/item tiles/Piante1.1.png"),
                 getImageResource("assets/item tiles/Piante1.2.png"),
                 getImageResource("assets/item tiles/Piante1.3.png"),
+                getImageResource("assets/Publisher material/Display_2.jpg"),
+                getImageResource("assets/Publisher material/Display_3.jpg"),
+                getImageResource("assets/Publisher material/Display_4.jpg"),
+                getImageResource("assets/Publisher material/Display_1.jpg"),
+                getImageResource("assets/Publisher material/Display_5.jpg"),
                 getCroppedImageResource("assets/personal goal cards/Personal_Goals.png", 110, 105, 198, 198),
                 getCroppedImageResource("assets/personal goal cards/Personal_Goals.png", 1058, 334, 198, 198),
                 getCroppedImageResource("assets/personal goal cards/Personal_Goals.png", 347, 792, 198, 198),
@@ -106,6 +111,7 @@ class FxCachingResourcesLoader implements FxResourcesLoader {
                 getCroppedImageResource("assets/personal goal cards/Personal_Goals.png", 822, 562, 198, 198),
                 getCroppedImageResource("assets/personal goal cards/Personal_Goals.png", 586, 1249, 198, 198),
                 getCroppedImageResource("assets/boards/livingroom.png", 1977, 2465, 889, 394),
+                getCroppedImageResource("assets/Publisher material/Title 2000x618px.png", 167, 77, 1667, 444),
                 getFxmlResource("board.fxml"),
                 getFxmlResource("shelfie.fxml"));
 
