@@ -21,6 +21,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -74,6 +75,8 @@ class JfxLobbySceneRoot extends AnchorPane {
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the observable, we need to keep a strong ref
     private final Consumer<? super Boolean> disconnectObserver;
 
+    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the observable, we need to keep a strong ref
+
     private JfxLobbySceneRoot(FxResourcesLoader resources,
                               ExecutorService threadPool,
                               Stage stage,
@@ -113,7 +116,7 @@ class JfxLobbySceneRoot extends AnchorPane {
         //X-change ready button to not ready when player is ready and make player not ready when pressed
         //-if player is first to connect -> set number of players
         //-change number of players when already in the lobby (has to be lobby creator) (what happens if other lobby creator quit?)
-        //when player disconnects from game and later reconnects he shouldn't go trough lobby
+        //X-when player disconnects from game and later reconnects he shouldn't go trough lobby
 
         AtomicBoolean isReady = new AtomicBoolean(false);
         // Create labels
@@ -151,6 +154,24 @@ class JfxLobbySceneRoot extends AnchorPane {
             });
         };
 
+        EventHandler<ActionEvent> eventQuitLobby = e -> {
+            try {
+                netManager.close();
+                System.exit(0);
+            } catch (IOException ex) {
+                LOGGER.error("Failed to disconnect from the server while closing", ex);
+                System.exit(-1);
+            }
+
+            throw new AssertionError("Should never be reached");
+        };
+
+        //QuitGameButton quitLobbyButton = new QuitGameButton("Quit Lobby");
+        final double scale = Math.min(getWidth() / 1055d, getHeight() / 585d);
+        PlayButton quitLobbyButton = new PlayButton("Quit lobby", Color.INDIANRED);
+
+        quitLobbyButton.setOnAction(eventQuitLobby);
+
         final LobbyPlayersVbox lobbyPlayersVbox = new LobbyPlayersVbox();
         lobbyPlayersVbox.lobbyPlayersProperty().bind(FxProperties
                 .toFxProperty("messages", lobbyPlayersVbox, lobbyAndController.lobby().joinedPlayers()));
@@ -163,23 +184,23 @@ class JfxLobbySceneRoot extends AnchorPane {
         ChoiceBox<String> playerNumberChoice = new ChoiceBox<>();
         playerNumberChoice.getItems().addAll("2", "3", "4");
         playerNumberChoice.setValue("2");
-        AtomicInteger requiredPlayers = new AtomicInteger();
+        AtomicInteger setPlayers = new AtomicInteger();
         playerNumberChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             switch (newValue) {
                 case "2":
-                    requiredPlayers.set(2);
+                    setPlayers.set(2);
                 case "3":
-                    requiredPlayers.set(3);
+                    setPlayers.set(3);
                     break;
                 case "4":
-                    requiredPlayers.set(4);
+                    setPlayers.set(4);
                     break;
                 default:
-                    requiredPlayers.set(2);
+                    setPlayers.set(2);
                     break;
             }
             try {
-                lobbyAndController.controller().setRequiredPlayers(requiredPlayers.get());
+                lobbyAndController.controller().setRequiredPlayers(setPlayers.get());
             } catch (DisconnectedException e) {
 
             }
@@ -196,11 +217,19 @@ class JfxLobbySceneRoot extends AnchorPane {
             playerNumberBox.setVisible(true);
         }
 
+        Label playersNumberLabel = new Label();
+
+        var players = lobbyAndController.lobby().joinedPlayers().get();
+        var requiredPlayers = lobbyAndController.lobby().requiredPlayers().get();
+
+        playersNumberLabel.setText(String.format("Players (%d/%d):", players.size(),
+                Math.max(players.size(), requiredPlayers != null ? requiredPlayers : 0)));
+
         //vbox
         VBox vbox = new VBox();
         vbox.setPadding(new Insets(10, 10, 10, 10));
         vbox.setSpacing(10);
-        vbox.getChildren().addAll(mainPane, readyButton, lobbyPlayersVbox);
+        vbox.getChildren().addAll(mainPane, playersNumberLabel, readyButton, lobbyPlayersVbox, quitLobbyButton);
         vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(10d);
 

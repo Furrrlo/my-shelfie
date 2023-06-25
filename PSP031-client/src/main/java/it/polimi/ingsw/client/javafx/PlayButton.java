@@ -20,6 +20,16 @@ public class PlayButton extends InGameButton {
         Fonts.changeWeight(fontProperty(), FontWeight.BOLD);
     }
 
+    public PlayButton(String buttonText, Color buttonColor) {
+        super(buttonText, buttonColor);
+
+        backgroundRadiusProperty().bind(widthProperty()
+                .map(w -> new CornerRadii(Math.min(10, 10 * (w.doubleValue() / 210d)))));
+        setBackgroundInsets(new Insets(0));
+
+        Fonts.changeWeight(fontProperty(), FontWeight.BOLD);
+    }
+
     @Override
     protected void layoutChildren() {
         double scale = Math.min(getWidth() / 115d, getHeight() / 46d);
