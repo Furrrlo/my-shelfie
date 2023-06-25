@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.controller.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 
@@ -189,7 +190,7 @@ public enum Type implements Serializable {
     private final String description;
     private final ImmutableColorMatrix example;
 
-    Type(CommonGoalChecker checker, String description, Color[][] example) {
+    Type(CommonGoalChecker checker, String description, @Nullable Color[][] example) {
         this.checker = checker;
         this.description = description;
         this.example = new ImmutableColorMatrix(example);
@@ -212,13 +213,14 @@ public enum Type implements Serializable {
 
     public static class ImmutableColorMatrix {
 
-        private final Color[][] matrix;
+        private final @Nullable Color[][] matrix;
 
-        public ImmutableColorMatrix(Color[][] matrix) {
+        public ImmutableColorMatrix(@Nullable Color[][] matrix) {
             this.matrix = matrix;
         }
 
-        public Color get(int row, int col) {
+        @SuppressWarnings("NullAway") // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
+        public @Nullable Color get(int row, int col) {
             return matrix[row][col];
         }
     }
