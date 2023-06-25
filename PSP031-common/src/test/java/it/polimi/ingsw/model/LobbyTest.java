@@ -15,6 +15,13 @@ class LobbyTest {
         final var lobby1 = new Lobby(4, List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")),
                 "test_player_2");
         assertTrue(lobby1.isLobbyCreator("test_player_1"));
+
+        final var lobby2 = new Lobby(4, List.of(new LobbyPlayer("test_player_1"), new LobbyPlayer("test_player_2")),
+                "test_player_2");
+        assertFalse(lobby2.isLobbyCreator("test_player_2"));
+
+        final var empty = new Lobby(0, List.of(), "");
+        assertFalse(empty.isLobbyCreator(""));
     }
 
     @Test

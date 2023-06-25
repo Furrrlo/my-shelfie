@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
@@ -86,6 +87,22 @@ class SerializablePropertyTest {
     }
 
     @Test
+    void testSetSameObserver() {
+        final var property = new SerializableProperty<>("empty");
+        AtomicInteger count = new AtomicInteger();
+        Consumer<String> obs = value -> count.incrementAndGet();
+
+        property.registerObserver(obs);
+        property.registerObserver(obs);
+
+        assertSame(1, property.getObservers().size());
+
+        property.set("set");
+
+        assertSame(1, count.get());
+    }
+
+    @Test
     void testSetWeakObservable() throws ExecutionException, InterruptedException, TimeoutException {
         final var property = new SerializableProperty<>("empty");
         {
@@ -99,6 +116,22 @@ class SerializablePropertyTest {
         property.set("test");
         assertEquals("test", property.get());
         assertTrue(property.getObservers().isEmpty());
+    }
+
+    @Test
+    void testSetSameWeakObserver() {
+        final var property = new SerializableProperty<>("empty");
+        AtomicInteger count = new AtomicInteger();
+        Consumer<String> obs = value -> count.incrementAndGet();
+
+        property.registerWeakObserver(obs);
+        property.registerWeakObserver(obs);
+
+        assertSame(1, property.getObservers().size());
+
+        property.set("set");
+
+        assertSame(1, count.get());
     }
 
     @Test
@@ -119,6 +152,13 @@ class SerializablePropertyTest {
         property.update(v -> v + "_updated");
         assertEquals("empty_updated", property.get());
         assertEquals(property.get(), observed.get(500, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    void testUnregisterNonExistentObserver() {
+        final var property = new SerializableProperty<>("empty");
+        assertDoesNotThrow(() -> property.unregisterObserver(s -> {
+        }));
     }
 
     @Test
