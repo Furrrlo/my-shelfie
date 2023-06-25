@@ -8,7 +8,7 @@
             </PatternLayout>
         </Console>
         <RollingRandomAccessFile name="file"
-                                 fileName="./logs/jfx-latest.log"
+                                 fileName="./jfx-logs/latest.log"
                                  filePattern="./jfx-logs/%d{yyyy-MM-dd}/logs.%d{yyyy-MM-dd}.%i.log.gz"
                                  immediateFlush="true"
                                  append="true">
