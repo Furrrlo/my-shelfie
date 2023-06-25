@@ -76,7 +76,7 @@ public enum Type implements Serializable {
                 new Color[] { Color.BLUE     , null           , Color.BLUE     , Color.LIGHTBLUE, null            },
                 new Color[] { Color.YELLOW   , null           , Color.WHITE    , Color.PINK     , null            },
                 new Color[] { Color.YELLOW   , null           , Color.BLUE     , Color.GREEN    , null            },
-                new Color[] { Color.GREEN    , null           , Color.WHITE    , Color.BLUE     , null            },
+                new Color[] { Color.GREEN    , null           , Color.WHITE    , Color.PINK     , null            },
                 new Color[] { Color.YELLOW   , null           , Color.YELLOW   , Color.LIGHTBLUE, null            },
                 new Color[] { Color.GREEN    , null           , Color.YELLOW   , Color.LIGHTBLUE, null            },
             //@formatter:on
