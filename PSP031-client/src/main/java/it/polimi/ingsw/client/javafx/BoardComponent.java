@@ -110,13 +110,18 @@ public class BoardComponent extends AnchorPane {
                 final int row = r, col = c;
 
                 TileComponent tileComponent = Objects.requireNonNull(matrix)[r][c]; // NullAway requires this :I
-                if (tileComponent == null || !board.isValidTile(r, c))
+                if (tileComponent == null)
                     continue;
+                if (!board.isValidTile(r, c)) {
+                    tileComponent.setDisable(true);
+                    continue;
+                }
 
                 tileComponent.tileProperty().bind(FxProperties.toFxProperty("t" + r + "x" + c, this, board.tile(r, c)));
 
                 var tilesAndCoords = tileComponent.tileProperty()
-                        .map(t -> TileAndCoords.nullable(tileComponent.getTile(), row, col));
+                        .map(t -> TileAndCoords.nullable(t, row, col))
+                        .orElse(TileAndCoords.nullable(null, row, col));
                 var nonPickable = BooleanExpression
                         // Instead of listening to neighbors for updates from the server,
                         // we listen to the un-disabling of the board, 'cause it's re-enabled once it's your turn
