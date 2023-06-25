@@ -41,6 +41,7 @@ class ChatComponent extends VBox {
         TextArea text = new TextArea();
         InGameButton send = new InGameButton(Color.LIGHTSEAGREEN);
 
+        var everyoneRecipientLabel = "Everyone";
         Runnable sendMessage = () -> {
             String message = text.getText();
             // Ignore empty messages
@@ -48,13 +49,16 @@ class ChatComponent extends VBox {
                 return;
 
             String nickRecipient = recipient.getValue();
-            if (!recipients.contains(nickRecipient) && !nickRecipient.equals(UserMessage.EVERYONE_RECIPIENT))
+            if (!recipients.contains(nickRecipient) && !nickRecipient.equals(everyoneRecipientLabel))
                 throw new IllegalArgumentException("There is no such a player " + nickRecipient);
 
             text.setText(""); // restore TextArea as soon as we know it's a valid message
             threadPool.execute(() -> {
                 try {
-                    controller.sendMessage(message, nickRecipient);
+                    if (nickRecipient.equals(everyoneRecipientLabel))
+                        controller.sendMessage(message, UserMessage.EVERYONE_RECIPIENT);
+                    else
+                        controller.sendMessage(message, nickRecipient);
                 } catch (DisconnectedException e) {
                     onDisconnect.accept(e);
                 }
@@ -72,7 +76,7 @@ class ChatComponent extends VBox {
                 .flatMap(p -> p instanceof Region r ? r.widthProperty() : null)
                 .map(w -> new CornerRadii(Math.min(RADIUS, RADIUS * (w.doubleValue() / 210d)))));
         recipient.setBackgroundInsets(new Insets(-INNER_INSET));
-        recipient.getItems().add(UserMessage.EVERYONE_RECIPIENT);
+        recipient.getItems().add(everyoneRecipientLabel);
         recipient.getItems().addAll(recipients);
         recipient.getSelectionModel().selectFirst();
         recipient.prefWidthProperty().bind(chatScrollComponent.widthProperty());
