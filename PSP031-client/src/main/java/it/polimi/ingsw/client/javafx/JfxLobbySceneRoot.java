@@ -4,12 +4,21 @@ import it.polimi.ingsw.DisconnectedException;
 import it.polimi.ingsw.GameAndController;
 import it.polimi.ingsw.LobbyAndController;
 import it.polimi.ingsw.client.network.ClientNetManager;
+import it.polimi.ingsw.controller.LobbyController;
 import it.polimi.ingsw.model.LobbyPlayer;
+import it.polimi.ingsw.model.LobbyView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,12 +26,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +48,7 @@ import java.util.function.Consumer;
  * <p>
  * Allows the player to set the ready state
  */
-class JfxLobbySceneRoot extends AnchorPane {
+class JfxLobbySceneRoot extends Pane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxLobbySceneRoot.class);
 
@@ -69,13 +80,19 @@ class JfxLobbySceneRoot extends AnchorPane {
     }
 
     private final DisconnectedDialog disconnectedMessage;
+    private final ImageView gameLogo;
+    private final Node lobbyPane;
+    private final Label currentMessage;
+    private final BorderPane randomImagePane;
+    private final InGameButton readyButton;
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private final BooleanProperty thePlayerReady = new SimpleBooleanProperty(this, "thePlayerReady");
+    private final BooleanProperty thePlayerLobbyCreator = new SimpleBooleanProperty(this, "thePlayerLobbyCreator");
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the game observable, we need to keep a strong ref
     private final Consumer<? super GameAndController<?>> gameObserver;
     @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the observable, we need to keep a strong ref
     private final Consumer<? super Boolean> disconnectObserver;
-
-    @SuppressWarnings({ "FieldCanBeLocal", "unused" }) // Registered weakly to the observable, we need to keep a strong ref
 
     private JfxLobbySceneRoot(FxResourcesLoader resources,
                               ExecutorService threadPool,
@@ -83,10 +100,16 @@ class JfxLobbySceneRoot extends AnchorPane {
                               LobbyAndController<?> lobbyAndController,
                               Consumer<? super GameAndController<?>> gameObserver,
                               ClientNetManager netManager) {
+        setStyle(getStyle() + "-fx-font-family: \"Inter\";");
+        setBackground(new Background(new BackgroundImage(
+                resources.loadImage("assets/misc/sfondo parquet.jpg"),
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(100, 100, true, true, false, true))));
+
         var dialogs = Dialogs.setupDialogSupport(this);
         this.disconnectedMessage = new DisconnectedDialog(resources, threadPool, stage, netManager);
         dialogs.register(disconnectedMessage, true);
-        disconnectedMessage.setManaged(false); // Do not make the layout manager manage this
         getChildren().add(disconnectedMessage);
 
         // Create a disconnection handler that shows the appropriate dialog and logs the exception
@@ -108,203 +131,311 @@ class JfxLobbySceneRoot extends AnchorPane {
                         onDisconnect.accept(new Exception("thePlayer connected state is false"));
                 }));
 
-        //TODO:
-        //X-change scene only when everyone is ready
-        //-first player chooses number of players
-        //-back to lobby button
-        //X-threads
-        //X-change ready button to not ready when player is ready and make player not ready when pressed
-        //-if player is first to connect -> set number of players
-        //-change number of players when already in the lobby (has to be lobby creator) (what happens if other lobby creator quit?)
-        //X-when player disconnects from game and later reconnects he shouldn't go trough lobby
+        thePlayerLobbyCreator.bind(FxProperties
+                .toFxProperty("lobbyCreator", this, lobbyAndController.lobby().joinedPlayers())
+                .map(i -> lobbyAndController.lobby().isLobbyCreator(netManager.getNick())));
+        thePlayerReady.bind(FxProperties
+                .toFxProperty("joinedPlayersForThePlayerReady", this, lobbyAndController.lobby().joinedPlayers())
+                .flatMap(players -> players.stream()
+                        .filter(p -> p.getNick().equals(netManager.getNick()))
+                        .findFirst()
+                        .map(p -> FxProperties.toFxProperty("foundThePlayerReady", this, p.ready()))
+                        .orElse(null))
+                .orElse(false));
+        var needsToSetRequiredPlayers = thePlayerLobbyCreator.and(BooleanExpression.booleanExpression(FxProperties
+                .toFxProperty("requiredPlayersNum", this, lobbyAndController.lobby().requiredPlayers())
+                .orElse(-1)
+                .map(num -> num == null || num == -1)));
+
+        gameLogo = new ImageView(resources.loadCroppedImage(
+                "assets/Publisher material/Title 2000x618px.png",
+                167, 77, 1667, 444));
+        gameLogo.setPreserveRatio(true);
+        getChildren().add(gameLogo);
+
+        lobbyPane = new LobbyVbox(threadPool, netManager, lobbyAndController.lobby(),
+                lobbyAndController.controller(), onDisconnect);
+        getChildren().add(lobbyPane);
+
+        currentMessage = new Label();
+        currentMessage.setAlignment(Pos.CENTER);
+        currentMessage.textProperty().bind(needsToSetRequiredPlayers.map(bool -> bool
+                ? "Set the required number of players"
+                : "Waiting for players..."));
+        getChildren().add(currentMessage);
+
+        var randomImages = List.of(
+                resources.loadImage("assets/Publisher material/Display_2.jpg"),
+                resources.loadImage("assets/Publisher material/Display_3.jpg"),
+                resources.loadImage("assets/Publisher material/Display_4.jpg"),
+                resources.loadImage("assets/Publisher material/Display_1.jpg"),
+                resources.loadImage("assets/Publisher material/Display_5.jpg"));
+        randomImagePane = new BorderPane();
+
+        var randomImage = new ImageView(randomImages.get(0));
+        randomImage.setPreserveRatio(true);
+        randomImage.fitWidthProperty().bind(randomImagePane.widthProperty());
+        randomImage.fitHeightProperty().bind(randomImagePane.heightProperty());
+
+        var carouselFadeOut = new FadeTransition(Duration.millis(500), randomImage);
+        carouselFadeOut.setFromValue(1);
+        carouselFadeOut.setToValue(0);
+        carouselFadeOut.setInterpolator(Interpolator.EASE_OUT);
+        carouselFadeOut.setCycleCount(1);
+        var carouselFadeIn = new FadeTransition(Duration.millis(500), randomImage);
+        carouselFadeIn.setFromValue(0);
+        carouselFadeIn.setToValue(1);
+        carouselFadeIn.setInterpolator(Interpolator.EASE_IN);
+        carouselFadeIn.setCycleCount(1);
+
+        final var currentImageIdx = new AtomicInteger(0);
+        Timeline carouselChangeImgTimeLine = new Timeline(new KeyFrame(Duration.seconds(10), evt -> {
+            // Keep playing until the scene changes
+            if (getScene() != null)
+                carouselFadeOut.playFromStart();
+        }));
+        carouselChangeImgTimeLine.setCycleCount(1);
+        carouselFadeOut.setOnFinished(evt -> {
+            randomImage.setImage(randomImages.get(currentImageIdx.updateAndGet(v -> v + 1 >= randomImages.size() ? 0 : v + 1)));
+            carouselFadeIn.playFromStart();
+        });
+        carouselFadeIn.setOnFinished(evt -> carouselChangeImgTimeLine.playFromStart());
+        carouselChangeImgTimeLine.playFromStart();
+
+        randomImagePane.setCenter(randomImage);
+        getChildren().add(randomImagePane);
+
+        readyButton = new InGameButton();
+        readyButton.backgroundInsetsProperty().set(new Insets(0));
+        readyButton.backgroundRadiusProperty().bind(readyButton.widthProperty()
+                .map(w -> new CornerRadii(Math.min(20, 20 * (w.doubleValue() / 210d)))));
+        readyButton.backgroundColorProperty().bind(thePlayerReady.map(ready -> ready ? Color.INDIANRED : Color.LIGHTSEAGREEN));
+        readyButton.textProperty().bind(thePlayerReady.map(ready -> ready ? "Not ready" : "Ready!"));
+        Fonts.changeWeight(readyButton.fontProperty(), FontWeight.EXTRA_BOLD);
+        readyButton.visibleProperty().bind(needsToSetRequiredPlayers.not());
 
         AtomicBoolean isReady = new AtomicBoolean(false);
-        // Create labels
-        Label connectionTypeLabel = new Label("Lobby");
-
-        // Create grid pane for layout
-        GridPane mainPane = new GridPane();
-        mainPane.setHgap(10);
-        mainPane.setVgap(10);
-        mainPane.setPadding(new Insets(10));
-
-        // Add components to grid pane
-        mainPane.add(connectionTypeLabel, 0, 0);
-        mainPane.setAlignment(Pos.CENTER);
-
-        Button readyButton = new Button("Ready");
-
-        EventHandler<ActionEvent> eventIpCHeck = e -> {
-            threadPool.execute(() -> {
-                try {
-                    if (!isReady.get()) {
-                        lobbyAndController.controller().ready(true);
-                        isReady.set(true);
-                        Platform.runLater(() -> readyButton.setText("Not ready"));
-
-                    } else if (isReady.get()) {
-                        lobbyAndController.controller().ready(false);
-                        isReady.set(false);
-                        Platform.runLater(() -> readyButton.setText("Ready!"));
-                    }
-
-                } catch (DisconnectedException ex) {
-                    onDisconnect.accept(ex);
+        EventHandler<ActionEvent> eventIpCHeck = e -> threadPool.execute(() -> {
+            try {
+                if (!isReady.get()) {
+                    lobbyAndController.controller().ready(true);
+                    isReady.set(true);
+                } else if (isReady.get()) {
+                    lobbyAndController.controller().ready(false);
+                    isReady.set(false);
                 }
-            });
-        };
-
-        EventHandler<ActionEvent> eventQuitLobby = e -> {
-            try {
-                netManager.close();
-                System.exit(0);
-            } catch (IOException ex) {
-                LOGGER.error("Failed to disconnect from the server while closing", ex);
-                System.exit(-1);
-            }
-
-            throw new AssertionError("Should never be reached");
-        };
-
-        //QuitGameButton quitLobbyButton = new QuitGameButton("Quit Lobby");
-        final double scale = Math.min(getWidth() / 1055d, getHeight() / 585d);
-        PlayButton quitLobbyButton = new PlayButton("Quit lobby", Color.INDIANRED);
-
-        quitLobbyButton.setOnAction(eventQuitLobby);
-
-        final LobbyPlayersVbox lobbyPlayersVbox = new LobbyPlayersVbox();
-        lobbyPlayersVbox.lobbyPlayersProperty().bind(FxProperties
-                .toFxProperty("messages", lobbyPlayersVbox, lobbyAndController.lobby().joinedPlayers()));
-        lobbyPlayersVbox.setAlignment(Pos.CENTER);
-
-        readyButton.setOnAction(eventIpCHeck);
-
-        //hbox
-        Label playerNumberLabel = new Label("Select number of players");
-        ChoiceBox<String> playerNumberChoice = new ChoiceBox<>();
-        playerNumberChoice.getItems().addAll("2", "3", "4");
-        playerNumberChoice.setValue("2");
-        AtomicInteger setPlayers = new AtomicInteger();
-        playerNumberChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            switch (newValue) {
-                case "2":
-                    setPlayers.set(2);
-                case "3":
-                    setPlayers.set(3);
-                    break;
-                case "4":
-                    setPlayers.set(4);
-                    break;
-                default:
-                    setPlayers.set(2);
-                    break;
-            }
-            try {
-                lobbyAndController.controller().setRequiredPlayers(setPlayers.get());
-            } catch (DisconnectedException e) {
-
+            } catch (DisconnectedException ex) {
+                onDisconnect.accept(ex);
             }
         });
+        readyButton.setOnAction(eventIpCHeck);
+        getChildren().add(readyButton);
 
-        HBox playerNumberBox = new HBox();
-        playerNumberBox.setPadding(new Insets(10, 10, 10, 10));
-        playerNumberBox.setSpacing(10);
-        playerNumberBox.getChildren().addAll(playerNumberLabel, playerNumberChoice);
-        playerNumberBox.setAlignment(Pos.CENTER);
-        playerNumberBox.setSpacing(10d);
-        playerNumberBox.setVisible(false);
-        if (lobbyAndController.lobby().requiredPlayers().get() == null) {
-            playerNumberBox.setVisible(true);
-        }
-
-        Label playersNumberLabel = new Label();
-
-        var players = lobbyAndController.lobby().joinedPlayers().get();
-        var requiredPlayers = lobbyAndController.lobby().requiredPlayers().get();
-
-        playersNumberLabel.setText(String.format("Players (%d/%d):", players.size(),
-                Math.max(players.size(), requiredPlayers != null ? requiredPlayers : 0)));
-
-        //vbox
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(10, 10, 10, 10));
-        vbox.setSpacing(10);
-        vbox.getChildren().addAll(mainPane, playersNumberLabel, readyButton, lobbyPlayersVbox, quitLobbyButton);
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setSpacing(10d);
-
-        AnchorPane.setTopAnchor(vbox, 1d);
-        AnchorPane.setBottomAnchor(vbox, 10d);
-        AnchorPane.setLeftAnchor(vbox, 10d);
-        AnchorPane.setRightAnchor(vbox, 10d);
-        getChildren().addAll(vbox, playerNumberBox);
-        //prefWidthProperty().bind(scene.widthProperty());
-        //prefHeightProperty().bind(scene.heightProperty());
-
-        setStyle(getStyle() + "-fx-font-family: \"Inter\";");
-        setBackground(new Background(new BackgroundImage(
-                resources.loadImage("assets/misc/sfondo parquet.jpg"),
-                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.DEFAULT,
-                new BackgroundSize(100, 100, true, true, false, true))));
+        // Check if we already disconnected
+        disconnectObserver.accept(lobbyAndController.lobby().thePlayerConnected().get());
     }
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
-
-        // Layout unmanaged children
         final double scale = Math.min(getWidth() / 1040d, getHeight() / 585d);
+        final double border = 20 * scale;
+
         this.disconnectedMessage.resizeRelocate((getWidth() - 230 * scale) / 2, (getHeight() - 230 * scale) / 2,
                 230 * scale, 230.0 * scale);
+
+        this.gameLogo.resizeRelocate(border, border, 350 * scale, 93.22 * scale);
+        this.gameLogo.setFitWidth(350 * scale);
+        this.gameLogo.setFitHeight(93.22 * scale);
+
+        this.lobbyPane.resizeRelocate(
+                border,
+                2 * border + 93.22 * scale,
+                350 * scale,
+                getHeight() - border * 3 - 93.22 * scale);
+
+        this.currentMessage.resizeRelocate(
+                2 * border + 350 * scale,
+                border,
+                getWidth() - 3 * border - 350 * scale,
+                20 * scale);
+        Fonts.changeSize(this.currentMessage.fontProperty(), 16 * scale);
+
+        this.randomImagePane.resizeRelocate(
+                2 * border + 350 * scale,
+                2 * border + 20 * scale,
+                getWidth() - 3 * border - 350 * scale,
+                getHeight() - 3 * border - 20 * scale - 40 * scale);
+
+        this.readyButton.resizeRelocate(
+                getWidth() - border - 250 * scale,
+                getHeight() - border - 80 * scale,
+                250 * scale,
+                80 * scale);
+        Fonts.changeSize(this.readyButton.fontProperty(), 30 * scale);
+    }
+
+    private class LobbyVbox extends VBox {
+
+        public LobbyVbox(ExecutorService threadPool,
+                         ClientNetManager netManager,
+                         LobbyView lobby,
+                         LobbyController controller,
+                         Consumer<Throwable> onDisconnect) {
+
+            setSpacing(15);
+            setPadding(new Insets(10));
+            backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                    Color.LIGHTGRAY,
+                    new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                    new Insets(0)))));
+
+            Label title = new Label("Lobby");
+            Fonts.changeWeight(title.fontProperty(), FontWeight.EXTRA_BOLD);
+            title.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                    Color.LIGHTSEAGREEN,
+                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
+                    new Insets(-5)))));
+            title.setAlignment(Pos.CENTER);
+            title.prefWidthProperty().bind(this.widthProperty());
+            this.getChildren().add(title);
+
+            Label server = new Label("Server: " + netManager.getHost() + ":" + netManager.getPort());
+            getChildren().add(server);
+
+            VBox requiredPlayersContainer = new VBox();
+            requiredPlayersContainer.visibleProperty().bind(thePlayerLobbyCreator);
+            requiredPlayersContainer.setPadding(new Insets(0));
+            requiredPlayersContainer.setSpacing(1);
+
+            Label playerNumberLabel = new Label("Required players");
+            InGameChoiceBox<String> playerNumberChoice = new InGameChoiceBox<>(Color.LIGHTSEAGREEN);
+            playerNumberChoice.backgroundRadiusProperty().bind(widthProperty()
+                    .map(w -> new CornerRadii(Math.min(5, 5 * (w.doubleValue() / 210d)))));
+            playerNumberChoice.setBackgroundInsets(new Insets(0));
+            playerNumberChoice.prefWidthProperty().bind(widthProperty());
+            playerNumberChoice.getItems().addAll("", "None", "2", "3", "4");
+            playerNumberChoice.setValue("");
+            playerNumberChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue.equals(""))
+                    return;
+
+                // Remove the empty value as it's only used at the start
+                playerNumberChoice.getItems().remove("");
+
+                var requiredPlayers = switch (newValue) {
+                    case "None" -> 0;
+                    case "2" -> 2;
+                    case "3" -> 3;
+                    case "4" -> 4;
+                    default -> throw new IllegalStateException("Unexpected value: " + newValue);
+                };
+
+                threadPool.execute(() -> {
+                    try {
+                        controller.setRequiredPlayers(requiredPlayers);
+                    } catch (DisconnectedException e) {
+                        onDisconnect.accept(e);
+                    }
+                });
+            });
+
+            // Only add children when it's visible, so that it doesn't take up space
+            requiredPlayersContainer.visibleProperty().addListener((obs, oldV, newV) -> {
+                if (newV) {
+                    // Set the value to the current one when it becomes visible
+                    var requiredPlayers = lobby.requiredPlayers().get();
+                    if (requiredPlayers == null) {
+                        if (!playerNumberChoice.getItems().contains(""))
+                            playerNumberChoice.getItems().add(0, "");
+                        playerNumberChoice.setValue("");
+                    } else {
+                        playerNumberChoice.getItems().remove("");
+                        playerNumberChoice.setValue(switch (requiredPlayers) {
+                            case 0 -> "None";
+                            case 2, 3, 4 -> String.valueOf(requiredPlayers);
+                            default -> throw new IllegalStateException("Unexpected value: " + requiredPlayers);
+                        });
+                    }
+
+                    requiredPlayersContainer.getChildren().setAll(playerNumberLabel, playerNumberChoice);
+                } else {
+                    requiredPlayersContainer.getChildren().clear();
+                }
+            });
+            if (requiredPlayersContainer.isVisible())
+                requiredPlayersContainer.getChildren().setAll(playerNumberLabel, playerNumberChoice);
+            getChildren().add(requiredPlayersContainer);
+
+            VBox playersVbox = new VBox();
+            playersVbox.setPadding(new Insets(0));
+            playersVbox.setSpacing(1);
+            Label numPlayers = new Label();
+            numPlayers.textProperty().bind(FxProperties.compositeObservableValue(
+                    FxProperties.toFxProperty("requiredPlayersNum", this, lobby.joinedPlayers()),
+                    FxProperties.toFxProperty("requiredPlayersNum", this, lobby.requiredPlayers()))
+                    .map(i -> {
+                        var requiredPlayers = lobby.requiredPlayers().get();
+                        var joinedPlayers = lobby.joinedPlayers().get().size();
+                        return requiredPlayers == null || requiredPlayers == 0
+                                ? "Players: " + joinedPlayers + "/" + Math.max(LobbyView.MIN_PLAYERS, joinedPlayers)
+                                : "Players: " + joinedPlayers + "/" + Math.max(LobbyView.MIN_PLAYERS, requiredPlayers);
+                    }));
+            playersVbox.getChildren().addAll(numPlayers, new LobbyPlayersVbox(lobby));
+            this.getChildren().add(playersVbox);
+        }
     }
 
     private static class LobbyPlayersVbox extends VBox {
 
+        @SuppressWarnings("FieldCanBeLocal") // Need to keep a strong ref
         private final ObjectProperty<List<? extends LobbyPlayer>> lobbyPlayers = new SimpleObjectProperty<>(this,
                 "lobbyPlayers");
 
-        public LobbyPlayersVbox() {
+        public LobbyPlayersVbox(LobbyView lobby) {
+            setPadding(new Insets(0));
+            setSpacing(5);
             lobbyPlayers.addListener((obs, old, newList) -> {
                 var newComponents = new ArrayList<Node>();
-                for (LobbyPlayer p : newList) {
-                    Label readyLabel = new Label();
-                    if (p.ready().get())
-                        readyLabel.setText("ready");
-                    else
-                        readyLabel.setText("not ready");
-                    var ready = new SimpleObjectProperty<>(p.ready(), "ready");
-                    ready.bind(FxProperties.toFxProperty("ready", this, p.ready()));
-                    ready.addListener(((observable, oldValue, newValue) -> {
-                        if (p.ready().get())
-                            readyLabel.setText("ready");
-                        else
-                            readyLabel.setText("not ready");
-                    }));
-                    Label playerLabel = new Label();
-                    playerLabel.setText(p.getNick());
-                    HBox hBox = new HBox();
-                    hBox.getChildren().add(playerLabel);
-                    hBox.getChildren().add(readyLabel);
-                    hBox.setAlignment(Pos.CENTER);
-                    hBox.setSpacing(5);
-                    newComponents.add(hBox);
-                }
+                for (LobbyPlayer p : newList)
+                    newComponents.add(new LobbyPlayerComponent(p));
                 getChildren().setAll(newComponents);
             });
+            lobbyPlayers.bind(FxProperties.toFxProperty("joinedPlayers", this, lobby.joinedPlayers()));
         }
+    }
 
-        public List<? extends LobbyPlayer> getLobbyPlayers() {
-            return lobbyPlayers.get();
+    private static class LobbyPlayerComponent extends HBox {
+
+        @SuppressWarnings("FieldCanBeLocal") // Need to keep a strong ref
+        private final ObjectProperty<Boolean> ready = new SimpleObjectProperty<>(this, "ready");
+
+        public LobbyPlayerComponent(LobbyPlayer p) {
+            setSpacing(5);
+            backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
+                    Color.LIGHTSEAGREEN,
+                    new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
+                    new Insets(0)))));
+            setPadding(new Insets(5));
+
+            var vbox = new VBox();
+            vbox.setSpacing(1);
+
+            Label playerLabel = new Label();
+            playerLabel.setText(p.getNick());
+
+            Label readyLabel = new Label();
+            ready.bind(FxProperties.toFxProperty("ready", this, p.ready()));
+            readyLabel.textProperty().bind(ready.map(ready -> ready ? "Ready" : "Not ready"));
+            readyLabel.textFillProperty().bind(ready.map(ready -> ready ? Color.GREEN : Color.RED));
+
+            vbox.getChildren().addAll(playerLabel, readyLabel);
+            HBox.setHgrow(vbox, Priority.SOMETIMES);
+            getChildren().add(vbox);
+
+            var spinner = new ProgressIndicator();
+            spinner.setPrefHeight(1); // Set v small, so it should take the size from the other components
+            spinner.visibleProperty().bind(ready.map(ready -> !ready));
+            getChildren().add(spinner);
         }
-
-        public ObjectProperty<List<? extends LobbyPlayer>> lobbyPlayersProperty() {
-            return lobbyPlayers;
-        }
-
-        public void setLobbyPlayers(List<? extends LobbyPlayer> lobbyPlayers) {
-            this.lobbyPlayers.set(lobbyPlayers);
-        }
-
     }
 }
