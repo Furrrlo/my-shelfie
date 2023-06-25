@@ -111,4 +111,17 @@ class LobbyServerControllerTest {
         controller.ready("p3", true);
         assertNotNull(lobby.game().get());
     }
+
+    @Test
+    void startGame_4requiredPlayers() {
+        assertNull(lobby.game().get());
+        controller.setRequiredPlayers("p1", 4);
+        assertNull(lobby.game().get());
+        controller.ready("p1", true);
+        assertNull(lobby.game().get());
+        controller.ready("p2", true);
+        assertNull(lobby.game().get());
+        controller.ready("p3", true);
+        assertNull(lobby.game().get());
+    }
 }
