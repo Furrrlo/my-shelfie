@@ -1,6 +1,5 @@
 package it.polimi.ingsw.client.javafx;
 
-import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.CommonGoalView;
 import it.polimi.ingsw.model.PersonalGoalView;
 
