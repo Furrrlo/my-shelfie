@@ -9,7 +9,7 @@ public record UserMessage(String nickSendingPlayer,
         String nickReceivingPlayer,
         String receivingColor) implements Serializable {
 
-    public static final String EVERYONE_RECIPIENT = "all";
+    public static final String EVERYONE_RECIPIENT = "";
 
     public static UserMessage forEveryone(String nickSendingPlayer, String sendingColor, String message) {
         return new UserMessage(nickSendingPlayer, sendingColor, message, EVERYONE_RECIPIENT, "");
