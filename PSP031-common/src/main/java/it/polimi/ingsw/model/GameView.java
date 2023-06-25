@@ -10,8 +10,7 @@ import java.util.List;
 
 public interface GameView extends Serializable {
 
-    // TODO: remember to bring back to 30 second
-    Duration SUSPENDED_GAME_TIMEOUT = Duration.of(120, ChronoUnit.SECONDS);
+    Duration SUSPENDED_GAME_TIMEOUT = Duration.of(30, ChronoUnit.SECONDS);
 
     /** Returns game ID */
     int getGameID();
