@@ -98,6 +98,24 @@
                                     <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate-controller</outputDirectory>
                                     <includes>
                                         <include>it/polimi/ingsw/controller/**/*</include>
+                                        <include>it/polimi/ingsw/server/controller/ServerController.*</include>
+                                        <include>it/polimi/ingsw/server/controller/GameServerController.*</include>
+                                        <include>it/polimi/ingsw/server/controller/LobbyServerController.*</include>
+                                        <include>it/polimi/ingsw/server/controller/PublicScoreProvider.*</include>
+                                        <include>it/polimi/ingsw/server/controller/PrivateScoreProvider.*</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report-aggregate-network</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate-network</outputDirectory>
+                                    <includes>
+                                        <include>it/polimi/ingsw/controller/**/*</include>
                                         <include>it/polimi/ingsw/updater/**/*</include>
                                         <include>it/polimi/ingsw/rmi/**/*</include>
                                         <include>it/polimi/ingsw/socket/**/*</include>

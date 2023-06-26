@@ -63,6 +63,17 @@ jobs:
           coverage-badge-filename: jacoco-controller.svg
           branches-badge-filename: branches-controller.svg
 
+      - name: Generate Controller Jacoco Badge
+        id: jacoco-network
+        # v2.8.0 introduces an automatic step summary that can't be turned off
+        uses: cicirello/jacoco-badge-generator@v2.7.0
+        with:
+          generate-branches-badge: true
+          jacoco-csv-file: 'PSP031-jacoco-report/target/site/jacoco-aggregate-network/jacoco.csv'
+          badges-directory: badges
+          coverage-badge-filename: jacoco-network.svg
+          branches-badge-filename: branches-network.svg
+
       - name: Commit and Push Badges
         if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
         continue-on-error: true
@@ -83,6 +94,8 @@ jobs:
           JACOCO_MODEL_BRANCHES: ${{ steps.jacoco-model.outputs.branches }}
           JACOCO_CONTROLLER_COVERAGE: ${{ steps.jacoco-controller.outputs.coverage }}
           JACOCO_CONTROLLER_BRANCHES: ${{ steps.jacoco-controller.outputs.branches }}
+          JACOCO_NETWORK_COVERAGE: ${{ steps.jacoco-network.outputs.coverage }}
+          JACOCO_NETWORK_BRANCHES: ${{ steps.jacoco-network.outputs.branches }}
           JACOCO_OVERALL_COVERAGE: ${{ steps.jacoco-overall.outputs.coverage }}
           JACOCO_OVERALL_BRANCHES: ${{ steps.jacoco-overall.outputs.branches }}
         run: |
@@ -92,6 +105,7 @@ jobs:
           |------------|:------------:|---------:|
           $(printf "| Model      | %.2f%%      | %.2f%%  |\n" "$(echo "100 * $JACOCO_MODEL_COVERAGE"      | bc)" "$(echo "100 * $JACOCO_MODEL_BRANCHES"      | bc)")
           $(printf "| Controller | %.2f%%      | %.2f%%  |\n" "$(echo "100 * $JACOCO_CONTROLLER_COVERAGE" | bc)" "$(echo "100 * $JACOCO_CONTROLLER_BRANCHES" | bc)")
+          $(printf "| Network    | %.2f%%      | %.2f%%  |\n" "$(echo "100 * $JACOCO_NETWORK_COVERAGE"    | bc)" "$(echo "100 * $JACOCO_NETWORK_BRANCHES"    | bc)")
           $(printf "| Overall    | %.2f%%      | %.2f%%  |\n" "$(echo "100 * $JACOCO_OVERALL_COVERAGE"    | bc)" "$(echo "100 * $JACOCO_OVERALL_BRANCHES"    | bc)")
           EOF
           )
