@@ -42,6 +42,50 @@ class JfxMainMenuSceneRoot extends Pane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxMainMenuSceneRoot.class);
 
+    public static void connectAndJoinGame(FxResourcesLoader resources,
+                                          ExecutorService threadPool,
+                                          Stage stage,
+                                          Callable<ClientNetManager> netManagerFactory)
+            throws Exception {
+        ClientNetManager netManager = null;
+        try {
+            netManager = netManagerFactory.call();
+            var lobbyAndController = netManager.joinGame();
+
+            final var netManager0 = netManager;
+            Platform.runLater(() -> {
+                EventHandler<WindowEvent> onClose = evt -> {
+                    int exitCode = 0;
+                    try {
+                        netManager0.close();
+                    } catch (IOException ex) {
+                        LOGGER.error("Failed to disconnect from the server while closing", ex);
+                        exitCode = -1;
+                    }
+
+                    Platform.exit();
+                    System.exit(exitCode);
+                };
+                stage.getScene().setRoot(JfxLobbySceneRoot
+                        .getSceneRootFor(resources, threadPool, stage, lobbyAndController, netManager0));
+                stage.setOnCloseRequest(onClose);
+                stage.setOnHiding(onClose);
+            });
+        } catch (NickNotValidException ex) {
+            throw ex;
+        } catch (Throwable ex) {
+            if (netManager != null) {
+                try {
+                    netManager.close();
+                } catch (IOException exc) {
+                    ex.addSuppressed(ex);
+                }
+            }
+
+            throw ex;
+        }
+    }
+
     private final TextField ipTextField;
     private final TextField portTextField;
     private final TextField usernameTextField;
@@ -283,49 +327,5 @@ class JfxMainMenuSceneRoot extends Pane {
             getChildren().add(scrollPane);
         }
 
-    }
-
-    public static void connectAndJoinGame(FxResourcesLoader resources,
-                                          ExecutorService threadPool,
-                                          Stage stage,
-                                          Callable<ClientNetManager> netManagerFactory)
-            throws Exception {
-        ClientNetManager netManager = null;
-        try {
-            netManager = netManagerFactory.call();
-            var lobbyAndController = netManager.joinGame();
-
-            final var netManager0 = netManager;
-            Platform.runLater(() -> {
-                EventHandler<WindowEvent> onClose = evt -> {
-                    int exitCode = 0;
-                    try {
-                        netManager0.close();
-                    } catch (IOException ex) {
-                        LOGGER.error("Failed to disconnect from the server while closing", ex);
-                        exitCode = -1;
-                    }
-
-                    Platform.exit();
-                    System.exit(exitCode);
-                };
-                stage.getScene().setRoot(JfxLobbySceneRoot
-                        .getSceneRootFor(resources, threadPool, stage, lobbyAndController, netManager0));
-                stage.setOnCloseRequest(onClose);
-                stage.setOnHiding(onClose);
-            });
-        } catch (NickNotValidException ex) {
-            throw ex;
-        } catch (Throwable ex) {
-            if (netManager != null) {
-                try {
-                    netManager.close();
-                } catch (IOException exc) {
-                    ex.addSuppressed(ex);
-                }
-            }
-
-            throw ex;
-        }
     }
 }
