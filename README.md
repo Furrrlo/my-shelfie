@@ -29,6 +29,14 @@ For documentation regarding the architecture see the [deliverables folder](deliv
 The application requires an installation of Java 19. Newer versions cannot be used
 as preview features were used which may have been changed in Java 20.
 
+Because of [limitations](https://www.reddit.com/r/JavaFX/comments/twye9j/comment/i3l6rq5/)
+caused by
+how [JavaFX loads its native libraries](https://github.com/openjdk/jfx/blob/d010d41cc9519a792957c6dda8275757b4664704/modules/javafx.graphics/src/main/java/com/sun/glass/utils/NativeLibLoader.java#L213),
+the jar can only support one architecture per Operating System.
+As such, we have chosen to export the jar with support for the three main OSes we personally use,
+so the GUI jar can only be run on Windows amd64, MacOS x86_64 and Linux amd64.
+Additional platforms can be supported by re-compiling the jar with whatever JFX natives you need.
+
 The server needs to be run from terminal using the following command:
 
 ```shell
