@@ -6,6 +6,7 @@ import it.polimi.ingsw.server.model.ServerPlayer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,7 @@ class GameServerControllerTest {
         game = LobbyServerController.createGame(0, randomFactory.create(0),
                 List.of(new LobbyPlayer("p1"),
                         new LobbyPlayer("p2")));
-        controller = new GameServerController(new LockProtected<>(game));
+        controller = new GameServerController(new LockProtected<>(game), Duration.ofSeconds(2));
         startingPlayer = game.getStartingPlayer();
         otherPlayer = game.getPlayers().stream()
                 .filter(player -> player != startingPlayer)
@@ -35,13 +36,13 @@ class GameServerControllerTest {
     }
 
     @Test
-    void testOnDisconnectPlayer() {
+    void testOnDisconnectPlayer() throws InterruptedException {
         controller.onDisconnectPlayer("p1");
         assertFalse(startingPlayer.connected().get());
         assertTrue(game.suspended().get());
         assertNotSame(startingPlayer, game.currentTurn().get());
-        //endGame will be set to true in 30 sec
-        // too long to wait (?) :(
+        Thread.sleep(3000);
+        assertTrue(game.endGame().get());
     }
 
     @Test
@@ -248,8 +249,6 @@ class GameServerControllerTest {
 
     @Test
     void sendMessage() {
-        //TODO : complete testing sendMessage
-
         //at the beginning of the game, message is set to null
         assertNull(game.message().get());
 

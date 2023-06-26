@@ -5,9 +5,11 @@ import it.polimi.ingsw.server.model.ServerGame;
 import it.polimi.ingsw.server.model.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,8 +40,20 @@ public class GameServerController {
     /** Future that ends the game if less than 2 players are connected */
     private volatile @Nullable ScheduledFuture<?> endGameFuture;
 
+    /**
+     * Timeout after which a game which is suspended (aka it does not have enough players
+     * to go on) is terminated
+     */
+    private final Duration suspendedGameTimeout;
+
     public GameServerController(LockProtected<ServerGame> game) {
+        this(game, GameView.SUSPENDED_GAME_TIMEOUT);
+    }
+
+    @VisibleForTesting
+    public GameServerController(LockProtected<ServerGame> game, Duration suspendedGameTimeout) {
         this.game = game;
+        this.suspendedGameTimeout = suspendedGameTimeout;
         this.executor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
                 .name("GameServerController-endGame-thread")
                 .factory());
@@ -67,7 +81,7 @@ public class GameServerController {
                             endGameFuture = executor.schedule(() -> {
                                 LOGGER.info("Game " + game.getGameID() + " is over because players have disconnected");
                                 game.endGame().set(true);
-                            }, GameView.SUSPENDED_GAME_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+                            }, suspendedGameTimeout.toMillis(), TimeUnit.MILLISECONDS);
                         }
 
                         // If the current player disconnects, skip his turn
