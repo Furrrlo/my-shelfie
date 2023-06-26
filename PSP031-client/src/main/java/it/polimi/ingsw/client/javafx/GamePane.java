@@ -416,14 +416,16 @@ class GamePane extends Pane {
                     var choosenCoords = pickedTilesPane.getTiles().stream()
                             .map(t -> new BoardCoord(t.row(), t.col()))
                             .toList();
-                    pickedTilesPane.tilesProperty().clear();
                     threadPool.execute(() -> {
                         try {
                             controller.makeMove(choosenCoords, tileAndCoords.col());
                         } catch (DisconnectedException e) {
                             onDisconnect.accept(e);
                         } finally {
-                            Platform.runLater(() -> isMakingMove.set(false));
+                            Platform.runLater(() -> {
+                                isMakingMove.set(false);
+                                pickedTilesPane.tilesProperty().clear();
+                            });
                         }
                     });
                 })));
