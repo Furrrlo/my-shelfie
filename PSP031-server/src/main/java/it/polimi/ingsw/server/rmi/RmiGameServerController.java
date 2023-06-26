@@ -1,5 +1,6 @@
 package it.polimi.ingsw.server.rmi;
 
+import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.BoardCoord;
 import it.polimi.ingsw.rmi.RmiGameController;
 import it.polimi.ingsw.server.controller.GameServerController;
@@ -9,6 +10,16 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * RMI remotable object which is used to implement {@link GameController}.
+ * <p>
+ * This object is per-player, meaning that a new one will be created and exported
+ * for each player. An object is then in charge of reading RMI {@link GameController}
+ * requests from its assigned player and relaying them to the protocol-agnostic
+ * {@link GameServerController}.
+ *
+ * @see RmiGameController
+ */
 public class RmiGameServerController implements RmiGameController {
 
     private final ServerPlayer player;

@@ -10,6 +10,15 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 
+/**
+ * Socket GameController implementation which listens for incoming packets from a socket
+ * and calls the corresponding methods on the protocol agnostic {@link LobbyServerController}.
+ * <p>
+ * This is a per-player object.
+ *
+ * @see LobbyController
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketServerLobbyController implements LobbyController, Runnable {
 
     private final ServerSocketManager socketManager;

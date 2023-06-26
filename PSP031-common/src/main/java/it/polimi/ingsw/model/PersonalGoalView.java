@@ -5,6 +5,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.stream.Stream;
 
+/**
+ * Read-only interface of a personal goal.
+ * <p>
+ * A personal goal is a goal which is specific to a player in the game
+ * and can only be seen and achieved by them.
+ */
 public interface PersonalGoalView extends Serializable {
 
     int ROWS = Shelfie.ROWS;

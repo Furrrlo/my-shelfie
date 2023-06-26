@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/** Modifiable implementation of {@link PersonalGoalView} */
 public class PersonalGoal implements PersonalGoalView {
 
     private final @Nullable Tile[][] personalGoal;

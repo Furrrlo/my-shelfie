@@ -8,8 +8,13 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/** Read-only object which represent an in-progress game as seen by one player */
 public interface GameView extends Serializable {
 
+    /**
+     * Timeout after which a game which is suspended (aka it does not have enough players
+     * to go on) is terminated
+     */
     Duration SUSPENDED_GAME_TIMEOUT = Duration.of(30, ChronoUnit.SECONDS);
 
     /** Returns game ID */

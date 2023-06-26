@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Objects;
 
+/** Modifiable implementation of {@link CommonGoalView} */
 public class CommonGoal implements CommonGoalView {
 
     private final Type type;

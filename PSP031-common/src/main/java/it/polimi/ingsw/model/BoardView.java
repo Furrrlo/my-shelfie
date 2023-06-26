@@ -6,6 +6,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Read-only object which represent the board of an in-progress game.
+ * <p>
+ * The board is diamond-shaped, but is represented in memory as a matrix
+ * of {@link #BOARD_ROWS}x{@link #BOARD_COLUMNS} and valid cells are indicated
+ * with {@link #isValidTile(int, int)}.
+ */
 public interface BoardView extends Serializable {
     int BOARD_ROWS = 9;
     int BOARD_COLUMNS = 9;

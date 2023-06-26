@@ -22,6 +22,15 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * RMI remotable service implementation which clients can use to establish a connection with the server.
+ * <p>
+ * This acts as the entry-point for networking for all clients that want to connect to the server using RMI.
+ * Once a connection is established, this will delegate most of the job to the protocol-agnostic
+ * {@link ServerController}, which will determine whether the player can connect.
+ *
+ * @see RmiConnectionController
+ */
 public class RmiConnectionServerController extends UnicastRemoteObject implements RmiConnectionController, Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmiConnectionServerController.class);

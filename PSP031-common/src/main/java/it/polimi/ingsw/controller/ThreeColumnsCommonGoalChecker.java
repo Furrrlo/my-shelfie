@@ -12,6 +12,10 @@ import java.util.Objects;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
+/**
+ * Object which can check whether a given {@link Shelfie} has achieved a common goal
+ * of type {@link it.polimi.ingsw.model.Type#THREE_COLUMNS}
+ */
 @Immutable
 public class ThreeColumnsCommonGoalChecker implements CommonGoalChecker {
 

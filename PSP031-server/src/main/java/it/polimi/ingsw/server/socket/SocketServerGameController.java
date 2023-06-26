@@ -15,6 +15,15 @@ import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 
+/**
+ * Socket GameController implementation which listens for incoming packets from a socket
+ * and calls the corresponding methods on the protocol agnostic {@link GameServerController}.
+ * <p>
+ * This is a per-player object.
+ *
+ * @see GameController
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketServerGameController implements GameController, Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketServerGameController.class);

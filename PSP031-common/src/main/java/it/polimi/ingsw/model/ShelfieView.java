@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Stream;
 
+/** Read-only object which represent the shelfie of a player in an in-progress game */
 public interface ShelfieView extends Serializable {
 
     int ROWS = 6;

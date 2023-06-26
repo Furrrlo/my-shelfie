@@ -2,6 +2,7 @@ package it.polimi.ingsw.model;
 
 import java.util.Objects;
 
+/** Modifiable implementation of {@link LobbyPlayerView} */
 public final class LobbyPlayer implements LobbyPlayerView {
     private final String nick;
     private final Property<Boolean> ready;

@@ -9,6 +9,14 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.function.Consumer;
 
+/**
+ * Socket based heartbeat handler which is able to deliver heartbeat pings
+ * to a specific client.
+ * <p>
+ * This is a per-socket object.
+ *
+ * @see HeartbeatHandler
+ */
 class SocketHeartbeatHandler implements HeartbeatHandler, Closeable {
 
     private final ServerSocketManager socketManager;

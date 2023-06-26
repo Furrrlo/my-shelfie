@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Objects;
 
+/** Modifiable implementation of {@link ServerLobbyView} */
 public class ServerLobby implements ServerLobbyView {
 
     private final Property<@Nullable Integer> requiredPlayers;

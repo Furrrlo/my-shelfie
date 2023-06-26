@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/** Modifiable implementation of {@link ShelfieView} */
 public class Shelfie implements ShelfieView {
 
     private final Property<@Nullable Tile>[][] shelfie;

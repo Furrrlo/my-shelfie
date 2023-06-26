@@ -14,6 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
+/**
+ * Object which represents and keeps track of the connection of a specific player.
+ * <p>
+ * This is used to keep track of observers and any network-related objects and can be
+ * used to close everything once the player disconnects.
+ */
 public abstract class BaseServerConnection implements PlayerObservableTracker, Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseServerConnection.class);

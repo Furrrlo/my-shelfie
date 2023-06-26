@@ -4,6 +4,16 @@ import it.polimi.ingsw.model.PersonalGoal;
 import it.polimi.ingsw.model.Provider;
 import it.polimi.ingsw.model.ShelfieView;
 
+/**
+ * Read-only object which represent a player of an in-progress game, as seen by the server.
+ * <p>
+ * Compared to the client, the server can see:
+ * - the shelfie of any player ({@link #getShelfie()})
+ * - the personal goal of any player ({@link #getPersonalGoal()})
+ * - the private score of any player at any point ({@link #privateScore()})
+ *
+ * @see it.polimi.ingsw.model.PlayerView
+ */
 public interface ServerPlayerView {
 
     /** Returns the player's nick */

@@ -15,6 +15,14 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
+/**
+ * Integer provider which calculates and keeps track of the public score of a player.
+ * <p>
+ * The private score is defined as the score which should be visible to the other
+ * players during the game.
+ *
+ * @see ServerPlayerView#publicScore()
+ */
 class PublicScoreProvider implements Provider<Integer> {
 
     private final List<Integer> COMMON_GOAL_SCORE_BY_POS = List.of(8, 6, 4, 2);

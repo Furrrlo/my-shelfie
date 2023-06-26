@@ -4,10 +4,19 @@ import it.polimi.ingsw.model.Property;
 import it.polimi.ingsw.model.Provider;
 import it.polimi.ingsw.model.SerializableProperty;
 import it.polimi.ingsw.server.model.ServerPlayer;
+import it.polimi.ingsw.server.model.ServerPlayerView;
 
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Integer provider which calculates and keeps track of the private score of a player.
+ * <p>
+ * The private score is defined as the score which should only be visible to the player
+ * itself during the game and to everyone at the end of the game.
+ *
+ * @see ServerPlayerView#privateScore()
+ */
 class PrivateScoreProvider implements Provider<Integer> {
 
     private final List<Integer> PERSONAL_GOAL_SCORE_BY_NUM = List.of(

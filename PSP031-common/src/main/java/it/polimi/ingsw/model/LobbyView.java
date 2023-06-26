@@ -7,6 +7,14 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Read-only object which represent the lobby of a game.
+ * <p>
+ * The lobby gets created before a game and players are temporarily placed in here
+ * first until the game starts. Once the game starts, the players can no longer
+ * leave the lobby and will maintain their spot in it even upon disconnection,
+ * until the game ends and both the lobby and the game are deleted.
+ */
 public interface LobbyView extends Serializable {
 
     int MIN_PLAYERS = 2;

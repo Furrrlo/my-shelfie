@@ -5,6 +5,7 @@ import it.polimi.ingsw.model.*;
 import java.util.Objects;
 import java.util.function.Function;
 
+/** Modifiable implementation of {@link ServerPlayerView} */
 public class ServerPlayer implements ServerPlayerView {
 
     private final String nick;

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+/** Modifiable implementation of {@link GameView} */
 public class Game implements GameView {
 
     private final int gameID;

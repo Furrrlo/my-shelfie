@@ -9,6 +9,15 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Read-only object which represent a game lobby, as seen by the server.
+ * <p>
+ * This object does not differ from {@link LobbyView} other than the fact that it
+ * returns {@link ServerGameView} instead of {@link it.polimi.ingsw.model.GameView} instances.
+ * In addition, it has a few utility methods which are only useful to the server.
+ *
+ * @see it.polimi.ingsw.model.GameView
+ */
 public interface ServerLobbyView {
 
     int MIN_PLAYERS = LobbyView.MIN_PLAYERS;

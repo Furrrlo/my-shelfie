@@ -2,6 +2,12 @@ package it.polimi.ingsw.model;
 
 import java.io.Serializable;
 
+/**
+ * Read-only interface of a player, as seen by a specific player (might be themselves).
+ * <p>
+ * As this is from the POV of a (possibly) different player, this holds limited
+ * information (mainly it does not have the personal goal and its related points).
+ */
 public interface PlayerView extends Serializable {
 
     /** Return player's nick */

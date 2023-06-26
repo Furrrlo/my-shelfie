@@ -15,7 +15,7 @@ import java.io.UncheckedIOException;
  * and calls the corresponding updaters methods
  *
  * @see GameClientUpdater
- * @see it.polimi.ingsw.controller
+ * @see it.polimi.ingsw.updater
  */
 public class SocketGameClientUpdater extends GameClientUpdater implements Runnable {
 

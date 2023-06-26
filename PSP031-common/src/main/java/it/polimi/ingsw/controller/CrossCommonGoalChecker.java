@@ -8,6 +8,10 @@ import it.polimi.ingsw.model.Tile;
 import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
 import static it.polimi.ingsw.model.ShelfieView.ROWS;
 
+/**
+ * Object which can check whether a given {@link Shelfie} has achieved a common goal
+ * of type {@link it.polimi.ingsw.model.Type#CROSS}
+ */
 @Immutable
 public class CrossCommonGoalChecker implements CommonGoalChecker {
 

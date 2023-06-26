@@ -23,6 +23,13 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Socket-based service implementation which clients can use to establish a connection with the server.
+ * <p>
+ * This acts as the entry-point for networking for all clients that want to connect to the server using sockets.
+ * Once a connection is established, this will delegate most of the job to the protocol-agnostic
+ * {@link ServerController}, which will determine whether the player can connect.
+ */
 public class SocketConnectionServerController implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketConnectionServerController.class);

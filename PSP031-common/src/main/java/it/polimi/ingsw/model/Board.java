@@ -9,6 +9,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
+ * Modifiable implementation of {@link BoardView}
+ *
  * @implNote Java Serialization automatically takes care of keeping multiple references to a single object
  *           correct on deserialization:
  *           "Multiple references to a single object are encoded using a reference sharing mechanism so that

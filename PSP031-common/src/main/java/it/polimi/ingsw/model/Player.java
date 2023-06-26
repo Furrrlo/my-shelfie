@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import java.util.Objects;
 import java.util.function.Function;
 
+/** Modifiable implementation of {@link PlayerView} */
 public class Player implements PlayerView {
 
     private final String nick;

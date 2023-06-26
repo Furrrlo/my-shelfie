@@ -207,6 +207,7 @@ public enum Type implements Serializable {
         return checker.checkCommonGoal(shelfie);
     }
 
+    /** Returns an example matrix of tiles which would achieve a common goal of this type */
     public ImmutableColorMatrix getExample() {
         return example;
     }

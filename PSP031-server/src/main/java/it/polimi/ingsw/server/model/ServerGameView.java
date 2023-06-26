@@ -10,6 +10,16 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
 
+/**
+ * Read-only object which represent an in-progress game, as seen by the server.
+ * <p>
+ * Compared to the client, the server can see:
+ * - the list of tiles still in the bag {@link #getBagView()}
+ * In addition, it returns {@link ServerPlayerView} and {@link ServerCommonGoalView} instead of
+ * {@link it.polimi.ingsw.model.PlayerView} and {@link it.polimi.ingsw.model.CommonGoalView} instances.
+ *
+ * @see it.polimi.ingsw.model.GameView
+ */
 public interface ServerGameView {
 
     /** Returns the game ID */

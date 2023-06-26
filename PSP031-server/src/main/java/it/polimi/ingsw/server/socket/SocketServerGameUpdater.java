@@ -11,6 +11,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Socket GameUpdater implementation which forwards requests to the client using packets
+ *
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketServerGameUpdater implements GameUpdater {
     private final ServerSocketManager socketManager;
 

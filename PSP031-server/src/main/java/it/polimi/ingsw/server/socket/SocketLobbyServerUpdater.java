@@ -13,6 +13,11 @@ import it.polimi.ingsw.updater.LobbyUpdater;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Socket LobbyUpdater implementation which forwards requests to the client using packets
+ *
+ * @see it.polimi.ingsw.controller
+ */
 public class SocketLobbyServerUpdater implements LobbyUpdater {
     private final ServerSocketManager socketManager;
 

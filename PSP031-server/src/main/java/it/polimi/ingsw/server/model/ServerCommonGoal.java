@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Objects;
 
+/** Modifiable implementation of {@link ServerCommonGoalView} */
 public class ServerCommonGoal implements ServerCommonGoalView {
 
     private final Type type;

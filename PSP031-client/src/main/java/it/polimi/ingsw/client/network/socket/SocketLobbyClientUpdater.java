@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * and calls the corresponding updaters methods
  *
  * @see GameClientUpdater
- * @see it.polimi.ingsw.controller
+ * @see it.polimi.ingsw.updater
  */
 public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supplier<@Nullable SocketGameClientUpdater> {
 

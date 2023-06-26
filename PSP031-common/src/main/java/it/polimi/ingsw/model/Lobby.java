@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/** Modifiable implementation of {@link LobbyView} */
 public class Lobby implements LobbyView {
 
     private final Property<@Nullable Integer> requiredPlayers;

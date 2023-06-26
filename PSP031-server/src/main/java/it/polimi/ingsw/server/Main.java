@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+/** Server main class */
 public class Main {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
