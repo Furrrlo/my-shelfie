@@ -39,7 +39,8 @@ public interface ServerLobbyView {
      * @return true if the nick is of the player which created the lobby
      */
     default boolean isLobbyCreator(String nick) {
-        return joinedPlayers().get().get(0).getNick().equals(nick);
+        var joinedPlayers = joinedPlayers().get();
+        return !joinedPlayers.isEmpty() && joinedPlayers.get(0).getNick().equals(nick);
     }
 
     /**
