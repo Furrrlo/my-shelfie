@@ -4,6 +4,7 @@ import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.client.network.rmi.RmiClientNetManager;
 import it.polimi.ingsw.client.network.socket.SocketClientNetManager;
 import it.polimi.ingsw.controller.NickNotValidException;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -91,9 +91,11 @@ class JfxMainMenuSceneRoot extends Pane {
     private final TextField usernameTextField;
     private final MainMenuPane mainMenuPane;
     private final ChoiceBox<String> connectionTypeChoice;
-    private final PlayButton playButton;
-    private final QuitGameButton quitGameButton;
+    private final Label errorLabel;
+    private final MenuButton playButton;
+    private final MenuButton quitGameButton;
     private final ImageView gameLogo;
+    private final BorderPane gameBoxPane;
     private final RulesPane rulesPane;
 
     public JfxMainMenuSceneRoot(FxResourcesLoader resources, ExecutorService threadPool, Stage stage) {
@@ -113,12 +115,13 @@ class JfxMainMenuSceneRoot extends Pane {
         ipTextField = new TextField();
         portTextField = new TextField();
         usernameTextField = new TextField();
-        playButton = new PlayButton("Connect");
-        quitGameButton = new QuitGameButton();
+        errorLabel = new Label("");
+        playButton = new MenuButton("Connect", Color.LIGHTSEAGREEN);
+        quitGameButton = new MenuButton("Quit", Color.INDIANRED);
         rulesPane = new RulesPane();
 
         connectionTypeChoice = new MenuChoiceBox<>();
-        connectionTypeChoice.getItems().addAll("RMI", "Socket");
+        connectionTypeChoice.getItems().addAll("Socket", "RMI");
         connectionTypeChoice.setOnAction(e -> portTextField
                 .setPromptText(String.valueOf(switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {
                     case "rmi" -> Registry.REGISTRY_PORT;
@@ -128,13 +131,21 @@ class JfxMainMenuSceneRoot extends Pane {
         connectionTypeChoice.getSelectionModel().selectFirst();
         mainMenuPane = new MainMenuPane();
 
-        //create tile image
-        Image titleImage = new Image(FxResources.getResourceAsStream("assets/Publisher material/Title 2000x618px.png"), 400,
-                124, true, false);
-        ImageView titleView = new ImageView(titleImage);
+        gameBoxPane = new BorderPane();
+        gameBoxPane.backgroundProperty().bind(gameBoxPane.widthProperty().map(width -> new Background(new BackgroundFill(
+                Color.LIGHTGRAY,
+                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
+                new Insets(0)))));
+        gameBoxPane.setPadding(new Insets(10));
+
+        var gameBox = new ImageView(resources.loadImage("assets/Publisher material/Box 280x280px.png"));
+        gameBox.setPreserveRatio(true);
+        gameBox.fitWidthProperty().bind(gameBoxPane.widthProperty().map(w -> w.doubleValue() - 20));
+        gameBox.fitHeightProperty().bind(gameBoxPane.heightProperty().map(w -> w.doubleValue() - 20));
+        gameBoxPane.setCenter(gameBox);
+        getChildren().add(gameBoxPane);
 
         // ip validation
-        Label errorLabel = new Label("");
         BooleanProperty isConnecting = new SimpleBooleanProperty(this, "isConnecting", false);
         EventHandler<ActionEvent> eventIpCHeck = e -> {
             String host = ipTextField.getText().isBlank()
@@ -146,6 +157,7 @@ class JfxMainMenuSceneRoot extends Pane {
             String username = usernameTextField.getText();
             String networkProtocol = connectionTypeChoice.getValue();
 
+            errorLabel.setText("");
             isConnecting.set(true);
             threadPool.execute(() -> {
                 try {
@@ -162,7 +174,7 @@ class JfxMainMenuSceneRoot extends Pane {
                     Platform.runLater(() -> errorLabel.setText(ex.getMessage()));
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to connect", ex);
-                    Platform.runLater(() -> errorLabel.setText("Failed to connect to the server. Check ip and port"));
+                    Platform.runLater(() -> errorLabel.setText("Failed to connect to the server, check IP and port"));
                 } finally {
                     Platform.runLater(() -> isConnecting.set(false));
                 }
@@ -175,23 +187,7 @@ class JfxMainMenuSceneRoot extends Pane {
                 .or(BooleanExpression.booleanExpression(usernameTextField.textProperty().map(String::isBlank))));
         quitGameButton.setOnMouseClicked(event -> getScene().getWindow().hide());
 
-        VBox menuVbox = new VBox();
-        menuVbox.getChildren().addAll(mainMenuPane, playButton, errorLabel);
-
-        menuVbox.setPadding(new Insets(10));
-        menuVbox.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
-                Color.LIGHTGRAY,
-                new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
-                new Insets(0)))));
-
-        //vbox
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(10, 10, 10, 10));
-        vbox.getChildren().addAll(titleView, menuVbox);
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setSpacing(15);
-
-        getChildren().addAll(mainMenuPane, playButton, quitGameButton, rulesPane);
+        getChildren().addAll(mainMenuPane, rulesPane);
     }
 
     @Override
@@ -205,30 +201,21 @@ class JfxMainMenuSceneRoot extends Pane {
 
         this.mainMenuPane.resizeRelocate(
                 border,
-                2 * border + 150 * scale,
-                320 * scale,
-                130 * scale);
-
-        this.playButton.resizeRelocate(
-                border,
-                getHeight() - border - 200 * scale,
-                220 * scale,
-                60 * scale);
-        Fonts.changeSize(this.playButton.fontProperty(), 30 * scale);
-
-        this.quitGameButton.resizeRelocate(
-                border,
-                getHeight() - border - 100 * scale,
-                220 * scale,
-                60 * scale);
-        Fonts.changeSize(this.quitGameButton.fontProperty(), 30 * scale);
+                2 * border + 110 * scale,
+                350 * scale,
+                this.mainMenuPane.prefHeight(350 * scale));
 
         this.rulesPane.resizeRelocate(
                 2 * border + 350 * scale,
                 2 * border + 110 * scale,
                 getWidth() - 3 * border - 350 * scale,
-                getHeight() - 3 * border - 100 * scale);
+                getHeight() - 3 * border - 110 * scale);
 
+        this.gameBoxPane.resizeRelocate(
+                border,
+                this.mainMenuPane.getLayoutY() + this.mainMenuPane.getHeight() + border,
+                this.mainMenuPane.getWidth(),
+                getHeight() - this.mainMenuPane.getLayoutY() - this.mainMenuPane.getHeight() - 2 * border);
     }
 
     private class MainMenuPane extends GridPane {
@@ -240,6 +227,7 @@ class JfxMainMenuSceneRoot extends Pane {
                     new Insets(0)))));
             setPadding(new Insets(10));
             setHgap(10d);
+            setVgap(5d);
 
             Label connectionTypeLabel = new Label("Connection Type:");
             Label ipLabel = new Label("IP:");
@@ -263,8 +251,15 @@ class JfxMainMenuSceneRoot extends Pane {
             this.add(usernameLabel, 0, 3);
             usernameTextField.prefWidthProperty().bind(widthProperty());
             this.add(usernameTextField, 1, 3);
+            errorLabel.prefWidthProperty().bind(widthProperty());
+            errorLabel.setTextFill(Color.RED);
+            errorLabel.setAlignment(Pos.CENTER);
+            this.add(errorLabel, 0, 4, 2, 1);
+            quitGameButton.prefWidthProperty().bind(widthProperty());
+            this.add(quitGameButton, 0, 5);
+            playButton.prefWidthProperty().bind(widthProperty());
+            this.add(playButton, 1, 5);
             this.setAlignment(Pos.CENTER);
-
         }
     }
 
@@ -327,5 +322,25 @@ class JfxMainMenuSceneRoot extends Pane {
             getChildren().add(scrollPane);
         }
 
+    }
+
+    private static class MenuChoiceBox<T> extends InGameChoiceBox<T> {
+        public MenuChoiceBox() {
+            super(Color.LIGHTSEAGREEN);
+            backgroundRadiusProperty().bind(widthProperty()
+                    .map(w -> new CornerRadii(Math.min(10, 10 * (w.doubleValue() / 210d)))));
+            setBackgroundInsets(new Insets(0));
+            setStyle("-fx-font-weight: bold;");
+        }
+    }
+
+    private static class MenuButton extends InGameButton {
+        public MenuButton(String text, @Nullable Color bgColor) {
+            super(text, bgColor);
+
+            backgroundRadiusProperty().bind(widthProperty()
+                    .map(w -> new CornerRadii(Math.min(10, 10 * (w.doubleValue() / 210d)))));
+            setBackgroundInsets(new Insets(0));
+        }
     }
 }
