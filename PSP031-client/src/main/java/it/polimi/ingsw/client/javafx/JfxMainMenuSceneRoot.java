@@ -262,6 +262,18 @@ class JfxMainMenuSceneRoot extends Pane {
                 textFlow.getChildren().add(textNode);
             }
             scrollPane = new ScrollPane();
+
+            // Set scroll pane as transparent
+            scrollPane.setBackground(Background.fill(Color.TRANSPARENT));
+            Platform.runLater(() -> {
+                var viewPort = scrollPane.getChildrenUnmodifiable().stream()
+                        .filter(n -> n.getStyleClass().contains("viewport"))
+                        .findFirst()
+                        .orElse(null);
+                if (viewPort instanceof Region region)
+                    region.setBackground(Background.fill(Color.TRANSPARENT));
+            });
+
             scrollPane.setContent(textFlow);
             scrollPane.setFitToWidth(true);
             AnchorPane.setTopAnchor(scrollPane, 0d);
