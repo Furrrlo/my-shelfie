@@ -1,1 +1,1 @@
-javaw --enable-preview -jar client.jar
+java --enable-preview -jar client.jar --gui
