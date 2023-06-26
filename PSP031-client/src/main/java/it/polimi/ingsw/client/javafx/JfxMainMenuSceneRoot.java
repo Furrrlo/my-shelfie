@@ -20,7 +20,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -54,10 +53,13 @@ class JfxMainMenuSceneRoot extends Pane {
     private final RulesPane rulesPane;
 
     public JfxMainMenuSceneRoot(FxResourcesLoader resources, ExecutorService threadPool, Stage stage) {
-        //var mainPane = new CenteringFitPane();
-        //mainPane.getChildren().add(new MainMenuPane());
-        //Pattern ipPattern = Pattern
-        //                .compile(" (\\b25[0-5]|\\b2[0-4][0-9]|\\b[01]?[0-9][0-9]?)(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3} ");
+        setStyle(getStyle() + "-fx-font-family: \"Inter\";");
+        setBackground(new Background(new BackgroundImage(
+                resources.loadImage("assets/misc/sfondo parquet.jpg"),
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(100, 100, true, true, false, true))));
+
         gameLogo = new ImageView(resources.loadCroppedImage(
                 "assets/Publisher material/Title 2000x618px.png",
                 167, 77, 1667, 444));
@@ -82,56 +84,6 @@ class JfxMainMenuSceneRoot extends Pane {
         connectionTypeChoice.getSelectionModel().selectFirst();
         mainMenuPane = new MainMenuPane();
 
-        stage.setOnShown(e -> rulesPane.scrollPane.lookup(".viewport").setStyle("-fx-background-color: transparent;"));
-
-        // Create labels
-        /*
-         * Label connectionTypeLabel = new Label("Connection Type:");
-         * Label ipLabel = new Label("IP:");
-         * Label portLabel = new Label("Port:");
-         * Label usernameLabel = new Label("Username:");
-         * 
-         * // Create choice dialog for connection type
-         * ChoiceBox<String> connectionTypeChoice = new MenuChoiceBox<>();
-         * connectionTypeChoice.getItems().addAll("RMI", "Socket");
-         * 
-         * // Create text fields
-         * TextField ipTextField = new TextField();
-         * TextField portTextField = new TextField();
-         * TextField usernameTextField = new TextField();
-         * 
-         * // Set prompt values
-         * ipTextField.setPromptText("localhost");
-         * portTextField.setTextFormatter(new TextFormatter<>(
-         * c -> c.getControlNewText().matches("([1-9][0-9]*)?") ? c : null));
-         * connectionTypeChoice.setOnAction(e -> portTextField
-         * .setPromptText(String.valueOf(switch (connectionTypeChoice.getValue().toLowerCase(Locale.ROOT)) {
-         * case "rmi" -> Registry.REGISTRY_PORT;
-         * case "socket" -> SocketClientNetManager.DEFAULT_PORT;
-         * default -> throw new IllegalStateException("Unexpected value: " + connectionTypeChoice.getValue());
-         * })));
-         * connectionTypeChoice.getSelectionModel().selectFirst();
-         * 
-         * 
-         * 
-         * // Create grid pane for layout
-         * GridPane mainPane = new GridPane();
-         * mainPane.setHgap(10);
-         * mainPane.setVgap(10);
-         * mainPane.setPadding(new Insets(10));
-         * 
-         * // Add components to grid pane
-         * mainPane.add(connectionTypeLabel, 0, 0);
-         * mainPane.add(connectionTypeChoice, 1, 0);
-         * mainPane.add(ipLabel, 0, 1);
-         * mainPane.add(ipTextField, 1, 1);
-         * mainPane.add(portLabel, 0, 2);
-         * mainPane.add(portTextField, 1, 2);
-         * mainPane.add(usernameLabel, 0, 3);
-         * mainPane.add(usernameTextField, 1, 3);
-         * mainPane.setAlignment(Pos.CENTER);
-         * 
-         */
         //create tile image
         Image titleImage = new Image(FxResources.getResourceAsStream("assets/Publisher material/Title 2000x618px.png"), 400,
                 124, true, false);
@@ -195,22 +147,7 @@ class JfxMainMenuSceneRoot extends Pane {
         vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(15);
 
-        /*
-         * AnchorPane.setTopAnchor(vbox, 1d);
-         * AnchorPane.setBottomAnchor(vbox, 10d);
-         * AnchorPane.setLeftAnchor(vbox, 10d);
-         * AnchorPane.setRightAnchor(vbox, 10d);
-         */
         getChildren().addAll(mainMenuPane, playButton, quitGameButton, rulesPane);
-        //prefWidthProperty().bind(scene.widthProperty());
-        //prefHeightProperty().bind(scene.heightProperty());
-
-        setStyle(getStyle() + "-fx-font-family: \"Inter\";");
-        setBackground(new Background(new BackgroundImage(
-                resources.loadImage("assets/misc/sfondo parquet.jpg"),
-                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.DEFAULT,
-                new BackgroundSize(100, 100, true, true, false, true))));
     }
 
     @Override
@@ -287,7 +224,7 @@ class JfxMainMenuSceneRoot extends Pane {
         }
     }
 
-    private static class RulesPane extends Pane {
+    private static class RulesPane extends AnchorPane {
         public ScrollPane scrollPane;
 
         public RulesPane() {
@@ -295,8 +232,6 @@ class JfxMainMenuSceneRoot extends Pane {
                     Color.LIGHTGRAY,
                     new CornerRadii(Math.min(10, 10 * (width.doubleValue() / 210d))),
                     new Insets(0)))));
-
-            //textArea.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
 
             String text = """
                     **Rules:**
@@ -316,42 +251,24 @@ class JfxMainMenuSceneRoot extends Pane {
 
                     A game of strategy and glance, different every time thanks to the variety of common and personal goals. The beautiful images of the item tiles will really give you the feeling of tidying up your precious shelf.""";
 
-            TextArea textArea = new TextArea();
-            textArea.setEditable(false);
-            textArea.setWrapText(true);
-            textArea.setBackground(Background.fill(Color.TRANSPARENT));
-            textArea.setText(text);
-            setStyle(getStyle() + "-fx-font-family: \"Inter\";");
-            textArea.prefWidthProperty().bind(this.widthProperty());
-            textArea.prefHeightProperty().bind(this.heightProperty());
-
-            //prefWidthProperty().bind(this.widthProperty());
-            //prefHeightProperty().bind(this.heightProperty());
             setPadding(new Insets(15));
-            //setStyle("-fx-padding: 15px;");
             TextFlow textFlow = new TextFlow();
             String[] parts = text.split("\\*\\*"); // Split the text at '**' to identify the important parts
             for (int i = 0; i < parts.length; i++) {
                 Text textNode = new Text(parts[i]);
-                if (i % 2 != 0) { // Apply bold formatting to the important parts
-                    textNode.setFont(Font.font("Inter", FontWeight.BOLD, 14));
-                } else {
-                    textNode.setFont(Font.font("Inter", 14));
-                }
+                Fonts.changeSize(textNode.fontProperty(), 14);
+                if (i % 2 != 0) // Apply bold formatting to the important parts
+                    Fonts.changeWeight(textNode.fontProperty(), FontWeight.BOLD);
                 textFlow.getChildren().add(textNode);
             }
             scrollPane = new ScrollPane();
-            //lookup(".viewport").setStyle("-fx-background-color: red;");
-            scrollPane.prefWidthProperty().bind(this.widthProperty());
-            scrollPane.prefHeightProperty().bind(this.heightProperty());
-            // getStylesheets().add(
-            //        getClass().getResource("style.css").toString());
-
-            setStyle("-fx-background-color: transparent;");
             scrollPane.setContent(textFlow);
             scrollPane.setFitToWidth(true);
+            AnchorPane.setTopAnchor(scrollPane, 0d);
+            AnchorPane.setBottomAnchor(scrollPane, 0d);
+            AnchorPane.setLeftAnchor(scrollPane, 0d);
+            AnchorPane.setRightAnchor(scrollPane, 0d);
             getChildren().add(scrollPane);
-
         }
 
     }
