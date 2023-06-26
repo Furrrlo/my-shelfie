@@ -99,7 +99,9 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
                 UnicastRemoteObjects.createTrackingExporter(underlyingUnicastRemoteObjects));
         connections.add(connection);
         try {
-            controller.connectPlayer(nick, new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer));
+            var heartbeatHandler = new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer);
+            connection.heartbeatHandler = heartbeatHandler;
+            controller.connectPlayer(nick, heartbeatHandler);
             connection.verifyNick();
             return connection.unicastRemoteObjects().export(new ConnectedControllerImpl(connection), 0);
         } catch (NickNotValidException e) {
@@ -178,6 +180,7 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
 
         private final UnicastRemoteObjects.TrackingExporter unicastRemoteObjects;
         private final UnicastRemoteObjects.TrackingExporter gameUnicastRemoteObjects;
+        volatile RmiHeartbeatHandler.@Nullable Adapter heartbeatHandler;
 
         public PlayerConnection(ServerController controller, String nick,
                                 UnicastRemoteObjects.TrackingExporter unicastRemoteObjects,
@@ -214,6 +217,9 @@ public class RmiConnectionServerController extends UnicastRemoteObject implement
         public void doClose() {
             gameUnicastRemoteObjects.unexportAll(true);
             unicastRemoteObjects.unexportAll(true);
+            RmiHeartbeatHandler.Adapter heartbeatHandler = this.heartbeatHandler;
+            if (heartbeatHandler != null)
+                heartbeatHandler.close();
         }
 
         @Override

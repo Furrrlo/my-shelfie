@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -29,6 +30,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
 
     protected final String nick;
     protected volatile boolean nickVerified;
+    protected AtomicBoolean playerDisconnected = new AtomicBoolean(false);
 
     public BaseServerConnection(ServerController controller, String nick) {
         this.controller = controller;
@@ -62,7 +64,7 @@ public abstract class BaseServerConnection implements PlayerObservableTracker, C
         } finally {
             // Make sure we only grab locks after we closed the connection, as if we do
             // it before it may lead to deadlocks
-            if (nickVerified)
+            if (nickVerified && !playerDisconnected.getAndSet(true))
                 callDisconnectPlayerHook();
         }
     }
