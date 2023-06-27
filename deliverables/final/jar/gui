@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd -- "$(dirname $0)" # Go to the current path
+java --enable-preview -jar client.jar --gui
