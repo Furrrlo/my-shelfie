@@ -54,6 +54,11 @@ abstract class PlayerShelfieComponent extends Pane {
         this.chair.setVisible(player.isStartingPlayer());
     }
 
+    @Override
+    protected void layoutChildren() {
+        // By default, we don't do any layout
+    }
+
     public void setTilesLowOpacity() {
         this.shelfieComponent.setLowOpacity();
     }
