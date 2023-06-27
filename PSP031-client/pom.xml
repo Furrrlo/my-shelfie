@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
-            <classifier>mac</classifier>
+            <classifier>mac-aarch64</classifier>
             <version>${javafx.version}</version>
         </dependency>
         <dependency>
