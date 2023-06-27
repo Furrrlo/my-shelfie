@@ -11,9 +11,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.concurrent.ExecutorService;
@@ -22,9 +22,6 @@ class DisconnectedDialog extends DialogVbox {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DisconnectedDialog.class);
 
-    private final Button cancel;
-    private final Button quitGame;
-
     private final Label errorLabel;
 
     public DisconnectedDialog(FxResourcesLoader resources,
@@ -32,21 +29,28 @@ class DisconnectedDialog extends DialogVbox {
                               Stage stage,
                               ClientNetManager closedNetManager) {
         super("Connection Lost",
-                Color.LIGHTGRAY, Color.INDIANRED,
+                Color.LIGHTGRAY, Color.INDIANRED, Color.INDIANRED,
                 "The connection with the server was lost.\nIf you reconnect " +
                         "you might be able to rejoin the previous game.");
 
-        this.errorLabel = new Label("");
+        HBox errorHbox = new HBox();
+        errorHbox.prefWidthProperty().bind(widthProperty());
+        errorHbox.setAlignment(Pos.CENTER);
+
+        errorLabel = new Label("");
         errorLabel.setTextFill(Color.INDIANRED);
+        errorHbox.getChildren().add(errorLabel);
+        this.getChildren().add(errorHbox);
 
         HBox buttonsHbox = new HBox();
-        buttonsHbox.setSpacing(15);
+        buttonsHbox.spacingProperty().bind(borderSize());
         buttonsHbox.prefWidthProperty().bind(widthProperty());
         buttonsHbox.setAlignment(Pos.CENTER_RIGHT);
 
         BooleanProperty isReConnecting = new SimpleBooleanProperty(this, "isReConnecting", false);
 
-        this.cancel = new DialogButton("Reconnect", Color.LIGHTSEAGREEN);
+        Button cancel = new DialogButton("Reconnect", Color.LIGHTSEAGREEN);
+        cancel.prefWidthProperty().bind(widthProperty());
         cancel.disableProperty().bind(isReConnecting);
         cancel.setOnMouseClicked(e -> {
             isReConnecting.set(true);
@@ -68,39 +72,24 @@ class DisconnectedDialog extends DialogVbox {
             });
         });
         buttonsHbox.getChildren().add(cancel);
+        HBox.setHgrow(cancel, Priority.SOMETIMES);
 
-        this.quitGame = new DialogButton("Quit", Color.INDIANRED);
+        Button quitGame = new DialogButton("Quit", Color.INDIANRED);
+        quitGame.prefWidthProperty().bind(widthProperty());
         // The stage has a onHidden handler which will handle the closing
         quitGame.setOnMouseClicked(event -> getScene().getWindow().hide());
 
-        this.getChildren().add(quitGame);
-        this.getChildren().add(cancel);
-        this.getChildren().add(errorLabel);
+        buttonsHbox.getChildren().add(quitGame);
+        HBox.setHgrow(quitGame, Priority.SOMETIMES);
+
+        this.getChildren().add(buttonsHbox);
     }
 
     @Override
     protected void layoutChildren() {
-        super.layoutChildren();
         double scale = Math.min(getWidth() / 230d, getHeight() / 230d);
+        Fonts.changeSize(errorLabel.fontProperty(), 12 * scale);
 
-        double border = 5 * scale;
-        double width = getWidth() / 2 - 2 * border;
-        double text_height = 14 * scale;
-        double error_text_height = 12 * scale;
-        double button_height = 28 * scale;
-
-        Fonts.changeSize(cancel.fontProperty(), text_height);
-        Fonts.changeSize(quitGame.fontProperty(), text_height);
-        Fonts.changeSize(errorLabel.fontProperty(), error_text_height);
-        Fonts.changeWeight(quitGame.fontProperty(), FontWeight.BOLD);
-        Fonts.changeWeight(errorLabel.fontProperty(), FontWeight.BOLD);
-
-        this.setBorder(new Border(new BorderStroke(Color.INDIANRED,
-                BorderStrokeStyle.SOLID, new CornerRadii(Math.min(10, 10 * (getWidth() / 230d))), BorderWidths.DEFAULT)));
-
-        this.cancel.resizeRelocate(border, getHeight() - button_height - border, width, button_height);
-        this.quitGame.resizeRelocate(3 * border + width, getHeight() - button_height - border, getWidth() / 2 - 2 * border,
-                button_height);
-        this.errorLabel.resizeRelocate(2 * border, getHeight() - 4 * text_height, getWidth() - 4 * border, text_height);
+        super.layoutChildren();
     }
 }
