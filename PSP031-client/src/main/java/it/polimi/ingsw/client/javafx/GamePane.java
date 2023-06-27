@@ -536,11 +536,14 @@ class GamePane extends Pane {
         this.pickedTilesPane.resizeRelocate(370.0 * scale, 471.0 * scale, 460.0 * scale, 114.0 * scale);
         this.quitGameBtn.resizeRelocate(707 * scale, (470 + 8) * scale, 115 * scale, 46 * scale);
         this.newChatBtn.resizeRelocate(707 * scale, (470 + 48 + 8 + 5) * scale, 115 * scale, 46 * scale);
-        this.player1Shelfie.resizeRelocate(842.0 * scale, 0, 212 * scale, 194.0 * scale);
+
+        var othersShelfiesWidth = 212 * scale;
+        this.player1Shelfie.resizeRelocate(842.0 * scale, 0, othersShelfiesWidth, 194.0 * scale);
         if (player2Shelfie != null)
-            this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, 212 * scale, 194.0 * scale);
+            this.player2Shelfie.resizeRelocate(842.0 * scale, 196.0 * scale, othersShelfiesWidth, 194.0 * scale);
         if (player3Shelfie != null)
-            this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, 212 * scale, 194.0 * scale);
+            this.player3Shelfie.resizeRelocate(842.0 * scale, 392.0 * scale, othersShelfiesWidth, 194.0 * scale);
+
         this.notCurrentTurnMessage.resizeRelocate((370.0 + 115.0) * scale, 115.0 * scale, 230 * scale, 230.0 * scale);
         this.suspendedGameMessage.resizeRelocate((getWidth() - 230 * scale) / 2, (getHeight() - 230 * scale) / 2, 230 * scale,
                 230.0 * scale);
@@ -553,7 +556,7 @@ class GamePane extends Pane {
                 230.0 * scale);
 
         final var newMsgSize = 13 * scale;
-        final var chatPaneWidth = 200.0 * scale;
+        final var chatPaneWidth = othersShelfiesWidth + 6 * scale;
         this.chatPane.resizeRelocate(
                 getWidth() - chatPaneWidth + ChatComponent.INSET,
                 +ChatComponent.INSET,
