@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -100,6 +101,13 @@ class EndGamePane extends Pane {
 
         teamPicture.autosize();
         teamPicture.relocate(0, 0);
+
+        final double text_height = 32 * scale;
+
+        Fonts.changeSize(quit.fontProperty(), text_height);
+        Fonts.changeSize(newGame.fontProperty(), text_height);
+        Fonts.changeWeight(newGame.fontProperty(), FontWeight.BOLD);
+        Fonts.changeWeight(quit.fontProperty(), FontWeight.BOLD);
 
         rankings.resizeRelocate(200 * scale, 650 * scale, getWidth() - 400 * scale, getHeight() - 800 * scale);
         rankings.setPadding(new Insets(30 * scale, 50 * scale, 30 * scale, 50 * scale));
