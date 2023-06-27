@@ -1,6 +1,7 @@
 package it.polimi.ingsw.rmi;
 
 import it.polimi.ingsw.NetworkConstants;
+import it.polimi.ingsw.socket.InetAddresses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class RMITimeoutClientSocketFactory implements RMIClientSocketFactory, Se
         LOGGER.trace("Creating new socket for RMI. Remote IP {}:{}", host, port);
         Socket s = doCreateNonConnectedSocket();
         s.setTcpNoDelay(true);
-        s.connect(new InetSocketAddress(host, port), (int) CONNECT_TIMEOUT_MILLIS);
+        s.connect(new InetSocketAddress(InetAddresses.createNonDnsReversable(host), port), (int) CONNECT_TIMEOUT_MILLIS);
         return s;
     }
 

@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
 import java.util.*;
 import java.util.function.Consumer;
@@ -73,13 +72,11 @@ class TuiPrompts {
     }
 
     private static Prompt promptSocketAddress(Prompt.Factory promptFactory) {
-        return promptAddress(promptFactory, SocketClientNetManager.DEFAULT_PORT,
-                (host, port, nick) -> SocketClientNetManager.connect(new InetSocketAddress(host, port), nick));
+        return promptAddress(promptFactory, SocketClientNetManager.DEFAULT_PORT, SocketClientNetManager::connect);
     }
 
     private static Prompt promptRmiAddress(Prompt.Factory promptFactory) {
-        return promptAddress(promptFactory, Registry.REGISTRY_PORT,
-                (host, port, nick) -> RmiClientNetManager.connect(host, port, nick));
+        return promptAddress(promptFactory, Registry.REGISTRY_PORT, RmiClientNetManager::connect);
     }
 
     private static Prompt promptAddress(Prompt.Factory promptFactory,

@@ -5,6 +5,7 @@ import it.polimi.ingsw.NetworkConstants;
 import it.polimi.ingsw.client.network.ClientNetManager;
 import it.polimi.ingsw.controller.NickNotValidException;
 import it.polimi.ingsw.model.Lobby;
+import it.polimi.ingsw.socket.InetAddresses;
 import it.polimi.ingsw.socket.packets.*;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -38,10 +39,10 @@ public class SocketClientNetManager implements ClientNetManager {
     private volatile @Nullable Future<?> updaterTask;
     private volatile @Nullable Lobby lobby;
 
-    public static ClientNetManager connect(InetSocketAddress serverAddress, String nick)
+    public static ClientNetManager connect(String host, int port, String nick)
             throws IOException, NickNotValidException {
         return connect(
-                serverAddress,
+                new InetSocketAddress(InetAddresses.createNonDnsReversable(host), port),
                 TimeUnit.MILLISECONDS.convert(NetworkConstants.READ_TIMEOUT), TimeUnit.MILLISECONDS,
                 TimeUnit.MILLISECONDS.convert(NetworkConstants.RESPONSE_TIMEOUT), TimeUnit.MILLISECONDS,
                 nick);
@@ -175,7 +176,7 @@ public class SocketClientNetManager implements ClientNetManager {
 
     @Override
     public String getHost() {
-        return serverAddress.getHostName();
+        return serverAddress.getHostString();
     }
 
     @Override

@@ -27,7 +27,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.rmi.registry.Registry;
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -167,7 +166,7 @@ class JfxMainMenuSceneRoot extends Pane {
                             stage,
                             () -> switch (networkProtocol.toLowerCase(Locale.ROOT)) {
                                 case "rmi" -> RmiClientNetManager.connect(host, port, username);
-                                case "socket" -> SocketClientNetManager.connect(new InetSocketAddress(host, port), username);
+                                case "socket" -> SocketClientNetManager.connect(host, port, username);
                                 default -> throw new IllegalStateException("Unexpected value: " + networkProtocol);
                             });
                 } catch (NickNotValidException ex) {
