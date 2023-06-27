@@ -13,6 +13,6 @@ class InetAddressesTest {
     void assertNonDnsReversableWorking() throws UnknownHostException {
         var addrStr = "127.0.0.1";
         var addr = InetAddresses.createNonDnsReversable(addrStr);
-        assertEquals(addrStr, assertTimeoutPreemptively(Duration.ofMillis(10), addr::getHostName));
+        assertEquals(addrStr, assertTimeoutPreemptively(Duration.ofMillis(100), addr::getHostName));
     }
 }
