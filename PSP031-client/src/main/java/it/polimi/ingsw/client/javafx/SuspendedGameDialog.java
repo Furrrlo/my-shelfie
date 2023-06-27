@@ -21,6 +21,8 @@ import javafx.util.Duration;
 class SuspendedGameDialog extends DialogVbox {
 
     private final Timeline timeline;
+    private final AnchorPane progressPane;
+    private final ProgressBar progress;
 
     public SuspendedGameDialog() {
         super("Player has disconnected",
@@ -29,8 +31,8 @@ class SuspendedGameDialog extends DialogVbox {
                         "If no one reconnects within " +
                         GameView.SUSPENDED_GAME_TIMEOUT.toSeconds() + " seconds, the game will end");
 
-        ProgressBar progress = new ProgressBar();
-        AnchorPane progressPane = new AnchorPane(progress);
+        this.progress = new ProgressBar();
+        this.progressPane = new AnchorPane();
 
         this.timeline = new Timeline(
                 new KeyFrame(Duration.ZERO, new KeyValue(progress.progressProperty(), 0)),
@@ -49,13 +51,28 @@ class SuspendedGameDialog extends DialogVbox {
                 timeline.stop();
         });
 
-        progress.prefWidthProperty().bind(widthProperty());
-        progressPane.prefWidthProperty().bind(widthProperty());
         progressPane.backgroundProperty().bind(widthProperty().map(width -> new Background(new BackgroundFill(
                 Color.LIGHTSEAGREEN,
                 new CornerRadii(Math.min(5, 5 * (width.doubleValue() / 210d))),
-                new Insets(-5)))));
+                new Insets(0)))));
+
         this.getChildren().add(progressPane);
+        this.getChildren().add(progress);
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        double scale = Math.min(getWidth() / 230d, getHeight() / 230d);
+
+        double border = 5 * scale;
+        double width = getWidth() - 2 * border;
+        double button_height = 28 * scale;
+
+        this.progressPane.resizeRelocate(border, getHeight() - button_height - border, width, button_height);
+        this.progress.resizeRelocate(2 * border, getHeight() - button_height, width - 2 * border,
+                button_height - 2 * border);
+
     }
 
     public void play() {
