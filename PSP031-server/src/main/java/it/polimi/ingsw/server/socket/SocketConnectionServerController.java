@@ -205,7 +205,7 @@ public class SocketConnectionServerController implements Closeable {
                         return socketController;
                     },
                     (serverPlayer, game) -> {
-                        var socketController = new SocketServerGameController(socketManager, serverPlayer, game);
+                        var socketController = new SocketServerGameController(threadPool, socketManager, serverPlayer, game);
                         connection.gameControllerTask.set(threadPool.submit(ThreadPools.giveNameToTask(
                                 n -> n + "[" + nick + ":gameController]",
                                 () -> {
