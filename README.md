@@ -52,7 +52,7 @@ java --enable-preview -jar client.jar
 and selecting the preferred mode.
 
 The GUI can also be run by double-clicking the `gui-console.bat`/`gui-noconsole.vbs`
-on Windows or `gui.sh` on *nix.
+on Windows or `gui.sh` on *nix (the script needs to be made executable).
 
 ## Coverage
 
