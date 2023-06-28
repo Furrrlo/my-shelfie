@@ -37,10 +37,14 @@ As such, we have chosen to export the jar with support for the three main OSes w
 so the GUI jar can only be run on Windows amd64, MacOS aarch64 and Linux amd64.
 Additional platforms can be supported by re-compiling the jar with whatever JFX natives you need.
 
+If the server has multiple network adapters (e.g. virtualbox adapter),
+rmi [may export objects to the wrong interface](https://bugs.openjdk.org/browse/JDK-8042232).
+To work around this, run JVM with the parameter <code>-Djava.rmi.server.hostname=\<server address\></code>
+
 The server needs to be run from terminal using the following command:
 
 ```shell
-java --enable-preview -jar server.jar
+java --enable-preview -Djava.rmi.server.hostname=\<server address\> -jar server.jar
 ```
 
 Both the GUI and TUI clients can be run from both the terminal by executing:
@@ -52,7 +56,7 @@ java --enable-preview -jar client.jar
 and selecting the preferred mode.
 
 The GUI can also be run by double-clicking the `gui-console.bat`/`gui-noconsole.vbs`
-on Windows or `gui.sh` on *nix (the script needs to be made executable).
+on Windows or `gui` on *nix (the script needs to be made executable).
 
 ## Coverage
 
