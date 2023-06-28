@@ -44,7 +44,7 @@ To work around this, run JVM with the parameter <code>-Djava.rmi.server.hostname
 The server needs to be run from terminal using the following command:
 
 ```shell
-java --enable-preview -Djava.rmi.server.hostname=\<server address\> -jar server.jar
+java --enable-preview -Djava.rmi.server.hostname=<server address> -jar server.jar
 ```
 
 Both the GUI and TUI clients can be run from both the terminal by executing:
