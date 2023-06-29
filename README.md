@@ -60,12 +60,18 @@ on Windows or `gui` on *nix (the script needs to be made executable).
 
 ## Coverage
 
-|            |                                                                    Instructions                                                                    |                                                                          Branches                                                                           |
-|------------|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| Model      |   [![coverage](../badges/jacoco-model.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)    |   [![branch coverage](../badges/branches-model.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)    |
-| Controller | [![coverage](../badges/jacoco-controller.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml) | [![branch coverage](../badges/branches-controller.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml) |
-| Network    |  [![coverage](../badges/jacoco-network.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)   |  [![branch coverage](../badges/branches-network.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)   |
-| Overall    |  [![coverage](../badges/jacoco-overall.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)   |  [![branch coverage](../badges/branches-overall.svg)](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/actions/workflows/test.yml)   |
+You can see the coverage reports by clicking on the badges:
+
+|            |                                                                    Instructions                                                                     |                                                                           Branches                                                                           |
+|------------|:---------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| Model      |      [![coverage](../badges/jacoco-model.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-model/)      |      [![branch coverage](../badges/branches-model.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-model/)      |
+| Controller | [![coverage](../badges/jacoco-controller.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-controller/) | [![branch coverage](../badges/branches-controller.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-controller/) |
+| Network    |    [![coverage](../badges/jacoco-network.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-network/)    |    [![branch coverage](../badges/branches-network.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-network/)    |
+| Overall    |        [![coverage](../badges/jacoco-overall.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate/)        |        [![branch coverage](../badges/branches-overall.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate/)        |
+
+## Javadocs
+
+You can find javadocs [here](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/javadocs/)
 
 # Development
 
