@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiGameServerController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.rmi</a> &gt; <span class="el_source">RmiGameServerController.java</span></div><h1>RmiGameServerController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.rmi;
+
+import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.model.BoardCoord;
+import it.polimi.ingsw.rmi.RmiGameController;
+import it.polimi.ingsw.server.controller.GameServerController;
+import it.polimi.ingsw.server.model.ServerPlayer;
+
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.function.Consumer;
+
+/**
+ * RMI remotable object which is used to implement {@link GameController}.
+ * &lt;p&gt;
+ * This object is per-player, meaning that a new one will be created and exported
+ * for each player. An object is then in charge of reading RMI {@link GameController}
+ * requests from its assigned player and relaying them to the protocol-agnostic
+ * {@link GameServerController}.
+ *
+ * @see RmiGameController
+ */
+public class RmiGameServerController implements RmiGameController {
+
+    private final ServerPlayer player;
+    private final GameServerController controller;
+    private final Consumer&lt;Throwable&gt; disconnectHandler;
+
+    public RmiGameServerController(ServerPlayer player, GameServerController controller,
+<span class="fc" id="L30">                                   Consumer&lt;Throwable&gt; disconnectHandler) {</span>
+<span class="fc" id="L31">        this.player = player;</span>
+<span class="fc" id="L32">        this.controller = controller;</span>
+<span class="fc" id="L33">        this.disconnectHandler = disconnectHandler;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    public void makeMove(List&lt;BoardCoord&gt; selected, int shelfCol) throws RemoteException {
+        try {
+<span class="fc" id="L39">            controller.makeMove(player, selected, shelfCol);</span>
+<span class="nc" id="L40">        } catch (Throwable t) {</span>
+<span class="nc" id="L41">            disconnectHandler.accept(t);</span>
+<span class="fc" id="L42">        }</span>
+<span class="fc" id="L43">    }</span>
+
+    @Override
+    public void sendMessage(String message, String nickReceivingPlayer) throws RemoteException {
+        try {
+<span class="fc" id="L48">            controller.sendMessage(player.getNick(), message, nickReceivingPlayer);</span>
+<span class="nc" id="L49">        } catch (Throwable t) {</span>
+<span class="nc" id="L50">            disconnectHandler.accept(t);</span>
+<span class="fc" id="L51">        }</span>
+<span class="fc" id="L52">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

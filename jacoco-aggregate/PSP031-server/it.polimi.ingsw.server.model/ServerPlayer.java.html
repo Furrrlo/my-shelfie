@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ServerPlayer.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.model</a> &gt; <span class="el_source">ServerPlayer.java</span></div><h1>ServerPlayer.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.model;
+
+import it.polimi.ingsw.model.*;
+
+import java.util.Objects;
+import java.util.function.Function;
+
+/** Modifiable implementation of {@link ServerPlayerView} */
+public class ServerPlayer implements ServerPlayerView {
+
+    private final String nick;
+    private final Shelfie shelfie;
+    private final PersonalGoal personalGoal;
+    private final Property&lt;Boolean&gt; connected;
+    private final Provider&lt;Integer&gt; publicScore;
+    private final Provider&lt;Integer&gt; privateScore;
+
+    /**
+     * @implNote requires a scoreProviderFactory so that it can resolve a circular dependency
+     *           between player and the provider impl, that most likely needs the player instance
+     *           to calculate the score.
+     */
+    public ServerPlayer(String nick,
+                        PersonalGoal personalGoal,
+                        Function&lt;ServerPlayer, Provider&lt;Integer&gt;&gt; publicScoreProviderFactory,
+<span class="fc" id="L26">                        Function&lt;ServerPlayer, Provider&lt;Integer&gt;&gt; privateScoreProviderFactory) {</span>
+<span class="fc" id="L27">        this.nick = nick;</span>
+<span class="fc" id="L28">        this.personalGoal = personalGoal;</span>
+<span class="fc" id="L29">        this.shelfie = new Shelfie();</span>
+<span class="fc" id="L30">        this.connected = new SerializableProperty&lt;&gt;(true);</span>
+<span class="fc" id="L31">        this.publicScore = publicScoreProviderFactory.apply(this);</span>
+<span class="fc" id="L32">        this.privateScore = privateScoreProviderFactory.apply(this);</span>
+<span class="fc" id="L33">    }</span>
+
+    @Override
+    public String getNick() {
+<span class="fc" id="L37">        return nick;</span>
+    }
+
+    @Override
+    public Shelfie getShelfie() {
+<span class="fc" id="L42">        return shelfie;</span>
+    }
+
+    @Override
+    public PersonalGoal getPersonalGoal() {
+<span class="fc" id="L47">        return personalGoal;</span>
+    }
+
+    @Override
+    public Property&lt;Boolean&gt; connected() {
+<span class="fc" id="L52">        return connected;</span>
+    }
+
+    @Override
+    public Provider&lt;Integer&gt; publicScore() {
+<span class="fc" id="L57">        return publicScore;</span>
+    }
+
+    @Override
+    public Provider&lt;Integer&gt; privateScore() {
+<span class="fc" id="L62">        return privateScore;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L68">            return true;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (!(o instanceof ServerPlayer that))</span>
+<span class="fc" id="L70">            return false;</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        return nick.equals(that.nick) &amp;&amp;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                shelfie.equals(that.shelfie) &amp;&amp;</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">                personalGoal.equals(that.personalGoal) &amp;&amp;</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">                connected.get().equals(that.connected.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">                publicScore.get().equals(that.publicScore.get()) &amp;&amp;</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">                privateScore.get().equals(that.privateScore.get());</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L81">        return Objects.hash(nick, shelfie, personalGoal, connected.get(), publicScore.get(), privateScore.get());</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L86">        return &quot;ServerPlayer{&quot; +</span>
+                &quot;nick='&quot; + nick + '\'' +
+                &quot;, shelfie=&quot; + shelfie +
+                &quot;, personalGoal=&quot; + personalGoal +
+                &quot;, connected=&quot; + connected +
+                &quot;, publicScore=&quot; + publicScore +
+                &quot;, privateScore=&quot; + privateScore +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

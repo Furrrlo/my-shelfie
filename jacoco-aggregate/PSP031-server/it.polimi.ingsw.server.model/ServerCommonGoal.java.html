@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ServerCommonGoal.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.model</a> &gt; <span class="el_source">ServerCommonGoal.java</span></div><h1>ServerCommonGoal.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.model;
+
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.SerializableProperty;
+import it.polimi.ingsw.model.Type;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.List;
+import java.util.Objects;
+
+/** Modifiable implementation of {@link ServerCommonGoalView} */
+public class ServerCommonGoal implements ServerCommonGoalView {
+
+    private final Type type;
+
+    private final Property&lt;@Unmodifiable List&lt;ServerPlayer&gt;&gt; achieved;
+
+<span class="fc" id="L18">    public ServerCommonGoal(Type type) {</span>
+<span class="fc" id="L19">        this.type = type;</span>
+<span class="fc" id="L20">        this.achieved = new SerializableProperty&lt;&gt;(List.of());</span>
+<span class="fc" id="L21">    }</span>
+
+    @Override
+    public Type getType() {
+<span class="fc" id="L25">        return type;</span>
+    }
+
+    @Override
+    public Property&lt;@Unmodifiable List&lt;ServerPlayer&gt;&gt; achieved() {
+<span class="fc" id="L30">        return achieved;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L36">            return true;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (!(o instanceof ServerCommonGoal that))</span>
+<span class="fc" id="L38">            return false;</span>
+<span class="fc bfc" id="L39" title="All 4 branches covered.">        return type == that.type &amp;&amp; achieved.get().equals(that.achieved.get());</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L44">        return Objects.hash(type, achieved.get());</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L49">        return &quot;ServerCommonGoal{&quot; +</span>
+                &quot;type=&quot; + type +
+                &quot;, achieved=&quot; + achieved +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

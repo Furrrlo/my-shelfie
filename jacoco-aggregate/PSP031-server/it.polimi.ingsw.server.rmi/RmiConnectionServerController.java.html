@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiConnectionServerController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.rmi</a> &gt; <span class="el_source">RmiConnectionServerController.java</span></div><h1>RmiConnectionServerController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.rmi;
+
+import it.polimi.ingsw.controller.NickNotValidException;
+import it.polimi.ingsw.rmi.*;
+import it.polimi.ingsw.server.controller.BaseServerConnection;
+import it.polimi.ingsw.server.controller.ServerController;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.ServerNotActiveException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * RMI remotable service implementation which clients can use to establish a connection with the server.
+ * &lt;p&gt;
+ * This acts as the entry-point for networking for all clients that want to connect to the server using RMI.
+ * Once a connection is established, this will delegate most of the job to the protocol-agnostic
+ * {@link ServerController}, which will determine whether the player can connect.
+ *
+ * @see RmiConnectionController
+ */
+public class RmiConnectionServerController extends UnicastRemoteObject implements RmiConnectionController, Closeable {
+
+<span class="fc" id="L36">    private static final Logger LOGGER = LoggerFactory.getLogger(RmiConnectionServerController.class);</span>
+
+    private final ServerController controller;
+    private final Registry registry;
+    private final String remoteName;
+    private final UnicastRemoteObjects.Exporter underlyingUnicastRemoteObjects;
+<span class="fc" id="L42">    private final Set&lt;PlayerConnection&gt; connections = ConcurrentHashMap.newKeySet();</span>
+
+    public static RmiConnectionServerController bind(ServerController controller) throws RemoteException {
+<span class="nc" id="L45">        return bind(LocateRegistry.createRegistry(Registry.REGISTRY_PORT), RmiConnectionController.REMOTE_NAME, controller);</span>
+    }
+
+    @VisibleForTesting
+    public static RmiConnectionServerController bind(Registry registry,
+                                                     String remoteName,
+                                                     ServerController controller)
+            throws RemoteException {
+<span class="fc" id="L53">        return bind(registry, remoteName, controller, new RMITimeoutClientSocketFactory(), null);</span>
+    }
+
+    @VisibleForTesting
+    public static RmiConnectionServerController bind(Registry registry,
+                                                     String remoteName,
+                                                     ServerController controller,
+                                                     @Nullable RMIClientSocketFactory csf,
+                                                     @Nullable RMIServerSocketFactory ssf)
+            throws RemoteException {
+        RmiConnectionServerController rmiController;
+<span class="fc" id="L64">        registry.rebind(remoteName,</span>
+                rmiController = new RmiConnectionServerController(0, csf, ssf, controller, registry, remoteName));
+<span class="fc" id="L66">        return rmiController;</span>
+    }
+
+    protected RmiConnectionServerController(int port,
+                                            @Nullable RMIClientSocketFactory csf,
+                                            @Nullable RMIServerSocketFactory ssf,
+                                            ServerController controller,
+                                            Registry registry,
+                                            String remoteName)
+            throws RemoteException {
+<span class="fc" id="L76">        super(port, csf, ssf);</span>
+<span class="fc" id="L77">        this.controller = controller;</span>
+<span class="fc" id="L78">        this.registry = registry;</span>
+<span class="fc" id="L79">        this.remoteName = remoteName;</span>
+<span class="fc" id="L80">        this.underlyingUnicastRemoteObjects = UnicastRemoteObjects.createExporter(csf, ssf);</span>
+<span class="fc" id="L81">    }</span>
+
+    @Override
+    public String getClientAddressHost() {
+        try {
+<span class="fc" id="L86">            return getClientHost();</span>
+<span class="nc" id="L87">        } catch (ServerNotActiveException e) {</span>
+<span class="nc" id="L88">            LOGGER.error(&quot;Somehow the server was not active&quot;, e);</span>
+<span class="nc" id="L89">            throw new IllegalStateException(&quot;Internal server error&quot;);</span>
+        }
+    }
+
+    @Override
+    public RmiConnectionController.ConnectedController doConnect(String nick, RmiHeartbeatHandler handler)
+            throws RemoteException, NickNotValidException {
+
+<span class="fc" id="L97">        var connection = new PlayerConnection(controller, nick,</span>
+<span class="fc" id="L98">                UnicastRemoteObjects.createTrackingExporter(underlyingUnicastRemoteObjects),</span>
+<span class="fc" id="L99">                UnicastRemoteObjects.createTrackingExporter(underlyingUnicastRemoteObjects));</span>
+<span class="fc" id="L100">        connections.add(connection);</span>
+        try {
+<span class="fc" id="L102">            var heartbeatHandler = new RmiHeartbeatHandler.Adapter(handler, connection::disconnectPlayer);</span>
+<span class="fc" id="L103">            connection.heartbeatHandler = heartbeatHandler;</span>
+<span class="fc" id="L104">            controller.connectPlayer(nick, heartbeatHandler);</span>
+<span class="fc" id="L105">            connection.verifyNick();</span>
+<span class="fc" id="L106">            return connection.unicastRemoteObjects().export(new ConnectedControllerImpl(connection), 0);</span>
+<span class="fc" id="L107">        } catch (NickNotValidException e) {</span>
+            try {
+<span class="fc" id="L109">                connection.close();</span>
+<span class="nc" id="L110">            } catch (Throwable t) {</span>
+<span class="nc" id="L111">                LOGGER.error(&quot;Failed to close player&quot;, t);</span>
+<span class="fc" id="L112">            }</span>
+<span class="fc" id="L113">            throw e;</span>
+<span class="nc" id="L114">        } catch (Throwable e) {</span>
+<span class="nc" id="L115">            connection.disconnectPlayer(e);</span>
+<span class="nc" id="L116">            throw new IllegalStateException(&quot;Internal server error&quot;);</span>
+        }
+    }
+
+    private class ConnectedControllerImpl implements RmiConnectionController.ConnectedController {
+
+        private final PlayerConnection connection;
+
+<span class="fc" id="L124">        public ConnectedControllerImpl(PlayerConnection connection) {</span>
+<span class="fc" id="L125">            this.connection = connection;</span>
+<span class="fc" id="L126">        }</span>
+
+        @Override
+        public void joinGame(RmiLobbyUpdaterFactory updaterFactory) throws RemoteException {
+<span class="fc" id="L130">            var nick = connection.getNick();</span>
+
+            try {
+<span class="fc" id="L133">                controller.joinGame(</span>
+                        nick,
+                        connection,
+<span class="fc" id="L136">                        connection::onGameOver,</span>
+                        new RmiLobbyUpdaterFactory.Adapter(updaterFactory),
+                        controller -&gt; {
+                            try {
+<span class="fc" id="L140">                                return new RmiLobbyController.Adapter(connection.gameUnicastRemoteObjects().export(</span>
+<span class="fc" id="L141">                                        new RmiLobbyServerController(nick, controller, connection::disconnectPlayer), 0));</span>
+<span class="nc" id="L142">                            } catch (RemoteException e) {</span>
+<span class="nc" id="L143">                                throw new IllegalStateException(&quot;Unexpectedly failed to export RmiGameServerController&quot;, e);</span>
+                            }
+                        },
+                        (player, game) -&gt; {
+                            try {
+<span class="fc" id="L148">                                return new RmiGameController.Adapter(connection.gameUnicastRemoteObjects()</span>
+<span class="fc" id="L149">                                        .export(new RmiGameServerController(player, game, connection::disconnectPlayer), 0));</span>
+<span class="nc" id="L150">                            } catch (RemoteException e) {</span>
+<span class="nc" id="L151">                                throw new IllegalStateException(&quot;Unexpectedly failed to export RmiGameServerController&quot;, e);</span>
+                            }
+                        });
+<span class="nc" id="L154">            } catch (Throwable e) {</span>
+<span class="nc" id="L155">                connection.disconnectPlayer(e);</span>
+<span class="fc" id="L156">            }</span>
+<span class="fc" id="L157">        }</span>
+    }
+
+    @Override
+    public void close() throws IOException {
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        for (PlayerConnection connection : connections) {</span>
+            try {
+<span class="fc" id="L164">                connection.close();</span>
+<span class="nc" id="L165">            } catch (Throwable t) {</span>
+<span class="nc" id="L166">                LOGGER.error(&quot;Failed to close player RMI objects&quot;, t);</span>
+<span class="fc" id="L167">            }</span>
+<span class="fc" id="L168">        }</span>
+
+        try {
+<span class="fc" id="L171">            registry.unbind(remoteName);</span>
+<span class="nc" id="L172">        } catch (NotBoundException e) {</span>
+<span class="nc" id="L173">            throw new IOException(&quot;Failed to unbind object from registry&quot;, e);</span>
+<span class="fc" id="L174">        }</span>
+
+<span class="fc" id="L176">        UnicastRemoteObject.unexportObject(this, true);</span>
+<span class="fc" id="L177">    }</span>
+
+    private class PlayerConnection extends BaseServerConnection {
+
+        private final UnicastRemoteObjects.TrackingExporter unicastRemoteObjects;
+        private final UnicastRemoteObjects.TrackingExporter gameUnicastRemoteObjects;
+        volatile RmiHeartbeatHandler.@Nullable Adapter heartbeatHandler;
+
+        public PlayerConnection(ServerController controller, String nick,
+                                UnicastRemoteObjects.TrackingExporter unicastRemoteObjects,
+<span class="fc" id="L187">                                UnicastRemoteObjects.TrackingExporter gameUnicastRemoteObjects) {</span>
+<span class="fc" id="L188">            super(controller, nick);</span>
+<span class="fc" id="L189">            this.unicastRemoteObjects = unicastRemoteObjects;</span>
+<span class="fc" id="L190">            this.gameUnicastRemoteObjects = gameUnicastRemoteObjects;</span>
+<span class="fc" id="L191">        }</span>
+
+        @Override
+        protected void verifyNick() {
+            // Override to be able to access it in the outer class
+<span class="fc" id="L196">            super.verifyNick();</span>
+<span class="fc" id="L197">        }</span>
+
+        public UnicastRemoteObjects.TrackingExporter unicastRemoteObjects() {
+<span class="fc" id="L200">            return unicastRemoteObjects;</span>
+        }
+
+        public UnicastRemoteObjects.TrackingExporter gameUnicastRemoteObjects() {
+<span class="fc" id="L204">            return gameUnicastRemoteObjects;</span>
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+<span class="fc" id="L210">                super.close();</span>
+            } finally {
+<span class="fc" id="L212">                connections.remove(this);</span>
+            }
+<span class="fc" id="L214">        }</span>
+
+        @Override
+        public void doClose() {
+<span class="fc" id="L218">            gameUnicastRemoteObjects.unexportAll(true);</span>
+<span class="fc" id="L219">            unicastRemoteObjects.unexportAll(true);</span>
+<span class="fc" id="L220">            RmiHeartbeatHandler.Adapter heartbeatHandler = this.heartbeatHandler;</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">            if (heartbeatHandler != null)</span>
+<span class="fc" id="L222">                heartbeatHandler.close();</span>
+<span class="fc" id="L223">        }</span>
+
+        @Override
+        protected void doClosePlayerGame() {
+<span class="fc" id="L227">            gameUnicastRemoteObjects.unexportAll(true);</span>
+<span class="fc" id="L228">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

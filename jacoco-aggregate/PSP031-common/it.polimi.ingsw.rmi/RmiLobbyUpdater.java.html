@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiLobbyUpdater.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.rmi</a> &gt; <span class="el_source">RmiLobbyUpdater.java</span></div><h1>RmiLobbyUpdater.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.rmi;
+
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.model.Game;
+import it.polimi.ingsw.updater.GameUpdater;
+import it.polimi.ingsw.updater.LobbyUpdater;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
+
+/**
+ * RMI remotable service which will be used to implement {@link LobbyUpdater}
+ *
+ * This re-declares the same methods, but with an RMI compatible signature, throwing
+ * {@link RemoteException} instead o {@link DisconnectedException}.
+ * &lt;p&gt;
+ * The {@link Adapter} is then used in order to be able to have an actual {@link LobbyUpdater}
+ * interface implementation
+ *
+ * @see LobbyUpdater
+ * @see Adapter
+ */
+public interface RmiLobbyUpdater extends Remote {
+
+    /** RMI redeclaration of {@link LobbyUpdater#updateRequiredPlayers(int)}, check that for docs and details */
+    void updateRequiredPlayers(int requiredPlayers) throws RemoteException;
+
+    /** RMI redeclaration of {@link LobbyUpdater#updateJoinedPlayers(List)}, check that for docs and details */
+    void updateJoinedPlayers(List&lt;String&gt; joinedPlayers) throws RemoteException;
+
+    /** RMI redeclaration of {@link LobbyUpdater#updatePlayerReady(String, boolean)}, check that for docs and details */
+    void updatePlayerReady(String nick, boolean ready) throws RemoteException;
+
+    /** RMI redeclaration of {@link LobbyUpdater#updateGame(GameAndController)}, check that for docs and details */
+    GameUpdater updateGame(GameAndController&lt;Game&gt; gameAndController) throws RemoteException;
+
+    class Adapter extends RmiAdapter implements LobbyUpdater {
+
+        private final RmiLobbyUpdater updater;
+
+<span class="fc" id="L43">        public Adapter(RmiLobbyUpdater updater) {</span>
+<span class="fc" id="L44">            this.updater = updater;</span>
+<span class="fc" id="L45">        }</span>
+
+        @Override
+        public void updateRequiredPlayers(int requiredPlayers) throws DisconnectedException {
+<span class="fc" id="L49">            adapt(() -&gt; updater.updateRequiredPlayers(requiredPlayers));</span>
+<span class="fc" id="L50">        }</span>
+
+        @Override
+        public void updateJoinedPlayers(List&lt;String&gt; joinedPlayers) throws DisconnectedException {
+<span class="fc" id="L54">            adapt(() -&gt; updater.updateJoinedPlayers(joinedPlayers));</span>
+<span class="fc" id="L55">        }</span>
+
+        @Override
+        public void updatePlayerReady(String nick, boolean ready) throws DisconnectedException {
+<span class="fc" id="L59">            adapt(() -&gt; updater.updatePlayerReady(nick, ready));</span>
+<span class="fc" id="L60">        }</span>
+
+        @Override
+        public GameUpdater updateGame(GameAndController&lt;Game&gt; gameAndController) throws DisconnectedException {
+<span class="fc" id="L64">            return adapt(() -&gt; updater.updateGame(gameAndController));</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Player.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">Player.java</span></div><h1>Player.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import java.util.Objects;
+import java.util.function.Function;
+
+/** Modifiable implementation of {@link PlayerView} */
+public class Player implements PlayerView {
+
+    private final String nick;
+    private final Shelfie shelfie;
+    private final boolean isStartingPlayer;
+    private final Property&lt;Boolean&gt; connected;
+    private final Provider&lt;Boolean&gt; isCurrentTurn;
+    private final Provider&lt;Boolean&gt; isFirstFinisher;
+    private final Property&lt;Integer&gt; score;
+
+    /** Default constructor for player */
+    public Player(String nick,
+                  Shelfie shelfie,
+                  boolean isStartingPlayer,
+                  boolean isConnected,
+                  Function&lt;Player, Provider&lt;Boolean&gt;&gt; isCurrentTurnFactory,
+                  Function&lt;Player, Provider&lt;Boolean&gt;&gt; isFirstFinisherFactory,
+<span class="fc" id="L24">                  int score) {</span>
+<span class="fc" id="L25">        this.nick = nick;</span>
+<span class="fc" id="L26">        this.shelfie = shelfie;</span>
+<span class="fc" id="L27">        this.isStartingPlayer = isStartingPlayer;</span>
+<span class="fc" id="L28">        this.connected = new SerializableProperty&lt;&gt;(isConnected);</span>
+<span class="fc" id="L29">        this.isCurrentTurn = isCurrentTurnFactory.apply(this);</span>
+<span class="fc" id="L30">        this.isFirstFinisher = isFirstFinisherFactory.apply(this);</span>
+<span class="fc" id="L31">        this.score = new SerializableProperty&lt;&gt;(score);</span>
+<span class="fc" id="L32">    }</span>
+
+    @Override
+    public String getNick() {
+<span class="fc" id="L36">        return nick;</span>
+    }
+
+    @Override
+    public Shelfie getShelfie() {
+<span class="fc" id="L41">        return shelfie;</span>
+    }
+
+    @Override
+    public boolean isStartingPlayer() {
+<span class="fc" id="L46">        return isStartingPlayer;</span>
+    }
+
+    @Override
+    public Property&lt;Boolean&gt; connected() {
+<span class="fc" id="L51">        return connected;</span>
+    }
+
+    @Override
+    public Provider&lt;Boolean&gt; isCurrentTurn() {
+<span class="fc" id="L56">        return isCurrentTurn;</span>
+    }
+
+    @Override
+    public Provider&lt;Boolean&gt; isFirstFinisher() {
+<span class="fc" id="L61">        return isFirstFinisher;</span>
+    }
+
+    @Override
+    public Property&lt;Integer&gt; score() {
+<span class="fc" id="L66">        return score;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L72">            return true;</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!(o instanceof Player player))</span>
+<span class="fc" id="L74">            return false;</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        return nick.equals(player.nick) &amp;&amp;</span>
+<span class="fc bfc" id="L76" title="All 4 branches covered.">                shelfie.equals(player.shelfie) &amp;&amp;</span>
+                isStartingPlayer == player.isStartingPlayer &amp;&amp;
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                connected.get().equals(player.connected.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                isCurrentTurn.get().equals(player.isCurrentTurn.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">                isFirstFinisher.get().equals(player.isFirstFinisher.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">                score.get().equals(player.score.get());</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L86">        return Objects.hash(nick, shelfie, isStartingPlayer, connected.get(), isCurrentTurn.get(), isFirstFinisher.get(),</span>
+<span class="fc" id="L87">                score.get());</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L92">        return &quot;Player{&quot; +</span>
+                &quot;nick='&quot; + nick + '\'' +
+                &quot;, shelfie=&quot; + shelfie +
+                &quot;, isStartingPlayer=&quot; + isStartingPlayer +
+                &quot;, connected=&quot; + connected +
+                &quot;, isCurrentTurn=&quot; + isCurrentTurn +
+                &quot;, isFirstFinisher=&quot; + isFirstFinisher +
+                &quot;, score=&quot; + score +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

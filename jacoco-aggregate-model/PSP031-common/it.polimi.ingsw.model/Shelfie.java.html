@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Shelfie.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">Shelfie.java</span></div><h1>Shelfie.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+/** Modifiable implementation of {@link ShelfieView} */
+public class Shelfie implements ShelfieView {
+
+    private final Property&lt;@Nullable Tile&gt;[][] shelfie;
+
+    /**
+     * Default constructor
+     */
+    @SuppressWarnings(&quot;unchecked&quot;) // Java doesn't support generic arrays creation
+<span class="fc" id="L22">    public Shelfie() {</span>
+<span class="fc" id="L23">        shelfie = new SerializableProperty[ROWS][COLUMNS];</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        for (int r = 0; r &lt; ROWS; r++) {</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            for (int c = 0; c &lt; COLUMNS; c++) {</span>
+<span class="fc" id="L26">                shelfie[r][c] = SerializableProperty.nullableProperty(null);</span>
+            }
+        }
+<span class="fc" id="L29">    }</span>
+
+    /** returns a shelfie from a matrix of Color passed as parameter */
+    @VisibleForTesting
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L34">    public Shelfie(@Nullable Color[][] tiles) {</span>
+<span class="fc" id="L35">        this.shelfie = Arrays.stream(tiles)</span>
+<span class="fc" id="L36">                .map(row -&gt; Arrays.stream(row)</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">                        .map(color -&gt; color == null</span>
+<span class="fc" id="L38">                                ? SerializableProperty.nullableProperty(null)</span>
+<span class="fc" id="L39">                                : SerializableProperty.nullableProperty(new Tile(color)))</span>
+<span class="fc" id="L40">                        .toArray(Property[]::new))</span>
+<span class="fc" id="L41">                .toArray(Property[][]::new);</span>
+<span class="fc" id="L42">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L45">    Shelfie(@Nullable Tile[][] tiles) {</span>
+<span class="fc" id="L46">        this.shelfie = Arrays.stream(tiles)</span>
+<span class="fc" id="L47">                .map(row -&gt; Arrays.stream(row)</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">                        .map(tile -&gt; tile == null</span>
+<span class="fc" id="L49">                                ? SerializableProperty.nullableProperty(null)</span>
+<span class="fc" id="L50">                                : SerializableProperty.nullableProperty(tile))</span>
+<span class="fc" id="L51">                        .toArray(Property[]::new))</span>
+<span class="fc" id="L52">                .toArray(Property[][]::new);</span>
+<span class="fc" id="L53">    }</span>
+
+    @Override
+    public boolean isOverlapping(ShelfieView that) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (int r = 0; r &lt; ROWS; r++) {</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            for (int c = 0; c &lt; COLUMNS; c++) {</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                if (this.tile(r, c).get() != null &amp;&amp;</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                        !Objects.equals(this.tile(r, c).get(), that.tile(r, c).get()))</span>
+<span class="fc" id="L61">                    return false;</span>
+            }
+        }
+<span class="fc" id="L64">        return true;</span>
+    }
+
+    @Override
+    public int numTilesOverlappingWithPersonalGoal(PersonalGoalView personalGoal) {
+<span class="fc" id="L69">        int count = 0;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        for (int row = 0; row &lt; ROWS; row++) {</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            for (int col = 0; col &lt; COLUMNS; col++) {</span>
+<span class="fc bfc" id="L72" title="All 4 branches covered.">                if (personalGoal.get(row, col) != null &amp;&amp; this.tile(row, col).get() != null &amp;&amp;</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">                        Objects.equals(personalGoal.get(row, col), tile(row, col).get()))</span>
+<span class="fc" id="L74">                    count++;</span>
+            }
+        }
+<span class="fc" id="L77">        return count;</span>
+    }
+
+    @Override
+    public List&lt;List&lt;TileAndCoords&lt;Tile&gt;&gt;&gt; groupsOfTiles() {
+<span class="fc" id="L82">        List&lt;List&lt;TileAndCoords&lt;Tile&gt;&gt;&gt; groupsOfTiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L83">        int[][] checked = new int[ROWS][COLUMNS];</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for (int r = 0; r &lt; ROWS; r++) {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            for (int c = 0; c &lt; COLUMNS; c++) {</span>
+<span class="fc bfc" id="L86" title="All 4 branches covered.">                if (checked[r][c] == 0 &amp;&amp; tile(r, c).get() != null) {</span>
+<span class="fc" id="L87">                    groupsOfTiles.add(this.groupOfTiles(r, c, checked));</span>
+                }
+            }
+        }
+<span class="fc" id="L91">        return groupsOfTiles;</span>
+    }
+
+    /**
+     * returns a list af TileAndCoords of the same type that can be reached from a given position, and updates the
+     * matrix of inspected types( checked[][] ) setting to 1 the elements in the same positions as the tiles added
+     * to the group
+     */
+    private List&lt;TileAndCoords&lt;Tile&gt;&gt; groupOfTiles(int row, int col, int[][] checked) {
+<span class="fc" id="L100">        List&lt;TileAndCoords&lt;Tile&gt;&gt; reachedTiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L101">        reachedTiles.add(new TileAndCoords&lt;Tile&gt;(this.tile(row, col).get(), row, col));</span>
+<span class="fc" id="L102">        checked[row][col] = 1;</span>
+
+        int prevSize;
+        do {
+<span class="fc" id="L106">            prevSize = reachedTiles.size();</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            for (int i = 0; i &lt; reachedTiles.size(); i++) {</span>
+<span class="fc" id="L108">                TileAndCoords&lt;Tile&gt; curr = reachedTiles.get(i);</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                if (curr.row() &lt; ROWS - 1</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">                        &amp;&amp; Objects.equals(tile(curr.row() + 1, curr.col()).get(), curr.tile())</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">                        &amp;&amp; !reachedTiles.contains(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row() + 1, curr.col()))) {</span>
+<span class="fc" id="L112">                    reachedTiles.add(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row() + 1, curr.col()));</span>
+<span class="fc" id="L113">                    checked[curr.row() + 1][curr.col()] = 1;</span>
+                }
+<span class="fc bfc" id="L115" title="All 2 branches covered.">                if (curr.col() &lt; COLUMNS - 1</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                        &amp;&amp; Objects.equals(tile(curr.row(), curr.col() + 1).get(), curr.tile())</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">                        &amp;&amp; !reachedTiles.contains(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row(), curr.col() + 1))) {</span>
+<span class="fc" id="L118">                    reachedTiles.add(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row(), curr.col() + 1));</span>
+<span class="fc" id="L119">                    checked[curr.row()][curr.col() + 1] = 1;</span>
+                }
+                //check already covered by always checking first the tile over the one being analysed, therefore never entering
+                //if second condition ( it is always already contained if it is equal )
+                // if (curr.row() &gt; 0
+                //        &amp;&amp; Objects.equals(tile(curr.row() - 1, curr.col()).get(), tile(curr.row(), curr.col()).get())
+                //        &amp;&amp; !reachedTiles.contains(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row() - 1, curr.col()))) {
+                //    reachedTiles.add(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row() - 1, curr.col()));
+                //    checked[curr.row() - 1][curr.col()] = 1;
+                //}
+<span class="fc bfc" id="L129" title="All 2 branches covered.">                if (curr.col() &gt; 0</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">                        &amp;&amp; Objects.equals(tile(curr.row(), curr.col() - 1).get(), curr.tile())</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">                        &amp;&amp; !reachedTiles.contains(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row(), curr.col() - 1))) {</span>
+<span class="fc" id="L132">                    reachedTiles.add(new TileAndCoords&lt;Tile&gt;(curr.tile(), curr.row(), curr.col() - 1));</span>
+<span class="fc" id="L133">                    checked[curr.row()][curr.col() - 1] = 1;</span>
+                }
+            }
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        } while (reachedTiles.size() &gt; prevSize);</span>
+<span class="fc" id="L137">        return reachedTiles;</span>
+    }
+
+    @Override
+    public Property&lt;@Nullable Tile&gt; tile(int r, int c) {
+<span class="fc" id="L142">        return shelfie[r][c];</span>
+    }
+
+    @Override
+    public Stream&lt;TileAndCoords&lt;Property&lt;@Nullable Tile&gt;&gt;&gt; tiles() {
+<span class="fc" id="L147">        return IntStream.range(0, ROWS).boxed().flatMap(row -&gt; IntStream.range(0, COLUMNS).boxed()</span>
+<span class="fc" id="L148">                .map(col -&gt; new TileAndCoords&lt;&gt;(shelfie[row][col], row, col)));</span>
+    }
+
+    public int getColumnFreeSpace(int col) {
+<span class="fc" id="L152">        int freeSpace = 0;</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        for (int r = 0; r &lt; ROWS; r++) {</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">            if (shelfie[r][col].get() == null) {</span>
+<span class="fc" id="L155">                freeSpace++;</span>
+            }
+        }
+<span class="fc" id="L158">        return freeSpace;</span>
+    }
+
+    @Override
+    public boolean checkColumnSpace(int shelfCol, int selected) {
+<span class="fc bfc" id="L163" title="All 4 branches covered.">        if (shelfCol &lt; 0 || shelfCol &gt;= COLUMNS)</span>
+<span class="fc" id="L164">            return false;</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        return selected &lt;= getColumnFreeSpace(shelfCol);</span>
+    }
+
+    @Override
+    public boolean isFull() {
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        return tiles().allMatch(t -&gt; t.tile().get() != null);</span>
+    }
+
+    public void placeTiles(List&lt;Tile&gt; selectedTiles, int shelfCol) {
+        //place tiles in the selected column from the bottom and first free space
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        for (Tile tile : selectedTiles) {</span>
+<span class="fc" id="L176">            int freeSpace = getColumnFreeSpace(shelfCol);</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">            if (freeSpace &gt; 0)</span>
+<span class="fc" id="L178">                shelfie[freeSpace - 1][shelfCol].set(tile);</span>
+            else
+<span class="fc" id="L180">                throw new IndexOutOfBoundsException(&quot;This column is full&quot;);</span>
+<span class="fc" id="L181">        }</span>
+<span class="fc" id="L182">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L187">            return true;</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">        if (!(o instanceof Shelfie that))</span>
+<span class="fc" id="L189">            return false;</span>
+<span class="fc" id="L190">        return IntStream.range(0, ROWS).boxed()</span>
+<span class="fc" id="L191">                .allMatch(row -&gt; IntStream.range(0, COLUMNS).boxed()</span>
+<span class="fc" id="L192">                        .allMatch(col -&gt; Objects.equals(shelfie[row][col].get(), that.shelfie[row][col].get())));</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L197">        return Arrays.stream(shelfie)</span>
+<span class="fc" id="L198">                .mapToInt(row -&gt; Arrays.stream(row)</span>
+<span class="fc" id="L199">                        .mapToInt(tile -&gt; Objects.hashCode(tile.get()))</span>
+<span class="fc" id="L200">                        .reduce(1, (a, b) -&gt; 31 * a + b))</span>
+<span class="fc" id="L201">                .reduce(1, (a, b) -&gt; 31 * a + b);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L206">        return &quot;Shelfie{&quot; +</span>
+<span class="fc" id="L207">                &quot;shelfie=&quot; + Arrays.deepToString(shelfie) +</span>
+                '}';
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

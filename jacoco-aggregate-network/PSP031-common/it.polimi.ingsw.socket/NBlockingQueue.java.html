@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>NBlockingQueue.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.socket</a> &gt; <span class="el_source">NBlockingQueue.java</span></div><h1>NBlockingQueue.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.socket;
+
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+
+import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
+/**
+ * Queue used for implementing 1 producer to n consumers, where the consumers can
+ * retrieve elements off of the queue by matching them against a {@link Predicate}.
+ *
+ * @param &lt;E&gt; the type of elements held in this queue
+ */
+<span class="fc" id="L21">public class NBlockingQueue&lt;E&gt; {</span>
+
+    /*
+     * This is implemented as a lock-free linked queue, where each node represent
+     * a consumer and has its own BlockingQueue of objects which it has already processed.
+     *
+     * Objects to consume are therefore added to the processed queue of the head,
+     * the subsequent node will then be able to process the objects itself, then add it to its
+     * own processed queue, and so on and so forth.
+     *
+     * Nodes are not allowed to delete themselves, but are only allowed to signal that they are done.
+     * Once that happens, the marked node transfers the entire ownership of its fields to the subsequent one,
+     * which will be in charge of clearing the processed objects queue and unlinking it from its prev.
+     */
+
+<span class="fc" id="L36">    private class Node {</span>
+
+        private volatile @Nullable Node prev;
+<span class="fc" id="L39">        private final AtomicReference&lt;Node&gt; next = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L40">        private final BlockingQueue&lt;E&gt; processed = new LinkedBlockingQueue&lt;&gt;();</span>
+        private volatile boolean done;
+
+        public void done() {
+<span class="fc" id="L44">            done = true;</span>
+<span class="fc" id="L45">            processed.add(signalDone);</span>
+<span class="fc" id="L46">        }</span>
+
+        public void addToNext(E e) {
+<span class="fc" id="L49">            processed.add(e);</span>
+<span class="fc" id="L50">        }</span>
+    }
+
+<span class="fc" id="L53">    @SuppressWarnings(&quot;unchecked&quot;) // Won't be returned outside, so we can safely cast it</span>
+<span class="fc" id="L54">    private final E signalDone = (E) new Object() {</span>
+        @Override
+        public String toString() {
+<span class="nc" id="L57">            return &quot;signalDone&quot;;</span>
+        }
+    };
+
+    private @Nullable Thread producerThread;
+<span class="fc" id="L62">    private final Node head = new Node();</span>
+<span class="fc" id="L63">    private volatile Node tail = head;</span>
+
+    /**
+     * Inserts the specified element at the tail of this queue.
+     *
+     * @throws NullPointerException if the specified element is null
+     */
+    public void add(E e) {
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (producerThread == null)</span>
+<span class="fc" id="L72">            producerThread = Thread.currentThread();</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        else if (Thread.currentThread() != producerThread)</span>
+<span class="fc" id="L74">            throw new UnsupportedOperationException(&quot;There can only be 1 producer&quot;);</span>
+
+<span class="fc" id="L76">        head.addToNext(Objects.requireNonNull(e));</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Retrieves and removes the first element of the queue which matches the given predicate, waiting if
+     * necessary until an element becomes available.
+     *
+     * @return the first element which matches the given predicate
+     * @throws InterruptedException if interrupted while waiting
+     */
+    public E takeFirstMatching(Matcher&lt;E&gt; matcher) throws InterruptedException {
+        try {
+<span class="fc" id="L88">            return takeFirstMatching(matcher, null, -1, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L89">        } catch (TimeoutException e) {</span>
+<span class="nc" id="L90">            throw new AssertionError(&quot;There should be no timeout when -1 is passed&quot;, e);</span>
+        }
+    }
+
+    public E takeFirstMatching(Matcher&lt;E&gt; matcher, long timeout, TimeUnit unit)
+            throws InterruptedException, TimeoutException {
+<span class="fc" id="L96">        return takeFirstMatching(matcher, null, timeout, unit);</span>
+    }
+
+    /**
+     * @param timeout time before a {@link TimeoutException} is thrown, using the given {@code unit}.
+     *        If -1, no timeout is used and TimeoutException is never thrown
+     * @param unit time unit for {@code timeout}
+     * @throws TimeoutException if timeout is not -1 and has elapsed
+     */
+    @VisibleForTesting
+    E takeFirstMatching(Matcher&lt;E&gt; matcher,
+                        @Nullable Runnable signalRegistered,
+                        long timeout,
+                        TimeUnit unit)
+            throws InterruptedException, TimeoutException {
+<span class="fc" id="L111">        var newNode = new Node();</span>
+        // Fight to get added as tail
+        // Note that, because of the impl, there is no way for the tail to remove itself
+        // as a node can only be deleted by a subsequent node, which the tail by definition can't have
+        // Therefore, we can skip any check to see if we fell of the linked list somehow
+        Node prev;
+<span class="fc" id="L117">        for (prev = tail;; prev = tail) {</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">            if (prev.next.compareAndSet(null, newNode))</span>
+<span class="fc" id="L119">                break;</span>
+            // Lost the CAS fight, just retry
+        }
+        // We won, newNode is officially part of the queue now
+<span class="fc" id="L123">        newNode.prev = prev;</span>
+<span class="fc" id="L124">        tail = newNode;</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (signalRegistered != null)</span>
+<span class="fc" id="L126">            signalRegistered.run();</span>
+
+        // Consuming cycle
+        try {
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            var timeoutMillis = timeout != -1 ? unit.toMillis(timeout) : -1;</span>
+<span class="fc" id="L131">            var startTimeMillis = System.currentTimeMillis();</span>
+            outer: for (;;) {
+                // The head can't have done = true, so prev != head is implicit
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                while (prev.done /* &amp;&amp; prev != head */) {</span>
+                    // The previous node is done, process all its enqueued stuff
+                    // Note: by signaling that it's finished, the previous node won't modify its processed queue anymore.
+                    //       We are free to empty it and no additional nodes will be added once we are done
+                    E toTransfer;
+<span class="fc bfc" id="L139" title="All 2 branches covered.">                    while ((toTransfer = prev.processed.poll()) != null) {</span>
+                        // We already knew that the prev queue was done, we don't care
+<span class="fc bfc" id="L141" title="All 2 branches covered.">                        if (toTransfer == signalDone)</span>
+<span class="fc" id="L142">                            continue;</span>
+
+<span class="fc" id="L144">                        var processResult = matcher.apply(toTransfer, ProcessResultCtx.INSTANCE);</span>
+<span class="pc bpc" id="L145" title="1 of 4 branches missed.">                        if (processResult == ProcessResult.CONSUME || processResult == ProcessResult.PEEK) {</span>
+                            // We want to get it but not remove it, so also pass it along
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">                            if (processResult == ProcessResult.PEEK)</span>
+<span class="nc" id="L148">                                newNode.addToNext(toTransfer);</span>
+<span class="fc" id="L149">                            return toTransfer;</span>
+                        }
+                        // We don't care about this element, pass it along
+<span class="fc" id="L152">                        newNode.addToNext(toTransfer);</span>
+<span class="fc" id="L153">                    }</span>
+                    // Processed all its stuff, it's done and empty, un-reference it
+                    Node prevPrev;
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">                    if ((prevPrev = prev.prev) != null)</span>
+<span class="fc" id="L157">                        prevPrev.next.set(newNode);</span>
+<span class="fc" id="L158">                    newNode.prev = prev = Objects.requireNonNull(prev.prev, &quot;Only head can have prev = null&quot;);</span>
+<span class="fc" id="L159">                }</span>
+
+                while (true) {
+<span class="fc" id="L162">                    var elapsedMillis = System.currentTimeMillis() - startTimeMillis;</span>
+<span class="fc bfc" id="L163" title="All 4 branches covered.">                    if (timeoutMillis != -1 &amp;&amp; elapsedMillis &gt;= timeoutMillis)</span>
+<span class="fc" id="L164">                        throw new TimeoutException(&quot;Timeout expired&quot;);</span>
+
+                    final E candidate;
+<span class="fc bfc" id="L167" title="All 2 branches covered.">                    if (timeoutMillis == -1) {</span>
+<span class="fc" id="L168">                        candidate = prev.processed.take();</span>
+                    } else {
+<span class="fc" id="L170">                        candidate = prev.processed.poll(timeoutMillis - elapsedMillis, TimeUnit.MILLISECONDS);</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                        if (candidate == null)</span>
+<span class="fc" id="L172">                            throw new TimeoutException(&quot;Timeout expired&quot;);</span>
+                    }
+
+                    // Prev queue just switched to done, let's return to the previous loop
+<span class="fc bfc" id="L176" title="All 2 branches covered.">                    if (candidate == signalDone)</span>
+<span class="fc" id="L177">                        continue outer;</span>
+
+<span class="fc" id="L179">                    var processResult = matcher.apply(candidate, ProcessResultCtx.INSTANCE);</span>
+<span class="fc bfc" id="L180" title="All 4 branches covered.">                    if (processResult == ProcessResult.CONSUME || processResult == ProcessResult.PEEK) {</span>
+                        // We want to get it but not remove it, so also pass it along
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                        if (processResult == ProcessResult.PEEK)</span>
+<span class="fc" id="L183">                            newNode.addToNext(candidate);</span>
+<span class="fc" id="L184">                        return candidate;</span>
+                    }
+                    // We don't care about this element, pass it along
+<span class="fc" id="L187">                    newNode.addToNext(candidate);</span>
+<span class="fc" id="L188">                }</span>
+            }
+        } finally {
+            // Whatever happens, we need to signal that we are done
+<span class="fc" id="L192">            newNode.done();</span>
+        }
+    }
+
+    @VisibleForTesting
+    String getQueueDebugState() {
+<span class="fc" id="L198">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L199">        var curr = head;</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        while (curr != null) {</span>
+<span class="fc" id="L201">            var next = curr.next.get();</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">            sb.append(next == null ? String.valueOf(curr.done) : curr.done + &quot;, &quot;);</span>
+<span class="fc" id="L203">            curr = next;</span>
+<span class="fc" id="L204">        }</span>
+<span class="fc" id="L205">        return sb.toString();</span>
+    }
+
+    public interface Matcher&lt;E&gt; extends BiFunction&lt;E, ProcessResultCtx, ProcessResult&gt; {
+    }
+
+<span class="fc" id="L211">    enum ProcessResult {</span>
+<span class="fc" id="L212">        PEEK,</span>
+<span class="fc" id="L213">        CONSUME,</span>
+<span class="fc" id="L214">        SKIP</span>
+    }
+
+    public static class ProcessResultCtx {
+
+<span class="fc" id="L219">        private static final ProcessResultCtx INSTANCE = new ProcessResultCtx();</span>
+
+        private ProcessResultCtx() {
+        }
+
+        public ProcessResult peek() {
+<span class="fc" id="L225">            return ProcessResult.PEEK;</span>
+        }
+
+        public ProcessResult consume() {
+<span class="fc" id="L229">            return ProcessResult.CONSUME;</span>
+        }
+
+        public ProcessResult skip() {
+<span class="fc" id="L233">            return ProcessResult.SKIP;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

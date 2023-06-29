@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketServerGameUpdater.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.socket</a> &gt; <span class="el_source">SocketServerGameUpdater.java</span></div><h1>SocketServerGameUpdater.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.socket;
+
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.Type;
+import it.polimi.ingsw.model.UserMessage;
+import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.updater.GameUpdater;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * Socket GameUpdater implementation which forwards requests to the client using packets
+ *
+ * @see it.polimi.ingsw.controller
+ */
+public class SocketServerGameUpdater implements GameUpdater {
+    private final ServerSocketManager socketManager;
+
+<span class="fc" id="L22">    public SocketServerGameUpdater(ServerSocketManager socketManager) {</span>
+<span class="fc" id="L23">        this.socketManager = socketManager;</span>
+<span class="fc" id="L24">    }</span>
+
+    @Override
+    public void updateBoardTile(int row, int col, @Nullable Tile tile) throws DisconnectedException {
+        try {
+<span class="fc" id="L29">            socketManager.send(new UpdateBoardTilePacket(row, col, tile));</span>
+<span class="nc" id="L30">        } catch (IOException e) {</span>
+<span class="nc" id="L31">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L32">        }</span>
+<span class="fc" id="L33">    }</span>
+
+    @Override
+    public void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) throws DisconnectedException {
+        try {
+<span class="fc" id="L38">            socketManager.send(new UpdatePlayerShelfieTilePacket(nick, row, col, tile));</span>
+<span class="nc" id="L39">        } catch (IOException e) {</span>
+<span class="nc" id="L40">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L41">        }</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public void updatePlayerConnected(String nick, boolean connected) throws DisconnectedException {
+        try {
+<span class="fc" id="L47">            socketManager.send(new UpdatePlayerConnectedPacket(nick, connected));</span>
+<span class="fc" id="L48">        } catch (IOException e) {</span>
+<span class="fc" id="L49">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L50">        }</span>
+<span class="fc" id="L51">    }</span>
+
+    @Override
+    public void updatePlayerScore(String nick, int score) throws DisconnectedException {
+        try {
+<span class="fc" id="L56">            socketManager.send(new UpdatePlayerScorePacket(nick, score));</span>
+<span class="nc" id="L57">        } catch (IOException e) {</span>
+<span class="nc" id="L58">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L59">        }</span>
+<span class="fc" id="L60">    }</span>
+
+    @Override
+    public void updateCurrentTurn(String nick) throws DisconnectedException {
+        try {
+<span class="fc" id="L65">            socketManager.send(new UpdateCurrentTurnPacket(nick));</span>
+<span class="nc" id="L66">        } catch (IOException e) {</span>
+<span class="nc" id="L67">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L68">        }</span>
+<span class="fc" id="L69">    }</span>
+
+    @Override
+    public void updateFirstFinisher(@Nullable String nick) throws DisconnectedException {
+        try {
+<span class="fc" id="L74">            socketManager.send(new UpdateFirstFinisherPacket(nick));</span>
+<span class="nc" id="L75">        } catch (IOException e) {</span>
+<span class="nc" id="L76">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L77">        }</span>
+<span class="fc" id="L78">    }</span>
+
+    @Override
+    public void updateEndGame(Boolean endGame) throws DisconnectedException {
+        try {
+<span class="fc" id="L83">            socketManager.send(new UpdateEndGamePacket(endGame));</span>
+<span class="nc" id="L84">        } catch (IOException e) {</span>
+<span class="nc" id="L85">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L86">        }</span>
+<span class="fc" id="L87">    }</span>
+
+    @Override
+    public void updateSuspended(boolean suspended) throws DisconnectedException {
+        try {
+<span class="fc" id="L92">            socketManager.send(new UpdateSuspendedPacket(suspended));</span>
+<span class="nc" id="L93">        } catch (IOException e) {</span>
+<span class="nc" id="L94">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L95">        }</span>
+<span class="fc" id="L96">    }</span>
+
+    @Override
+    public void updateMessage(@Nullable UserMessage message) throws DisconnectedException {
+        try {
+<span class="fc" id="L101">            socketManager.send(new UpdateMessagePacket(message));</span>
+<span class="nc" id="L102">        } catch (IOException e) {</span>
+<span class="nc" id="L103">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L104">        }</span>
+<span class="fc" id="L105">    }</span>
+
+    @Override
+    public void updateAchievedCommonGoal(Type commonGoalType, List&lt;String&gt; playersAchieved) throws DisconnectedException {
+        try {
+<span class="fc" id="L110">            socketManager.send(new UpdateAchievedCommonGoalPacket(commonGoalType, playersAchieved));</span>
+<span class="nc" id="L111">        } catch (IOException e) {</span>
+<span class="nc" id="L112">            throw new DisconnectedException(e);</span>
+<span class="fc" id="L113">        }</span>
+<span class="fc" id="L114">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

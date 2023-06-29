@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiGameUpdater.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.rmi</a> &gt; <span class="el_source">RmiGameUpdater.java</span></div><h1>RmiGameUpdater.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.rmi;
+
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.model.Tile;
+import it.polimi.ingsw.model.Type;
+import it.polimi.ingsw.model.UserMessage;
+import it.polimi.ingsw.updater.GameUpdater;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.Serializable;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
+
+/**
+ * RMI remotable service which will be used to implement {@link GameUpdater}
+ *
+ * This re-declares the same methods, but with an RMI compatible signature, throwing
+ * {@link RemoteException} instead o {@link DisconnectedException}.
+ * &lt;p&gt;
+ * The {@link Adapter} is then used in order to be able to have an actual {@link GameUpdater}
+ * interface implementation
+ *
+ * @see GameUpdater
+ * @see Adapter
+ */
+public interface RmiGameUpdater extends Remote {
+
+    /** RMI redeclaration of {@link GameUpdater#updateBoardTile(int, int, Tile)}, check that for docs and details */
+    void updateBoardTile(int row, int col, @Nullable Tile tile) throws RemoteException;
+
+    /**
+     * RMI redeclaration of {@link GameUpdater#updatePlayerShelfieTile(String, int, int, Tile)}, check that for docs and details
+     */
+    void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updatePlayerConnected(String, boolean)}, check that for docs and details */
+    void updatePlayerConnected(String nick, boolean connected) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updatePlayerScore(String, int)}, check that for docs and details */
+    void updatePlayerScore(String nick, int score) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updateCurrentTurn(String)}, check that for docs and details */
+    void updateCurrentTurn(String nick) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updateFirstFinisher(String)}, check that for docs and details */
+    void updateFirstFinisher(@Nullable String nick) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updateEndGame(Boolean)}, check that for docs and details */
+    void updateEndGame(Boolean endGame) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updateSuspended(boolean)}, check that for docs and details */
+    void updateSuspended(boolean suspended) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updateMessage(UserMessage)}, check that for docs and details */
+    void updateMessage(@Nullable UserMessage message) throws RemoteException;
+
+    /** RMI redeclaration of {@link GameUpdater#updateAchievedCommonGoal(Type, List)}, check that for docs and details */
+    void updateAchievedCommonGoal(Type commonGoalType, List&lt;String&gt; playersAchieved) throws RemoteException;
+
+    class Adapter extends RmiAdapter implements GameUpdater, Serializable {
+
+        private final RmiGameUpdater updater;
+
+<span class="fc" id="L65">        public Adapter(RmiGameUpdater updater) {</span>
+<span class="fc" id="L66">            this.updater = updater;</span>
+<span class="fc" id="L67">        }</span>
+
+        @Override
+        public void updateBoardTile(int row, int col, @Nullable Tile tile) throws DisconnectedException {
+<span class="fc" id="L71">            adapt(() -&gt; updater.updateBoardTile(row, col, tile));</span>
+<span class="fc" id="L72">        }</span>
+
+        @Override
+        public void updatePlayerShelfieTile(String nick, int row, int col, @Nullable Tile tile) throws DisconnectedException {
+<span class="fc" id="L76">            adapt(() -&gt; updater.updatePlayerShelfieTile(nick, row, col, tile));</span>
+<span class="fc" id="L77">        }</span>
+
+        @Override
+        public void updatePlayerConnected(String nick, boolean connected) throws DisconnectedException {
+<span class="fc" id="L81">            adapt(() -&gt; updater.updatePlayerConnected(nick, connected));</span>
+<span class="fc" id="L82">        }</span>
+
+        @Override
+        public void updatePlayerScore(String nick, int score) throws DisconnectedException {
+<span class="fc" id="L86">            adapt(() -&gt; updater.updatePlayerScore(nick, score));</span>
+<span class="fc" id="L87">        }</span>
+
+        @Override
+        public void updateCurrentTurn(String nick) throws DisconnectedException {
+<span class="fc" id="L91">            adapt(() -&gt; updater.updateCurrentTurn(nick));</span>
+<span class="fc" id="L92">        }</span>
+
+        @Override
+        public void updateFirstFinisher(@Nullable String nick) throws DisconnectedException {
+<span class="fc" id="L96">            adapt(() -&gt; updater.updateFirstFinisher(nick));</span>
+<span class="fc" id="L97">        }</span>
+
+        @Override
+        public void updateEndGame(Boolean endGame) throws DisconnectedException {
+<span class="fc" id="L101">            adapt(() -&gt; updater.updateEndGame(endGame));</span>
+<span class="fc" id="L102">        }</span>
+
+        @Override
+        public void updateSuspended(boolean suspended) throws DisconnectedException {
+<span class="fc" id="L106">            adapt(() -&gt; updater.updateSuspended(suspended));</span>
+<span class="fc" id="L107">        }</span>
+
+        @Override
+        public void updateMessage(@Nullable UserMessage message) throws DisconnectedException {
+<span class="fc" id="L111">            adapt(() -&gt; updater.updateMessage(message));</span>
+<span class="fc" id="L112">        }</span>
+
+        @Override
+        public void updateAchievedCommonGoal(Type commonGoalType, List&lt;String&gt; playersAchieved) throws DisconnectedException {
+<span class="fc" id="L116">            adapt(() -&gt; updater.updateAchievedCommonGoal(commonGoalType, playersAchieved));</span>
+<span class="fc" id="L117">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

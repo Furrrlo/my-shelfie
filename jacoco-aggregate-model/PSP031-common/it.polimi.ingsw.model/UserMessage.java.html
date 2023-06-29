@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UserMessage.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">UserMessage.java</span></div><h1>UserMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+/**
+ * Object representing a message sent by a user
+ *
+ * @param nickSendingPlayer nick of the player which sent the message
+ * @param sendingColor console color unique to the player which sent the message
+ * @param message text of the message which was sent
+ * @param nickReceivingPlayer nick of the player to which the message was addressed
+ * @param receivingColor console color unique to the player which received the message
+ */
+<span class="fc" id="L15">public record UserMessage(String nickSendingPlayer,</span>
+        String sendingColor,
+        String message,
+        String nickReceivingPlayer,
+        String receivingColor) implements Serializable {
+
+    /** Placeholder used as the receiving player nick for messages addressed to the whole game lobby */
+    public static final String EVERYONE_RECIPIENT = &quot;&quot;;
+
+    /** Creates a message object which is sent to everyone */
+    public static UserMessage forEveryone(String nickSendingPlayer, String sendingColor, String message) {
+<span class="fc" id="L26">        return new UserMessage(nickSendingPlayer, sendingColor, message, EVERYONE_RECIPIENT, &quot;&quot;);</span>
+    }
+
+    /** Returns whether this message was sent to everyone in the game */
+    public boolean isForEveryone() {
+<span class="fc" id="L31">        return nickReceivingPlayer.equals(EVERYONE_RECIPIENT);</span>
+    }
+
+    /** Returns a string to be printed in the console */
+    public String toConsoleString() {
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (isForEveryone()) {</span>
+<span class="fc" id="L37">            return '[' + sendingColor + nickSendingPlayer + &quot;\033[0m&quot; + &quot;]: &quot; + message;</span>
+        } else {
+<span class="fc" id="L39">            return '[' + sendingColor + nickSendingPlayer + &quot;\033[0m&quot; + &quot; to &quot; + receivingColor + nickReceivingPlayer</span>
+                    + &quot;\033[0m&quot; + &quot;]: &quot; + message;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L47">            return true;</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (!(o instanceof UserMessage that))</span>
+<span class="fc" id="L49">            return false;</span>
+<span class="fc bfc" id="L50" title="All 4 branches covered.">        return nickSendingPlayer.equals(that.nickSendingPlayer) &amp;&amp; message.equals(that.message)</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">                &amp;&amp; nickReceivingPlayer.equals(that.nickReceivingPlayer);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L56">        return Objects.hash(nickSendingPlayer, message, nickReceivingPlayer);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

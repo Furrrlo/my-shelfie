@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ClientSocketManagerImpl.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network.socket</a> &gt; <span class="el_source">ClientSocketManagerImpl.java</span></div><h1>ClientSocketManagerImpl.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network.socket;
+
+import it.polimi.ingsw.socket.SocketManagerImpl;
+import it.polimi.ingsw.socket.packets.C2SAckPacket;
+import it.polimi.ingsw.socket.packets.C2SPacket;
+import it.polimi.ingsw.socket.packets.S2CAckPacket;
+import it.polimi.ingsw.socket.packets.S2CPacket;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/** Actual implementation of {@link ClientSocketManager} */
+class ClientSocketManagerImpl
+        extends SocketManagerImpl&lt;S2CPacket, S2CAckPacket, C2SAckPacket, C2SPacket&gt;
+        implements ClientSocketManager {
+
+    private final ExecutorService executor;
+
+    public ClientSocketManagerImpl(Socket socket) throws IOException {
+<span class="nc" id="L25">        this(createDefaultExecutor(), socket);</span>
+<span class="nc" id="L26">    }</span>
+
+    public ClientSocketManagerImpl(Socket socket,
+                                   long defaultResponseTimeout,
+                                   TimeUnit defaultResponseTimeoutUnit)
+            throws IOException {
+<span class="fc" id="L32">        this(createDefaultExecutor(), socket, defaultResponseTimeout, defaultResponseTimeoutUnit);</span>
+<span class="fc" id="L33">    }</span>
+
+    private ClientSocketManagerImpl(ExecutorService executor, Socket socket) throws IOException {
+<span class="nc" id="L36">        super(&quot;Client&quot;, executor, socket);</span>
+<span class="nc" id="L37">        this.executor = executor;</span>
+<span class="nc" id="L38">    }</span>
+
+    private ClientSocketManagerImpl(ExecutorService executor,
+                                    Socket socket,
+                                    long defaultResponseTimeout,
+                                    TimeUnit defaultResponseTimeoutUnit)
+            throws IOException {
+<span class="fc" id="L45">        super(&quot;Client&quot;, executor, socket, defaultResponseTimeout, defaultResponseTimeoutUnit);</span>
+<span class="fc" id="L46">        this.executor = executor;</span>
+<span class="fc" id="L47">    }</span>
+
+    private static ExecutorService createDefaultExecutor() {
+<span class="fc" id="L50">        return Executors.newFixedThreadPool(2, new ThreadFactory() {</span>
+
+<span class="fc" id="L52">            private final AtomicInteger threadNum = new AtomicInteger();</span>
+
+            @Override
+            public Thread newThread(Runnable r) {
+<span class="fc" id="L56">                var th = new Thread(r);</span>
+<span class="fc" id="L57">                th.setName(&quot;ClientSocketManagerImpl-thread-&quot; + threadNum.getAndIncrement());</span>
+<span class="fc" id="L58">                return th;</span>
+            }
+        });
+    }
+
+    @Override
+    public long getDefaultResponseTimeout() {
+<span class="nc" id="L65">        return defaultResponseTimeout;</span>
+    }
+
+    @Override
+    public TimeUnit getDefaultResponseTimeoutUnit() {
+<span class="nc" id="L70">        return defaultResponseTimeoutUnit;</span>
+    }
+
+    @Override
+    protected void doClose() throws IOException {
+<span class="fc" id="L75">        super.doClose();</span>
+
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (!executor.isShutdown())</span>
+<span class="fc" id="L78">            executor.shutdown();</span>
+<span class="fc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

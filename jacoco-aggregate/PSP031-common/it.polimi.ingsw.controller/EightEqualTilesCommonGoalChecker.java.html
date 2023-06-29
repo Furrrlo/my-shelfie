@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>EightEqualTilesCommonGoalChecker.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.controller</a> &gt; <span class="el_source">EightEqualTilesCommonGoalChecker.java</span></div><h1>EightEqualTilesCommonGoalChecker.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.controller;
+
+import com.google.errorprone.annotations.Immutable;
+import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.model.CommonGoalChecker;
+import it.polimi.ingsw.model.Shelfie;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
+import static it.polimi.ingsw.model.ShelfieView.ROWS;
+
+/**
+ * Object which can check whether a given {@link Shelfie} has achieved a common goal
+ * of type {@link it.polimi.ingsw.model.Type#EIGHT_EQUAL_TILES}
+ */
+@Immutable
+<span class="fc" id="L19">public class EightEqualTilesCommonGoalChecker implements CommonGoalChecker {</span>
+
+    /** Returns the amount of tiles of a given color present in the shelfie */
+    public int equalColoredTiles(Shelfie shelfie, int[][] checked, Color color) {
+<span class="fc" id="L23">        int count = 0;</span>
+<span class="fc" id="L24">        int[][] oldChecked = Arrays.stream(checked).map(int[]::clone).toArray(int[][]::new);</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        for (int r = 0; r &lt; ROWS; r++) {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">            for (int c = 0; c &lt; COLUMNS; c++) {</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">                if (shelfie.tile(r, c).get() != null</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">                        &amp;&amp; Objects.requireNonNull(shelfie.tile(r, c).get()).getColor().equals(color)) {</span>
+<span class="fc" id="L29">                    count++;</span>
+<span class="fc" id="L30">                    checked[r][c] = count;</span>
+                }
+            }
+        }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (count &lt; 8) {</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            for (int r = 0; r &lt; ROWS; r++)</span>
+<span class="fc" id="L36">                System.arraycopy(oldChecked[r], 0, checked[r], 0, COLUMNS);</span>
+        }
+<span class="fc" id="L38">        return count;</span>
+    }
+
+    @Override
+    public boolean checkCommonGoal(Shelfie shelfie) {
+<span class="fc" id="L43">        boolean achieved = false;</span>
+<span class="fc" id="L44">        int[][] checked = new int[ROWS][COLUMNS];</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (Color c : Color.values()) {</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            if (equalColoredTiles(shelfie, checked, c) &gt;= 8)</span>
+<span class="fc" id="L47">                achieved = true;</span>
+        }
+<span class="fc" id="L49">        return achieved;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

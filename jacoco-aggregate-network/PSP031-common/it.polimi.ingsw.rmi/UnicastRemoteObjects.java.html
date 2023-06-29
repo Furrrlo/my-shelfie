@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UnicastRemoteObjects.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.rmi</a> &gt; <span class="el_source">UnicastRemoteObjects.java</span></div><h1>UnicastRemoteObjects.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.rmi;
+
+import org.jetbrains.annotations.Nullable;
+
+import java.rmi.NoSuchObjectException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.RMISocketFactory;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+/** Utilities to work with RMI {@link UnicastRemoteObject}s */
+public class UnicastRemoteObjects {
+
+    private UnicastRemoteObjects() {
+    }
+
+    /**
+     * Utility method which delegates to {@link UnicastRemoteObject#exportObject(Remote, int)} but casts the result
+     *
+     * @see UnicastRemoteObject#exportObject(Remote, int)
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T extends Remote&gt; T export(T remote, int port) throws RemoteException {
+<span class="nc" id="L33">        return (T) UnicastRemoteObject.exportObject(remote, port);</span>
+    }
+
+    /**
+     * Utility method which delegates to
+     * {@link UnicastRemoteObject#exportObject(Remote, int, RMIClientSocketFactory, RMIServerSocketFactory)}
+     * but casts the result
+     * 
+     * @see UnicastRemoteObject#exportObject(Remote, int, RMIClientSocketFactory, RMIServerSocketFactory)
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T extends Remote&gt; T export(T obj, int port,
+                                              @Nullable RMIClientSocketFactory csf,
+                                              @Nullable RMIServerSocketFactory ssf)
+            throws RemoteException {
+<span class="fc" id="L48">        return (T) UnicastRemoteObject.exportObject(obj, port, csf, ssf);</span>
+    }
+
+    /** Interface used to export remote objects in a consistent way across the whole application */
+    public interface Exporter {
+
+        /**
+         * Exports the remote object to make it available to receive incoming
+         * calls, using the particular supplied port.
+         *
+         * The object is exported using settings provided when creating
+         * this exporter.
+         *
+         * @param obj the remote object to be exported
+         * @param port the port to export the object on
+         * @return remote object stub
+         * @throws RemoteException if export fails
+         */
+        &lt;T extends Remote&gt; T export(T obj, int port) throws RemoteException;
+    }
+
+    /**
+     * Creates a UnicastRemoteObjectExporter which creates socket using the global RMISocketFactory
+     *
+     * @return a UnicastRemoteObjectExporter using the global RMISocketFactory
+     * @see UnicastRemoteObject#exportObject(Remote, int)
+     * @see RMISocketFactory#setSocketFactory(RMISocketFactory)
+     */
+    public static Exporter createExporter() {
+<span class="nc" id="L77">        return new DefaultExporter();</span>
+    }
+
+    /** Implementation for the {@link #createExporter()} method */
+    private static class DefaultExporter implements Exporter {
+
+        @Override
+        public &lt;T extends Remote&gt; T export(T remote, int port) throws RemoteException {
+<span class="nc" id="L85">            return UnicastRemoteObjects.export(remote, port);</span>
+        }
+    }
+
+    /**
+     * Creates a UnicastRemoteObjectExporter which creates socket using the given RMISocketFactory
+     *
+     * The socket factory may be null, in which case the corresponding client or server socket
+     * creation method of RMISocketFactory is used instead.
+     *
+     * @return a UnicastRemoteObjectExporter using the given RMISocketFactory
+     * @see UnicastRemoteObject#exportObject(Remote, int, RMIClientSocketFactory, RMIServerSocketFactory)
+     */
+    public static Exporter createExporter(@Nullable RMISocketFactory sf) {
+<span class="nc" id="L99">        return createExporter(sf, sf);</span>
+    }
+
+    /**
+     * Creates a UnicastRemoteObjectExporter which creates socket using the given factories
+     *
+     * Either socket factory may be null, in which case the corresponding client or server socket
+     * creation method of RMISocketFactory is used instead.
+     *
+     * @return a UnicastRemoteObjectExporter using the given RMISocketFactory
+     * @see UnicastRemoteObject#exportObject(Remote, int, RMIClientSocketFactory, RMIServerSocketFactory)
+     * @see RMISocketFactory#setSocketFactory(RMISocketFactory)
+     */
+    public static Exporter createExporter(@Nullable RMIClientSocketFactory csf,
+                                          @Nullable RMIServerSocketFactory ssf) {
+<span class="fc" id="L114">        return new FactoriesExporter(csf, ssf);</span>
+    }
+
+    /** Implementation for the {@link #createExporter(RMIClientSocketFactory, RMIServerSocketFactory)} method */
+<span class="fc" id="L118">    private record FactoriesExporter(</span>
+            @Nullable RMIClientSocketFactory csf,
+            @Nullable RMIServerSocketFactory ssf) implements Exporter {
+
+        @Override
+        public &lt;T extends Remote&gt; T export(T remote, int port) throws RemoteException {
+<span class="fc" id="L124">            return UnicastRemoteObjects.export(remote, port, csf, ssf);</span>
+        }
+    }
+
+    /**
+     * Interface used to export remote objects which also tracks which object have been exported
+     * and allows bulk-unexporting them
+     */
+    public interface TrackingExporter extends Exporter {
+
+        /** Returns the underlying exporter used to actually export objects */
+        Exporter getUnderlyingExporter();
+
+        /**
+         * Exports the remote object to make it available to receive incoming
+         * calls, using the particular supplied port. Optionally, the object can
+         * also be excluded from tracking and, therefore, from bulk-unregistering
+         * &lt;p&gt;
+         * The object is exported using settings provided when creating
+         * this exporter.
+         *
+         * @param obj the remote object to be exported
+         * @param port the port to export the object on
+         * @param track whether the object needs to be tracked or not
+         * @return remote object stub
+         * @throws RemoteException if export fails
+         */
+        &lt;T extends Remote&gt; T export(T obj, int port, boolean track) throws RemoteException;
+
+        /**
+         * Unexport all objects previously exported with tracking by this exporter
+         * 
+         * @param force if true, unexports the object even if there are pending or in-progress calls;
+         *        if false, only unexports the object if there are no pending or in-progress calls
+         * @see UnicastRemoteObject#unexportObject(Remote, boolean)
+         */
+        void unexportAll(boolean force);
+    }
+
+    /**
+     * Creates a UnicastRemoteObjectTrackingExporter which exports objects using
+     * the given exporter and tracks them for bulk-unexporting
+     *
+     * @return a UnicastRemoteObjectExporter using the global RMISocketFactory
+     * @see TrackingExporter
+     * @see #createExporter()
+     * @see #createExporter(RMISocketFactory)
+     * @see #createExporter(RMIClientSocketFactory, RMIServerSocketFactory)
+     * @see UnicastRemoteObject#unexportObject(Remote, boolean)
+     */
+    public static TrackingExporter createTrackingExporter(Exporter exporter) {
+<span class="fc" id="L175">        return new DefaultTrackingExporter(exporter);</span>
+    }
+
+    /** Implementation for the {@link #createTrackingExporter(Exporter)} method */
+<span class="fc" id="L179">    private record DefaultTrackingExporter(Exporter exporter,</span>
+            Set&lt;Remote&gt; exportedRemotes,
+            Lock unexportLock) implements TrackingExporter {
+
+        private DefaultTrackingExporter(Exporter exporter) {
+<span class="fc" id="L184">            this(exporter, ConcurrentHashMap.newKeySet(), new ReentrantLock());</span>
+<span class="fc" id="L185">        }</span>
+
+        @Override
+        public Exporter getUnderlyingExporter() {
+<span class="nc" id="L189">            return exporter;</span>
+        }
+
+        @Override
+        public &lt;T extends Remote&gt; T export(T obj, int port, boolean track) throws RemoteException {
+<span class="fc" id="L194">            var exported = exporter.export(obj, port);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">            if (track)</span>
+<span class="fc" id="L196">                exportedRemotes.add(obj);</span>
+<span class="fc" id="L197">            return exported;</span>
+        }
+
+        @Override
+        public &lt;T extends Remote&gt; T export(T obj, int port) throws RemoteException {
+<span class="fc" id="L202">            return export(obj, port, true);</span>
+        }
+
+        @Override
+        public void unexportAll(boolean force) {
+            Set&lt;Remote&gt; toRemove;
+            // Make sure that this call will unexport object at most once
+<span class="fc" id="L209">            unexportLock.lock();</span>
+            try {
+<span class="fc" id="L211">                toRemove = new HashSet&lt;&gt;(exportedRemotes);</span>
+<span class="fc" id="L212">                exportedRemotes.removeAll(toRemove); // Remove only the ones we are going to unexport</span>
+            } finally {
+<span class="fc" id="L214">                unexportLock.unlock();</span>
+            }
+
+<span class="fc" id="L217">            List&lt;Throwable&gt; exs = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            for (Remote e : toRemove) {</span>
+                try {
+<span class="fc" id="L220">                    UnicastRemoteObject.unexportObject(e, force);</span>
+<span class="nc" id="L221">                } catch (NoSuchObjectException ex) {</span>
+<span class="nc" id="L222">                    exs.add(new IllegalStateException(&quot;object &quot; + e + &quot; not exported&quot;, ex));</span>
+<span class="fc" id="L223">                }</span>
+<span class="fc" id="L224">            }</span>
+
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">            if (!exs.isEmpty()) {</span>
+<span class="nc" id="L227">                var ex = new IllegalStateException(&quot;Some object have already been unexported&quot;);</span>
+<span class="nc" id="L228">                exs.forEach(ex::addSuppressed);</span>
+<span class="nc" id="L229">                throw ex;</span>
+            }
+<span class="fc" id="L231">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

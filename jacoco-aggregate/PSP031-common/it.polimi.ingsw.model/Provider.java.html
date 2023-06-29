@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Provider.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">Provider.java</span></div><h1>Provider.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import java.io.Serializable;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+/**
+ * Interface which contains data and allows to register/unregister observers
+ * to be notified about related changes.
+ * &lt;p&gt;
+ * Implementations should be fully concurrent and observers should be able to mutate the data,
+ * register or unregister additional observers or themselves when they are notififed of a value
+ * change.
+ *
+ * @param &lt;T&gt; type o the contained data
+ */
+public interface Provider&lt;T&gt; {
+
+    T get();
+
+    /**
+     * Registers the given observer if not already registered, otherwise does nothing.
+     *
+     * @param o observer to register
+     */
+    void registerObserver(Consumer&lt;? super T&gt; o);
+
+    void registerWeakObserver(Consumer&lt;? super T&gt; o);
+
+    void unregisterObserver(Consumer&lt;? super T&gt; o);
+
+    default &lt;T1&gt; Provider&lt;T1&gt; map(SerializableFunction&lt;T, T1&gt; mapper) {
+<span class="fc" id="L33">        return new MappedProvider&lt;&gt;(this, mapper);</span>
+    }
+
+    interface SerializableFunction&lt;T, R&gt; extends Function&lt;T, R&gt;, Serializable {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

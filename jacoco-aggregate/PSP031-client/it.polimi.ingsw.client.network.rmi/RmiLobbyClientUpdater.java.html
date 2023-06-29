@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiLobbyClientUpdater.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network.rmi</a> &gt; <span class="el_source">RmiLobbyClientUpdater.java</span></div><h1>RmiLobbyClientUpdater.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network.rmi;
+
+import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.client.updater.LobbyClientUpdater;
+import it.polimi.ingsw.model.Game;
+import it.polimi.ingsw.model.Lobby;
+import it.polimi.ingsw.rmi.RmiGameUpdater;
+import it.polimi.ingsw.rmi.RmiLobbyUpdater;
+import it.polimi.ingsw.rmi.UnicastRemoteObjects;
+import it.polimi.ingsw.updater.GameUpdater;
+
+import java.rmi.RemoteException;
+
+/**
+ * RMI LobbyClientUpdater implementation which is exported as a remotable object
+ * which will be given to the server
+ *
+ * @see LobbyClientUpdater
+ * @see it.polimi.ingsw.controller
+ */
+class RmiLobbyClientUpdater extends LobbyClientUpdater implements RmiLobbyUpdater {
+
+    private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
+    private final LobbyAndController&lt;Lobby&gt; lobbyAndController;
+
+    public RmiLobbyClientUpdater(UnicastRemoteObjects.Exporter unicastRemoteObjects,
+                                 LobbyAndController&lt;Lobby&gt; lobbyAndController) {
+<span class="fc" id="L29">        super(lobbyAndController.lobby());</span>
+<span class="fc" id="L30">        this.unicastRemoteObjects = unicastRemoteObjects;</span>
+<span class="fc" id="L31">        this.lobbyAndController = lobbyAndController;</span>
+<span class="fc" id="L32">    }</span>
+
+    LobbyAndController&lt;Lobby&gt; getLobbyAndController() {
+<span class="fc" id="L35">        return lobbyAndController;</span>
+    }
+
+    @Override
+    protected GameUpdater createGameUpdater(GameAndController&lt;Game&gt; gameAndController) {
+        try {
+<span class="fc" id="L41">            return new RmiGameUpdater.Adapter(unicastRemoteObjects.export(</span>
+<span class="fc" id="L42">                    new RmiGameClientUpdater(gameAndController.game()), 0));</span>
+<span class="nc" id="L43">        } catch (RemoteException e) {</span>
+<span class="nc" id="L44">            throw new IllegalStateException(&quot;Unexpectedly failed to export RmiGameClientUpdater&quot;, e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

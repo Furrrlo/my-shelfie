@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ThreeColumnsCommonGoalChecker.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.controller</a> &gt; <span class="el_source">ThreeColumnsCommonGoalChecker.java</span></div><h1>ThreeColumnsCommonGoalChecker.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.controller;
+
+import com.google.errorprone.annotations.Immutable;
+import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.model.CommonGoalChecker;
+import it.polimi.ingsw.model.Shelfie;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import static it.polimi.ingsw.model.ShelfieView.COLUMNS;
+import static it.polimi.ingsw.model.ShelfieView.ROWS;
+
+/**
+ * Object which can check whether a given {@link Shelfie} has achieved a common goal
+ * of type {@link it.polimi.ingsw.model.Type#THREE_COLUMNS}
+ */
+@Immutable
+<span class="fc" id="L20">public class ThreeColumnsCommonGoalChecker implements CommonGoalChecker {</span>
+
+    /**
+     * Returns the number of different colors present in a given column c of a shelfie, and if the number of
+     * colors is less than 4, it marks the columns with a progressive number according to the order they have
+     * been found
+     */
+    public int numColorsForColumn(Shelfie shelfie, int c, int[][] checked, int marker) {
+<span class="fc" id="L28">        List&lt;Color&gt; colors = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L29">        boolean fullColumn = true;</span>
+
+<span class="fc bfc" id="L31" title="All 4 branches covered.">        for (int r = 0; r &lt; ROWS &amp;&amp; fullColumn; r++) {</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            if (shelfie.tile(r, c).get() != null</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">                    &amp;&amp; !colors.contains(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor()))</span>
+<span class="fc" id="L34">                colors.add(Objects.requireNonNull(shelfie.tile(r, c).get()).getColor());</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            if (shelfie.tile(r, c).get() == null)</span>
+<span class="fc" id="L36">                fullColumn = false;</span>
+        }
+<span class="fc bfc" id="L38" title="All 4 branches covered.">        if (colors.size() &lt;= 3 &amp;&amp; fullColumn)</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">            for (int r = 0; r &lt; ROWS; r++) {</span>
+<span class="fc" id="L40">                checked[r][c] = marker;</span>
+            }
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        return fullColumn ? colors.size() : COLUMNS;</span>
+    }
+
+    @Override
+    public boolean checkCommonGoal(Shelfie shelfie) {
+<span class="fc" id="L47">        int count = 0;</span>
+<span class="fc" id="L48">        int[][] checked = new int[ROWS][COLUMNS];</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (int c = 0; c &lt; COLUMNS; c++) {</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">            if (numColorsForColumn(shelfie, c, checked, count + 1) &lt;= 3)</span>
+<span class="fc" id="L51">                count++;</span>
+        }
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        return (count &gt;= 3);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

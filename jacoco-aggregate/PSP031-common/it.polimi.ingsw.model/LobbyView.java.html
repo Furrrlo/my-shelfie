@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>LobbyView.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">LobbyView.java</span></div><h1>LobbyView.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import it.polimi.ingsw.GameAndController;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * Read-only object which represent the lobby of a game.
+ * &lt;p&gt;
+ * The lobby gets created before a game and players are temporarily placed in here
+ * first until the game starts. Once the game starts, the players can no longer
+ * leave the lobby and will maintain their spot in it even upon disconnection,
+ * until the game ends and both the lobby and the game are deleted.
+ */
+public interface LobbyView extends Serializable {
+
+    int MIN_PLAYERS = 2;
+    int MAX_PLAYERS = 4;
+
+    /** Return number of required players */
+    Provider&lt;@Nullable Integer&gt; requiredPlayers();
+
+    /** Return Property list of joined players */
+    Provider&lt;? extends @Unmodifiable List&lt;? extends LobbyPlayer&gt;&gt; joinedPlayers();
+
+    Provider&lt;? extends @Nullable GameAndController&lt;?&gt;&gt; game();
+
+    Provider&lt;Boolean&gt; thePlayerConnected();
+
+    /**
+     * Returns whether the specified nick is of the player which created the lobby or has inherited it
+     * after the creator left
+     *
+     * @param nick player's nick to check
+     * @return true if the nick is of the player which created the lobby
+     */
+    default boolean isLobbyCreator(String nick) {
+<span class="fc" id="L41">        var joinedPlayers = joinedPlayers().get();</span>
+<span class="fc bfc" id="L42" title="All 4 branches covered.">        return !joinedPlayers.isEmpty() &amp;&amp; joinedPlayers.get(0).getNick().equals(nick);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

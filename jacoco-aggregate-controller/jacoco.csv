@@ -1,0 +1,19 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+JaCoCo Aggregate Report/PSP031-server,it.polimi.ingsw.server.controller,ServerController,83,1011,20,60,14,211,21,71,4,48
+JaCoCo Aggregate Report/PSP031-server,it.polimi.ingsw.server.controller,LobbyServerController,0,1443,1,29,0,83,1,30,0,16
+JaCoCo Aggregate Report/PSP031-server,it.polimi.ingsw.server.controller,PrivateScoreProvider,5,100,0,0,2,25,1,9,1,9
+JaCoCo Aggregate Report/PSP031-server,it.polimi.ingsw.server.controller,GameServerController,5,505,4,59,3,107,4,47,0,18
+JaCoCo Aggregate Report/PSP031-server,it.polimi.ingsw.server.controller,PublicScoreProvider,5,210,0,11,2,45,1,22,1,15
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,EightEqualTilesCommonGoalChecker,0,115,0,16,0,19,0,13,0,5
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,AllCornersCommonGoalChecker,0,55,0,8,0,5,0,6,0,2
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,ThreeColumnsCommonGoalChecker,0,113,0,24,0,19,0,15,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,TwoAllDiffColumnsCommonGoalChecker,0,95,0,16,0,16,0,11,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,TwoAllDiffRowsCommonGoalChecker,0,87,0,14,0,15,0,10,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,TriangleCommonGoalChecker,0,176,0,22,0,28,0,14,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,DiagonalCommonGoalChecker,0,149,0,30,0,22,0,18,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,TwoSquaresCommonGoalChecker,0,132,0,18,0,17,0,12,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,CrossCommonGoalChecker,0,130,0,16,0,19,0,11,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,NickNotValidException,0,10,0,0,0,3,0,2,0,2
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,SixCouplesCommonGoalChecker,0,131,0,24,0,17,0,15,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,FourQuadripletsCommonGoalChecker,0,24,0,4,0,4,0,5,0,3
+JaCoCo Aggregate Report/PSP031-common,it.polimi.ingsw.controller,FourRowsCommonGoalChecker,0,89,0,14,0,16,0,10,0,3

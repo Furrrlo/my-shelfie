@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiHeartbeatClientHandler.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network.rmi</a> &gt; <span class="el_source">RmiHeartbeatClientHandler.java</span></div><h1>RmiHeartbeatClientHandler.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network.rmi;
+
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.SerializableProperty;
+import it.polimi.ingsw.rmi.RmiHeartbeatHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.rmi.RemoteException;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * RMI implementation of the heartbeat, which is in charge of answering the server's ping request
+ * and additionally detecting unexpected disconnections if too much time has passed between
+ * subsequent pings
+ */
+class RmiHeartbeatClientHandler implements RmiHeartbeatHandler, Closeable {
+
+<span class="fc" id="L27">    private static final Logger LOGGER = LoggerFactory.getLogger(RmiHeartbeatClientHandler.class);</span>
+
+    private final Clock clock;
+    private final Runnable onDisconnect;
+    private final long readTimeoutMillis;
+    private final ScheduledExecutorService heartbeatExecutor;
+<span class="fc" id="L33">    private final AtomicBoolean closed = new AtomicBoolean();</span>
+
+<span class="fc" id="L35">    private final Property&lt;Duration&gt; ping = new SerializableProperty&lt;&gt;(Duration.ZERO);</span>
+    private volatile Instant lastPing;
+
+    public RmiHeartbeatClientHandler(long readTimeout, TimeUnit readTimeoutUnit, Runnable onDisconnect) {
+<span class="fc" id="L39">        this(Clock.systemUTC(), readTimeout, readTimeoutUnit, onDisconnect);</span>
+<span class="fc" id="L40">    }</span>
+
+    public RmiHeartbeatClientHandler(Clock clock,
+                                     long readTimeout,
+                                     TimeUnit readTimeoutUnit,
+<span class="fc" id="L45">                                     Runnable onDisconnect) {</span>
+<span class="fc" id="L46">        this.clock = clock;</span>
+<span class="fc" id="L47">        this.readTimeoutMillis = readTimeoutUnit.toMillis(readTimeout);</span>
+<span class="fc" id="L48">        this.onDisconnect = onDisconnect;</span>
+<span class="fc" id="L49">        this.lastPing = Instant.EPOCH;</span>
+<span class="fc" id="L50">        this.heartbeatExecutor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()</span>
+<span class="fc" id="L51">                .name(&quot;ClientRMI-heartbeat-scheduler-thread&quot;)</span>
+<span class="fc" id="L52">                .factory());</span>
+<span class="fc" id="L53">    }</span>
+
+    @Override
+    public Instant sendHeartbeat(Instant serverTime) throws RemoteException {
+<span class="fc" id="L57">        lastPing = Instant.now(clock);</span>
+<span class="fc" id="L58">        ping.set(Duration.between(serverTime, lastPing));</span>
+<span class="fc" id="L59">        return lastPing;</span>
+    }
+
+    public void start() {
+<span class="fc" id="L63">        this.heartbeatExecutor.scheduleAtFixedRate(</span>
+                this::checkLastPing,
+                // The first needs to happen after we received the first ping, so wait a while
+                readTimeoutMillis,
+                // Check quite often just to make sure, it's not an expensive check anyway
+                readTimeoutMillis / 5,
+                TimeUnit.MILLISECONDS);
+<span class="fc" id="L70">    }</span>
+
+    private void checkLastPing() {
+<span class="pc bpc" id="L73" title="1 of 4 branches missed.">        if (!closed.get() &amp;&amp; lastPing.plus(readTimeoutMillis, ChronoUnit.MILLIS).isBefore(Instant.now(clock))) {</span>
+<span class="fc" id="L74">            LOGGER.error(&quot;RMI: connection lost&quot;);</span>
+
+            //TODO: find a better way to get the lobby (?)
+            try {
+<span class="fc" id="L78">                onDisconnect.run();</span>
+<span class="nc" id="L79">            } catch (NullPointerException e) {</span>
+<span class="nc" id="L80">                LOGGER.warn(&quot;Failed to create the lobby &quot;, e);</span>
+<span class="fc" id="L81">            }</span>
+<span class="fc" id="L82">            close();</span>
+        }
+<span class="fc" id="L84">    }</span>
+
+    public Property&lt;Duration&gt; ping() {
+<span class="nc" id="L87">        return ping;</span>
+    }
+
+    @Override
+    public void close() {
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if (closed.getAndSet(true))</span>
+<span class="nc" id="L93">            return;</span>
+
+<span class="fc" id="L95">        heartbeatExecutor.shutdown();</span>
+<span class="fc" id="L96">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

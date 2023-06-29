@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Game.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">Game.java</span></div><h1>Game.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+
+/** Modifiable implementation of {@link GameView} */
+public class Game implements GameView {
+
+    private final int gameID;
+    private final Board board;
+    private final @Unmodifiable List&lt;Player&gt; players;
+    private final Player thePlayer;
+    private final Player startingPlayer;
+    private final Property&lt;Player&gt; currentTurn;
+    private final PersonalGoal personalGoal;
+    private final @Unmodifiable List&lt;CommonGoal&gt; commonGoal;
+    private final Property&lt;@Nullable Player&gt; firstFinisher;
+    private final Property&lt;Boolean&gt; endGame;
+    private final Property&lt;Boolean&gt; suspended;
+    private final Property&lt;List&lt;@Nullable UserMessage&gt;&gt; messageList;
+
+    public Game(int gameID,
+                Board board,
+                List&lt;PlayerFactory&gt; playersFactories,
+                int thePlayerIdx,
+                int startingPlayerIdx,
+                int currentTurnIdx,
+                Function&lt;@Unmodifiable List&lt;Player&gt;, List&lt;CommonGoal&gt;&gt; commonGoalFactory,
+                PersonalGoal personalGoal,
+                @Nullable Integer firstFinisherIdx,
+                boolean endGame,
+<span class="fc" id="L39">                boolean suspended) {</span>
+        // There's a circular dependency between the players and these properties, create proxies first
+<span class="fc" id="L41">        var currentTurnProxy = new PropertyProxy&lt;Player&gt;();</span>
+<span class="fc" id="L42">        var firstFinisherProxy = new PropertyProxy&lt;Player&gt;();</span>
+        // Now we can create the actual players
+<span class="fc" id="L44">        this.players = IntStream.range(0, playersFactories.size())</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                .mapToObj(idx -&gt; playersFactories.get(idx).create(</span>
+                        idx == startingPlayerIdx,
+<span class="fc" id="L47">                        player -&gt; currentTurnProxy.map(currentTurnPlayer -&gt; {</span>
+                            // This should be the only plane where the currentTurn null value might spill
+<span class="fc" id="L49">                            Objects.requireNonNull(</span>
+                                    currentTurnPlayer,
+                                    &quot;Something went wrong during while solving Game circular dependency&quot;);
+<span class="fc" id="L52">                            return currentTurnPlayer.equals(player);</span>
+                        }),
+<span class="fc" id="L54">                        player -&gt; firstFinisherProxy.map(firstFinisher -&gt; Objects.equals(firstFinisher, player))))</span>
+<span class="fc" id="L55">                .toList();</span>
+        // Once we have players, we can set the properties to their actual value
+<span class="fc" id="L57">        currentTurnProxy.setProxied(new SerializableProperty&lt;&gt;(players.get(currentTurnIdx)));</span>
+<span class="fc" id="L58">        this.currentTurn = currentTurnProxy;</span>
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        firstFinisherProxy.setProxied(SerializableProperty.nullableProperty(firstFinisherIdx == null</span>
+<span class="fc" id="L61">                ? null</span>
+<span class="fc" id="L62">                : players.get(firstFinisherIdx)));</span>
+<span class="fc" id="L63">        this.firstFinisher = firstFinisherProxy;</span>
+
+        // We can set the rest
+<span class="fc" id="L66">        this.gameID = gameID;</span>
+<span class="fc" id="L67">        this.board = board;</span>
+<span class="fc" id="L68">        this.personalGoal = personalGoal;</span>
+<span class="fc" id="L69">        this.thePlayer = players.get(thePlayerIdx);</span>
+<span class="fc" id="L70">        this.startingPlayer = players.get(startingPlayerIdx);</span>
+<span class="fc" id="L71">        this.commonGoal = List.copyOf(commonGoalFactory.apply(players));</span>
+<span class="fc" id="L72">        this.endGame = new SerializableProperty&lt;&gt;(endGame);</span>
+<span class="fc" id="L73">        this.suspended = new SerializableProperty&lt;&gt;(suspended);</span>
+<span class="fc" id="L74">        this.messageList = new SerializableProperty&lt;&gt;(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L75">    }</span>
+
+    public interface PlayerFactory {
+
+        Player create(boolean isStartingPlayer,
+                      Function&lt;Player, Provider&lt;Boolean&gt;&gt; isCurrentTurnFactory,
+                      Function&lt;Player, Provider&lt;Boolean&gt;&gt; isFirstFinisherFactory);
+    }
+
+    @Override
+    public int getGameID() {
+<span class="fc" id="L86">        return gameID;</span>
+    }
+
+    @Override
+    public Board getBoard() {
+<span class="fc" id="L91">        return board;</span>
+    }
+
+    @Override
+    public Player thePlayer() {
+<span class="fc" id="L96">        return thePlayer;</span>
+    }
+
+    @Override
+    public Player getStartingPlayer() {
+<span class="fc" id="L101">        return startingPlayer;</span>
+    }
+
+    @Override
+    public @Unmodifiable List&lt;Player&gt; getPlayers() {
+<span class="fc" id="L106">        return players;</span>
+    }
+
+    @Override
+    public @Unmodifiable List&lt;? extends PlayerView&gt; getSortedPlayers() {
+<span class="fc" id="L111">        return players.stream()</span>
+<span class="fc" id="L112">                .sorted((Comparator&lt;PlayerView&gt;) (o1, o2) -&gt; {</span>
+<span class="fc bfc" id="L113" title="All 4 branches covered.">                    if (o1.connected().get() &amp;&amp; !o2.connected().get())</span>
+<span class="fc" id="L114">                        return -1;</span>
+<span class="fc bfc" id="L115" title="All 4 branches covered.">                    if (!o1.connected().get() &amp;&amp; o2.connected().get())</span>
+<span class="fc" id="L116">                        return 1;</span>
+<span class="fc" id="L117">                    return o2.score().get() - o1.score().get();</span>
+<span class="fc" id="L118">                }).toList();</span>
+    }
+
+    @Override
+    public Property&lt;Player&gt; currentTurn() {
+<span class="fc" id="L123">        return currentTurn;</span>
+    }
+
+    @Override
+    public PersonalGoal getPersonalGoal() {
+<span class="fc" id="L128">        return personalGoal;</span>
+    }
+
+    @Override
+    public @Unmodifiable List&lt;CommonGoal&gt; getCommonGoals() {
+<span class="fc" id="L133">        return commonGoal;</span>
+    }
+
+    @Override
+    public Property&lt;@Nullable Player&gt; firstFinisher() {
+<span class="fc" id="L138">        return firstFinisher;</span>
+    }
+
+    @Override
+    public Property&lt;Boolean&gt; endGame() {
+<span class="fc" id="L143">        return endGame;</span>
+    }
+
+    @Override
+    public Property&lt;Boolean&gt; suspended() {
+<span class="fc" id="L148">        return suspended;</span>
+    }
+
+    @Override
+    public Property&lt;List&lt;@Nullable UserMessage&gt;&gt; messageList() {
+<span class="fc" id="L153">        return messageList;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L158" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L159">            return true;</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (!(o instanceof Game game))</span>
+<span class="fc" id="L161">            return false;</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        return gameID == game.gameID &amp;&amp;</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">                board.equals(game.board) &amp;&amp;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">                thePlayer.equals(game.thePlayer) &amp;&amp;</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">                startingPlayer.equals(game.startingPlayer) &amp;&amp;</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">                currentTurn.get().equals(game.currentTurn.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">                personalGoal.equals(game.personalGoal) &amp;&amp;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">                commonGoal.equals(game.commonGoal) &amp;&amp;</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">                Objects.equals(firstFinisher.get(), game.firstFinisher.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">                players.equals(game.players) &amp;&amp;</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                endGame.get().equals(game.endGame.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">                suspended.get().equals(game.suspended.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">                messageList.get().equals(game.messageList.get());</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L178">        return Objects.hash(gameID, board, players, thePlayer, startingPlayer, currentTurn.get(), personalGoal, commonGoal,</span>
+<span class="fc" id="L179">                firstFinisher.get(), endGame.get(), suspended.get(), messageList.get());</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L184">        return &quot;Game{&quot; +</span>
+                &quot;gameID=&quot; + gameID +
+                &quot;, board=&quot; + board +
+                &quot;, players=&quot; + players +
+                &quot;, thePlayer=&quot; + thePlayer +
+                &quot;, startingPlayer=&quot; + startingPlayer +
+                &quot;, currentTurn=&quot; + currentTurn +
+                &quot;, personalGoal=&quot; + personalGoal +
+                &quot;, commonGoal=&quot; + commonGoal +
+                &quot;, firstFinisher=&quot; + firstFinisher +
+                &quot;, endGame=&quot; + endGame +
+                &quot;, suspended=&quot; + suspended +
+                &quot;, messageList=&quot; + messageList +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

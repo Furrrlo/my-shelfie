@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>MappedProvider.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">MappedProvider.java</span></div><h1>MappedProvider.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import java.io.ObjectStreamException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+class MappedProvider&lt;P, T&gt; implements Provider&lt;T&gt;, Serializable {
+
+    private final Provider&lt;P&gt; parent;
+    private final SerializableFunction&lt;P, T&gt; mapper;
+
+<span class="fc" id="L18">    private final transient Map&lt;Consumer&lt;? super T&gt;, Consumer&lt;? super P&gt;&gt; registeredObservers = new ConcurrentHashMap&lt;&gt;();</span>
+
+<span class="fc" id="L20">    private final transient Map&lt;Consumer&lt;? super T&gt;, Consumer&lt;? super P&gt;&gt; registeredWeakObservers = Collections</span>
+<span class="fc" id="L21">            .synchronizedMap(new WeakHashMap&lt;&gt;());</span>
+
+<span class="fc" id="L23">    public MappedProvider(Provider&lt;P&gt; parent, SerializableFunction&lt;P, T&gt; mapper) {</span>
+<span class="fc" id="L24">        this.parent = parent;</span>
+<span class="fc" id="L25">        this.mapper = mapper;</span>
+<span class="fc" id="L26">    }</span>
+
+    /**
+     * Custom serialization hook defined by Java spec.
+     * &lt;p&gt;
+     * We use it to create a MappedProvider with non-null observers map,
+     * as by default serialization leaves final transient fields as nulls.
+     */
+    @Serial
+    private Object readResolve() throws ObjectStreamException {
+<span class="fc" id="L36">        return new MappedProvider&lt;&gt;(parent, mapper);</span>
+    }
+
+    @Override
+    public T get() {
+<span class="fc" id="L41">        return mapper.apply(parent.get());</span>
+    }
+
+    @Override
+    public void registerObserver(Consumer&lt;? super T&gt; o) {
+<span class="fc" id="L46">        parent.registerObserver(registeredObservers.computeIfAbsent(o, key -&gt; v -&gt; key.accept(mapper.apply(v))));</span>
+<span class="fc" id="L47">    }</span>
+
+    @Override
+    public void registerWeakObserver(Consumer&lt;? super T&gt; o) {
+<span class="fc" id="L51">        parent.registerWeakObserver(registeredWeakObservers.computeIfAbsent(o, key -&gt; v -&gt; key.accept(mapper.apply(v))));</span>
+<span class="fc" id="L52">    }</span>
+
+    @Override
+    public void unregisterObserver(Consumer&lt;? super T&gt; o) {
+<span class="fc" id="L56">        var obs = registeredObservers.remove(o);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (obs != null)</span>
+<span class="fc" id="L58">            parent.unregisterObserver(obs);</span>
+
+<span class="fc" id="L60">        var weakObs = registeredWeakObservers.remove(o);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (weakObs != null)</span>
+<span class="fc" id="L62">            parent.unregisterObserver(weakObs);</span>
+<span class="fc" id="L63">    }</span>
+
+    @Override
+    public &lt;T1&gt; Provider&lt;T1&gt; map(SerializableFunction&lt;T, T1&gt; mapper) {
+<span class="fc" id="L67">        return new MappedProvider&lt;&gt;(parent, concat(this.mapper, mapper));</span>
+    }
+
+    private static &lt;P, T, T1&gt; SerializableFunction&lt;P, T1&gt; concat(Function&lt;P, T&gt; before, Function&lt;T, T1&gt; after) {
+<span class="fc" id="L71">        return t -&gt; after.apply(before.apply(t));</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L76">        return &quot;MappedProvider{&quot; +</span>
+                &quot;mapper=&quot; + mapper +
+                &quot;, registeredObservers=&quot; + registeredObservers +
+                &quot;, registeredWeakObservers=&quot; + registeredWeakObservers +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

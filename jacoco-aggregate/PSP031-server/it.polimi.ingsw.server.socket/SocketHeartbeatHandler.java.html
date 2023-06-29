@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketHeartbeatHandler.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.socket</a> &gt; <span class="el_source">SocketHeartbeatHandler.java</span></div><h1>SocketHeartbeatHandler.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.socket;
+
+import it.polimi.ingsw.HeartbeatHandler;
+import it.polimi.ingsw.socket.packets.HeartbeatPing;
+import it.polimi.ingsw.socket.packets.HeartbeatPong;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.function.Consumer;
+
+/**
+ * Socket based heartbeat handler which is able to deliver heartbeat pings
+ * to a specific client.
+ * &lt;p&gt;
+ * This is a per-socket object.
+ *
+ * @see HeartbeatHandler
+ */
+class SocketHeartbeatHandler implements HeartbeatHandler, Closeable {
+
+    private final ServerSocketManager socketManager;
+    private final Consumer&lt;Throwable&gt; close;
+    private volatile boolean isClosed;
+
+<span class="fc" id="L26">    public SocketHeartbeatHandler(ServerSocketManager socketManager, Consumer&lt;Throwable&gt; pingFailed) {</span>
+<span class="fc" id="L27">        this.socketManager = socketManager;</span>
+<span class="fc" id="L28">        this.close = pingFailed;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    @SuppressWarnings(&quot;EmptyTryBlock&quot;)
+    public void sendHeartbeat(Instant serverTime) {
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (isClosed)</span>
+<span class="fc" id="L35">            return;</span>
+
+<span class="fc" id="L37">        try (var ignored = socketManager.send(new HeartbeatPing(serverTime), HeartbeatPong.class)) {</span>
+            // Received pong, we are happy
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        } catch (IOException e) {</span>
+<span class="fc" id="L40">            close.accept(e);</span>
+<span class="fc" id="L41">        }</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public void close() {
+<span class="fc" id="L46">        isClosed = true;</span>
+<span class="fc" id="L47">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

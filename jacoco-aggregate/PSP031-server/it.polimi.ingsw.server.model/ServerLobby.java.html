@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ServerLobby.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.model</a> &gt; <span class="el_source">ServerLobby.java</span></div><h1>ServerLobby.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.model;
+
+import it.polimi.ingsw.model.LobbyPlayer;
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.SerializableProperty;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.List;
+import java.util.Objects;
+
+/** Modifiable implementation of {@link ServerLobbyView} */
+public class ServerLobby implements ServerLobbyView {
+
+    private final Property&lt;@Nullable Integer&gt; requiredPlayers;
+    private final Property&lt;List&lt;LobbyPlayer&gt;&gt; joinedPlayers;
+    private final Property&lt;@Nullable ServerGameAndController&lt;ServerGame&gt;&gt; game;
+
+    /**
+     * Creates Lobby with #requiredPlayer = requiredPlayer and Empty Property list of Joined Players
+     */
+<span class="fc" id="L22">    public ServerLobby() {</span>
+<span class="fc" id="L23">        this.requiredPlayers = SerializableProperty.nullableProperty(null);</span>
+<span class="fc" id="L24">        this.joinedPlayers = new SerializableProperty&lt;&gt;(List.of());</span>
+<span class="fc" id="L25">        this.game = SerializableProperty.nullableProperty(null);</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    public Property&lt;@Nullable Integer&gt; requiredPlayers() {
+<span class="fc" id="L30">        return requiredPlayers;</span>
+    }
+
+    @Override
+    public Property&lt;@Unmodifiable List&lt;LobbyPlayer&gt;&gt; joinedPlayers() {
+<span class="fc" id="L35">        return joinedPlayers;</span>
+    }
+
+    @Override
+    public Property&lt;@Nullable ServerGameAndController&lt;ServerGame&gt;&gt; game() {
+<span class="fc" id="L40">        return game;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L46">            return true;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (!(o instanceof ServerLobby that))</span>
+<span class="fc" id="L48">            return false;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        return Objects.equals(requiredPlayers.get(), that.requiredPlayers.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">                joinedPlayers.get().equals(that.joinedPlayers.get()) &amp;&amp;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">                Objects.equals(game.get(), that.game.get());</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L56">        return Objects.hash(requiredPlayers.get(), joinedPlayers.get(), game.get());</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L61">        return &quot;ServerLobby{&quot; +</span>
+                &quot;requiredPlayers=&quot; + requiredPlayers +
+                &quot;, joinedPlayers=&quot; + joinedPlayers +
+                &quot;, game=&quot; + game +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

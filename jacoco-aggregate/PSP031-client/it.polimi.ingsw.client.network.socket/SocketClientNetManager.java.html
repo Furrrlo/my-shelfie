@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketClientNetManager.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network.socket</a> &gt; <span class="el_source">SocketClientNetManager.java</span></div><h1>SocketClientNetManager.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network.socket;
+
+import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.NetworkConstants;
+import it.polimi.ingsw.client.network.ClientNetManager;
+import it.polimi.ingsw.controller.NickNotValidException;
+import it.polimi.ingsw.model.Lobby;
+import it.polimi.ingsw.socket.packets.*;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+/** NetManager implementation which uses a protocol built on top of raw TCP sockets */
+public class SocketClientNetManager implements ClientNetManager {
+
+    public static final int DEFAULT_PORT = 1234;
+<span class="fc" id="L27">    private static final Logger LOGGER = LoggerFactory.getLogger(SocketClientNetManager.class);</span>
+
+    private final ExecutorService threadPool;
+    private final InetSocketAddress serverAddress;
+    private final ClientSocketManager socketManager;
+    private final String nick;
+
+    private final long readTimeout;
+    private final TimeUnit readTimeoutUnit;
+
+    private volatile @Nullable Future&lt;?&gt; heartbeatHandlerTask;
+    private volatile @Nullable Future&lt;?&gt; updaterTask;
+    private volatile @Nullable Lobby lobby;
+
+    public static ClientNetManager connect(InetSocketAddress serverAddress, String nick)
+            throws IOException, NickNotValidException {
+<span class="nc" id="L43">        return connect(</span>
+                serverAddress,
+<span class="nc" id="L45">                TimeUnit.MILLISECONDS.convert(NetworkConstants.READ_TIMEOUT), TimeUnit.MILLISECONDS,</span>
+<span class="nc" id="L46">                TimeUnit.MILLISECONDS.convert(NetworkConstants.RESPONSE_TIMEOUT), TimeUnit.MILLISECONDS,</span>
+                nick);
+    }
+
+    public static ClientNetManager connect(InetSocketAddress serverAddress,
+                                           long readTimeout,
+                                           TimeUnit readTimeoutUnit,
+                                           long responseTimeout,
+                                           TimeUnit responseTimeoutUnit,
+                                           String nick)
+            throws IOException, NickNotValidException {
+<span class="fc" id="L57">        return connect(serverAddress, readTimeout, readTimeoutUnit, responseTimeout, responseTimeoutUnit, new Socket(), nick);</span>
+    }
+
+    @VisibleForTesting
+    public static SocketClientNetManager connect(InetSocketAddress serverAddress,
+                                                 long readTimeout,
+                                                 TimeUnit readTimeoutUnit,
+                                                 long responseTimeout,
+                                                 TimeUnit responseTimeoutUnit,
+                                                 Socket socket,
+                                                 String nick)
+            throws IOException, NickNotValidException {
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (readTimeout == -1) {</span>
+<span class="nc" id="L70">            socket.connect(serverAddress);</span>
+        } else {
+<span class="fc" id="L72">            var readTimeoutMillis = (int) readTimeoutUnit.toMillis(readTimeout);</span>
+<span class="fc" id="L73">            socket.connect(serverAddress, readTimeoutMillis);</span>
+<span class="fc" id="L74">            socket.setSoTimeout(readTimeoutMillis);</span>
+        }
+<span class="fc" id="L76">        socket.setTcpNoDelay(true);</span>
+
+        ClientSocketManager socketManager;
+        try {
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            socketManager = responseTimeout == -1</span>
+<span class="nc" id="L81">                    ? new ClientSocketManagerImpl(socket)</span>
+<span class="fc" id="L82">                    : new ClientSocketManagerImpl(socket, responseTimeout, responseTimeoutUnit);</span>
+<span class="fc" id="L83">            socketManager.setNick(nick);</span>
+<span class="nc" id="L84">        } catch (Throwable t) {</span>
+<span class="nc" id="L85">            socket.close();</span>
+<span class="nc" id="L86">            throw t;</span>
+<span class="fc" id="L87">        }</span>
+
+<span class="fc" id="L89">        LOGGER.info(&quot;Connected to : &quot; + serverAddress);</span>
+
+        try {
+<span class="fc" id="L92">            var netManager = new SocketClientNetManager(serverAddress, socketManager, readTimeout, readTimeoutUnit, nick);</span>
+<span class="fc" id="L93">            socketManager.setOnClose(netManager::doClose);</span>
+<span class="fc" id="L94">            netManager.doConnect();</span>
+<span class="fc" id="L95">            return netManager;</span>
+<span class="fc" id="L96">        } catch (Throwable t) {</span>
+            try {
+<span class="fc" id="L98">                socketManager.close();</span>
+<span class="nc" id="L99">            } catch (Throwable t0) {</span>
+<span class="nc" id="L100">                t.addSuppressed(t0);</span>
+<span class="fc" id="L101">            }</span>
+<span class="fc" id="L102">            throw t;</span>
+        }
+    }
+
+    private SocketClientNetManager(InetSocketAddress serverAddress,
+                                   ClientSocketManager socketManager,
+                                   long readTimeout,
+                                   TimeUnit readTimeoutUnit,
+<span class="fc" id="L110">                                   String nick) {</span>
+<span class="fc" id="L111">        this.serverAddress = serverAddress;</span>
+<span class="fc" id="L112">        this.socketManager = socketManager;</span>
+<span class="fc" id="L113">        this.readTimeout = readTimeout;</span>
+<span class="fc" id="L114">        this.readTimeoutUnit = readTimeoutUnit;</span>
+<span class="fc" id="L115">        this.nick = nick;</span>
+<span class="fc" id="L116">        this.threadPool = Executors.newFixedThreadPool(2, r -&gt; {</span>
+<span class="fc" id="L117">            var th = new Thread(r);</span>
+<span class="fc" id="L118">            th.setName(&quot;ClientUpdater-thread&quot;);</span>
+<span class="fc" id="L119">            return th;</span>
+        });
+<span class="fc" id="L121">    }</span>
+
+    @Override
+    public ClientNetManager recreateAndReconnect() throws Exception {
+<span class="nc" id="L125">        return SocketClientNetManager.connect(serverAddress,</span>
+                readTimeout,
+                readTimeoutUnit,
+<span class="nc" id="L128">                socketManager.getDefaultResponseTimeout(),</span>
+<span class="nc" id="L129">                socketManager.getDefaultResponseTimeoutUnit(),</span>
+                new Socket(),
+                nick);
+    }
+
+    private void doConnect() throws IOException, NickNotValidException {
+<span class="fc" id="L135">        try (var lobbyCtx = socketManager.send(new JoinPacket(nick), JoinResponsePacket.class)) {</span>
+<span class="pc bpc" id="L136" title="1 of 3 branches missed.">            switch (lobbyCtx.getPacket()) {</span>
+<span class="fc" id="L137">                case NickNotValidPacket p -&gt; {</span>
+<span class="fc" id="L138">                    var nickException = new NickNotValidException(p.message());</span>
+
+                    try {
+<span class="fc" id="L141">                        lobbyCtx.reply(new NickNotValidReceivedPacket());</span>
+<span class="nc" id="L142">                    } catch (IOException ex) {</span>
+                        // We ignore exceptions on the last ack receival, because the socket may
+                        // be closed before we are able to read out the last ack packet
+                        // We don't care about whether the server has received this anyway,
+                        // we can just hope it did and go on
+<span class="nc" id="L147">                        ex.addSuppressed(new IOException(&quot;Failed to send last LobbyReceivedPacket ack&quot;, ex));</span>
+<span class="fc" id="L148">                    }</span>
+
+                    try {
+<span class="fc" id="L151">                        close();</span>
+<span class="nc" id="L152">                    } catch (IOException e) {</span>
+<span class="nc" id="L153">                        nickException.addSuppressed(new IOException(&quot;Failed to close socket&quot;, e));</span>
+<span class="fc" id="L154">                    }</span>
+
+<span class="fc" id="L156">                    throw nickException;</span>
+                }
+<span class="fc" id="L158">                case JoinedPacket ignored -&gt; heartbeatHandlerTask = threadPool.submit(() -&gt; {</span>
+                    try {
+<span class="fc" id="L160">                        var heartbeat = new SocketClientHeartbeatHandler(socketManager);</span>
+<span class="fc" id="L161">                        heartbeat.run();</span>
+<span class="fc" id="L162">                    } catch (Throwable t) {</span>
+                        try {
+<span class="fc" id="L164">                            close();</span>
+<span class="nc" id="L165">                        } catch (IOException e) {</span>
+<span class="nc" id="L166">                            t.addSuppressed(new IOException(&quot;Failed to close SocketClientNetManager&quot;, e));</span>
+<span class="fc" id="L167">                        }</span>
+
+<span class="fc" id="L169">                        LOGGER.error(&quot;Uncaught exception in SocketClientHeartbeatHandler&quot;, t);</span>
+<span class="fc" id="L170">                    }</span>
+<span class="fc" id="L171">                });</span>
+            }
+        }
+<span class="fc" id="L174">    }</span>
+
+    @Override
+    public String getHost() {
+<span class="nc" id="L178">        return serverAddress.getHostName();</span>
+    }
+
+    @Override
+    public int getPort() {
+<span class="nc" id="L183">        return serverAddress.getPort();</span>
+    }
+
+    @Override
+    public String getNick() {
+<span class="nc" id="L188">        return nick;</span>
+    }
+
+    @Override
+    public LobbyAndController&lt;Lobby&gt; joinGame() throws IOException {
+<span class="fc" id="L193">        try (var lobbyCtx = socketManager.send(new JoinGamePacket(), LobbyPacket.class)) {</span>
+<span class="fc" id="L194">            final var lobby = lobbyCtx.getPacket().lobby();</span>
+<span class="fc" id="L195">            this.lobby = lobby;</span>
+
+<span class="fc" id="L197">            var updaterTask = this.updaterTask;</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">            if (updaterTask != null)</span>
+<span class="nc" id="L199">                updaterTask.cancel(true);</span>
+<span class="fc" id="L200">            this.updaterTask = threadPool.submit(() -&gt; {</span>
+                try {
+<span class="fc" id="L202">                    var lobbyUpdater = new SocketLobbyClientUpdater(lobby, socketManager);</span>
+<span class="fc" id="L203">                    var gameUpdater = lobbyUpdater.get();</span>
+<span class="fc" id="L204">                    LOGGER.info(&quot;[Client] [&quot; + nick + &quot;] shut down lobby updater&quot;);</span>
+
+<span class="fc bfc" id="L206" title="All 2 branches covered.">                    if (gameUpdater != null) {</span>
+<span class="fc" id="L207">                        gameUpdater.run();</span>
+<span class="fc" id="L208">                        LOGGER.info(&quot;[Client] [&quot; + nick + &quot;] shut down game updater&quot;);</span>
+                    }
+<span class="nc" id="L210">                } catch (Throwable t) {</span>
+                    try {
+<span class="nc" id="L212">                        close();</span>
+<span class="nc" id="L213">                    } catch (IOException e) {</span>
+<span class="nc" id="L214">                        t.addSuppressed(new IOException(&quot;Failed to close SocketClientNetManager&quot;, e));</span>
+<span class="nc" id="L215">                    }</span>
+
+<span class="nc" id="L217">                    LOGGER.error(&quot;Uncaught exception in SocketClient*Updater&quot;, t);</span>
+<span class="fc" id="L218">                }</span>
+<span class="fc" id="L219">            });</span>
+<span class="fc" id="L220">            lobbyCtx.reply(new LobbyReceivedPacket());</span>
+<span class="fc" id="L221">            return new LobbyAndController&lt;&gt;(lobby, new SocketLobbyController(socketManager));</span>
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+<span class="fc" id="L227">        socketManager.close();</span>
+<span class="fc" id="L228">    }</span>
+
+    private void doClose(Closeable socketManagerDoClose) throws IOException {
+        try {
+<span class="fc" id="L232">            var heartbeatHandlerTask = this.heartbeatHandlerTask;</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">            if (heartbeatHandlerTask != null)</span>
+<span class="fc" id="L234">                heartbeatHandlerTask.cancel(true);</span>
+<span class="fc" id="L235">            var updaterTask = this.updaterTask;</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">            if (updaterTask != null)</span>
+<span class="fc" id="L237">                updaterTask.cancel(true);</span>
+<span class="fc" id="L238">            socketManagerDoClose.close();</span>
+        } finally {
+<span class="fc" id="L240">            var lobby = this.lobby;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            if (lobby != null)</span>
+<span class="fc" id="L242">                lobby.disconnectThePlayer(nick);</span>
+        }
+<span class="fc" id="L244">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

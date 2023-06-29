@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>GameView.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">GameView.java</span></div><h1>GameView.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.io.Serializable;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+/** Read-only object which represent an in-progress game as seen by one player */
+public interface GameView extends Serializable {
+
+    /**
+     * Timeout after which a game which is suspended (aka it does not have enough players
+     * to go on) is terminated
+     */
+<span class="fc" id="L18">    Duration SUSPENDED_GAME_TIMEOUT = Duration.of(30, ChronoUnit.SECONDS);</span>
+
+    /** Returns game ID */
+    int getGameID();
+
+    /** Returns playing board */
+    BoardView getBoard();
+
+    /** Returns list of players */
+    @Unmodifiable
+    List&lt;? extends PlayerView&gt; getPlayers();
+
+    /** Returns list of players, sorted by score */
+    @Unmodifiable
+    List&lt;? extends PlayerView&gt; getSortedPlayers();
+
+    /** Returns this client's player */
+    PlayerView thePlayer();
+
+    /** Returns the player who has started his turn first */
+    PlayerView getStartingPlayer();
+
+    /** Return player whose now playing */
+    Provider&lt;? extends PlayerView&gt; currentTurn();
+
+    /** Return personal goal of the player */
+    PersonalGoalView getPersonalGoal();
+
+    /** Return list of common goals of the game */
+    @Unmodifiable
+    List&lt;? extends CommonGoalView&gt; getCommonGoals();
+
+    /** Return first player completing his shelfie */
+    Provider&lt;? extends @Nullable PlayerView&gt; firstFinisher();
+
+    /** Returns endGame */
+    Provider&lt;Boolean&gt; endGame();
+
+    Provider&lt;? extends List&lt;UserMessage&gt;&gt; messageList();
+
+    /** Returns whether the game is suspended */
+    Provider&lt;Boolean&gt; suspended();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

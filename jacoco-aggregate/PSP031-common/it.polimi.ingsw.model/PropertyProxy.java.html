@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PropertyProxy.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">PropertyProxy.java</span></div><h1>PropertyProxy.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import org.jetbrains.annotations.Nullable;
+
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+public class PropertyProxy&lt;T&gt; implements Property&lt;T&gt;, Serializable {
+
+    private @Nullable Property&lt;T&gt; proxied;
+
+<span class="fc" id="L14">    public PropertyProxy() {</span>
+<span class="fc" id="L15">        this.proxied = null;</span>
+<span class="fc" id="L16">    }</span>
+
+    private Property&lt;T&gt; getProxied() {
+<span class="fc" id="L19">        return Objects.requireNonNull(proxied, &quot;Proxy hasn't been resolved yet&quot;);</span>
+    }
+
+    public void setProxied(Property&lt;T&gt; proxied) {
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (this.proxied != null)</span>
+<span class="fc" id="L24">            throw new IllegalStateException(&quot;Proxy has already been resolved&quot;);</span>
+<span class="fc" id="L25">        this.proxied = proxied;</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    public void set(T val) {
+<span class="fc" id="L30">        getProxied().set(val);</span>
+<span class="fc" id="L31">    }</span>
+
+    @Override
+    public void update(Function&lt;T, T&gt; updater) {
+<span class="fc" id="L35">        getProxied().update(updater);</span>
+<span class="fc" id="L36">    }</span>
+
+    @Override
+    public T get() {
+<span class="fc" id="L40">        return getProxied().get();</span>
+    }
+
+    @Override
+    public void registerObserver(Consumer&lt;? super T&gt; o) {
+<span class="fc" id="L45">        getProxied().registerObserver(o);</span>
+<span class="fc" id="L46">    }</span>
+
+    @Override
+    public void registerWeakObserver(Consumer&lt;? super T&gt; o) {
+<span class="fc" id="L50">        getProxied().registerWeakObserver(o);</span>
+<span class="fc" id="L51">    }</span>
+
+    @Override
+    public void unregisterObserver(Consumer&lt;? super T&gt; o) {
+<span class="fc" id="L55">        getProxied().unregisterObserver(o);</span>
+<span class="fc" id="L56">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L60">        return &quot;PropertyProxy{&quot; +</span>
+                &quot;proxied=&quot; + proxied +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

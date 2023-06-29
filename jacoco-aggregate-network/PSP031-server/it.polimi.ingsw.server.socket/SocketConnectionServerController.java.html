@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketConnectionServerController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.socket</a> &gt; <span class="el_source">SocketConnectionServerController.java</span></div><h1>SocketConnectionServerController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.socket;
+
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.controller.NickNotValidException;
+import it.polimi.ingsw.server.controller.BaseServerConnection;
+import it.polimi.ingsw.server.controller.ServerController;
+import it.polimi.ingsw.socket.SocketManager;
+import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.utils.ThreadPools;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ * Socket-based service implementation which clients can use to establish a connection with the server.
+ * &lt;p&gt;
+ * This acts as the entry-point for networking for all clients that want to connect to the server using sockets.
+ * Once a connection is established, this will delegate most of the job to the protocol-agnostic
+ * {@link ServerController}, which will determine whether the player can connect.
+ */
+public class SocketConnectionServerController implements Closeable {
+
+<span class="fc" id="L35">    private static final Logger LOGGER = LoggerFactory.getLogger(SocketConnectionServerController.class);</span>
+
+    private final ServerController controller;
+    private final ExecutorService threadPool;
+    private final ServerSocket socketServer;
+
+    /**
+     * Maximum time to wait without any input before considering a socket dead in {@link #readTimeoutUnit},
+     * or -1 to wait indefinitely
+     */
+    private final long readTimeout;
+    private final TimeUnit readTimeoutUnit;
+
+    /** Maximum time to wait for a response in {@link #responseTimeoutUnit}, or -1 to wait indefinitely */
+    private final long responseTimeout;
+    private final TimeUnit responseTimeoutUnit;
+
+    private final Future&lt;?&gt; acceptConnectionsTask;
+<span class="fc" id="L53">    private final Set&lt;PlayerConnection&gt; connections = ConcurrentHashMap.newKeySet();</span>
+
+    public SocketConnectionServerController(ServerController controller, int port)
+            throws IOException {
+<span class="nc" id="L57">        this(controller, new ServerSocket(port), -1, TimeUnit.MILLISECONDS, -1, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L58">    }</span>
+
+    public SocketConnectionServerController(ServerController controller,
+                                            int port,
+                                            long readTimeout,
+                                            TimeUnit readTimeoutUnit,
+                                            long responseTimeout,
+                                            TimeUnit responseTimeoutUnit)
+            throws IOException {
+<span class="nc" id="L67">        this(controller, new ServerSocket(port), readTimeout, readTimeoutUnit, responseTimeout, responseTimeoutUnit);</span>
+<span class="nc" id="L68">    }</span>
+
+    @VisibleForTesting
+    public SocketConnectionServerController(ServerController controller,
+                                            ServerSocket serverSocket,
+                                            long readTimeout,
+                                            TimeUnit readTimeoutUnit,
+                                            long responseTimeout,
+<span class="fc" id="L76">                                            TimeUnit responseTimeoutUnit) {</span>
+<span class="fc" id="L77">        this.controller = controller;</span>
+<span class="fc" id="L78">        this.threadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()</span>
+<span class="fc" id="L79">                .name(&quot;SocketConnectionServerController-thread-&quot;, 0)</span>
+<span class="fc" id="L80">                .factory());</span>
+<span class="fc" id="L81">        this.socketServer = serverSocket;</span>
+<span class="fc" id="L82">        this.readTimeout = readTimeout;</span>
+<span class="fc" id="L83">        this.readTimeoutUnit = readTimeoutUnit;</span>
+<span class="fc" id="L84">        this.responseTimeout = responseTimeout;</span>
+<span class="fc" id="L85">        this.responseTimeoutUnit = responseTimeoutUnit;</span>
+<span class="fc" id="L86">        this.acceptConnectionsTask = threadPool.submit(</span>
+<span class="fc" id="L87">                ThreadPools.giveNameToTask(&quot;SocketConnectionServerController-accept-thread&quot;, this::acceptConnectionsLoop));</span>
+<span class="fc" id="L88">    }</span>
+
+    @SuppressWarnings(&quot;FutureReturnValueIgnored&quot;) // We don't need to keep track of it as we shut down everything together
+    private void acceptConnectionsLoop() {
+        try {
+            do {
+<span class="fc" id="L94">                final Socket socket = socketServer.accept();</span>
+<span class="fc" id="L95">                socket.setTcpNoDelay(true);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                if (readTimeout != -1)</span>
+<span class="nc" id="L97">                    socket.setSoTimeout((int) readTimeoutUnit.toMillis(readTimeout));</span>
+<span class="fc" id="L98">                LOGGER.info(&quot;[Server] New socket client connected: {}&quot;, socket.getRemoteSocketAddress());</span>
+<span class="fc" id="L99">                threadPool.submit(ThreadPools.giveNameToTask(n -&gt; n + &quot;[doJoin]&quot;, () -&gt; {</span>
+                    PlayerConnection connection;
+                    try {
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                        connection = doConnect(responseTimeout == -1</span>
+<span class="nc" id="L103">                                ? new ServerSocketManagerImpl(threadPool, socket)</span>
+<span class="fc" id="L104">                                : new ServerSocketManagerImpl(threadPool, socket, responseTimeout, responseTimeoutUnit));</span>
+<span class="nc" id="L105">                    } catch (IOException e) {</span>
+<span class="nc" id="L106">                        throw new RuntimeException(&quot;Failed to connect player&quot;, e);</span>
+<span class="fc" id="L107">                    }</span>
+
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                    if (connection != null)</span>
+<span class="fc" id="L110">                        connection.joinGameTask = threadPool.submit(ThreadPools.giveNameToTask(</span>
+<span class="fc" id="L111">                                n -&gt; n + &quot;[&quot; + connection.getNick() + &quot;:joinGameLoop]&quot;,</span>
+<span class="fc" id="L112">                                () -&gt; joinGameLoop(connection)),</span>
+                                threadPool);
+<span class="fc" id="L114">                }));</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">            } while (!Thread.interrupted());</span>
+<span class="nc" id="L116">        } catch (InterruptedIOException ignored) {</span>
+            // Thread was interrupted to stop, normal control flow
+<span class="fc" id="L118">        } catch (IOException e) {</span>
+<span class="fc" id="L119">            throw new UncheckedIOException(e);</span>
+<span class="nc" id="L120">        }</span>
+<span class="nc" id="L121">    }</span>
+
+    @Override
+    public void close() throws IOException {
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for (PlayerConnection c : connections) {</span>
+            try {
+<span class="fc" id="L127">                c.close();</span>
+<span class="nc" id="L128">            } catch (IOException ex) {</span>
+<span class="nc" id="L129">                LOGGER.error(&quot;Failed to close player socket&quot;, ex);</span>
+<span class="fc" id="L130">            }</span>
+<span class="fc" id="L131">        }</span>
+
+<span class="fc" id="L133">        acceptConnectionsTask.cancel(true);</span>
+<span class="fc" id="L134">        socketServer.close();</span>
+<span class="fc" id="L135">        threadPool.shutdown();</span>
+<span class="fc" id="L136">    }</span>
+
+    private @Nullable PlayerConnection doConnect(ServerSocketManager socketManager) throws IOException {
+<span class="fc" id="L139">        final var joinCtx = socketManager.receive(JoinPacket.class);</span>
+<span class="fc" id="L140">        final var nick = joinCtx.getPacket().nick();</span>
+<span class="fc" id="L141">        LOGGER.info(&quot;[Server] {} is joining...&quot;, nick);</span>
+<span class="fc" id="L142">        socketManager.setNick(nick);</span>
+
+<span class="fc" id="L144">        final var connection = new PlayerConnection(controller, socketManager, nick);</span>
+<span class="fc" id="L145">        connections.add(connection);</span>
+<span class="fc" id="L146">        socketManager.setOnClose(connection::onSocketClose);</span>
+        try {
+<span class="fc" id="L148">            var heartbeatHandler = new SocketHeartbeatHandler(socketManager, connection::disconnectPlayer);</span>
+<span class="fc" id="L149">            connection.heartbeatHandler = heartbeatHandler;</span>
+<span class="fc" id="L150">            controller.connectPlayer(nick, heartbeatHandler);</span>
+<span class="fc" id="L151">            connection.verifyNick();</span>
+<span class="fc" id="L152">            joinCtx.reply(new JoinedPacket());</span>
+<span class="fc" id="L153">            return connection;</span>
+<span class="fc" id="L154">        } catch (NickNotValidException e) {</span>
+<span class="fc" id="L155">            joinCtx.reply(new NickNotValidPacket(e.getMessage()), NickNotValidReceivedPacket.class).ack();</span>
+<span class="fc" id="L156">            connection.close();</span>
+<span class="nc" id="L157">        } catch (Throwable e) {</span>
+<span class="nc" id="L158">            connection.disconnectPlayer(e);</span>
+<span class="fc" id="L159">        }</span>
+
+<span class="fc" id="L161">        return null;</span>
+    }
+
+    private void joinGameLoop(PlayerConnection connection) {
+        try {
+            do {
+<span class="fc" id="L167">                doJoinGame(connection);</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">            } while (!Thread.currentThread().isInterrupted());</span>
+<span class="fc" id="L169">        } catch (InterruptedIOException ignored) {</span>
+            // Thread was interrupted to stop, normal control flow
+<span class="nc" id="L171">        } catch (IOException | DisconnectedException ex) {</span>
+<span class="nc" id="L172">            connection.disconnectPlayer(ex);</span>
+<span class="pc" id="L173">        }</span>
+<span class="fc" id="L174">    }</span>
+
+    private void doJoinGame(PlayerConnection connection) throws IOException, DisconnectedException {
+<span class="fc" id="L177">        var nick = connection.getNick();</span>
+<span class="fc" id="L178">        var socketManager = connection.getSocketManager();</span>
+
+<span class="fc" id="L180">        try (var joinCtx = connection.getSocketManager().receive(JoinGamePacket.class)) {</span>
+<span class="fc" id="L181">            var lobbyCtx = new AtomicReference&lt;SocketManager.PacketReplyContext&lt;C2SAckPacket, S2CAckPacket, LobbyReceivedPacket&gt;&gt;();</span>
+<span class="fc" id="L182">            controller.joinGame(</span>
+                    nick,
+                    connection,
+<span class="fc" id="L185">                    connection::onGameOver,</span>
+                    l -&gt; {
+                        try {
+<span class="fc" id="L188">                            lobbyCtx.set(joinCtx.reply(new LobbyPacket(l.lobby()), LobbyReceivedPacket.class));</span>
+<span class="fc" id="L189">                            return new SocketLobbyServerUpdater(socketManager);</span>
+<span class="nc" id="L190">                        } catch (IOException e) {</span>
+<span class="nc" id="L191">                            throw new DisconnectedException(e);</span>
+                        }
+                    },
+                    lobbyController -&gt; {
+<span class="fc" id="L195">                        var socketController = new SocketServerLobbyController(socketManager, lobbyController, nick);</span>
+<span class="fc" id="L196">                        connection.lobbyControllerTask.set(threadPool.submit(ThreadPools.giveNameToTask(</span>
+<span class="fc" id="L197">                                n -&gt; n + &quot;[&quot; + nick + &quot;:lobbyController]&quot;,</span>
+                                () -&gt; {
+                                    try {
+<span class="fc" id="L200">                                        socketController.run();</span>
+<span class="nc" id="L201">                                    } catch (Throwable t) {</span>
+<span class="nc" id="L202">                                        connection.disconnectPlayer(t);</span>
+<span class="fc" id="L203">                                    }</span>
+<span class="fc" id="L204">                                })));</span>
+<span class="fc" id="L205">                        return socketController;</span>
+                    },
+                    (serverPlayer, game) -&gt; {
+<span class="fc" id="L208">                        var socketController = new SocketServerGameController(threadPool, socketManager, serverPlayer, game);</span>
+<span class="fc" id="L209">                        connection.gameControllerTask.set(threadPool.submit(ThreadPools.giveNameToTask(</span>
+<span class="fc" id="L210">                                n -&gt; n + &quot;[&quot; + nick + &quot;:gameController]&quot;,</span>
+                                () -&gt; {
+                                    try {
+<span class="fc" id="L213">                                        socketController.run();</span>
+<span class="nc" id="L214">                                    } catch (Throwable t) {</span>
+<span class="nc" id="L215">                                        connection.disconnectPlayer(t);</span>
+<span class="fc" id="L216">                                    }</span>
+<span class="fc" id="L217">                                })));</span>
+<span class="fc" id="L218">                        return socketController;</span>
+                    });
+<span class="fc" id="L220">            Objects.requireNonNull(lobbyCtx.get(), &quot;Lobby was somehow not sent to the player&quot;).ack();</span>
+        }
+<span class="fc" id="L222">    }</span>
+
+    private class PlayerConnection extends BaseServerConnection {
+
+        private final ServerSocketManager socketManager;
+        volatile @Nullable Closeable heartbeatHandler;
+        volatile @Nullable Future&lt;?&gt; joinGameTask;
+<span class="fc" id="L229">        final AtomicReference&lt;@Nullable Future&lt;?&gt;&gt; lobbyControllerTask = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L230">        final AtomicReference&lt;@Nullable Future&lt;?&gt;&gt; gameControllerTask = new AtomicReference&lt;&gt;();</span>
+
+        private volatile @Nullable Closeable socketManagerDoClose;
+
+        public PlayerConnection(ServerController controller,
+                                ServerSocketManager socketManager,
+<span class="fc" id="L236">                                String nick) {</span>
+<span class="fc" id="L237">            super(controller, nick);</span>
+<span class="fc" id="L238">            this.socketManager = socketManager;</span>
+<span class="fc" id="L239">        }</span>
+
+        public ServerSocketManager getSocketManager() {
+<span class="fc" id="L242">            return socketManager;</span>
+        }
+
+        @Override
+        protected void verifyNick() {
+            // Override to be able to access it in the outer class
+<span class="fc" id="L248">            super.verifyNick();</span>
+<span class="fc" id="L249">        }</span>
+
+        @Override
+        @SuppressWarnings(&quot;MethodDoesntCallSuperMethod&quot;) // It's called indirectly by doClose(...)
+        public void close() throws IOException {
+            // This call will bootstrap the socketManager close procedure, which will then
+            // invoke doClose(...),, as it was previously registered using setOnClose
+            // The actual close impl can be found in doClose(...)
+<span class="fc" id="L257">            socketManager.close();</span>
+<span class="fc" id="L258">        }</span>
+
+        private void onSocketClose(Closeable socketManagerDoClose) throws IOException {
+<span class="fc" id="L261">            this.socketManagerDoClose = socketManagerDoClose;</span>
+            try {
+<span class="fc" id="L263">                super.close();</span>
+            } finally {
+<span class="fc" id="L265">                this.socketManagerDoClose = null;</span>
+<span class="fc" id="L266">                connections.remove(this);</span>
+            }
+<span class="fc" id="L268">        }</span>
+
+        @Override
+        protected void doClose() throws IOException {
+<span class="fc" id="L272">            var heartbeatHandler = this.heartbeatHandler;</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">            if (heartbeatHandler != null)</span>
+<span class="fc" id="L274">                heartbeatHandler.close();</span>
+<span class="fc" id="L275">            var joinGameTask = this.joinGameTask;</span>
+<span class="fc bfc" id="L276" title="All 2 branches covered.">            if (joinGameTask != null)</span>
+<span class="fc" id="L277">                joinGameTask.cancel(true);</span>
+<span class="fc" id="L278">            var lobbyControllerTask = this.lobbyControllerTask.getAndSet(null);</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">            if (lobbyControllerTask != null)</span>
+<span class="fc" id="L280">                lobbyControllerTask.cancel(true);</span>
+<span class="fc" id="L281">            var gameControllerTask = this.gameControllerTask.getAndSet(null);</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">            if (gameControllerTask != null)</span>
+<span class="fc" id="L283">                gameControllerTask.cancel(true);</span>
+<span class="fc" id="L284">            var socketManagerDoClose = this.socketManagerDoClose;</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">            if (socketManagerDoClose != null)</span>
+<span class="fc" id="L286">                socketManagerDoClose.close();</span>
+<span class="fc" id="L287">        }</span>
+
+        @Override
+        protected void callDisconnectPlayerHook() {
+<span class="fc bfc" id="L291" title="All 2 branches covered.">            if (!Thread.currentThread().isInterrupted()) {</span>
+<span class="fc" id="L292">                super.callDisconnectPlayerHook();</span>
+<span class="fc" id="L293">                return;</span>
+            }
+
+            // If we are in an interrupted thread (might be the socket recv/read thread which triggered the close)
+            // we need to clear the state in order to be able to call potentially interrupting methods
+            // We do it in a complete different thread as subsequent close calls might re-interrupt the thread,
+            // so instead we use Future#getUninterruptibly() which should handle this properly
+            try {
+<span class="fc" id="L301">                ThreadPools.getUninterruptibly(threadPool.submit(super::callDisconnectPlayerHook));</span>
+<span class="nc" id="L302">            } catch (ExecutionException e) {</span>
+<span class="nc" id="L303">                throw new RuntimeException(&quot;Failed to invoke disconnectPlayerHook uninterruptibly&quot;, e.getCause());</span>
+<span class="fc" id="L304">            }</span>
+<span class="fc" id="L305">        }</span>
+
+        @Override
+        protected void doClosePlayerGame() {
+<span class="fc" id="L309">            var lobbyControllerTask = this.lobbyControllerTask.getAndSet(null);</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">            if (lobbyControllerTask != null)</span>
+<span class="fc" id="L311">                lobbyControllerTask.cancel(true);</span>
+<span class="fc" id="L312">            var gameControllerTask = this.gameControllerTask.getAndSet(null);</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">            if (gameControllerTask != null)</span>
+<span class="fc" id="L314">                gameControllerTask.cancel(true);</span>
+<span class="fc" id="L315">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

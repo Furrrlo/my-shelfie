@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketServerLobbyController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.socket</a> &gt; <span class="el_source">SocketServerLobbyController.java</span></div><h1>SocketServerLobbyController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.socket;
+
+import it.polimi.ingsw.controller.LobbyController;
+import it.polimi.ingsw.server.controller.LobbyServerController;
+import it.polimi.ingsw.socket.packets.LobbyActionPacket;
+import it.polimi.ingsw.socket.packets.ReadyPacket;
+import it.polimi.ingsw.socket.packets.RequiredPlayersPacket;
+
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
+
+/**
+ * Socket GameController implementation which listens for incoming packets from a socket
+ * and calls the corresponding methods on the protocol agnostic {@link LobbyServerController}.
+ * &lt;p&gt;
+ * This is a per-player object.
+ *
+ * @see LobbyController
+ * @see it.polimi.ingsw.controller
+ */
+public class SocketServerLobbyController implements LobbyController, Runnable {
+
+    private final ServerSocketManager socketManager;
+    private final LobbyServerController controller;
+    private final String nick;
+
+    public SocketServerLobbyController(ServerSocketManager socketManager,
+                                       LobbyServerController controller,
+<span class="fc" id="L30">                                       String nick) {</span>
+<span class="fc" id="L31">        this.socketManager = socketManager;</span>
+<span class="fc" id="L32">        this.controller = controller;</span>
+<span class="fc" id="L33">        this.nick = nick;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    public void run() {
+        try {
+            do {
+<span class="fc" id="L40">                try (var ctx = socketManager.receive(LobbyActionPacket.class)) {</span>
+<span class="pc bpc" id="L41" title="1 of 3 branches missed.">                    switch (ctx.getPacket()) {</span>
+<span class="fc" id="L42">                        case RequiredPlayersPacket p -&gt; setRequiredPlayers(p.requiredPlayers());</span>
+<span class="fc" id="L43">                        case ReadyPacket p -&gt; ready(p.ready());</span>
+                    }
+                }
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">            } while (!Thread.currentThread().isInterrupted());</span>
+<span class="fc" id="L47">        } catch (InterruptedIOException ignored) {</span>
+            // Thread was interrupted to stop, normal control flow
+<span class="nc" id="L49">        } catch (IOException ex) {</span>
+<span class="nc" id="L50">            throw new UncheckedIOException(ex);</span>
+<span class="pc" id="L51">        }</span>
+<span class="fc" id="L52">    }</span>
+
+    @Override
+    public void setRequiredPlayers(int requiredPlayers) {
+<span class="fc" id="L56">        controller.setRequiredPlayers(nick, requiredPlayers);</span>
+<span class="fc" id="L57">    }</span>
+
+    @Override
+    public void ready(boolean ready) {
+<span class="fc" id="L61">        controller.ready(nick, ready);</span>
+<span class="fc" id="L62">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

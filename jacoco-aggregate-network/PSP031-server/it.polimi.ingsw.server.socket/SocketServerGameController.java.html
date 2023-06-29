@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketServerGameController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.socket</a> &gt; <span class="el_source">SocketServerGameController.java</span></div><h1>SocketServerGameController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.socket;
+
+import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.model.BoardCoord;
+import it.polimi.ingsw.server.controller.GameServerController;
+import it.polimi.ingsw.server.model.ServerPlayer;
+import it.polimi.ingsw.socket.SocketManager;
+import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.utils.ThreadPools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+
+/**
+ * Socket GameController implementation which listens for incoming packets from a socket
+ * and calls the corresponding methods on the protocol agnostic {@link GameServerController}.
+ * &lt;p&gt;
+ * This is a per-player object.
+ *
+ * @see GameController
+ * @see it.polimi.ingsw.controller
+ */
+public class SocketServerGameController implements GameController, Runnable {
+
+<span class="fc" id="L31">    private static final Logger LOGGER = LoggerFactory.getLogger(SocketServerGameController.class);</span>
+
+    private final ExecutorService threadPool;
+    private final ServerSocketManager socketManager;
+    private final ServerPlayer player;
+    private final GameServerController controller;
+
+    public SocketServerGameController(ExecutorService threadPool,
+                                      ServerSocketManager socketManager,
+                                      ServerPlayer serverPlayer,
+<span class="fc" id="L41">                                      GameServerController controller) {</span>
+<span class="fc" id="L42">        this.socketManager = socketManager;</span>
+<span class="fc" id="L43">        this.threadPool = threadPool;</span>
+<span class="fc" id="L44">        this.player = serverPlayer;</span>
+<span class="fc" id="L45">        this.controller = controller;</span>
+<span class="fc" id="L46">    }</span>
+
+    @Override
+    public void run() {
+<span class="fc" id="L50">        LOGGER.info(&quot;[Server] Started game controller&quot;);</span>
+        try {
+            do {
+<span class="fc" id="L53">                try (var ctx = socketManager.receive(GameActionPacket.class)) {</span>
+<span class="pc bpc" id="L54" title="1 of 3 branches missed.">                    switch (ctx.getPacket()) {</span>
+<span class="fc" id="L55">                        case MakeMovePacket p -&gt; doMakeMove(ctx, p.selected(), p.shelfCol());</span>
+<span class="fc" id="L56">                        case SendMessagePacket p -&gt; sendMessage(p.message(), p.nickReceivingPlayer());</span>
+                    }
+                }
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            } while (!Thread.currentThread().isInterrupted());</span>
+<span class="fc" id="L60">        } catch (InterruptedIOException ignored) {</span>
+            // Thread was interrupted to stop, normal control flow
+<span class="nc" id="L62">        } catch (IOException ex) {</span>
+<span class="nc" id="L63">            throw new UncheckedIOException(ex);</span>
+<span class="fc" id="L64">        }</span>
+<span class="fc" id="L65">    }</span>
+
+    private void doMakeMove(SocketManager.PacketReplyContext&lt;C2SAckPacket, S2CAckPacket, GameActionPacket&gt; ctx,
+                            List&lt;BoardCoord&gt; selected,
+                            int shelfCol)
+            throws IOException {
+        // If we are making the last move of the game (the move that will cause enGame to be set to true),
+        // that will cause the onGameOver hook to run and interrupt this thread, causing issues with subsequent
+        // updates that will happen in this same thread (updating final score and endGame for other players and
+        // disconnecting them).
+        // We do it in a complete different thread so this won't be an issue, and we wait for it uninterruptibly
+        // so that we won't stop waiting for it
+        try {
+<span class="fc" id="L78">            ThreadPools.getUninterruptibly(threadPool.submit(() -&gt; {</span>
+<span class="fc" id="L79">                makeMove(selected, shelfCol);</span>
+                // Also send the ack from here, so it's done uninterruptibly
+                try {
+<span class="fc" id="L82">                    ctx.ack();</span>
+<span class="nc" id="L83">                } catch (IOException e) {</span>
+<span class="nc" id="L84">                    throw new UncheckedIOException(e);</span>
+<span class="fc" id="L85">                }</span>
+<span class="fc" id="L86">            }));</span>
+<span class="nc" id="L87">        } catch (ExecutionException e) {</span>
+            // Unwrap IOExceptions
+<span class="nc bnc" id="L89" title="All 4 branches missed.">            if (e.getCause() instanceof UncheckedIOException uio &amp;&amp; uio.getCause() instanceof IOException io) {</span>
+<span class="nc" id="L90">                io.addSuppressed(new Exception(&quot;Called from here&quot;, e));</span>
+<span class="nc" id="L91">                throw io;</span>
+            }
+
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (e.getCause() instanceof RuntimeException re) {</span>
+<span class="nc" id="L95">                re.addSuppressed(new Exception(&quot;Called from here&quot;, e));</span>
+<span class="nc" id="L96">                throw re;</span>
+            }
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            if (e.getCause() instanceof Error err) {</span>
+<span class="nc" id="L99">                err.addSuppressed(new Exception(&quot;Called from here&quot;, e));</span>
+<span class="nc" id="L100">                throw err;</span>
+            }
+
+<span class="nc" id="L103">            throw new RuntimeException(&quot;Failed to invoke makeMove uninterruptibly&quot;, e.getCause());</span>
+<span class="fc" id="L104">        }</span>
+<span class="fc" id="L105">    }</span>
+
+    @Override
+    public void makeMove(List&lt;BoardCoord&gt; selected, int shelfCol) {
+<span class="fc" id="L109">        controller.makeMove(player, selected, shelfCol);</span>
+<span class="fc" id="L110">    }</span>
+
+    @Override
+    public void sendMessage(String message, String nickReceivingPlayer) {
+<span class="fc" id="L114">        controller.sendMessage(player.getNick(), message, nickReceivingPlayer);</span>
+<span class="fc" id="L115">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

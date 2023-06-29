@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketClientHeartbeatHandler.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network.socket</a> &gt; <span class="el_source">SocketClientHeartbeatHandler.java</span></div><h1>SocketClientHeartbeatHandler.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network.socket;
+
+import it.polimi.ingsw.model.Property;
+import it.polimi.ingsw.model.SerializableProperty;
+import it.polimi.ingsw.socket.packets.HeartbeatPing;
+import it.polimi.ingsw.socket.packets.HeartbeatPong;
+
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+
+/** Socket implementation of the heartbeat which is in charge of answering the server's ping request */
+class SocketClientHeartbeatHandler implements Runnable {
+
+    private final ClientSocketManager socketManager;
+    private final Clock clock;
+<span class="fc" id="L20">    private final Property&lt;Duration&gt; ping = new SerializableProperty&lt;&gt;(Duration.ZERO);</span>
+
+    public SocketClientHeartbeatHandler(ClientSocketManager socketManager) {
+<span class="fc" id="L23">        this(socketManager, Clock.systemUTC());</span>
+<span class="fc" id="L24">    }</span>
+
+<span class="fc" id="L26">    public SocketClientHeartbeatHandler(ClientSocketManager socketManager, Clock clock) {</span>
+<span class="fc" id="L27">        this.socketManager = socketManager;</span>
+<span class="fc" id="L28">        this.clock = clock;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    public void run() {
+        try {
+            do {
+<span class="fc" id="L35">                var pingCtx = socketManager.receive(HeartbeatPing.class);</span>
+<span class="fc" id="L36">                var now = Instant.now(clock);</span>
+<span class="fc" id="L37">                ping.set(Duration.between(pingCtx.getPacket().serverTime(), now));</span>
+<span class="fc" id="L38">                pingCtx.reply(new HeartbeatPong(now));</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">            } while (!Thread.currentThread().isInterrupted());</span>
+<span class="fc" id="L40">        } catch (InterruptedIOException ignored) {</span>
+            // We got interrupted, normal flow
+<span class="fc" id="L42">        } catch (IOException ex) {</span>
+<span class="fc" id="L43">            throw new UncheckedIOException(ex);</span>
+<span class="pc" id="L44">        }</span>
+<span class="fc" id="L45">    }</span>
+
+    public Property&lt;Duration&gt; ping() {
+<span class="nc" id="L48">        return ping;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

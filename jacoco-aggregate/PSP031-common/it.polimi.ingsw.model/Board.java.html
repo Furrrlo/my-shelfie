@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Board.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">Board.java</span></div><h1>Board.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+/**
+ * Modifiable implementation of {@link BoardView}
+ *
+ * @implNote Java Serialization automatically takes care of keeping multiple references to a single object
+ *           correct on deserialization:
+ *           &quot;Multiple references to a single object are encoded using a reference sharing mechanism so that
+ *           graphs of objects can be restored to the same shape as when the original was written.&quot;
+ *           Using invalidTile's reference as a marker should be deserialized correctly.
+ * @see java.io.ObjectOutputStream
+ */
+public class Board implements BoardView {
+
+<span class="fc" id="L23">    private final static int[][] TWO_PLAYERS_MATRIX = new int[][] {</span>
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+            { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+            { 0, 1, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    };
+<span class="fc" id="L34">    private final static int[][] THREE_PLAYERS_MATRIX = new int[][] {</span>
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 1, 1 },
+            { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+            { 1, 1, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 1, 0, 0, 0 }
+    };
+<span class="fc" id="L45">    private final static int[][] FOUR_PLAYERS_MATRIX = new int[][] {</span>
+            { 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 0 },
+            { 0, 0, 1, 1, 1, 1, 1, 0, 0 },
+            { 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+            { 0, 0, 0, 0, 1, 1, 0, 0, 0 }
+    };
+
+    private final Property&lt;@Nullable Tile&gt;[][] board;
+    private final Property&lt;Tile&gt; invalidTile;
+
+    @SuppressWarnings({
+            &quot;unchecked&quot;, // Arrays don't support generics and need unchecked casts
+            &quot;ReferenceEquality&quot; // It's done on purpose to check for invalid tiles
+    })
+<span class="fc" id="L64">    public Board(int numOfPlayers) {</span>
+<span class="fc" id="L65">        var invalidTile = new Tile(Color.GREEN);</span>
+<span class="fc" id="L66">        this.invalidTile = new SerializableProperty&lt;&gt;(invalidTile);</span>
+<span class="fc" id="L67">        this.board = Arrays.stream(generateBasedOnPlayers(numOfPlayers, invalidTile))</span>
+<span class="fc" id="L68">                .map(row -&gt; Arrays.stream(row)</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                        .map(tile -&gt; tile == invalidTile ? this.invalidTile : SerializableProperty.nullableProperty(tile))</span>
+<span class="fc" id="L70">                        .toArray(Property[]::new))</span>
+<span class="fc" id="L71">                .toArray(Property[][]::new);</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * depending on the number of players calls the method responsible for generating the board
+     */
+    private static @Nullable Tile[][] generateBasedOnPlayers(int numOfPlayers, Tile invalidTile) {
+<span class="fc bfc" id="L78" title="All 4 branches covered.">        return switch (numOfPlayers) {</span>
+<span class="fc" id="L79">            case 2 -&gt; generateBoard(TWO_PLAYERS_MATRIX, invalidTile);</span>
+<span class="fc" id="L80">            case 3 -&gt; generateBoard(THREE_PLAYERS_MATRIX, invalidTile);</span>
+<span class="fc" id="L81">            case 4 -&gt; generateBoard(FOUR_PLAYERS_MATRIX, invalidTile);</span>
+<span class="fc" id="L82">            default -&gt; throw new UnsupportedOperationException(&quot;Invalid player number (min: 2, max: 4): &quot; + numOfPlayers);</span>
+        };
+    }
+
+    /**
+     * @param validTiles : matrix of type int whose elements represents if a tile is valid(1) or invalid(0)
+     * @param invalidTile : specifies the parameter for setting all the invalid tiles in the board
+     *        returns an empty board with invalid tiles positioned as specified in validTiles
+     */
+    private static @Nullable Tile[][] generateBoard(int[][] validTiles, Tile invalidTile) {
+<span class="fc" id="L92">        Tile[][] board = new Tile[BOARD_ROWS][BOARD_COLUMNS];</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for (int r = 0; r &lt; BOARD_ROWS; r++) {</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            for (int c = 0; c &lt; BOARD_COLUMNS; c++) {</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">                if (validTiles[r][c] == 0) {</span>
+<span class="fc" id="L96">                    board[r][c] = invalidTile;</span>
+                } else {
+<span class="fc" id="L98">                    board[r][c] = null;</span>
+                }
+            }
+        }
+<span class="fc" id="L102">        return board;</span>
+    }
+
+    @Override
+    public int getRows() {
+<span class="fc" id="L107">        return BOARD_ROWS;</span>
+    }
+
+    @Override
+    public int getCols() {
+<span class="fc" id="L112">        return BOARD_COLUMNS;</span>
+    }
+
+    @Override
+    public boolean isValidTile(int r, int c) {
+<span class="fc bfc" id="L117" title="All 10 branches covered.">        return r &gt;= 0 &amp;&amp; r &lt; getRows() &amp;&amp; c &gt;= 0 &amp;&amp; c &lt; getCols() &amp;&amp; board[r][c] != invalidTile;</span>
+    }
+
+    @Override
+    public Property&lt;@Nullable Tile&gt; tile(int r, int c) {
+        // Force an AIOB if r or c are not between 0 and ROWS/COLS
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        if (board[r][c] == invalidTile)</span>
+<span class="fc" id="L124">            throw new IndexOutOfBoundsException(&quot;Invalid Position selected &quot; + r + &quot;x&quot; + c);</span>
+<span class="fc" id="L125">        return board[r][c];</span>
+    }
+
+    @Override
+    public Stream&lt;TileAndCoords&lt;Property&lt;@Nullable Tile&gt;&gt;&gt; tiles() {
+<span class="fc" id="L130">        return IntStream.range(0, getRows()).boxed().flatMap(row -&gt; IntStream.range(0, getCols()).boxed()</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">                .filter(col -&gt; board[row][col] != invalidTile)</span>
+<span class="fc" id="L132">                .map(col -&gt; new TileAndCoords&lt;&gt;(board[row][col], row, col)));</span>
+    }
+
+    @Override
+    public boolean isEmpty() {
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        for (int i = 0; i &lt; getRows(); i++) {</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">            for (int j = 0; j &lt; getCols(); j++) {</span>
+<span class="fc bfc" id="L139" title="All 4 branches covered.">                if (isValidTile(i, j) &amp;&amp; board[i][j].get() != null)</span>
+<span class="fc" id="L140">                    return false;</span>
+            }
+        }
+<span class="fc" id="L143">        return true;</span>
+    }
+
+    @Override
+    public boolean needsRefill() {
+<span class="fc" id="L148">        return tiles()</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">                .filter(t -&gt; t.tile().get() != null)</span>
+<span class="fc bfc" id="L150" title="All 4 branches covered.">                .allMatch(t -&gt; (!isValidTile(t.row() + 1, t.col()) || tile(t.row() + 1, t.col()).get() == null) &amp;&amp;</span>
+<span class="fc bfc" id="L151" title="All 4 branches covered.">                        (!isValidTile(t.row(), t.col() + 1) || tile(t.row(), t.col() + 1).get() == null));</span>
+    }
+
+    @Override
+    public boolean checkBoardCoord(List&lt;? extends Coord&gt; selected) {
+<span class="fc bfc" id="L156" title="All 4 branches covered.">        if (selected.size() == 0 || selected.size() &gt; 3)</span>
+<span class="fc" id="L157">            return false;</span>
+
+        // If any coord is specified more than once, it's invalid
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (selected.stream().distinct().count() != selected.size())</span>
+<span class="fc" id="L161">            return false;</span>
+
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        for (Coord coord : selected) {</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            if (!isValidTile(coord.row(), coord.col()))</span>
+<span class="fc" id="L165">                return false;</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">            if (tile(coord.row(), coord.col()).get() == null)</span>
+<span class="fc" id="L167">                return false;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">            if (!hasFreeSide(coord.row(), coord.col()))</span>
+<span class="fc" id="L169">                return false;</span>
+<span class="fc" id="L170">        }</span>
+
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        if (selected.size() == 1)</span>
+<span class="fc" id="L173">            return true;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (selected.size() == 2)</span>
+<span class="fc" id="L175">            return hasCommonSide(selected.get(0).row(), selected.get(0).col(), selected.get(1).row(), selected.get(1).col());</span>
+        else
+<span class="fc" id="L177">            return hasCommonSide(</span>
+<span class="fc" id="L178">                    selected.get(0).row(), selected.get(0).col(),</span>
+<span class="fc" id="L179">                    selected.get(1).row(), selected.get(1).col(),</span>
+<span class="fc" id="L180">                    selected.get(2).row(), selected.get(2).col());</span>
+    }
+
+    @Override
+    public boolean hasFreeSide(int row, int col) {
+<span class="fc bfc" id="L185" title="All 4 branches covered.">        if (!isValidTile(row + 1, col) || tile(row + 1, col).get() == null)</span>
+<span class="fc" id="L186">            return true;</span>
+<span class="fc bfc" id="L187" title="All 4 branches covered.">        if (!isValidTile(row - 1, col) || tile(row - 1, col).get() == null)</span>
+<span class="fc" id="L188">            return true;</span>
+<span class="fc bfc" id="L189" title="All 4 branches covered.">        if (!isValidTile(row, col + 1) || tile(row, col + 1).get() == null)</span>
+<span class="fc" id="L190">            return true;</span>
+<span class="fc bfc" id="L191" title="All 4 branches covered.">        return !isValidTile(row, col - 1) || tile(row, col - 1).get() == null;</span>
+    }
+
+    /** returns true if the two tiles in the specified positions have one common side */
+    public boolean hasCommonSide(int row0, int col0, int row1, int col1) {
+<span class="fc bfc" id="L196" title="All 6 branches covered.">        if (row0 == row1 &amp;&amp; (col1 == col0 + 1 || col1 == col0 - 1))</span>
+<span class="fc" id="L197">            return true;</span>
+<span class="fc bfc" id="L198" title="All 6 branches covered.">        return col0 == col1 &amp;&amp; (row1 == row0 + 1 || row1 == row0 - 1);</span>
+    }
+
+    /** returns true if the three tiles in the specified positions are linked between them in a line */
+    public boolean hasCommonSide(int row0, int col0, int row1, int col1, int row2, int col2) {
+<span class="fc bfc" id="L203" title="All 8 branches covered.">        if ((row0 == row1 &amp;&amp; row1 == row2) || (col0 == col1 &amp;&amp; col1 == col2)) {</span>
+<span class="fc bfc" id="L204" title="All 4 branches covered.">            return (hasCommonSide(row0, col0, row1, col1) &amp;&amp; hasCommonSide(row1, col1, row2, col2)) ||</span>
+<span class="fc bfc" id="L205" title="All 4 branches covered.">                    (hasCommonSide(row0, col0, row2, col2) &amp;&amp; hasCommonSide(row1, col1, row2, col2)) ||</span>
+<span class="fc bfc" id="L206" title="All 4 branches covered.">                    (hasCommonSide(row1, col1, row0, col0) &amp;&amp; hasCommonSide(row0, col0, row2, col2));</span>
+        }
+<span class="fc" id="L208">        return false;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L214">            return true;</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if (!(o instanceof Board that))</span>
+<span class="fc" id="L216">            return false;</span>
+<span class="fc" id="L217">        return IntStream.range(0, getRows()).boxed()</span>
+<span class="fc" id="L218">                .allMatch(row -&gt; IntStream.range(0, getCols()).boxed()</span>
+<span class="fc" id="L219">                        .allMatch(col -&gt; Objects.equals(board[row][col].get(), that.board[row][col].get())));</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L224">        return Arrays.stream(board)</span>
+<span class="fc" id="L225">                .mapToInt(row -&gt; Arrays.stream(row)</span>
+<span class="fc" id="L226">                        .mapToInt(tile -&gt; Objects.hashCode(tile.get()))</span>
+<span class="fc" id="L227">                        .reduce(1, (a, b) -&gt; 31 * a + b))</span>
+<span class="fc" id="L228">                .reduce(1, (a, b) -&gt; 31 * a + b);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L233">        return &quot;Board{&quot; +</span>
+<span class="fc" id="L234">                &quot;board=&quot; + Arrays.deepToString(board) +</span>
+                &quot;, invalidTile=&quot; + invalidTile +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ServerLobbyView.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.model</a> &gt; <span class="el_source">ServerLobbyView.java</span></div><h1>ServerLobbyView.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.model;
+
+import it.polimi.ingsw.model.LobbyPlayerView;
+import it.polimi.ingsw.model.LobbyView;
+import it.polimi.ingsw.model.Provider;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Read-only object which represent a game lobby, as seen by the server.
+ * &lt;p&gt;
+ * This object does not differ from {@link LobbyView} other than the fact that it
+ * returns {@link ServerGameView} instead of {@link it.polimi.ingsw.model.GameView} instances.
+ * In addition, it has a few utility methods which are only useful to the server.
+ *
+ * @see it.polimi.ingsw.model.GameView
+ */
+public interface ServerLobbyView {
+
+    int MIN_PLAYERS = LobbyView.MIN_PLAYERS;
+    int MAX_PLAYERS = LobbyView.MAX_PLAYERS;
+
+    /**
+     * Returns the number of required players.
+     * &lt;p&gt;
+     * Can be:
+     * - null: if the creator of the lobby hasn't set it yet (see {@link #isOpen()})
+     * - 0: there's no number of required players (see {@link #hasRequiredPlayers()})
+     * - a number between {@link LobbyView#MIN_PLAYERS} and {@link LobbyView#MAX_PLAYERS}
+     * 
+     * @return the number of required players
+     */
+    Provider&lt;@Nullable Integer&gt; requiredPlayers();
+
+    /** Returns the list of joined players */
+    Provider&lt;? extends @Unmodifiable List&lt;? extends LobbyPlayerView&gt;&gt; joinedPlayers();
+
+    Provider&lt;? extends @Nullable ServerGameAndController&lt;? extends ServerGameView&gt;&gt; game();
+
+    /**
+     * Returns whether the specified nick is of the player which created the lobby or has inherited it
+     * after the creator left
+     * 
+     * @param nick player's nick to check
+     * @return true if the nick is of the player which created the lobby
+     */
+    default boolean isLobbyCreator(String nick) {
+<span class="fc" id="L51">        var joinedPlayers = joinedPlayers().get();</span>
+<span class="pc bpc" id="L52" title="1 of 4 branches missed.">        return !joinedPlayers.isEmpty() &amp;&amp; joinedPlayers.get(0).getNick().equals(nick);</span>
+    }
+
+    /**
+     * Return whether the creator of this lobby has set {@link #requiredPlayers()}.
+     * If this method returns false, nobody can join this lobby yet.
+     * This method does NOT check how many players have joined
+     *
+     * @return true if requiredPlayers != null
+     */
+    default boolean isOpen() {
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        return requiredPlayers().get() != null;</span>
+    }
+
+    /**
+     * Return whether {@link #requiredPlayers()} is set
+     * &lt;p&gt;
+     * If this method returns false, the game can start when all players are ready
+     * and {@link #MAX_PLAYERS} can join this lobby.
+     * &lt;p&gt;
+     * This method does NOT check how many players have joined
+     *
+     * @return true if requiredPlayers != 0
+     */
+    default boolean hasRequiredPlayers() {
+<span class="fc bfc" id="L77" title="All 4 branches covered.">        return isOpen() &amp;&amp; !Objects.equals(requiredPlayers().get(), 0);</span>
+    }
+
+    /**
+     * Returns whether the game has been started, so that it can be safely be grabbed using
+     * the {@link #game()} method.
+     *
+     * @return true if the game has been started
+     */
+    default boolean hasGameStarted() {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        return game().get() != null;</span>
+    }
+
+    /** Returns true if this lobby is open and there's space for another player */
+    default boolean canOnePlayerJoin() {
+<span class="fc bfc" id="L92" title="All 4 branches covered.">        return isOpen() &amp;&amp; !hasGameStarted() &amp;&amp;</span>
+<span class="fc bfc" id="L93" title="All 4 branches covered.">                ((hasRequiredPlayers() &amp;&amp; joinedPlayers().get().size() &lt; requiredPlayers().get())</span>
+<span class="fc bfc" id="L94" title="All 4 branches covered.">                        || (!hasRequiredPlayers() &amp;&amp; joinedPlayers().get().size() &lt; MAX_PLAYERS));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

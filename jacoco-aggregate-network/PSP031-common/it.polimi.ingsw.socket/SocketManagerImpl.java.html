@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketManagerImpl.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.socket</a> &gt; <span class="el_source">SocketManagerImpl.java</span></div><h1>SocketManagerImpl.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.socket;
+
+import it.polimi.ingsw.socket.packets.AckPacket;
+import it.polimi.ingsw.socket.packets.Packet;
+import it.polimi.ingsw.utils.ThreadPools;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
+
+public class SocketManagerImpl&lt;IN extends Packet, ACK_IN extends /* Packet &amp; */ AckPacket, ACK_OUT extends /* Packet &amp; */ AckPacket, OUT extends Packet&gt;
+        implements SocketManager&lt;IN, ACK_IN, ACK_OUT, OUT&gt; {
+
+<span class="fc" id="L25">    private static final Logger LOGGER = LoggerFactory.getLogger(SocketManagerImpl.class);</span>
+    @VisibleForTesting
+    static final String CLOSE_EX_MSG = &quot;Socket was closed&quot;;
+
+<span class="fc" id="L29">    private final AtomicBoolean isClosing = new AtomicBoolean();</span>
+    private volatile boolean isClosed;
+    private volatile @Nullable OnCloseHook onClose;
+    private volatile @Nullable SeqPacket closePacket;
+    private final @Nullable Socket socket;
+    private final ObjectOutputStream oos;
+    private final ObjectInputStream ois;
+    /** Maximum time to wait for a response in {@link #defaultResponseTimeoutUnit}, or -1 to wait indefinitely */
+    protected final long defaultResponseTimeout;
+    protected final TimeUnit defaultResponseTimeoutUnit;
+<span class="fc" id="L39">    private final BlockingDeque&lt;QueuedOutput&gt; outPacketQueue = new LinkedBlockingDeque&lt;&gt;();</span>
+<span class="fc" id="L40">    private final NBlockingQueue&lt;Object&gt; inPacketQueue = new NBlockingQueue&lt;&gt;();</span>
+
+    private final Future&lt;?&gt; recvTask;
+    private volatile boolean isRecvTaskRunning;
+    private final Future&lt;?&gt; sendTask;
+    private volatile boolean isSendTaskRunning;
+
+<span class="fc" id="L47">    private final AtomicLong seq = new AtomicLong();</span>
+    private final String name;
+<span class="fc" id="L49">    private String nick = &quot;&quot;;</span>
+
+<span class="fc" id="L51">    record QueuedOutput(SeqPacket packet, CompletableFuture&lt;Void&gt; future) {</span>
+    }
+
+    public SocketManagerImpl(String name,
+                             ExecutorService executor,
+                             Socket socket)
+            throws IOException {
+<span class="nc" id="L58">        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream(), -1, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L59">    }</span>
+
+    public SocketManagerImpl(String name,
+                             ExecutorService executor,
+                             Socket socket,
+                             long defaultResponseTimeout,
+                             TimeUnit defaultResponseTimeoutUnit)
+            throws IOException {
+<span class="fc" id="L67">        this(name, executor, socket, socket.getInputStream(), socket.getOutputStream(), defaultResponseTimeout,</span>
+                defaultResponseTimeoutUnit);
+<span class="fc" id="L69">    }</span>
+
+    @VisibleForTesting
+    SocketManagerImpl(String name,
+                      ExecutorService executor,
+                      InputStream is,
+                      OutputStream os,
+                      long defaultResponseTimeout,
+                      TimeUnit defaultResponseTimeoutUnit)
+            throws IOException {
+<span class="fc" id="L79">        this(name, executor, null, is, os, defaultResponseTimeout, defaultResponseTimeoutUnit);</span>
+<span class="fc" id="L80">    }</span>
+
+    private SocketManagerImpl(String name,
+                              ExecutorService executor,
+                              @Nullable Socket socket,
+                              InputStream is,
+                              OutputStream os,
+                              long defaultResponseTimeout,
+                              TimeUnit defaultResponseTimeoutUnit)
+<span class="fc" id="L89">            throws IOException {</span>
+<span class="fc" id="L90">        this.socket = socket;</span>
+<span class="fc" id="L91">        this.name = name;</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        this.oos = os instanceof ObjectOutputStream oos ? oos : new ObjectOutputStream(os);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        this.ois = is instanceof ObjectInputStream ois ? ois : new ObjectInputStream(is);</span>
+<span class="fc" id="L94">        this.defaultResponseTimeout = defaultResponseTimeout;</span>
+<span class="fc" id="L95">        this.defaultResponseTimeoutUnit = defaultResponseTimeoutUnit;</span>
+
+<span class="fc" id="L97">        recvTask = executor.submit(ThreadPools.giveNameToTask(n -&gt; n + &quot;[socket-recv]&quot;, this::readLoop));</span>
+<span class="fc" id="L98">        isRecvTaskRunning = true;</span>
+<span class="fc" id="L99">        sendTask = executor.submit(ThreadPools.giveNameToTask(n -&gt; n + &quot;[socket-send]&quot;, this::writeLoop));</span>
+<span class="fc" id="L100">        isSendTaskRunning = true;</span>
+<span class="fc" id="L101">    }</span>
+
+    @Override
+    public boolean isClosed() {
+<span class="nc" id="L105">        return isClosed;</span>
+    }
+
+    @Override
+    public final void close() throws IOException {
+<span class="fc" id="L110">        var onClose = this.onClose;</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (onClose != null)</span>
+<span class="fc" id="L112">            onClose.doClose(this::doClose);</span>
+        else
+<span class="fc" id="L114">            doClose();</span>
+<span class="fc" id="L115">    }</span>
+
+    @MustBeInvokedByOverriders
+    @SuppressWarnings({
+            &quot;unchecked&quot;, // ClosePacket and CloseAckPacket need to be hard-casted
+            &quot;resource&quot; // We don't need to ack the last CloseAckPacket
+    })
+    protected void doClose() throws IOException {
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        if (isClosing.getAndSet(true))</span>
+<span class="fc" id="L124">            return;</span>
+
+<span class="fc" id="L126">        log(&quot;Closing socket manager...&quot;);</span>
+
+        try {
+<span class="fc" id="L129">            var closePacket = this.closePacket;</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (closePacket == null) {</span>
+<span class="fc" id="L131">                send((OUT) new ClosePacket(), (Class&lt;ACK_IN&gt;) CloseAckPacket.class);</span>
+            } else {
+<span class="fc" id="L133">                doSend(new SeqAckPacket(new CloseAckPacket(), -1, closePacket.seqN()));</span>
+            }
+<span class="fc" id="L135">        } catch (IOException ex) {</span>
+            // We ignore exceptions on the last ack receival, because the socket may
+            // be closed before we are able to read out the last ack packet
+            // We don't care about whether the other has received this anyway,
+            // we can just hope it did and go on
+<span class="fc" id="L140">        }</span>
+
+<span class="fc" id="L142">        isClosed = true;</span>
+<span class="fc" id="L143">        recvTask.cancel(true);</span>
+<span class="fc" id="L144">        sendTask.cancel(true);</span>
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        if (socket != null) {</span>
+            // This should take care of closing the in/out streams
+<span class="fc" id="L148">            socket.close();</span>
+        } else {
+            // Use a try-with-resources so everything is closed even if any of the close methods fail
+            //noinspection EmptyTryBlock
+<span class="fc" id="L152">            try (var ignoredOos = this.oos; var ignoredOis = this.ois) {</span>
+                // Empty body just to close
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">            }</span>
+        }
+<span class="fc" id="L156">    }</span>
+
+    private boolean isClosePacket(@Nullable Packet packet) {
+<span class="fc bfc" id="L159" title="All 4 branches covered.">        return packet instanceof ClosePacket || packet instanceof CloseAckPacket;</span>
+    }
+
+    @Override
+    public void setOnClose(@Nullable OnCloseHook onClose) {
+<span class="fc" id="L164">        this.onClose = onClose;</span>
+<span class="fc" id="L165">    }</span>
+
+    private void ensureOpen() throws IOException {
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        if (isClosed)</span>
+<span class="fc" id="L169">            throw new IOException(CLOSE_EX_MSG);</span>
+<span class="fc" id="L170">    }</span>
+
+    private void readLoop() {
+        try {
+<span class="fc" id="L174">            SeqPacket closePacket = null;</span>
+<span class="fc" id="L175">            boolean wasClosed = false;</span>
+            do {
+                SeqPacket p;
+                try {
+<span class="fc" id="L179">                    p = (SeqPacket) ois.readObject();</span>
+<span class="nc" id="L180">                } catch (ClassNotFoundException | ClassCastException ex) {</span>
+<span class="nc" id="L181">                    LOGGER.error(&quot;[{}][{}] Received unexpected input packet&quot;, name, nick, ex);</span>
+<span class="nc" id="L182">                    continue;</span>
+<span class="fc" id="L183">                }</span>
+
+                // Also read a null-object to make sure we received the reset from the corresponding ObjectOutputStream.
+                // In particular, we need to read an object cause ObjectInputStream only handles reset requests in
+                // readObject/readUnshared, not in readByte.
+                // We use a null reference 'cause it's the smallest object I can think of sending.
+                // By doing this, we make sure that by the time the current packet we are reading is handled, the
+                // other side has already flushed out all its data related to this packet (including the reset req),
+                // therefore we can (and some packets do) close the connection and the other side could do the same.
+                Object resetFlushObj;
+                try {
+<span class="fc" id="L194">                    resetFlushObj = ois.readUnshared();</span>
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">                    if (resetFlushObj != null)</span>
+<span class="nc" id="L196">                        throw new IOException(&quot;Received unexpected resetFlushObj &quot; + resetFlushObj);</span>
+<span class="nc" id="L197">                } catch (ClassNotFoundException | ClassCastException ex) {</span>
+<span class="nc" id="L198">                    throw new IOException(&quot;Received unexpected resetFlushObj&quot;, ex);</span>
+<span class="fc" id="L199">                }</span>
+
+<span class="fc" id="L201">                log(&quot;Received packet: &quot; + p);</span>
+<span class="fc" id="L202">                wasClosed = isClosePacket(p.packet());</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">                if (p.packet() instanceof ClosePacket) {</span>
+<span class="fc" id="L204">                    closePacket = p;</span>
+                } else {
+<span class="fc" id="L206">                    inPacketQueue.add(p);</span>
+                }
+<span class="pc bpc" id="L208" title="1 of 4 branches missed.">            } while (!wasClosed &amp;&amp; !Thread.currentThread().isInterrupted());</span>
+
+<span class="fc bfc" id="L210" title="All 2 branches covered.">            if (closePacket != null) {</span>
+                // Set it here (other than in the finally-block) as we need it set before the close call
+<span class="fc" id="L212">                this.isRecvTaskRunning = false;</span>
+<span class="fc" id="L213">                this.closePacket = closePacket;</span>
+                // Close the socket, close will be in charge of sending the ack
+                try {
+<span class="fc" id="L216">                    close();</span>
+<span class="nc" id="L217">                } catch (IOException ex) {</span>
+<span class="nc" id="L218">                    LOGGER.error(&quot;[{}][{}] Failed to close socket after close packet...&quot;, name, nick, ex);</span>
+<span class="fc" id="L219">                }</span>
+            }
+<span class="fc" id="L221">        } catch (IOException e) {</span>
+            // Set it here (other than in the finally-block) as we need it set before the close call
+<span class="fc" id="L223">            this.isRecvTaskRunning = false;</span>
+
+            // If it's an interrupted exception or the interruption flag was set
+<span class="fc" id="L226">            final boolean isTimeout = e instanceof SocketTimeoutException;</span>
+<span class="pc bpc" id="L227" title="1 of 6 branches missed.">            if (!isTimeout &amp;&amp; (e instanceof InterruptedIOException</span>
+                    || e instanceof ClosedByInterruptException
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">                    || Thread.currentThread().isInterrupted()))</span>
+<span class="fc" id="L230">                return;</span>
+
+<span class="fc" id="L232">            LOGGER.error(&quot;[{}][{}] Failed to read packet, closing...&quot;, name, nick, e);</span>
+            try {
+<span class="fc" id="L234">                close();</span>
+<span class="nc" id="L235">            } catch (IOException ignored) {</span>
+                // Ignore
+<span class="fc" id="L237">            }</span>
+        } finally {
+<span class="fc" id="L239">            this.isRecvTaskRunning = false;</span>
+
+            // Signal to everybody who is waiting that the socket got closed
+<span class="fc" id="L242">            inPacketQueue.add(new IOException(CLOSE_EX_MSG));</span>
+        }
+<span class="fc" id="L244">    }</span>
+
+    private void writeLoop() {
+<span class="fc" id="L247">        QueuedOutput p = null;</span>
+        try {
+            do {
+<span class="fc" id="L250">                p = outPacketQueue.take();</span>
+
+                try {
+<span class="fc" id="L253">                    oos.writeObject(p.packet());</span>
+                    // Fix memory leak, as ObjectOutputStream maintains a reference to anything
+                    // you write into it, in order to implement the reference sharing mechanism.
+                    // Since we don't need to share references past a single object graph, we
+                    // can just reset the references after each time we write.
+                    // see https://bugs.openjdk.org/browse/JDK-6525563
+<span class="fc" id="L259">                    oos.reset();</span>
+                    // Write a null reference to use as a marker that the reset request was flushed
+                    // and received with the packet by the other side.
+                    // See the readLoop for additional details
+<span class="fc" id="L263">                    oos.writeUnshared(null);</span>
+<span class="fc" id="L264">                    oos.flush();</span>
+
+<span class="fc" id="L266">                    log(&quot;Sent &quot; + p);</span>
+<span class="fc" id="L267">                    p.future().complete(null);</span>
+<span class="nc" id="L268">                } catch (InvalidClassException | NotSerializableException ex) {</span>
+<span class="nc" id="L269">                    p.future().completeExceptionally(ex);</span>
+<span class="fc" id="L270">                } catch (Throwable ex) {</span>
+<span class="fc" id="L271">                    p.future().completeExceptionally(ex);</span>
+<span class="fc" id="L272">                    throw ex;</span>
+<span class="pc" id="L273">                }</span>
+<span class="fc bfc" id="L274" title="All 2 branches covered.">            } while (!Thread.currentThread().isInterrupted());</span>
+<span class="fc" id="L275">        } catch (InterruptedIOException | ClosedByInterruptException | InterruptedException e) {</span>
+            // Go on, interruption is expected
+<span class="fc" id="L277">        } catch (IOException e) {</span>
+            // Set it here (other than in the finally-block) as we need it set before the close call
+<span class="fc" id="L279">            this.isSendTaskRunning = false;</span>
+
+            // If the interruption flag was set, we got interrupted by close, so it's expected
+<span class="pc bpc" id="L282" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted())</span>
+<span class="nc" id="L283">                return;</span>
+            // If it was a close packet being sent, we don't need to log the error and call close
+            // see #doClose(...) for more details on the close sequence
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">            if (isClosePacket(p.packet().packet()))</span>
+<span class="fc" id="L287">                return;</span>
+
+<span class="nc" id="L289">            LOGGER.error(&quot;[{}][{}] Failed to write packet {}, closing...&quot;, name, nick, p, e);</span>
+            try {
+<span class="nc" id="L291">                close();</span>
+<span class="nc" id="L292">            } catch (IOException ignored) {</span>
+                // Ignore
+<span class="nc" id="L294">            }</span>
+        } finally {
+<span class="fc" id="L296">            this.isSendTaskRunning = false;</span>
+
+            // Signal to everybody who is waiting that the socket got closed
+<span class="fc" id="L299">            var toCancel = new ArrayList&lt;&gt;(outPacketQueue);</span>
+<span class="fc" id="L300">            outPacketQueue.removeAll(toCancel);</span>
+<span class="fc" id="L301">            final IOException closeEx = new IOException(CLOSE_EX_MSG);</span>
+<span class="pc" id="L302">            toCancel.forEach(q -&gt; q.future().completeExceptionally(closeEx));</span>
+        }
+<span class="fc" id="L304">    }</span>
+
+    private void doSend(SeqPacket toSend) throws IOException {
+<span class="fc" id="L307">        ensureOpen();</span>
+
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        if (!isSendTaskRunning)</span>
+<span class="nc" id="L310">            throw new IOException(CLOSE_EX_MSG);</span>
+
+<span class="fc" id="L312">        final CompletableFuture&lt;Void&gt; hasSent = new CompletableFuture&lt;&gt;();</span>
+<span class="fc" id="L313">        log(&quot;Sending &quot; + toSend + &quot;...&quot;);</span>
+<span class="fc" id="L314">        outPacketQueue.add(new QueuedOutput(toSend, hasSent));</span>
+<span class="fc" id="L315">        log(String.valueOf(outPacketQueue.size()));</span>
+
+        try {
+<span class="fc" id="L318">            ThreadPools.getUninterruptibly(hasSent);</span>
+<span class="fc" id="L319">        } catch (ExecutionException e) {</span>
+<span class="pc bpc" id="L320" title="1 of 2 branches missed.">            throw rethrowIOException(e.getCause() != null ? e.getCause() : e, &quot;Failed to send packet &quot; + toSend);</span>
+<span class="fc" id="L321">        }</span>
+<span class="fc" id="L322">    }</span>
+
+    private SeqPacket doReceive(Predicate&lt;SeqPacket&gt; filter, long timeout, TimeUnit timeoutUnit)
+            throws InterruptedException, IOException, TimeoutException {
+<span class="fc" id="L326">        ensureOpen();</span>
+
+<span class="fc bfc" id="L328" title="All 2 branches covered.">        if (!isRecvTaskRunning)</span>
+<span class="fc" id="L329">            throw new IOException(CLOSE_EX_MSG);</span>
+
+<span class="fc" id="L331">        final NBlockingQueue.Matcher&lt;Object&gt; cond = (obj, res) -&gt; {</span>
+            // We should be the only ones getting this packet, consume it
+<span class="fc bfc" id="L333" title="All 4 branches covered.">            if (obj instanceof SeqPacket pkt &amp;&amp; filter.test(pkt))</span>
+<span class="fc" id="L334">                return res.consume();</span>
+            // Exceptions are not specific to us, but to the whole receive thread, so
+            // we shouldn't be consuming it, as everybody has to get it
+<span class="fc bfc" id="L337" title="All 2 branches covered.">            if (obj instanceof Throwable)</span>
+<span class="fc" id="L338">                return res.peek();</span>
+
+<span class="fc" id="L340">            return res.skip();</span>
+        };
+<span class="fc bfc" id="L342" title="All 2 branches covered.">        var res = timeout == -1</span>
+<span class="fc" id="L343">                ? inPacketQueue.takeFirstMatching(cond)</span>
+<span class="fc" id="L344">                : inPacketQueue.takeFirstMatching(cond, timeout, timeoutUnit);</span>
+        // Correct result
+<span class="fc bfc" id="L346" title="All 2 branches covered.">        if (res instanceof SeqPacket pkt)</span>
+<span class="fc" id="L347">            return pkt;</span>
+        // We got an exception
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">        if (res instanceof Throwable t)</span>
+<span class="nc" id="L350">            throw rethrowIOException(t, &quot;Failed to receive packet&quot;);</span>
+
+<span class="nc" id="L352">        throw new AssertionError(&quot;Unexpected result from queue &quot; + res);</span>
+    }
+
+    private RuntimeException rethrowIOException(Throwable t, String msg) throws IOException {
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">        if (t instanceof RuntimeException ex) {</span>
+<span class="nc" id="L357">            ex.addSuppressed(new Exception(&quot;Called from here&quot;));</span>
+<span class="nc" id="L358">            throw ex;</span>
+        }
+<span class="pc bpc" id="L360" title="1 of 2 branches missed.">        if (t instanceof Error ex) {</span>
+<span class="nc" id="L361">            ex.addSuppressed(new Exception(&quot;Called from here&quot;));</span>
+<span class="nc" id="L362">            throw ex;</span>
+        }
+
+<span class="fc" id="L365">        throw new IOException(msg, t);</span>
+    }
+
+    private SeqPacket doReceive(Predicate&lt;SeqPacket&gt; filter) throws InterruptedException, IOException {
+        try {
+<span class="fc" id="L370">            return doReceive(filter, -1, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L371">        } catch (TimeoutException ex) {</span>
+<span class="nc" id="L372">            throw new AssertionError(&quot;Timeout expired where there should be no timeout&quot;, ex);</span>
+        }
+    }
+
+    private SeqPacket doReceiveWithTimeout(Predicate&lt;SeqPacket&gt; filter)
+            throws InterruptedException, IOException, TimeoutException {
+<span class="fc" id="L378">        return doReceive(filter, defaultResponseTimeout, defaultResponseTimeoutUnit);</span>
+    }
+
+    private &lt;R extends ACK_IN&gt; PacketReplyContext&lt;ACK_IN, ACK_OUT, R&gt; doSendAndWaitResponse(SeqPacket p, Class&lt;R&gt; replyType)
+            throws IOException {
+        try {
+<span class="fc" id="L384">            final long seqN = p.seqN();</span>
+<span class="fc" id="L385">            doSend(p);</span>
+<span class="fc" id="L386">            log(&quot;Waiting for  &quot; + replyType + &quot;...&quot;);</span>
+<span class="pc bpc" id="L387" title="1 of 4 branches missed.">            return new PacketReplyContextImpl&lt;&gt;(doReceiveWithTimeout(packet -&gt; replyType.isInstance(packet.packet()) &amp;&amp;</span>
+<span class="fc" id="L388">                    packet instanceof SeqAckPacket ack &amp;&amp;</span>
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">                    ack.seqAck() == seqN));</span>
+<span class="fc" id="L390">        } catch (InterruptedException e) {</span>
+<span class="fc" id="L391">            throw (IOException) new InterruptedIOException(&quot;Failed to send packet &quot; + p).initCause(e);</span>
+<span class="fc" id="L392">        } catch (TimeoutException e) {</span>
+<span class="fc" id="L393">            throw new IOException(&quot;Timeout expired while waiting for response packet &quot; + replyType +</span>
+                    &quot; after sending &quot; + p, e);
+        }
+    }
+
+    @Override
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;resource&quot; }) // We don't care about acknowledging a SimpleAckPacket
+    public void send(OUT p) throws IOException {
+<span class="fc" id="L401">        send(p, (Class&lt;ACK_IN&gt;) SimpleAckPacket.class);</span>
+<span class="fc" id="L402">    }</span>
+
+    @Override
+    public &lt;R extends ACK_IN&gt; PacketReplyContext&lt;ACK_IN, ACK_OUT, R&gt; send(OUT p, Class&lt;R&gt; replyType) throws IOException {
+<span class="fc" id="L406">        long seqN = seq.getAndIncrement();</span>
+<span class="fc" id="L407">        return doSendAndWaitResponse(new SimpleSeqPacket(p, seqN), replyType);</span>
+    }
+
+    @Override
+    public &lt;R extends IN&gt; PacketReplyContext&lt;ACK_IN, ACK_OUT, R&gt; receive(Class&lt;R&gt; type) throws IOException {
+        try {
+<span class="fc" id="L413">            log(&quot;Waiting for  &quot; + type + &quot;...&quot;);</span>
+<span class="fc" id="L414">            return new PacketReplyContextImpl&lt;&gt;(doReceive(packet -&gt; type.isInstance(packet.packet())));</span>
+<span class="fc" id="L415">        } catch (InterruptedException e) {</span>
+<span class="fc" id="L416">            throw (IOException) new InterruptedIOException(&quot;Failed to receive packet &quot; + type).initCause(e);</span>
+        }
+    }
+
+    @Override
+    public void setNick(String nick) {
+<span class="fc" id="L422">        this.nick = nick;</span>
+<span class="fc" id="L423">    }</span>
+
+    private void log(String s) {
+<span class="fc" id="L426">        LOGGER.trace(&quot;[{}][{}] {}&quot;, name, nick, s);</span>
+<span class="fc" id="L427">    }</span>
+
+    private class PacketReplyContextImpl&lt;T extends Packet&gt; implements PacketReplyContext&lt;ACK_IN, ACK_OUT, T&gt; {
+
+        private final SeqPacket packet;
+<span class="fc" id="L432">        private final AtomicBoolean hasAcked = new AtomicBoolean(false);</span>
+
+<span class="fc" id="L434">        PacketReplyContextImpl(SeqPacket packet) {</span>
+<span class="fc" id="L435">            this.packet = packet;</span>
+<span class="fc" id="L436">        }</span>
+
+        @Override
+        @SuppressWarnings(&quot;unchecked&quot;)
+        public T getPacket() {
+<span class="fc" id="L441">            return (T) packet.packet();</span>
+        }
+
+        @Override
+        public void ack() throws IOException {
+<span class="pc bpc" id="L446" title="1 of 2 branches missed.">            if (hasAcked.getAndSet(true))</span>
+<span class="nc" id="L447">                throw new IllegalStateException(&quot;Packet &quot; + packet + &quot; has already been acked&quot;);</span>
+
+<span class="fc" id="L449">            doAck();</span>
+<span class="fc" id="L450">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc bfc" id="L454" title="All 2 branches covered.">            if (!hasAcked.getAndSet(true))</span>
+<span class="fc" id="L455">                doAck();</span>
+<span class="fc" id="L456">        }</span>
+
+        private void doAck() throws IOException {
+<span class="fc" id="L459">            doSend(new SeqAckPacket(new SimpleAckPacket(), -1, packet.seqN()));</span>
+<span class="fc" id="L460">        }</span>
+
+        @Override
+        @SuppressWarnings({ &quot;unchecked&quot;, &quot;resource&quot; }) // We don't care about acknowledging a SimpleAckPacket
+        public void reply(ACK_OUT p) throws IOException {
+<span class="fc" id="L465">            reply(p, (Class&lt;ACK_IN&gt;) SimpleAckPacket.class);</span>
+<span class="fc" id="L466">        }</span>
+
+        @Override
+        public &lt;R1 extends ACK_IN&gt; PacketReplyContext&lt;ACK_IN, ACK_OUT, R1&gt; reply(ACK_OUT p, Class&lt;R1&gt; replyType)
+                throws IOException {
+<span class="pc bpc" id="L471" title="1 of 2 branches missed.">            if (hasAcked.getAndSet(true))</span>
+<span class="nc" id="L472">                throw new IllegalStateException(&quot;Packet &quot; + packet + &quot; has already been acked&quot;);</span>
+
+<span class="fc" id="L474">            long seqN = seq.getAndIncrement();</span>
+<span class="fc" id="L475">            return doSendAndWaitResponse(new SeqAckPacket(p, seqN, packet.seqN()), replyType);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

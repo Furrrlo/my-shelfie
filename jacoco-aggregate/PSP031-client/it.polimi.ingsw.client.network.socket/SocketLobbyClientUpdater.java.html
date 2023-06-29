@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SocketLobbyClientUpdater.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network.socket</a> &gt; <span class="el_source">SocketLobbyClientUpdater.java</span></div><h1>SocketLobbyClientUpdater.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network.socket;
+
+import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.client.updater.GameClientUpdater;
+import it.polimi.ingsw.client.updater.LobbyClientUpdater;
+import it.polimi.ingsw.model.Game;
+import it.polimi.ingsw.model.Lobby;
+import it.polimi.ingsw.socket.packets.*;
+import it.polimi.ingsw.updater.GameUpdater;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
+import java.util.function.Supplier;
+
+/**
+ * Socket LobbyClientUpdater implementation which listens for incoming packets from a socket
+ * and calls the corresponding updaters methods
+ *
+ * @see GameClientUpdater
+ * @see it.polimi.ingsw.updater
+ */
+public class SocketLobbyClientUpdater extends LobbyClientUpdater implements Supplier&lt;@Nullable SocketGameClientUpdater&gt; {
+
+    private final ClientSocketManager socketManager;
+
+    public SocketLobbyClientUpdater(Lobby lobby, ClientSocketManager socketManager) {
+<span class="fc" id="L29">        super(lobby);</span>
+<span class="fc" id="L30">        this.socketManager = socketManager;</span>
+<span class="fc" id="L31">    }</span>
+
+    @Override
+    public @Nullable SocketGameClientUpdater get() {
+        try {
+            do {
+<span class="fc" id="L37">                try (var ctx = socketManager.receive(LobbyUpdaterPacket.class)) {</span>
+<span class="pc bpc" id="L38" title="1 of 5 branches missed.">                    switch (ctx.getPacket()) {</span>
+<span class="fc" id="L39">                        case UpdateRequiredPlayersPacket packet -&gt; updateRequiredPlayers(packet.requiredPlayers());</span>
+<span class="fc" id="L40">                        case UpdateJoinedPlayerPacket packet -&gt; updateJoinedPlayers(packet.players());</span>
+<span class="fc" id="L41">                        case UpdatePlayerReadyPacket packet -&gt; updatePlayerReady(packet.nick(), packet.ready());</span>
+<span class="fc" id="L42">                        case CreateGamePacket packet -&gt; {</span>
+<span class="fc" id="L43">                            return (SocketGameClientUpdater) updateGame(new GameAndController&lt;&gt;(</span>
+<span class="fc" id="L44">                                    packet.game(),</span>
+                                    new SocketGameClientController(socketManager)));
+                        }
+                    }
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                }</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">            } while (!Thread.interrupted());</span>
+<span class="fc" id="L50">        } catch (InterruptedIOException ignored) {</span>
+            // We got interrupted, normal flow
+<span class="nc" id="L52">        } catch (IOException e) {</span>
+<span class="nc" id="L53">            throw new UncheckedIOException(e);</span>
+<span class="pc" id="L54">        }</span>
+
+<span class="fc" id="L56">        return null;</span>
+    }
+
+    @Override
+    protected GameUpdater createGameUpdater(GameAndController&lt;Game&gt; gameAndController) {
+<span class="fc" id="L61">        return new SocketGameClientUpdater(gameAndController.game(), socketManager);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

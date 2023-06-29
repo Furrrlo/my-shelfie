@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiLobbyServerController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.rmi</a> &gt; <span class="el_source">RmiLobbyServerController.java</span></div><h1>RmiLobbyServerController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.rmi;
+
+import it.polimi.ingsw.controller.LobbyController;
+import it.polimi.ingsw.rmi.RmiLobbyController;
+import it.polimi.ingsw.server.controller.LobbyServerController;
+
+import java.rmi.RemoteException;
+import java.util.function.Consumer;
+
+/**
+ * RMI remotable object which is used to implement {@link LobbyController}.
+ * &lt;p&gt;
+ * This object is per-player, meaning that a new one will be created and exported
+ * for each player. An object is then in charge of reading RMI {@link LobbyController}
+ * requests from its assigned player and relaying them to the protocol-agnostic
+ * {@link LobbyServerController}.
+ *
+ * @see RmiLobbyController
+ */
+public class RmiLobbyServerController implements RmiLobbyController {
+
+    private final String nick;
+    private final LobbyServerController controller;
+    private final Consumer&lt;Throwable&gt; disconnectHandler;
+
+<span class="fc" id="L26">    public RmiLobbyServerController(String nick, LobbyServerController controller, Consumer&lt;Throwable&gt; disconnectHandler) {</span>
+<span class="fc" id="L27">        this.nick = nick;</span>
+<span class="fc" id="L28">        this.controller = controller;</span>
+<span class="fc" id="L29">        this.disconnectHandler = disconnectHandler;</span>
+<span class="fc" id="L30">    }</span>
+
+    @Override
+    public void setRequiredPlayers(int requiredPlayers) throws RemoteException {
+        try {
+<span class="fc" id="L35">            controller.setRequiredPlayers(nick, requiredPlayers);</span>
+<span class="nc" id="L36">        } catch (Throwable t) {</span>
+<span class="nc" id="L37">            disconnectHandler.accept(t);</span>
+<span class="fc" id="L38">        }</span>
+<span class="fc" id="L39">    }</span>
+
+    @Override
+    public void ready(boolean ready) throws RemoteException {
+        try {
+<span class="fc" id="L44">            controller.ready(nick, ready);</span>
+<span class="nc" id="L45">        } catch (Throwable t) {</span>
+<span class="nc" id="L46">            disconnectHandler.accept(t);</span>
+<span class="fc" id="L47">        }</span>
+<span class="fc" id="L48">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

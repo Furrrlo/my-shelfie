@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PersonalGoal.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">PersonalGoal.java</span></div><h1>PersonalGoal.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+/** Modifiable implementation of {@link PersonalGoalView} */
+public class PersonalGoal implements PersonalGoalView {
+
+    private final @Nullable Tile[][] personalGoal;
+    private final int index;
+
+    /** Immutable list containing all possible personal goals assignable to players */
+<span class="fc" id="L17">    public static final List&lt;PersonalGoal&gt; PERSONAL_GOALS = List.of(new PersonalGoal(0, new Color[][] {</span>
+            //@formatter:off
+            new Color[]{Color.PINK     , null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.GREEN    },
+            new Color[]{null           , null           , null           , Color.WHITE    , null           },
+            new Color[]{null           , Color.YELLOW   , null           , null           , null           },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
+            //@formatter:on
+    }), new PersonalGoal(1, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , Color.PINK     , null           , null           , null           },
+            new Color[]{Color.GREEN    , null           , Color.YELLOW   , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.WHITE    },
+            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
+            new Color[]{null           , null           , null           , null           , Color.BLUE     },
+            //@formatter:on 
+    }), new PersonalGoal(2, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{Color.BLUE     , null           , null           , Color.YELLOW   , null           },
+            new Color[]{null           , null           , Color.PINK     , null           , null           },
+            new Color[]{null           , Color.GREEN    , null           , null           , Color.LIGHTBLUE},
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{Color.WHITE    , null           , null           , null           , null           },
+            //@formatter:on
+    }), new PersonalGoal(3, new Color[][] {
+        //@formatter:off
+            new Color[]{null           , null           , null           , null           , Color.YELLOW   },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{Color.LIGHTBLUE, null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , Color.PINK     , null           },
+            new Color[]{null           , Color.WHITE    , Color.GREEN    , null           , null           },
+            new Color[]{null           , null           , null           , null           , null           },
+        //@formatter:on
+    }), new PersonalGoal(4, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , Color.LIGHTBLUE, null           , null           , null           },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , Color.BLUE     , Color.WHITE    , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.PINK     },
+            new Color[]{Color.YELLOW   , null           , null           , Color.GREEN    , null           },
+            //@formatter:on
+    }), new PersonalGoal(5, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , Color.LIGHTBLUE, null           , Color.GREEN    },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.WHITE    , null           },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , Color.YELLOW   , null           , Color.BLUE     , null           },
+            new Color[]{Color.PINK     , null           , null           , null           , null           },
+            //@formatter:on
+    }), new PersonalGoal(6, new Color[][] {
+            //@formatter:off
+            new Color[]{Color.GREEN    , null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.BLUE     , null           },
+            new Color[]{null           , Color.PINK     , null           , null           , null           },
+            new Color[]{Color.LIGHTBLUE, null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.YELLOW   },
+            new Color[]{null           , null           , Color.WHITE    , null           , null           },
+            //@formatter:on
+    }), new PersonalGoal(7, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , null           , null           , Color.BLUE     },
+            new Color[]{null           , Color.GREEN    , null           , null           , null           },
+            new Color[]{null           , null           , Color.LIGHTBLUE, null           , null           },
+            new Color[]{Color.PINK     , null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.WHITE    , null           },
+            new Color[]{null           , null           , null           , Color.YELLOW   , null           },
+            //@formatter:on
+    }), new PersonalGoal(8, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , Color.YELLOW   , null           , null           },
+            new Color[]{null           , null           , null           , null           , null           },
+            new Color[]{null           , null           , Color.GREEN    , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.WHITE    },
+            new Color[]{null           , Color.LIGHTBLUE, null           , null           , Color.PINK     },
+            new Color[]{Color.BLUE     , null           , null           , null           , null           },
+            //@formatter:on
+    }), new PersonalGoal(9, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , null           , null           , Color.LIGHTBLUE},
+            new Color[]{null           , Color.YELLOW   , null           , null           , null           },
+            new Color[]{Color.WHITE    , null           , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.GREEN    , null           },
+            new Color[]{null           , Color.BLUE     , null           , null           , null           },
+            new Color[]{null           , null           , null           , Color.PINK     , null           },
+            //@formatter:on
+    }), new PersonalGoal(10, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , Color.PINK     , null           , null           },
+            new Color[]{null           , Color.WHITE    , null           , null           , null           },
+            new Color[]{Color.YELLOW   , null           , null           , null           , null           },
+            new Color[]{null           , null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , null           , Color.GREEN    },
+            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
+            //@formatter:on
+    }), new PersonalGoal(11, new Color[][] {
+            //@formatter:off
+            new Color[]{null           , null           , Color.WHITE    , null           , null           },
+            new Color[]{null           , Color.PINK     , null           , null           , null           },
+            new Color[]{null           , null           , Color.BLUE     , null           , null           },
+            new Color[]{null           , null           , null           , Color.LIGHTBLUE, null           },
+            new Color[]{null           , null           , null           , null           , Color.YELLOW   },
+            new Color[]{Color.GREEN    , null           , null           , null           , null           },
+            //@formatter:on
+    }));
+
+    private PersonalGoal(int index, @Nullable Color[][] personalGoal) {
+<span class="fc" id="L128">        this(index, colorToTiles(personalGoal));</span>
+<span class="fc" id="L129">    }</span>
+
+    /** returns a matrix of Tile[][] from a given matrix of Color[][] passed as parameter */
+    @SuppressWarnings(&quot;NullAway&quot;) // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
+    private static @Nullable Tile[][] colorToTiles(@Nullable Color[][] tiles) {
+<span class="fc" id="L134">        return Arrays.stream(tiles)</span>
+<span class="fc" id="L135">                .map(row -&gt; Arrays.stream(row)</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                        .map(color -&gt; color == null ? null</span>
+<span class="fc" id="L137">                                : new Tile(color))</span>
+<span class="fc" id="L138">                        .toArray(Tile[]::new))</span>
+<span class="fc" id="L139">                .toArray(Tile[][]::new);</span>
+    }
+
+    @SuppressWarnings(&quot;NullAway&quot;) // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
+<span class="fc" id="L143">    private PersonalGoal(int index, @Nullable Tile[][] personalGoal) {</span>
+<span class="fc" id="L144">        this.personalGoal = personalGoal;</span>
+<span class="fc" id="L145">        this.index = index;</span>
+<span class="fc" id="L146">    }</span>
+
+    /**
+     * generate a personalGoal corresponding to the element in the specified position of the immutable list personalGoals
+     * that contains all possible cases of personal Goals assignable to players
+     * 
+     * @param index : specifies the index of the personalGoals list from which to extract the personalGoal
+     */
+    public PersonalGoal(int index) {
+<span class="fc" id="L155">        this(index, PERSONAL_GOALS.get(index).personalGoal);</span>
+<span class="fc" id="L156">    }</span>
+
+    /** returns true if the shelfie passed as a parameter corresponds to the tiles of the commonGoal */
+    @Override
+    public boolean achievedPersonalGoal(ShelfieView shelfie) {
+<span class="fc" id="L161">        return new Shelfie(PERSONAL_GOALS.get(this.index).personalGoal).isOverlapping(shelfie);</span>
+    }
+
+    @Override
+    public int getIndex() {
+<span class="fc" id="L166">        return index;</span>
+    }
+
+    @Override
+    @SuppressWarnings(&quot;NullAway&quot;) // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
+    public @Nullable Tile get(int r, int c) {
+<span class="fc" id="L172">        return personalGoal[r][c];</span>
+    }
+
+    @Override
+    @SuppressWarnings(&quot;NullAway&quot;) // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
+    public Stream&lt;TileAndCoords&lt;@Nullable Tile&gt;&gt; tiles() {
+<span class="fc" id="L178">        return IntStream.range(0, ROWS).boxed().flatMap(row -&gt; IntStream.range(0, COLUMNS).boxed()</span>
+<span class="fc" id="L179">                .map(col -&gt; new TileAndCoords&lt;&gt;(personalGoal[row][col], row, col)));</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        if (this == o)</span>
+<span class="fc" id="L185">            return true;</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (!(o instanceof PersonalGoal that))</span>
+<span class="fc" id="L187">            return false;</span>
+<span class="fc" id="L188">        return Arrays.deepEquals(personalGoal, that.personalGoal);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L193">        return Arrays.deepHashCode(personalGoal);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L198">        return &quot;PersonalGoal{&quot; +</span>
+<span class="fc" id="L199">                &quot;personalGoal=&quot; + Arrays.deepToString(personalGoal) +</span>
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

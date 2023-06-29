@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiClientNetManager.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network.rmi</a> &gt; <span class="el_source">RmiClientNetManager.java</span></div><h1>RmiClientNetManager.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network.rmi;
+
+import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.NetworkConstants;
+import it.polimi.ingsw.client.network.ClientNetManager;
+import it.polimi.ingsw.controller.NickNotValidException;
+import it.polimi.ingsw.model.Lobby;
+import it.polimi.ingsw.rmi.*;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+/** NetManager implementation which uses a protocol built on top of RMI */
+public class RmiClientNetManager extends RmiAdapter implements ClientNetManager {
+
+<span class="fc" id="L28">    private static final Logger LOGGER = LoggerFactory.getLogger(RmiClientNetManager.class);</span>
+
+    private final @Nullable String host;
+    private final int port;
+    private final String remoteName;
+    private final String nick;
+    private final RmiConnectionController.ConnectedController server;
+    private final UnicastRemoteObjects.TrackingExporter unicastRemoteObjects;
+
+    private volatile @Nullable Lobby lobby;
+
+    public static ClientNetManager connect(@Nullable String host, int port, String nick)
+            throws RemoteException, NotBoundException, NickNotValidException {
+<span class="nc" id="L41">        return connect(host, port, RmiConnectionController.REMOTE_NAME, nick);</span>
+    }
+
+    @VisibleForTesting
+    public static RmiClientNetManager connect(@Nullable String host, int port, String remoteName, String nick)
+            throws RemoteException, NotBoundException, NickNotValidException {
+<span class="fc" id="L47">        return connect(host, port, remoteName, new RMITimeoutClientSocketFactory(), null, nick);</span>
+    }
+
+    @VisibleForTesting
+    public static RmiClientNetManager connect(@Nullable String host,
+                                              int port,
+                                              String remoteName,
+                                              @Nullable RMIClientSocketFactory csf,
+                                              @Nullable RMIServerSocketFactory ssf,
+                                              String nick)
+            throws RemoteException, NotBoundException, NickNotValidException {
+<span class="fc" id="L58">        return connect(host, port, remoteName, UnicastRemoteObjects.createExporter(csf, ssf), nick);</span>
+    }
+
+    private static RmiClientNetManager connect(@Nullable String host,
+                                               int port,
+                                               String remoteName,
+                                               UnicastRemoteObjects.Exporter unicastRemoteObjectsIn,
+                                               String nick)
+            throws RemoteException, NotBoundException, NickNotValidException {
+<span class="fc" id="L67">        var unicastRemoteObjects = UnicastRemoteObjects.createTrackingExporter(unicastRemoteObjectsIn);</span>
+
+<span class="fc" id="L69">        final Registry registry = LocateRegistry.getRegistry(host, port);</span>
+<span class="fc" id="L70">        final var server = (RmiConnectionController) registry.lookup(remoteName);</span>
+
+        // If the client has multiple network adapters (e.g. virtualbox adapter), rmi may export objects to the wrong interface.
+        // @see https://bugs.openjdk.org/browse/JDK-8042232
+        // To work around this, either run the JVM with the parameter -Djava.rmi.server.hostname=&lt;server address&gt; or
+        // we ask the server to give back the remote client address.
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (System.getProperty(&quot;java.rmi.server.hostname&quot;) == null) {</span>
+<span class="fc" id="L77">            var addrStr = server.getClientAddressHost();</span>
+<span class="fc" id="L78">            System.setProperty(&quot;java.rmi.server.hostname&quot;, addrStr);</span>
+<span class="fc" id="L79">            LOGGER.info(&quot;Detected java.rmi.server.hostname='{}'&quot;, addrStr);</span>
+        }
+
+<span class="fc" id="L82">        AtomicReference&lt;RmiClientNetManager&gt; netManagerRef = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L83">        var readTimeoutMillis = Long.getLong(&quot;sun.rmi.transport.tcp.readTimeout&quot;, NetworkConstants.READ_TIMEOUT.toMillis());</span>
+<span class="fc" id="L84">        var heartbeatClientHandler = new RmiHeartbeatClientHandler(readTimeoutMillis, TimeUnit.MILLISECONDS, () -&gt; {</span>
+<span class="fc" id="L85">            var netManager = netManagerRef.get();</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">            if (netManager != null)</span>
+<span class="fc" id="L87">                netManager.close();</span>
+<span class="fc" id="L88">        });</span>
+<span class="fc" id="L89">        RmiHeartbeatHandler exportedHeartbeatHandler = unicastRemoteObjects.export(heartbeatClientHandler, 0);</span>
+        try {
+<span class="fc" id="L91">            var connectedServer = server.doConnect(nick, exportedHeartbeatHandler);</span>
+<span class="fc" id="L92">            heartbeatClientHandler.start();</span>
+
+<span class="fc" id="L94">            var netManager = new RmiClientNetManager(host, port, remoteName, nick, connectedServer, unicastRemoteObjects);</span>
+<span class="fc" id="L95">            netManagerRef.set(netManager);</span>
+<span class="fc" id="L96">            return netManager;</span>
+<span class="fc" id="L97">        } catch (Throwable t) {</span>
+<span class="fc" id="L98">            unicastRemoteObjects.unexportAll(true);</span>
+<span class="fc" id="L99">            throw t;</span>
+        }
+    }
+
+    @VisibleForTesting
+    private RmiClientNetManager(@Nullable String host,
+                                int port,
+                                String remoteName,
+                                String nick,
+                                RmiConnectionController.ConnectedController server,
+<span class="fc" id="L109">                                UnicastRemoteObjects.TrackingExporter unicastRemoteObjects) {</span>
+<span class="fc" id="L110">        this.port = port;</span>
+<span class="fc" id="L111">        this.server = server;</span>
+<span class="fc" id="L112">        this.remoteName = remoteName;</span>
+<span class="fc" id="L113">        this.nick = nick;</span>
+<span class="fc" id="L114">        this.host = host;</span>
+<span class="fc" id="L115">        this.unicastRemoteObjects = unicastRemoteObjects;</span>
+<span class="fc" id="L116">    }</span>
+
+    @Override
+    public ClientNetManager recreateAndReconnect() throws NotBoundException, RemoteException, NickNotValidException {
+<span class="nc" id="L120">        return RmiClientNetManager.connect(host, port, remoteName, unicastRemoteObjects.getUnderlyingExporter(), nick);</span>
+    }
+
+    @Override
+    public String getHost() {
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        return host == null ? &quot;localhost&quot; : host;</span>
+    }
+
+    @Override
+    public int getPort() {
+<span class="nc" id="L130">        return port;</span>
+    }
+
+    @Override
+    public String getNick() {
+<span class="nc" id="L135">        return nick;</span>
+    }
+
+    @Override
+    public LobbyAndController&lt;Lobby&gt; joinGame() throws RemoteException {
+<span class="fc" id="L140">        final InterceptingFactory updaterFactory = new InterceptingFactory(unicastRemoteObjects);</span>
+<span class="fc" id="L141">        server.joinGame(unicastRemoteObjects.export(updaterFactory, 0, false));</span>
+<span class="fc" id="L142">        UnicastRemoteObject.unexportObject(updaterFactory, true);</span>
+
+<span class="fc" id="L144">        var lobbyAndController = updaterFactory.getUpdater().getLobbyAndController();</span>
+<span class="fc" id="L145">        lobby = lobbyAndController.lobby();</span>
+<span class="fc" id="L146">        return lobbyAndController;</span>
+    }
+
+    @Override
+    public void close() {
+        try {
+<span class="fc" id="L152">            unicastRemoteObjects.unexportAll(true);</span>
+        } finally {
+<span class="fc" id="L154">            var lobby = this.lobby;</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">            if (lobby != null)</span>
+<span class="fc" id="L156">                lobby.disconnectThePlayer(nick);</span>
+        }
+<span class="fc" id="L158">    }</span>
+
+    private static class InterceptingFactory implements RmiLobbyUpdaterFactory {
+
+        private final UnicastRemoteObjects.Exporter unicastRemoteObjects;
+        private @Nullable RmiLobbyClientUpdater updater;
+
+<span class="fc" id="L165">        public InterceptingFactory(UnicastRemoteObjects.Exporter unicastRemoteObjects) {</span>
+<span class="fc" id="L166">            this.unicastRemoteObjects = unicastRemoteObjects;</span>
+<span class="fc" id="L167">        }</span>
+
+        public RmiLobbyClientUpdater getUpdater() {
+<span class="fc" id="L170">            return Objects.requireNonNull(</span>
+                    updater,
+                    &quot;Expected ConnectionServerController to invoke &quot; +
+                            &quot;GameCreationStateUpdaterFactory exactly once, was 0&quot;);
+        }
+
+        @Override
+        public RmiLobbyUpdater create(LobbyAndController&lt;Lobby&gt; lobby) throws RemoteException {
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">            if (updater != null)</span>
+<span class="nc" id="L179">                throw new UnsupportedOperationException(&quot;Expected ConnectionServerController to invoke &quot; +</span>
+                        &quot;GameCreationStateUpdaterFactory exactly once, was 2+&quot;);
+
+<span class="fc" id="L182">            updater = new RmiLobbyClientUpdater(unicastRemoteObjects, lobby);</span>
+<span class="fc" id="L183">            return unicastRemoteObjects.export(updater, 0);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

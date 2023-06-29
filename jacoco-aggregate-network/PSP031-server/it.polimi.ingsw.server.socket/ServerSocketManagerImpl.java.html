@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ServerSocketManagerImpl.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.socket</a> &gt; <span class="el_source">ServerSocketManagerImpl.java</span></div><h1>ServerSocketManagerImpl.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.socket;
+
+import it.polimi.ingsw.socket.SocketManagerImpl;
+import it.polimi.ingsw.socket.packets.C2SAckPacket;
+import it.polimi.ingsw.socket.packets.C2SPacket;
+import it.polimi.ingsw.socket.packets.S2CAckPacket;
+import it.polimi.ingsw.socket.packets.S2CPacket;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Actual implementation of {@link ServerSocketManager}.
+ * &lt;p&gt;
+ * This is mostly needed to respect the packet flow defined by ServerSocketManager
+ */
+public class ServerSocketManagerImpl
+        extends SocketManagerImpl&lt;C2SPacket, C2SAckPacket, S2CAckPacket, S2CPacket&gt;
+        implements ServerSocketManager {
+
+    public ServerSocketManagerImpl(ExecutorService executor, Socket socket) throws IOException {
+<span class="nc" id="L24">        super(&quot;Server&quot;, executor, socket);</span>
+<span class="nc" id="L25">    }</span>
+
+    public ServerSocketManagerImpl(ExecutorService executor,
+                                   Socket socket,
+                                   long defaultResponseTimeout,
+                                   TimeUnit defaultResponseTimeoutUnit)
+            throws IOException {
+<span class="fc" id="L32">        super(&quot;Server&quot;, executor, socket, defaultResponseTimeout, defaultResponseTimeoutUnit);</span>
+<span class="fc" id="L33">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

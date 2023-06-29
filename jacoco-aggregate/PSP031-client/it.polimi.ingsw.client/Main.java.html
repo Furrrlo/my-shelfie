@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-client</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client;
+
+import it.polimi.ingsw.client.javafx.JfxMain;
+import it.polimi.ingsw.client.tui.TuiMain;
+
+import java.util.Arrays;
+
+/**
+ * Main class which starts the client
+ * &lt;p&gt;
+ * This class will attempt to start the GUI in case no console is detected, otherwise
+ * it will prompt the user whether to use the GUI or the TUI in the console itself.
+ * The choice can also be overridden using command line args:
+ * - {@code '--gui'} or {@code '-g'} will start the GUI
+ * - {@code '--tui'}, {@code '-t'}, {@code '--cli'} or {@code '-c'} will start the CLI
+ *
+ * @implNote it is important that this class does not declare any static logger fields,
+ *           as it might trigger log4j initialization before {@link TuiMain#main(String[])} or
+ *           {@link JfxMain#main(String[])} has the possibility to set the {@code log4j.configurationFile}
+ *           system property to the correct file
+ */
+<span class="nc" id="L22">public class Main {</span>
+
+    public static void main(String[] args) {
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        boolean hasTuiArg = Arrays.stream(args).anyMatch(arg -&gt; arg.equalsIgnoreCase(&quot;--tui&quot;)</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">                || arg.equalsIgnoreCase(&quot;--cli&quot;)</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">                || arg.equalsIgnoreCase(&quot;-t&quot;)</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">                || arg.equalsIgnoreCase(&quot;-c&quot;));</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        boolean hasGuiArg = Arrays.stream(args).anyMatch(arg -&gt; arg.equalsIgnoreCase(&quot;--gui&quot;)</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">                || arg.equalsIgnoreCase(&quot;-g&quot;));</span>
+
+<span class="nc bnc" id="L32" title="All 4 branches missed.">        if (hasTuiArg &amp;&amp; hasGuiArg) {</span>
+<span class="nc" id="L33">            System.err.println(&quot;Only one between --gui and --tui can be specified&quot;);</span>
+<span class="nc" id="L34">            System.exit(-1);</span>
+<span class="nc" id="L35">            return;</span>
+        }
+
+<span class="nc" id="L38">        var console = System.console();</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (hasTuiArg) {</span>
+<span class="nc" id="L40">            TuiMain.main(args);</span>
+<span class="nc" id="L41">            return;</span>
+        }
+
+<span class="nc bnc" id="L44" title="All 4 branches missed.">        if (hasGuiArg || console == null) {</span>
+<span class="nc" id="L45">            JfxMain.main(args);</span>
+<span class="nc" id="L46">            return;</span>
+        }
+
+<span class="nc" id="L49">        System.out.println(&quot;Which UI do you want to use?&quot;);</span>
+<span class="nc" id="L50">        System.out.println(&quot;1. Textual User Interface&quot;);</span>
+<span class="nc" id="L51">        System.out.println(&quot;2. Graphical User Interface&quot;);</span>
+        do {
+<span class="nc" id="L53">            var read = console.readLine();</span>
+
+            int choice;
+            try {
+<span class="nc" id="L57">                choice = Integer.parseInt(read);</span>
+<span class="nc" id="L58">            } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L59">                System.out.println(&quot;Invalid choice &quot; + read);</span>
+<span class="nc" id="L60">                continue;</span>
+<span class="nc" id="L61">            }</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (choice == 1) {</span>
+<span class="nc" id="L64">                TuiMain.main(args);</span>
+<span class="nc" id="L65">                return;</span>
+            }
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (choice == 2) {</span>
+<span class="nc" id="L69">                JfxMain.main(args);</span>
+<span class="nc" id="L70">                return;</span>
+            }
+
+<span class="nc" id="L73">            System.out.println(&quot;Invalid choice &quot; + read);</span>
+<span class="nc" id="L74">        } while (true);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

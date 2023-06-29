@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RmiHeartbeatHandler.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.rmi</a> &gt; <span class="el_source">RmiHeartbeatHandler.java</span></div><h1>RmiHeartbeatHandler.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.rmi;
+
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.HeartbeatHandler;
+
+import java.io.Closeable;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+
+/**
+ * RMI remotable service which will be used to implement {@link HeartbeatHandler}
+ *
+ * This re-declares the same methods, but with an RMI compatible signature, throwing
+ * {@link RemoteException} instead o {@link DisconnectedException}.
+ * &lt;p&gt;
+ * The {@link Adapter} is then used in order to be able to have an actual {@link HeartbeatHandler}
+ * interface implementation
+ *
+ * @see HeartbeatHandler
+ * @see Adapter
+ */
+public interface RmiHeartbeatHandler extends Remote {
+
+    /** RMI redeclaration of {@link HeartbeatHandler#sendHeartbeat(Instant)}, check that for docs and details */
+    Instant sendHeartbeat(Instant serverTime) throws RemoteException;
+
+    class Adapter extends RmiAdapter implements HeartbeatHandler, Closeable {
+
+        private final RmiHeartbeatHandler handler;
+        private final Consumer&lt;Throwable&gt; pingFailed;
+<span class="fc" id="L34">        private final AtomicBoolean closed = new AtomicBoolean(false);</span>
+
+<span class="fc" id="L36">        public Adapter(RmiHeartbeatHandler handler, Consumer&lt;Throwable&gt; pingFailed) {</span>
+<span class="fc" id="L37">            this.handler = handler;</span>
+<span class="fc" id="L38">            this.pingFailed = pingFailed;</span>
+<span class="fc" id="L39">        }</span>
+
+        @Override
+        public void sendHeartbeat(Instant serverTime) {
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">            if (!closed.get()) {</span>
+                try {
+<span class="fc" id="L45">                    adapt(() -&gt; handler.sendHeartbeat(serverTime));</span>
+<span class="fc" id="L46">                } catch (DisconnectedException e) {</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">                    if (!closed.get())</span>
+<span class="fc" id="L48">                        pingFailed.accept(e);</span>
+<span class="fc" id="L49">                }</span>
+            }
+<span class="fc" id="L51">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L55">            closed.set(true);</span>
+<span class="fc" id="L56">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

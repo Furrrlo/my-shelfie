@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>LobbyServerController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.controller</a> &gt; <span class="el_source">LobbyServerController.java</span></div><h1>LobbyServerController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.controller;
+
+import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.model.*;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
+
+/**
+ * Actual {@link it.polimi.ingsw.controller.LobbyController} server implementation which all network controllers
+ * delegate to
+ * &lt;p&gt;
+ * This implements all the {@link it.polimi.ingsw.controller.LobbyController} interface methods, but with an overload
+ * which is the nick of the player executing the method
+ *
+ * @see it.polimi.ingsw.controller.LobbyController
+ */
+public class LobbyServerController {
+
+<span class="fc" id="L24">    private static final Logger LOGGER = LoggerFactory.getLogger(LobbyServerController.class);</span>
+
+<span class="fc" id="L26">    private static final List&lt;Tile&gt; BAG = List.of(</span>
+            new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0),
+            new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0), new Tile(Color.GREEN, 0),
+            new Tile(Color.GREEN, 1), new Tile(Color.GREEN, 1), new Tile(Color.GREEN, 1), new Tile(Color.GREEN, 1),
+            new Tile(Color.GREEN, 1), new Tile(Color.GREEN, 1), new Tile(Color.GREEN, 1),
+            new Tile(Color.GREEN, 2), new Tile(Color.GREEN, 2), new Tile(Color.GREEN, 2), new Tile(Color.GREEN, 2),
+            new Tile(Color.GREEN, 2), new Tile(Color.GREEN, 2), new Tile(Color.GREEN, 2), new Tile(Color.GREEN, 0),
+            new Tile(Color.BLUE, 0), new Tile(Color.BLUE, 0), new Tile(Color.BLUE, 0), new Tile(Color.BLUE, 0),
+            new Tile(Color.BLUE, 0), new Tile(Color.BLUE, 0), new Tile(Color.BLUE, 0),
+            new Tile(Color.BLUE, 1), new Tile(Color.BLUE, 1), new Tile(Color.BLUE, 1), new Tile(Color.BLUE, 1),
+            new Tile(Color.BLUE, 1), new Tile(Color.BLUE, 1), new Tile(Color.BLUE, 1),
+            new Tile(Color.BLUE, 2), new Tile(Color.BLUE, 2), new Tile(Color.BLUE, 2), new Tile(Color.BLUE, 2),
+            new Tile(Color.BLUE, 2), new Tile(Color.BLUE, 2), new Tile(Color.BLUE, 2), new Tile(Color.BLUE, 0),
+            new Tile(Color.PINK, 0), new Tile(Color.PINK, 0), new Tile(Color.PINK, 0), new Tile(Color.PINK, 0),
+            new Tile(Color.PINK, 0), new Tile(Color.PINK, 0), new Tile(Color.PINK, 0),
+            new Tile(Color.PINK, 1), new Tile(Color.PINK, 1), new Tile(Color.PINK, 1), new Tile(Color.PINK, 1),
+            new Tile(Color.PINK, 1), new Tile(Color.PINK, 1), new Tile(Color.PINK, 1),
+            new Tile(Color.PINK, 2), new Tile(Color.PINK, 2), new Tile(Color.PINK, 2), new Tile(Color.PINK, 2),
+            new Tile(Color.PINK, 2), new Tile(Color.PINK, 2), new Tile(Color.PINK, 2), new Tile(Color.PINK, 0),
+            new Tile(Color.LIGHTBLUE, 0), new Tile(Color.LIGHTBLUE, 0), new Tile(Color.LIGHTBLUE, 0),
+            new Tile(Color.LIGHTBLUE, 0), new Tile(Color.LIGHTBLUE, 0), new Tile(Color.LIGHTBLUE, 0),
+            new Tile(Color.LIGHTBLUE, 0),
+            new Tile(Color.LIGHTBLUE, 1), new Tile(Color.LIGHTBLUE, 1), new Tile(Color.LIGHTBLUE, 1),
+            new Tile(Color.LIGHTBLUE, 1), new Tile(Color.LIGHTBLUE, 1), new Tile(Color.LIGHTBLUE, 1),
+            new Tile(Color.LIGHTBLUE, 1),
+            new Tile(Color.LIGHTBLUE, 2), new Tile(Color.LIGHTBLUE, 2), new Tile(Color.LIGHTBLUE, 2),
+            new Tile(Color.LIGHTBLUE, 2), new Tile(Color.LIGHTBLUE, 2), new Tile(Color.LIGHTBLUE, 2),
+            new Tile(Color.LIGHTBLUE, 2), new Tile(Color.LIGHTBLUE, 0),
+            new Tile(Color.YELLOW, 0), new Tile(Color.YELLOW, 0), new Tile(Color.YELLOW, 0), new Tile(Color.YELLOW, 0),
+            new Tile(Color.YELLOW, 0), new Tile(Color.YELLOW, 0), new Tile(Color.YELLOW, 0),
+            new Tile(Color.YELLOW, 1), new Tile(Color.YELLOW, 1), new Tile(Color.YELLOW, 1), new Tile(Color.YELLOW, 1),
+            new Tile(Color.YELLOW, 1), new Tile(Color.YELLOW, 1), new Tile(Color.YELLOW, 1),
+            new Tile(Color.YELLOW, 2), new Tile(Color.YELLOW, 2), new Tile(Color.YELLOW, 2), new Tile(Color.YELLOW, 2),
+            new Tile(Color.YELLOW, 2), new Tile(Color.YELLOW, 2), new Tile(Color.YELLOW, 2), new Tile(Color.YELLOW, 0),
+            new Tile(Color.WHITE, 0), new Tile(Color.WHITE, 0), new Tile(Color.WHITE, 0), new Tile(Color.WHITE, 0),
+            new Tile(Color.WHITE, 0), new Tile(Color.WHITE, 0), new Tile(Color.WHITE, 0),
+            new Tile(Color.WHITE, 1), new Tile(Color.WHITE, 1), new Tile(Color.WHITE, 1), new Tile(Color.WHITE, 1),
+            new Tile(Color.WHITE, 1), new Tile(Color.WHITE, 1), new Tile(Color.WHITE, 1),
+            new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2),
+            new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 2), new Tile(Color.WHITE, 0));
+
+    private final LockProtected&lt;ServerLobby&gt; lockedLobby;
+
+<span class="fc" id="L69">    public LobbyServerController(LockProtected&lt;ServerLobby&gt; lockedLobby) {</span>
+<span class="fc" id="L70">        this.lockedLobby = lockedLobby;</span>
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Hook method called by the network controllers when a player disconnects
+     *
+     * @param nick nick of the player which disconnected, used as an identifier
+     */
+    public void onDisconnectPlayer(String nick) {
+<span class="fc" id="L79">        try (var lobbyCloseable = lockedLobby.use()) {</span>
+<span class="fc" id="L80">            var lobby = lobbyCloseable.obj();</span>
+<span class="fc" id="L81">            LobbyPlayer lobbyPlayer = lobby.joinedPlayers().get().stream()</span>
+<span class="fc" id="L82">                    .filter(p -&gt; p.getNick().equals(nick))</span>
+<span class="fc" id="L83">                    .findFirst()</span>
+<span class="fc" id="L84">                    .orElse(null);</span>
+
+<span class="fc" id="L86">            var game = lobbyCloseable.obj().game().get();</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (game != null) {</span>
+<span class="fc" id="L88">                game.controller().onDisconnectPlayer(nick);</span>
+            } else {
+                // If the game hasn't started yet, just remove the lobbyPlayer
+<span class="fc" id="L91">                lobby.joinedPlayers().update(lobbyPlayers -&gt; {</span>
+<span class="fc" id="L92">                    List&lt;LobbyPlayer&gt; newP = new ArrayList&lt;&gt;(lobbyPlayers);</span>
+<span class="fc" id="L93">                    newP.remove(lobbyPlayer);</span>
+<span class="fc" id="L94">                    LOGGER.info(&quot;[Server] Removed {}&quot;, nick);</span>
+<span class="fc" id="L95">                    return Collections.unmodifiableList(newP);</span>
+                });
+            }
+        }
+<span class="fc" id="L99">    }</span>
+
+    /**
+     * Hook method called by the network controllers when a player reconnects after a disconnection
+     *
+     * @param nick nick of the player which reconnected, used as an identifier
+     */
+    public void onReconnectedPlayer(String nick) {
+<span class="fc" id="L107">        try (var lobbyCloseable = lockedLobby.use()) {</span>
+<span class="fc" id="L108">            var lobby = lobbyCloseable.obj();</span>
+<span class="fc" id="L109">            var game = lobby.game().get();</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if (game != null)</span>
+<span class="fc" id="L111">                game.controller().onReconnectedPlayer(nick);</span>
+        }
+<span class="fc" id="L113">    }</span>
+
+    /**
+     * Implementation of {@link it.polimi.ingsw.controller.LobbyController#setRequiredPlayers(int)}, see
+     * there for detailed docs
+     *
+     * @param nick the player executing the method
+     */
+    public void setRequiredPlayers(String nick, int requiredPlayers) {
+<span class="fc" id="L122">        try (var use = lockedLobby.use()) {</span>
+<span class="fc" id="L123">            ServerLobby lobby = use.obj();</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (!lobby.isLobbyCreator(nick))</span>
+<span class="fc" id="L125">                throw new IllegalArgumentException(&quot;This player is not the creator of this lobby&quot;);</span>
+
+<span class="fc bfc" id="L127" title="All 6 branches covered.">            if (requiredPlayers != 0</span>
+                    &amp;&amp; (requiredPlayers &lt; ServerLobbyView.MIN_PLAYERS || requiredPlayers &gt; ServerLobbyView.MAX_PLAYERS))
+<span class="fc" id="L129">                throw new IllegalArgumentException(&quot;Number of player not valid&quot;);</span>
+
+<span class="fc" id="L131">            lobby.requiredPlayers().set(requiredPlayers);</span>
+
+<span class="fc" id="L133">            checkGameStart(lobby);</span>
+        }
+<span class="fc" id="L135">    }</span>
+
+    /**
+     * Implementation of {@link it.polimi.ingsw.controller.LobbyController#ready(boolean)}}, see
+     * there for detailed docs
+     *
+     * @param nick the player executing the method
+     */
+    public void ready(String nick, boolean ready) {
+<span class="fc" id="L144">        try (var use = lockedLobby.use()) {</span>
+<span class="fc" id="L145">            var lobby = use.obj();</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">            if (lobby.hasGameStarted())</span>
+<span class="fc" id="L147">                return;</span>
+<span class="fc" id="L148">            LobbyPlayer lobbyPlayer = lobby.joinedPlayers().get().stream()</span>
+<span class="fc" id="L149">                    .filter(p -&gt; p.getNick().equals(nick))</span>
+<span class="fc" id="L150">                    .findFirst()</span>
+<span class="fc" id="L151">                    .orElseThrow(() -&gt; new IllegalStateException(&quot;Somehow missing the player &quot; + nick));</span>
+<span class="fc" id="L152">            lobbyPlayer.ready().set(ready);</span>
+
+<span class="fc" id="L154">            checkGameStart(lobby);</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        }</span>
+<span class="fc" id="L156">    }</span>
+
+    private void checkGameStart(ServerLobby lobby) {
+<span class="fc" id="L159">        List&lt;LobbyPlayer&gt; lobbyPlayers = lobby.joinedPlayers().get();</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (lobbyPlayers.stream().allMatch(p -&gt; p.ready().get())</span>
+<span class="fc bfc" id="L161" title="All 4 branches covered.">                &amp;&amp; ((!lobby.hasRequiredPlayers() &amp;&amp; lobbyPlayers.size() &gt; 1)</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">                        || (lobby.hasRequiredPlayers()</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">                                &amp;&amp; lobbyPlayers.size() &gt;= lobby.requiredPlayers().get()))) {</span>
+<span class="fc" id="L164">            final ServerGame game = createGame(0, lobbyPlayers);</span>
+<span class="fc" id="L165">            lobby.game().set(new ServerGameAndController&lt;&gt;(game,</span>
+<span class="fc" id="L166">                    new GameServerController(new LockProtected&lt;&gt;(game, lockedLobby.getLock()))));</span>
+        }
+<span class="fc" id="L168">    }</span>
+
+    @VisibleForTesting
+    public static ServerGame createGame(int gameId, List&lt;LobbyPlayer&gt; lobbyPlayers) {
+<span class="fc" id="L172">        return createGame(gameId, RandomGenerator.getDefault(), lobbyPlayers);</span>
+    }
+
+    @VisibleForTesting
+    public static ServerGame createGame(int gameId,
+                                        RandomGenerator random,
+                                        List&lt;LobbyPlayer&gt; lobbyPlayers) {
+<span class="fc" id="L179">        LOGGER.info(&quot;game started&quot;);</span>
+
+<span class="fc" id="L181">        final var remainingCommonGoalTypes = new ArrayList&lt;Type&gt;();</span>
+<span class="fc" id="L182">        Collections.addAll(remainingCommonGoalTypes, Type.values());</span>
+<span class="fc" id="L183">        final List&lt;ServerCommonGoal&gt; commonGoals = List.of(</span>
+<span class="fc" id="L184">                new ServerCommonGoal(remainingCommonGoalTypes.remove(random.nextInt(remainingCommonGoalTypes.size()))),</span>
+<span class="fc" id="L185">                new ServerCommonGoal(remainingCommonGoalTypes.remove(random.nextInt(remainingCommonGoalTypes.size()))));</span>
+
+<span class="fc" id="L187">        final var bag = new ArrayList&lt;&gt;(BAG);</span>
+<span class="fc" id="L188">        Collections.shuffle(bag, Random.from(random));</span>
+
+<span class="fc" id="L190">        final var firstFinisher = SerializableProperty.&lt;ServerPlayer&gt; nullableProperty(null);</span>
+
+        final List&lt;ServerPlayer&gt; players;
+<span class="fc" id="L193">        final var personalGoalIndexes = new ArrayList&lt;Integer&gt;();</span>
+        int temp;
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        for (int i = 0; i &lt; lobbyPlayers.size(); i++) {</span>
+<span class="fc" id="L196">            temp = random.nextInt(PersonalGoal.PERSONAL_GOALS.size());</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">            while (personalGoalIndexes.contains(temp))</span>
+<span class="fc" id="L198">                temp = random.nextInt(PersonalGoal.PERSONAL_GOALS.size());</span>
+<span class="fc" id="L199">            personalGoalIndexes.add(temp);</span>
+        }
+<span class="fc" id="L201">        var game = new ServerGame(</span>
+                gameId,
+<span class="fc" id="L203">                new Board(lobbyPlayers.size()),</span>
+                bag,
+<span class="fc" id="L205">                players = lobbyPlayers.stream()</span>
+<span class="fc" id="L206">                        .map(n -&gt; new ServerPlayer(</span>
+<span class="fc" id="L207">                                n.getNick(),</span>
+<span class="fc" id="L208">                                new PersonalGoal(personalGoalIndexes.remove(random.nextInt(personalGoalIndexes.size()))),</span>
+<span class="fc" id="L209">                                p -&gt; new PublicScoreProvider(p, commonGoals, firstFinisher),</span>
+                                PrivateScoreProvider::new))
+<span class="fc" id="L211">                        .collect(Collectors.toList()),</span>
+<span class="fc" id="L212">                random.nextInt(players.size()),</span>
+                commonGoals, firstFinisher);
+<span class="fc" id="L214">        game.refillBoard();</span>
+<span class="fc" id="L215">        return game;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>NetworkConstants.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw</a> &gt; <span class="el_source">NetworkConstants.java</span></div><h1>NetworkConstants.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
+/** Network protocol constants to use in both client and server */
+public interface NetworkConstants {
+    /** Interval between successive heartbeat pings */
+<span class="fc" id="L9">    Duration PING_INTERVAL = Duration.of(5, ChronoUnit.SECONDS);</span>
+    /** Timeout after which, if nothing was read, the connection should be considered dead */
+<span class="fc" id="L11">    Duration READ_TIMEOUT = PING_INTERVAL.multipliedBy(2);</span>
+    /** Timeout after which, if a response to a packet was not received, the connection should be considered dead */
+<span class="fc" id="L13">    Duration RESPONSE_TIMEOUT = Duration.of(5, ChronoUnit.SECONDS);</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>LockProtected.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.controller</a> &gt; <span class="el_source">LockProtected.java</span></div><h1>LockProtected.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.controller;
+
+import com.google.errorprone.annotations.MustBeClosed;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+
+import java.io.Closeable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Represent an object which should only be accessed through the use of a lock
+ * 
+ * @param &lt;T&gt; type of the held object
+ */
+public class LockProtected&lt;T&gt; {
+
+<span class="fc" id="L18">    private static final LockCloseable&lt;?&gt; NULL_LOCK_CLOSEABLE = new LockCloseable&lt;&gt;() {</span>
+        @Override
+        @SuppressWarnings(&quot;NullAway&quot;) // NullAway doesn't support generics
+        public @Nullable Object obj() {
+<span class="nc" id="L22">            return null;</span>
+        }
+
+        @Override
+        public void close() {
+<span class="nc" id="L27">        }</span>
+    };
+
+    /**
+     * Utility method to allow using a possibly null LockProtected object in a try-with-resources
+     * &lt;p&gt;
+     * If the object is not null, this will call {@link LockProtected#use()} and, therefore, take
+     * the lock. Otherwise, it will do nothing.
+     *
+     * @param lock the possibly null LockProtected object
+     * @return a non-null {@code LockCloseable&lt;@Nullable T&gt;}
+     * @param &lt;T&gt; type of the held object
+     */
+    @MustBeClosed
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; LockCloseable&lt;@Nullable T&gt; useNullable(@Nullable LockProtected&lt;T&gt; lock) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        return lock == null ? (LockCloseable&lt;T&gt;) NULL_LOCK_CLOSEABLE : lock.use();</span>
+    }
+
+    private final T obj;
+    private final Lock lock;
+
+<span class="fc" id="L49">    private final LockCloseable&lt;T&gt; lockCloseable = new LockCloseable&lt;&gt;() {</span>
+        @Override
+        public T obj() {
+<span class="fc" id="L52">            return obj;</span>
+        }
+
+        @Override
+        public void close() {
+<span class="fc" id="L57">            lock.unlock();</span>
+<span class="fc" id="L58">        }</span>
+    };
+
+    public LockProtected(T obj) {
+<span class="fc" id="L62">        this(obj, new ReentrantLock());</span>
+<span class="fc" id="L63">    }</span>
+
+<span class="fc" id="L65">    public LockProtected(T obj, Lock lock) {</span>
+<span class="fc" id="L66">        this.obj = obj;</span>
+<span class="fc" id="L67">        this.lock = lock;</span>
+<span class="fc" id="L68">    }</span>
+
+    public Lock getLock() {
+<span class="fc" id="L71">        return lock;</span>
+    }
+
+    /**
+     * Acquires the lock.
+     * &lt;p&gt;
+     * If the lock is not available then the current thread becomes
+     * disabled for thread scheduling purposes and lies dormant until the
+     * lock has been acquired.
+     *
+     * @return closeable which will unlock the lock automatically once closed
+     * @see Lock#lock()
+     */
+    @MustBeClosed
+    public LockCloseable&lt;T&gt; use() {
+<span class="fc" id="L86">        lock.lock();</span>
+<span class="fc" id="L87">        return lockCloseable;</span>
+    }
+
+    /** Returns the protected object without acquiring the lock */
+    @VisibleForTesting
+    public T getUnsafe() {
+<span class="fc" id="L93">        return obj;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L98">        return &quot;LockProtected{&quot; +</span>
+                &quot;obj=&quot; + obj +
+                &quot;, lock=&quot; + lock +
+                '}';
+    }
+
+    /**
+     * Closeable which will unlock the lock automatically once closed
+     * 
+     * @param &lt;T&gt; type of the held object
+     */
+    public interface LockCloseable&lt;T&gt; extends Closeable {
+
+        /** Returns the object we are currently holding a lock for */
+        T obj();
+
+        @Override
+        void close();
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

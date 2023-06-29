@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Type.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-common</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.model</a> &gt; <span class="el_source">Type.java</span></div><h1>Type.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.model;
+
+import it.polimi.ingsw.controller.*;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.Serializable;
+
+/** Possible types of goals that a given {@link CommonGoal} can be */
+<span class="fc" id="L9">public enum Type implements Serializable {</span>
+<span class="fc" id="L10">    SIX_COUPLES(new SixCouplesCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Six groups each containing at least 2 tiles of
+            the same type(not necessarily in the depicted
+            shape). The tiles of one group cam be
+            different from those of another group.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { Color.WHITE    , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , Color.BLUE      },
+                new Color[] { Color.WHITE    , null           , null           , null           , Color.BLUE      },
+                new Color[] { null           , null           , Color.YELLOW   , null           , null            },
+                new Color[] { null           , null           , Color.YELLOW   , null           , null            },
+                new Color[] { Color.GREEN    , null           , null           , null           , null            },
+                new Color[] { Color.GREEN    , null           , null           , Color.PINK     , Color.PINK      },
+            //@formatter:on
+            }),
+<span class="fc" id="L26">    ALL_CORNERS(new AllCornersCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Four tiles of the same type in the four corners
+            of the bookshelf.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { Color.LIGHTBLUE, null           , null           , null           , Color.LIGHTBLUE },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { Color.LIGHTBLUE, null           , null           , null           , Color.LIGHTBLUE },
+            //@formatter:on
+            }),
+<span class="fc" id="L40">    FOUR_QUADRIPLETS(new FourQuadripletsCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Four groups each containing at least 4 tiles
+            of the same type(not necessarily in the
+            depicted shape). The tiles of one group can be
+            different from those of another group.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { Color.BLUE     , Color.BLUE     , null           , Color.PINK     , null            },
+                new Color[] { Color.BLUE     , Color.BLUE     , null           , Color.PINK     , null            },
+                new Color[] { null           , null           , null           , Color.PINK     , null            },
+                new Color[] { null           , null           , null           , Color.PINK     , null            },
+                new Color[] { null           , Color.YELLOW   , Color.GREEN    , Color.GREEN    , null            },
+                new Color[] { Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.GREEN    , Color.GREEN     },
+            //@formatter:on
+            }),
+<span class="fc" id="L56">    TWO_SQUARES(new TwoSquaresCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Two groups each containing 4 tiles of the same
+            type in a 2x2 square. The tiles of one square
+            can be different from those of the other square.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            },
+                new Color[] { null           , Color.YELLOW   , Color.YELLOW   , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           , null            },
+                new Color[] { Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+            }),
+<span class="fc" id="L71">    THREE_COLUMNS(new ThreeColumnsCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Three columns each formed by 6 tiles of maximum
+            three different types. One column can show the
+            same or a different combination of another column.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { Color.BLUE     , null           , Color.BLUE     , Color.LIGHTBLUE, null            },
+                new Color[] { Color.YELLOW   , null           , Color.WHITE    , Color.PINK     , null            },
+                new Color[] { Color.YELLOW   , null           , Color.BLUE     , Color.GREEN    , null            },
+                new Color[] { Color.GREEN    , null           , Color.WHITE    , Color.PINK     , null            },
+                new Color[] { Color.YELLOW   , null           , Color.YELLOW   , Color.LIGHTBLUE, null            },
+                new Color[] { Color.GREEN    , null           , Color.YELLOW   , Color.LIGHTBLUE, null            },
+            //@formatter:on
+            }),
+<span class="fc" id="L86">    EIGHT_EQUAL_TILES(new EightEqualTilesCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Eight tiles of the same type. There's no
+            restriction about the position of these
+            tiles.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { Color.LIGHTBLUE, null           , null           , null           , Color.LIGHTBLUE },
+                new Color[] { Color.LIGHTBLUE, null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { Color.LIGHTBLUE, null           , Color.LIGHTBLUE, null           , null            },
+                new Color[] { null           , null           , null           , null           , Color.LIGHTBLUE },
+                new Color[] { null           , Color.LIGHTBLUE, Color.LIGHTBLUE, null           , null            },
+            //@formatter:on
+            }),
+    //@formatter:on
+<span class="fc" id="L102">    DIAGONAL(new DiagonalCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Five tiles of the same type forming a diagonal.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { Color.PINK     , null           , null           , null           , null            },
+                new Color[] { null           , Color.PINK     , null           , null           , null            },
+                new Color[] { null           , null           , Color.PINK     , null           , null            },
+                new Color[] { null           , null           , null           , Color.PINK     , null            },
+                new Color[] { null           , null           , null           , null           , Color.PINK     },
+                new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+            }),
+<span class="fc" id="L115">    FOUR_ROWS(new FourRowsCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Four lines each formed by 5 tiles of
+            maximum three different types. One line
+            can show the same or a different
+            combination of another line.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.LIGHTBLUE, Color.WHITE     },
+                new Color[] { Color.BLUE     , Color.BLUE     , Color.BLUE     , Color.BLUE     , Color.BLUE      },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.YELLOW   , Color.GREEN     },
+                new Color[] { Color.PINK     , Color.PINK     , Color.LIGHTBLUE, Color.LIGHTBLUE, Color.PINK      },
+            //@formatter:on
+            }),
+<span class="fc" id="L131">    TWO_ALL_DIFF_COLUMNS(new TwoAllDiffColumnsCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Two columns each formed by 6 different types
+            of tiles.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { Color.YELLOW   , null           , Color.PINK     , null           , Color.PINK      },
+                new Color[] { Color.GREEN    , null           , Color.GREEN    , null           , Color.GREEN     },
+                new Color[] { Color.LIGHTBLUE, null           , Color.LIGHTBLUE, null           , Color.LIGHTBLUE },
+                new Color[] { Color.BLUE     , null           , Color.BLUE     , null           , Color.BLUE      },
+                new Color[] { Color.PINK     , null           , Color.YELLOW   , null           , Color.YELLOW    },
+                new Color[] { Color.WHITE    , null           , Color.WHITE    , null           , Color.WHITE     },
+            //@formatter:on
+            }),
+<span class="fc" id="L145">    TWO_ALL_DIFF_ROWS(new TwoAllDiffRowsCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Two lines each formed by 5 different types
+            of tiles. One line can show the same or a
+            different combination of the other line.
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { Color.BLUE     , Color.PINK     , Color.GREEN    , Color.WHITE    , Color.YELLOW    },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { Color.LIGHTBLUE, Color.WHITE    , Color.GREEN    , Color.BLUE     , Color.PINK      },
+                new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+            }),
+<span class="fc" id="L160">    CROSS(new CrossCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Five tiles of the same type forming an X
+            &quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , Color.PINK     , null           , Color.PINK     , null            },
+                new Color[] { null           , null           , Color.PINK     , null           , null            },
+                new Color[] { null           , Color.PINK     , null           , Color.PINK     , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+                new Color[] { null           , null           , null           , null           , null            },
+            //@formatter:on
+            }),
+<span class="fc" id="L173">    TRIANGLE(new TriangleCommonGoalChecker(), &quot;&quot;&quot;</span>
+            Five columns of increasing or decreasing
+            height. Starting from first column on the
+            left or on the right, each next column must
+            be made of exactly one more tile. Tiles
+            can be of any type.&quot;&quot;&quot;,
+            new Color[][] {
+            //@formatter:off
+                new Color[] { null           , null           , null           , null           , null             },
+                new Color[] { null           , null           , null           , null           , Color.YELLOW     },
+                new Color[] { null           , null           , null           , Color.GREEN    , Color.WHITE      },
+                new Color[] { null           , null           , Color.GREEN    , Color.YELLOW   , Color.WHITE      },
+                new Color[] { null           , Color.YELLOW   , Color.WHITE    , Color.YELLOW   , Color.WHITE      },
+                new Color[] { Color.PINK     , Color.GREEN    , Color.PINK     , Color.GREEN    , Color.YELLOW     },
+            //@formatter:on
+            });
+
+    private final CommonGoalChecker checker;
+    private final String description;
+    private final ImmutableColorMatrix example;
+
+<span class="fc" id="L194">    Type(CommonGoalChecker checker, String description, @Nullable Color[][] example) {</span>
+<span class="fc" id="L195">        this.checker = checker;</span>
+<span class="fc" id="L196">        this.description = description;</span>
+<span class="fc" id="L197">        this.example = new ImmutableColorMatrix(example);</span>
+<span class="fc" id="L198">    }</span>
+
+    /** Returns a brief description of the common goal */
+    public String getDescription() {
+<span class="fc" id="L202">        return description;</span>
+    }
+
+    /** Returns true if the common goal of given type is achieved */
+    public boolean checkCommonGoal(Shelfie shelfie) {
+<span class="fc" id="L207">        return checker.checkCommonGoal(shelfie);</span>
+    }
+
+    /** Returns an example matrix of tiles which would achieve a common goal of this type */
+    public ImmutableColorMatrix getExample() {
+<span class="fc" id="L212">        return example;</span>
+    }
+
+    public static class ImmutableColorMatrix {
+
+        private final @Nullable Color[][] matrix;
+
+<span class="fc" id="L219">        public ImmutableColorMatrix(@Nullable Color[][] matrix) {</span>
+<span class="fc" id="L220">            this.matrix = matrix;</span>
+<span class="fc" id="L221">        }</span>
+
+        @SuppressWarnings(&quot;NullAway&quot;) // NullAway doesn't support array, see https://github.com/uber/NullAway/labels/jspecify
+        public @Nullable Color get(int row, int col) {
+<span class="fc" id="L225">            return matrix[row][col];</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

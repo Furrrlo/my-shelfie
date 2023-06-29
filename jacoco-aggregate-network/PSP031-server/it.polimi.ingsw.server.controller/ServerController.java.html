@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ServerController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">JaCoCo Aggregate Report</a> &gt; <a href="../index.html" class="el_bundle">PSP031-server</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.server.controller</a> &gt; <span class="el_source">ServerController.java</span></div><h1>ServerController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.server.controller;
+
+import it.polimi.ingsw.DisconnectedException;
+import it.polimi.ingsw.GameAndController;
+import it.polimi.ingsw.HeartbeatHandler;
+import it.polimi.ingsw.LobbyAndController;
+import it.polimi.ingsw.controller.GameController;
+import it.polimi.ingsw.controller.NickNotValidException;
+import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.server.model.ServerGame;
+import it.polimi.ingsw.server.model.ServerLobby;
+import it.polimi.ingsw.server.model.ServerLobbyAndController;
+import it.polimi.ingsw.server.model.ServerPlayer;
+import it.polimi.ingsw.updater.GameUpdater;
+import it.polimi.ingsw.updater.LobbyUpdater;
+import it.polimi.ingsw.updater.LobbyUpdaterFactory;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+public class ServerController implements Closeable {
+
+<span class="fc" id="L35">    private static final Logger LOGGER = LoggerFactory.getLogger(ServerController.class);</span>
+
+    private final Clock clock;
+    private final ScheduledExecutorService heartbeatExecutor;
+    private final ExecutorService heartbeatThreadPool;
+
+<span class="fc" id="L41">    private final ConcurrentMap&lt;String, HeartbeatHandler&gt; heartbeats = new ConcurrentHashMap&lt;&gt;();</span>
+
+<span class="fc" id="L43">    private final Lock lobbiesLock = new ReentrantLock();</span>
+<span class="fc" id="L44">    private final Set&lt;ServerLobbyAndController&lt;ServerLobby&gt;&gt; lobbies = ConcurrentHashMap.newKeySet();</span>
+
+    public ServerController(long pingInterval, TimeUnit pingIntervalUnit) {
+<span class="fc" id="L47">        this(Clock.systemUTC(), pingInterval, pingIntervalUnit);</span>
+<span class="fc" id="L48">    }</span>
+
+    public ServerController(Clock clock,
+                            long pingInterval,
+<span class="fc" id="L52">                            TimeUnit pingIntervalUnit) {</span>
+<span class="fc" id="L53">        this.clock = clock;</span>
+<span class="fc" id="L54">        this.heartbeatThreadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()</span>
+<span class="fc" id="L55">                .name(&quot;ServerController-heartbeat-thread-&quot;, 0)</span>
+<span class="fc" id="L56">                .factory());</span>
+<span class="fc" id="L57">        this.heartbeatExecutor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()</span>
+<span class="fc" id="L58">                .name(&quot;ServerController-heartbeat-scheduler-thread&quot;)</span>
+<span class="fc" id="L59">                .factory());</span>
+<span class="fc" id="L60">        this.heartbeatExecutor.scheduleAtFixedRate(</span>
+                this::detectDisconnectedPlayers,
+                0, pingInterval, pingIntervalUnit);
+<span class="fc" id="L63">    }</span>
+
+    @Override
+    public void close() {
+<span class="fc" id="L67">        heartbeatExecutor.shutdown();</span>
+<span class="fc" id="L68">        heartbeatThreadPool.shutdown();</span>
+<span class="fc" id="L69">    }</span>
+
+    @VisibleForTesting
+    @SuppressWarnings(&quot;FutureReturnValueIgnored&quot;) // We don't need to keep track of it as we shut down everything together
+    protected void detectDisconnectedPlayers() {
+<span class="fc" id="L74">        heartbeats.forEach(</span>
+<span class="fc" id="L75">                (nick, heartbeatHandler) -&gt; heartbeatThreadPool</span>
+<span class="fc" id="L76">                        .submit(() -&gt; heartbeatHandler.sendHeartbeat(Instant.now(clock))));</span>
+<span class="fc" id="L77">    }</span>
+
+    private @Nullable ServerLobbyAndController&lt;ServerLobby&gt; getLobbyFor(String nick) {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        for (var lobby : lobbies) {</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">            for (LobbyPlayer p : lobby.lobby().getUnsafe().joinedPlayers().get())</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">                if (p.getNick().equals(nick))</span>
+<span class="fc" id="L83">                    return lobby;</span>
+<span class="fc" id="L84">        }</span>
+<span class="fc" id="L85">        return null;</span>
+    }
+
+    /**
+     * @implNote to be as fast as possible, this method does not hold any of the lobby-specific locks
+     *           while checking if the given player can join it.
+     *           It is up to the caller to re-check inside a lock that the ServerLobby#canOnePlayerJoin()
+     *           condition still holds true.
+     */
+    @VisibleForTesting
+    protected ServerLobbyAndController&lt;ServerLobby&gt; getOrCreateLobby(String nick) {
+        // See if we can find a lobby where the player was already in
+        // Since we only keep players in a lobby after they left when a game has started,
+        // we can avoid holding any lock, as the #joinedPlayers() list becomes immutable de-facto
+<span class="fc" id="L99">        var lobby = getLobbyFor(nick);</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (lobby != null)</span>
+<span class="fc" id="L101">            return lobby;</span>
+        // Fast case: try seeing if there's a lobby already being created while not holding the lobbiesLock
+        // Note:
+        // 1. We are not holding any of the lobbies lock, so after returning this, the caller
+        //    needs to make sure that the canOnePlayerJoin() is still true while on the lobby lock
+        // 2. Since we don't hold the lobbies lock yet, we are not allowed to create and add a new lobby
+        //    to fill in case we find none available.
+<span class="fc" id="L108">        lobby = lobbies.stream()</span>
+<span class="fc" id="L109">                .filter(l -&gt; l.lobby().getUnsafe().canOnePlayerJoin())</span>
+<span class="fc" id="L110">                .findFirst()</span>
+<span class="fc" id="L111">                .orElse(null);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (lobby != null)</span>
+<span class="fc" id="L113">            return lobby;</span>
+        // Double-checked locking: while inside the lock let's recheck if we can find any valid lobby.
+        // If we can't, we are allowed to create a new one, as we are in the lock and nobody else can do
+        // so concurrently to us
+<span class="fc" id="L117">        lobbiesLock.lock();</span>
+        try {
+<span class="fc" id="L119">            return lobbies.stream()</span>
+<span class="fc" id="L120">                    .filter(l -&gt; l.lobby().getUnsafe().canOnePlayerJoin())</span>
+<span class="fc" id="L121">                    .findFirst()</span>
+<span class="fc" id="L122">                    .orElseGet(() -&gt; {</span>
+<span class="fc" id="L123">                        var lockedLobby = new LockProtected&lt;&gt;(new ServerLobby());</span>
+<span class="fc" id="L124">                        ServerLobbyAndController&lt;ServerLobby&gt; newLobby = new ServerLobbyAndController&lt;&gt;(lockedLobby,</span>
+                                new LobbyServerController(lockedLobby));
+<span class="fc" id="L126">                        lobbies.add(newLobby);</span>
+<span class="fc" id="L127">                        return newLobby;</span>
+                    });
+        } finally {
+<span class="fc" id="L130">            lobbiesLock.unlock();</span>
+        }
+    }
+
+    @VisibleForTesting
+    public void runOnOnlyLobbyLocks(Runnable runnable) {
+<span class="fc" id="L136">        var lock = getOnlyLobbyLock();</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (lock == null) {</span>
+<span class="nc" id="L138">            runnable.run();</span>
+<span class="nc" id="L139">            return;</span>
+        }
+
+<span class="fc" id="L142">        lock.lock();</span>
+        try {
+<span class="fc" id="L144">            runnable.run();</span>
+        } finally {
+<span class="fc" id="L146">            lock.unlock();</span>
+        }
+<span class="fc" id="L148">    }</span>
+
+    @VisibleForTesting
+    public @Nullable Lock getOnlyLobbyLock() {
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if (lobbies.size() != 1)</span>
+<span class="nc" id="L153">            throw new AssertionError(&quot;This method is supposed to be used for testing when there's only 1 lobby&quot;);</span>
+
+<span class="fc" id="L155">        var lobbyAndController = lobbies.stream()</span>
+<span class="fc" id="L156">                .findFirst()</span>
+<span class="pc" id="L157">                .orElseThrow(() -&gt; new AssertionError(&quot;This method is supposed to be used for testing &quot; +</span>
+                        &quot;when there's only 1 lobby&quot;));
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        return lobbyAndController == null</span>
+<span class="nc" id="L160">                ? null</span>
+<span class="fc" id="L161">                : lobbyAndController.lobby().getLock();</span>
+    }
+
+    public void connectPlayer(String nick, HeartbeatHandler heartbeatHandler)
+            throws NickNotValidException {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (nick.isEmpty())</span>
+<span class="fc" id="L167">            throw new NickNotValidException(&quot;Nick can't be empty&quot;);</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        if (heartbeats.putIfAbsent(nick, heartbeatHandler) != null)</span>
+<span class="fc" id="L169">            throw new NickNotValidException(&quot;This nick is already in use&quot;);</span>
+<span class="fc" id="L170">    }</span>
+
+    public LobbyView joinGame(String nick,
+                              PlayerObservableTracker observableTracker,
+                              Runnable onGameOver,
+                              LobbyUpdaterFactory lobbyUpdaterFactory,
+                              LobbyControllerFactory lobbyControllerFactory,
+                              BiFunction&lt;ServerPlayer, GameServerController, GameController&gt; gameControllerFactory)
+            throws DisconnectedException {
+        do {
+<span class="fc" id="L180">            final var serverLobbyAndController = getOrCreateLobby(nick);</span>
+<span class="fc" id="L181">            final var lockedServerLobby = serverLobbyAndController.lobby();</span>
+
+<span class="fc" id="L183">            try (var serverLobbyCloseable = lockedServerLobby.use()) {</span>
+<span class="fc" id="L184">                var serverLobby = serverLobbyCloseable.obj();</span>
+
+                // This is basically double-checked locking, getOrCreateGameLobbySomehow() checks with no lock
+                // so that it can discard options fast, then here we re-check while actually holding the lock
+                // to guarantee concurrency
+<span class="fc" id="L189">                final List&lt;String&gt; joinedPlayersNicks = serverLobby.joinedPlayers().get().stream()</span>
+<span class="fc" id="L190">                        .map(LobbyPlayer::getNick)</span>
+<span class="fc" id="L191">                        .toList();</span>
+
+                //I have the lock, so if this lobby is not open yet, I become the creator.
+<span class="pc bpc" id="L194" title="1 of 6 branches missed.">                if (!joinedPlayersNicks.contains(nick) &amp;&amp; !(serverLobby.canOnePlayerJoin() || !serverLobby.isOpen()))</span>
+                    continue; // If we fail the test, let's just retry and search a new one
+
+                final LobbyAndController&lt;Lobby&gt; lobbyAndController;
+                final LobbyUpdater lobbyUpdater;
+                try {
+<span class="fc" id="L200">                    lobbyUpdater = lobbyUpdaterFactory.create(lobbyAndController = new LobbyAndController&lt;&gt;(</span>
+<span class="fc" id="L201">                            new Lobby(serverLobby.requiredPlayers().get(), serverLobby.joinedPlayers().get(), nick),</span>
+<span class="fc" id="L202">                            lobbyControllerFactory.create(serverLobbyAndController.controller())));</span>
+<span class="nc" id="L203">                } catch (DisconnectedException e) {</span>
+<span class="nc" id="L204">                    throw new IllegalStateException(&quot;Player disconnected during handshake process&quot;);</span>
+<span class="fc" id="L205">                }</span>
+
+<span class="fc" id="L207">                final var currGameAndController = serverLobby.game().get();</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">                final var currGame = currGameAndController != null ? currGameAndController.game() : null;</span>
+                try {
+                    // Doesn't need to be concurrent as it will only be called inside the lobby lock
+<span class="fc" id="L211">                    final var playersRegisteredObservers = new HashMap&lt;LobbyPlayer, Consumer&lt;?&gt;&gt;();</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">                    for (LobbyPlayer player : serverLobby.joinedPlayers().get())</span>
+<span class="fc" id="L213">                        playersRegisteredObservers.put(</span>
+                                player,
+<span class="fc" id="L215">                                observableTracker.registerObserver(player.ready(),</span>
+<span class="nc" id="L216">                                        ready -&gt; lobbyUpdater.updatePlayerReady(player.getNick(), ready)));</span>
+
+<span class="fc" id="L218">                    observableTracker.registerObserver(serverLobby.requiredPlayers(),</span>
+<span class="fc" id="L219">                            lobbyUpdater::updateRequiredPlayers);</span>
+
+<span class="fc" id="L221">                    observableTracker.registerObserver(serverLobby.joinedPlayers(), newLobbyPlayers -&gt; {</span>
+<span class="fc" id="L222">                        lobbyUpdater.updateJoinedPlayers(newLobbyPlayers.stream()</span>
+<span class="fc" id="L223">                                .map(LobbyPlayer::getNick)</span>
+<span class="fc" id="L224">                                .collect(Collectors.toList()));</span>
+                        // Add observers to players which joined
+<span class="fc bfc" id="L226" title="All 2 branches covered.">                        for (LobbyPlayer p0 : newLobbyPlayers)</span>
+<span class="fc" id="L227">                            playersRegisteredObservers.computeIfAbsent(p0, p -&gt; observableTracker.registerObserver(</span>
+<span class="fc" id="L228">                                    p.ready(),</span>
+<span class="fc" id="L229">                                    ready -&gt; lobbyUpdater.updatePlayerReady(p.getNick(), ready)));</span>
+                        // Remove observers from players which left
+                        // TODO: unregister observers
+<span class="fc bfc" id="L232" title="All 2 branches covered.">                        playersRegisteredObservers.entrySet().removeIf(e -&gt; !newLobbyPlayers.contains(e.getKey()));</span>
+<span class="fc" id="L233">                    });</span>
+<span class="fc" id="L234">                    observableTracker.registerObserver(serverLobby.game(), game0 -&gt; {</span>
+<span class="fc" id="L235">                        try (var serverLobbyCloseable0 = lockedServerLobby.use()) {</span>
+<span class="fc" id="L236">                            var game = serverLobbyCloseable0.obj().game().get();</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">                            if (game != null) {</span>
+<span class="fc" id="L238">                                updateGameForPlayer(</span>
+                                        nick,
+                                        serverLobbyAndController,
+<span class="fc" id="L241">                                        game.game(),</span>
+<span class="fc" id="L242">                                        game.controller(),</span>
+                                        observableTracker,
+                                        onGameOver,
+                                        lobbyUpdater,
+                                        gameControllerFactory);
+                            }
+                        }
+<span class="fc" id="L249">                    });</span>
+
+                    // Add the player after registering the listeners, 
+                    // so the joining player will also receive it
+<span class="fc bfc" id="L253" title="All 2 branches covered.">                    if (!joinedPlayersNicks.contains(nick)) {</span>
+<span class="fc" id="L254">                        serverLobby.joinedPlayers().update(l -&gt; {</span>
+<span class="fc" id="L255">                            final var newList = new ArrayList&lt;&gt;(l);</span>
+<span class="fc" id="L256">                            newList.add(new LobbyPlayer(nick, false));</span>
+<span class="fc" id="L257">                            return Collections.unmodifiableList(newList);</span>
+                        });
+                    } else {
+<span class="fc" id="L260">                        LOGGER.info(&quot;[Server] {} is re-joining previous game...&quot;, nick);</span>
+<span class="fc" id="L261">                        serverLobbyAndController.controller().onReconnectedPlayer(nick);</span>
+                    }
+
+<span class="fc bfc" id="L264" title="All 2 branches covered.">                    if (currGameAndController != null)</span>
+<span class="fc" id="L265">                        updateGameForPlayer(</span>
+                                nick,
+                                serverLobbyAndController,
+<span class="fc" id="L268">                                Objects.requireNonNull(currGame, &quot;Controller is not null but game is null?&quot;),</span>
+<span class="fc" id="L269">                                currGameAndController.controller(),</span>
+                                observableTracker,
+                                onGameOver,
+                                lobbyUpdater,
+                                gameControllerFactory);
+<span class="nc" id="L274">                } catch (DisconnectedException ex) {</span>
+<span class="nc" id="L275">                    throw new DisconnectedException(&quot;Player disconnected during handshake process&quot;, ex);</span>
+<span class="fc" id="L276">                }</span>
+
+<span class="fc" id="L278">                return lobbyAndController.lobby();</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            }</span>
+        } while (true);
+    }
+
+    private void updateGameForPlayer(String nick,
+                                     ServerLobbyAndController&lt;ServerLobby&gt; serverLobbyAndController,
+                                     ServerGame game,
+                                     GameServerController gameController,
+                                     PlayerObservableTracker observableTracker,
+                                     Runnable onGameOver,
+                                     LobbyUpdater lobbyUpdater,
+                                     BiFunction&lt;ServerPlayer, GameServerController, GameController&gt; gameControllerFactory)
+            throws DisconnectedException {
+
+<span class="fc" id="L293">        final Map&lt;String, Game.PlayerFactory&gt; clientPlayers = game.getPlayers().stream()</span>
+<span class="fc" id="L294">                .collect(Collectors.toMap(</span>
+                        ServerPlayer::getNick,
+<span class="fc" id="L296">                        p -&gt; (isStartingPlayer, isCurrentTurnFactory, isFirstFinisherFactory) -&gt; new Player(</span>
+<span class="fc" id="L297">                                p.getNick(),</span>
+<span class="fc" id="L298">                                p.getShelfie(),</span>
+                                isStartingPlayer,
+<span class="fc" id="L300">                                p.connected().get(),</span>
+                                isCurrentTurnFactory,
+                                isFirstFinisherFactory,
+<span class="fc bfc" id="L303" title="All 2 branches covered.">                                p.getNick().equals(nick)</span>
+<span class="fc" id="L304">                                        ? p.privateScore().get()</span>
+<span class="fc" id="L305">                                        : p.publicScore().get())));</span>
+<span class="fc" id="L306">        final ServerPlayer thePlayer = game.getPlayers().stream()</span>
+<span class="fc" id="L307">                .filter(p -&gt; p.getNick().equals(nick))</span>
+<span class="fc" id="L308">                .findFirst()</span>
+<span class="pc" id="L309">                .orElseThrow(() -&gt; new IllegalStateException(&quot;&quot; +</span>
+                        &quot;Missing player &quot; + nick + &quot; which is supposed to be ingame &quot; +
+<span class="nc" id="L311">                        &quot;(found players: &quot; + game.getPlayers() + &quot;)&quot;));</span>
+
+<span class="fc" id="L313">        final GameUpdater gameUpdater = lobbyUpdater.updateGame(new GameAndController&lt;&gt;(</span>
+                new Game(
+<span class="fc" id="L315">                        game.getGameID(),</span>
+<span class="fc" id="L316">                        game.getBoard(),</span>
+                        // Use another stream 'cause we need to keep order
+<span class="fc" id="L318">                        game.getPlayers().stream()</span>
+<span class="fc" id="L319">                                .map(p -&gt; clientPlayers.get(p.getNick()))</span>
+<span class="fc" id="L320">                                .toList(),</span>
+<span class="fc" id="L321">                        game.getPlayers().indexOf(thePlayer),</span>
+<span class="fc" id="L322">                        game.getPlayers().indexOf(game.getStartingPlayer()),</span>
+<span class="fc" id="L323">                        game.getPlayers().indexOf(game.currentTurn().get()),</span>
+<span class="fc" id="L324">                        players -&gt; game.getCommonGoals().stream().map(goal -&gt; new CommonGoal(</span>
+<span class="fc" id="L325">                                goal.getType(),</span>
+<span class="fc" id="L326">                                goal.achieved().get().stream()</span>
+<span class="fc" id="L327">                                        .map(achievedPlayer -&gt; players.stream()</span>
+<span class="fc" id="L328">                                                .filter(p -&gt; p.getNick().equals(achievedPlayer.getNick()))</span>
+<span class="fc" id="L329">                                                .findFirst()</span>
+<span class="pc" id="L330">                                                .orElseThrow(() -&gt; new IllegalStateException(&quot;&quot; +</span>
+                                                        &quot;Missing player &quot; + achievedPlayer + &quot; which has supposedly &quot; +
+                                                        &quot;achieved a common goal&quot; +
+                                                        &quot;(found players: &quot; + players + &quot;)&quot;)))
+<span class="fc" id="L334">                                        .toList()))</span>
+<span class="fc" id="L335">                                .toList(),</span>
+<span class="fc" id="L336">                        thePlayer.getPersonalGoal(),</span>
+<span class="pc bpc" id="L337" title="1 of 2 branches missed.">                        game.firstFinisher().get() == null ? null : game.getPlayers().indexOf(game.firstFinisher().get()),</span>
+<span class="fc" id="L338">                        game.endGame().get(),</span>
+<span class="fc" id="L339">                        game.suspended().get()),</span>
+<span class="fc" id="L340">                gameControllerFactory.apply(thePlayer, gameController)));</span>
+        // Register all listeners to the game model
+<span class="fc" id="L342">        game.getBoard().tiles().forEach(tileAndCoords -&gt; observableTracker.registerObserver(</span>
+<span class="fc" id="L343">                tileAndCoords.tile(),</span>
+<span class="fc" id="L344">                tile -&gt; gameUpdater.updateBoardTile(tileAndCoords.row(), tileAndCoords.col(), tile)));</span>
+<span class="fc" id="L345">        game.getPlayers().forEach(p -&gt; {</span>
+<span class="fc" id="L346">            observableTracker.registerObserver(p.connected(),</span>
+<span class="fc" id="L347">                    connected -&gt; gameUpdater.updatePlayerConnected(p.getNick(), connected));</span>
+
+<span class="fc bfc" id="L349" title="All 2 branches covered.">            if (p.getNick().equals(nick)) {</span>
+<span class="fc" id="L350">                observableTracker.registerObserver(p.privateScore(),</span>
+<span class="fc" id="L351">                        score -&gt; gameUpdater.updatePlayerScore(p.getNick(), score));</span>
+            } else {
+                // If the game is not over, send the public score
+<span class="fc" id="L354">                observableTracker.registerObserver(p.publicScore(), score -&gt; {</span>
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">                    if (!game.endGame().get())</span>
+<span class="fc" id="L356">                        gameUpdater.updatePlayerScore(p.getNick(), score);</span>
+<span class="fc" id="L357">                });</span>
+                // If the game is over, send the private score
+<span class="fc" id="L359">                observableTracker.registerObserver(p.privateScore(), score -&gt; {</span>
+<span class="pc bpc" id="L360" title="1 of 2 branches missed.">                    if (game.endGame().get())</span>
+<span class="nc" id="L361">                        gameUpdater.updatePlayerScore(p.getNick(), score);</span>
+<span class="fc" id="L362">                });</span>
+            }
+
+<span class="fc" id="L365">            p.getShelfie().tiles().forEach(tileAndCoords -&gt; observableTracker.registerObserver(tileAndCoords.tile(),</span>
+<span class="fc" id="L366">                    tile -&gt; gameUpdater.updatePlayerShelfieTile(</span>
+<span class="fc" id="L367">                            p.getNick(),</span>
+<span class="fc" id="L368">                            tileAndCoords.row(),</span>
+<span class="fc" id="L369">                            tileAndCoords.col(),</span>
+                            tile)));
+<span class="fc" id="L371">        });</span>
+<span class="fc" id="L372">        observableTracker.registerObserver(game.suspended(), gameUpdater::updateSuspended);</span>
+
+        //Updating message only if message is for everyone, nickReceivingPlayer == nick or nickSendingPlayer == nick
+<span class="fc" id="L375">        observableTracker.registerObserver(game.message(), m -&gt; {</span>
+<span class="pc bpc" id="L376" title="2 of 4 branches missed.">            if (m != null &amp;&amp; (m.isForEveryone() ||</span>
+<span class="nc bnc" id="L377" title="All 4 branches missed.">                    m.nickReceivingPlayer().equals(nick) || m.nickSendingPlayer().equals(nick)))</span>
+<span class="fc" id="L378">                gameUpdater.updateMessage(m);</span>
+<span class="fc" id="L379">        });</span>
+
+<span class="fc" id="L381">        observableTracker.registerObserver(game.currentTurn(), p -&gt; gameUpdater.updateCurrentTurn(p.getNick()));</span>
+<span class="fc" id="L382">        observableTracker.registerObserver(game.firstFinisher(),</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">                p -&gt; gameUpdater.updateFirstFinisher(p == null ? null : p.getNick()));</span>
+<span class="fc" id="L384">        game.getCommonGoals().forEach(goal -&gt; observableTracker.registerObserver(</span>
+<span class="fc" id="L385">                goal.achieved(),</span>
+<span class="fc" id="L386">                players -&gt; gameUpdater.updateAchievedCommonGoal(goal.getType(), players.stream()</span>
+<span class="fc" id="L387">                        .map(ServerPlayer::getNick)</span>
+<span class="fc" id="L388">                        .collect(Collectors.toList()))));</span>
+<span class="fc" id="L389">        observableTracker.registerObserver(game.endGame(), gameOver -&gt; {</span>
+            // Update all scores to the private ones
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">            if (gameOver) {</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">                for (ServerPlayer p : game.getPlayers())</span>
+<span class="fc" id="L393">                    gameUpdater.updatePlayerScore(p.getNick(), p.privateScore().get());</span>
+            }
+
+<span class="fc" id="L396">            gameUpdater.updateEndGame(gameOver);</span>
+
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">            if (gameOver) {</span>
+<span class="fc" id="L399">                onGameOver.run();</span>
+            }
+<span class="fc" id="L401">        });</span>
+
+<span class="fc" id="L403">        game.endGame().registerObserver(gameOver -&gt; {</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">            if (lobbies.remove(serverLobbyAndController))</span>
+<span class="fc" id="L405">                LOGGER.info(&quot;Lobby with game &quot; + game.getGameID() + &quot; removed&quot;);</span>
+<span class="fc" id="L406">        });</span>
+<span class="fc" id="L407">    }</span>
+
+    public void onDisconnectPlayer(String nick) {
+<span class="pc bpc" id="L410" title="1 of 2 branches missed.">        boolean wasConnected = heartbeats.remove(nick) != null;</span>
+        // Only call the rest if the player was actually connected
+<span class="pc bpc" id="L412" title="1 of 2 branches missed.">        if (!wasConnected)</span>
+<span class="nc" id="L413">            return;</span>
+
+<span class="fc" id="L415">        final var lobbyAndController = getLobbyFor(nick);</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">        if (lobbyAndController != null) {</span>
+<span class="fc" id="L417">            try (var lobbyCloseable = lobbyAndController.lobby().use()) {</span>
+<span class="fc" id="L418">                var lobby = lobbyCloseable.obj();</span>
+
+<span class="fc" id="L420">                lobbyAndController.controller().onDisconnectPlayer(nick);</span>
+
+<span class="fc bfc" id="L422" title="All 2 branches covered.">                if (lobby.joinedPlayers().get().size() == 0) {</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">                    if (lobbies.remove(lobbyAndController))</span>
+<span class="fc" id="L424">                        LOGGER.info(&quot;Empty lobby deleted&quot;);</span>
+                }
+            }
+        }
+<span class="fc" id="L428">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
