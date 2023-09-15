@@ -37,6 +37,7 @@
         <module>PSP031-common</module>
         <module>PSP031-integration-tests</module>
         <module>PSP031-jacoco-report</module>
+        <module>PSP031-jlink</module>
     </modules>
 
     <dependencyManagement>
@@ -73,36 +74,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Annotations libraries, these do not add any actual functionality, only allow for additional
-             compiler checks -->
-        <!-- Nullability annotations -->
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>24.0.0</version>
-        </dependency>
-        <!-- Errorprone annotations for additional checks -->
-        <dependency>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>error_prone_annotations</artifactId>
-            <version>${errorprone.version}</version>
-        </dependency>
-        <!-- We don't actually use the checker framework, so we are going to ignore the majority of annotations
-             in this one, the only one we actually need is the DefaultQualifier one to make IntelliJ apply
-             nonnull by default to everything -->
-        <dependency>
-            <groupId>org.checkerframework</groupId>
-            <artifactId>checker-qual</artifactId>
-            <version>3.35.0</version>
-        </dependency>
-
-        <!-- Logging facade -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
         <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -300,6 +271,46 @@
                         <removeUnusedImports/>
                     </java>
                 </configuration>
+            </plugin>
+            <!-- JLink stuff -->
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+                <version>2.1.1</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jlink-plugin</artifactId>
+                <version>3.1.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <compress>2</compress>
+                    <noHeaderFiles>true</noHeaderFiles>
+                    <noManPages>true</noManPages>
+                    <stripDebug>true</stripDebug>
+                    <addOptions>
+                        <addOption>--enable-preview</addOption>
+                    </addOptions>
+                    <addModules>
+                        <addModule>java.base</addModule>
+                        <addModule>java.desktop</addModule>
+                        <addModule>java.logging</addModule>
+                        <addModule>java.management</addModule>
+                        <addModule>java.management.rmi</addModule>
+                        <addModule>java.rmi</addModule>
+                        <addModule>java.scripting</addModule>
+                        <addModule>java.xml</addModule>
+                        <addModule>jdk.random</addModule>
+                        <addModule>jdk.unsupported</addModule>
+                    </addModules>
+                    <verbose>true</verbose>
+                </configuration>
+                <!-- Kill the default execution -->
+                <executions>
+                    <execution>
+                        <id>default-jlink</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
 
