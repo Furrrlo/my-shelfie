@@ -40,7 +40,9 @@ commerciale di suddetti contenuti.
 ## Running the application
 
 The application requires an installation of Java 19. Newer versions cannot be used
-as preview features were used which may have been changed in Java 20.
+as preview features were used which may have been changed in Java 20. Alternatively,
+archive files with a ready-to-be-used JRE can be found in the 
+[releases](https://github.com/Furrrlo/Wordle/releases).
 
 Because of [limitations](https://www.reddit.com/r/JavaFX/comments/twye9j/comment/i3l6rq5/)
 caused by
@@ -53,6 +55,11 @@ Additional platforms can be supported by re-compiling the jar with whatever JFX 
 If the server has multiple network adapters (e.g. virtualbox adapter),
 rmi [may export objects to the wrong interface](https://bugs.openjdk.org/browse/JDK-8042232).
 To work around this, run JVM with the parameter <code>-Djava.rmi.server.hostname=\<server address\></code>
+
+### Running with the embedded JRE
+Follow instructions in the release
+
+### Running the jars
 
 The server needs to be run from terminal using the following command:
 
@@ -69,7 +76,8 @@ java --enable-preview -jar client.jar
 and selecting the preferred mode.
 
 The GUI can also be run by double-clicking the `gui-console.bat`/`gui-noconsole.vbs`
-on Windows or `gui` on *nix (the script needs to be made executable).
+on Windows or `gui` on *nix (the script needs to be made executable). All of these
+scripts can be found in the [final deliverables folder](deliverables/final/jar).
 
 ## Coverage
 
