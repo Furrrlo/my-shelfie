@@ -1,21 +1,27 @@
-# Project for the course "software engineering" at Politecnico di Milano, academic year 2022/2023
+![banner 1386x400px](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/assets/43098774/f53e318a-b170-472c-a0aa-3687dc86229f)
+
+# My Shelfie
+
+## Project for the course "software engineering" at Politecnico di Milano, academic year 2022/2023
+
+Grade: 30/30
 
 See specs [here](docs/Requisiti.pdf) and the rules
 ([ita](docs/MyShelfie_Rulebook_ITA.pdf) and [eng](docs/MyShelfie_Rulebook_ENG.pdf))
 
 For documentation regarding the architecture see the [deliverables folder](deliverables)
 
-
 ## License
+
 See [the license file](LICENSE)
 
-NOTA: My Shelfie è un gioco da tavolo sviluppato ed edito da Cranio Creations 
-Srl. I contenuti grafici di questo progetto riconducibili al prodotto 
-editoriale da tavolo sono utilizzati previa approvazione di Cranio Creations 
-Srl a solo scopo didattico. È vietata la distribuzione, la copia o la 
-riproduzione dei contenuti e immagini in qualsiasi forma al di fuori del 
-progetto, così come la redistribuzione e la pubblicazione dei contenuti e 
-immagini a fini diversi da quello sopracitato. È inoltre vietato l'utilizzo 
+NOTA: My Shelfie è un gioco da tavolo sviluppato ed edito da Cranio Creations
+Srl. I contenuti grafici di questo progetto riconducibili al prodotto
+editoriale da tavolo sono utilizzati previa approvazione di Cranio Creations
+Srl a solo scopo didattico. È vietata la distribuzione, la copia o la
+riproduzione dei contenuti e immagini in qualsiasi forma al di fuori del
+progetto, così come la redistribuzione e la pubblicazione dei contenuti e
+immagini a fini diversi da quello sopracitato. È inoltre vietato l'utilizzo
 commerciale di suddetti contenuti.
 
 ## Team (Group 31)
@@ -41,7 +47,7 @@ commerciale di suddetti contenuti.
 
 The application requires an installation of Java 19. Newer versions cannot be used
 as preview features were used which may have been changed in Java 20. Alternatively,
-archive files with a ready-to-be-used JRE can be found in the 
+archive files with a ready-to-be-used JRE can be found in the
 [releases](https://github.com/Furrrlo/Wordle/releases).
 
 Because of [limitations](https://www.reddit.com/r/JavaFX/comments/twye9j/comment/i3l6rq5/)
@@ -57,6 +63,7 @@ rmi [may export objects to the wrong interface](https://bugs.openjdk.org/browse/
 To work around this, run JVM with the parameter <code>-Djava.rmi.server.hostname=\<server address\></code>
 
 ### Running with the embedded JRE
+
 Follow instructions in the release
 
 ### Running the jars
