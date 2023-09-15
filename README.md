@@ -1,4 +1,4 @@
-![banner 1386x400px](https://github.com/Furrrlo/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/assets/43098774/f53e318a-b170-472c-a0aa-3687dc86229f)
+![banner 1386x400px](https://github.com/Furrrlo/my-shelfie/assets/43098774/f53e318a-b170-472c-a0aa-3687dc86229f)
 
 # My Shelfie
 
@@ -48,7 +48,7 @@ commerciale di suddetti contenuti.
 The application requires an installation of Java 19. Newer versions cannot be used
 as preview features were used which may have been changed in Java 20. Alternatively,
 archive files with a ready-to-be-used JRE can be found in the
-[releases](https://github.com/Furrrlo/Wordle/releases).
+[releases](https://github.com/Furrrlo/my-shelfie/releases).
 
 Because of [limitations](https://www.reddit.com/r/JavaFX/comments/twye9j/comment/i3l6rq5/)
 caused by
@@ -90,16 +90,16 @@ scripts can be found in the [final deliverables folder](deliverables/final/jar).
 
 You can see the coverage reports by clicking on the badges:
 
-|            |                                                                    Instructions                                                                     |                                                                           Branches                                                                           |
-|------------|:---------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| Model      |      [![coverage](../badges/jacoco-model.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-model/)      |      [![branch coverage](../badges/branches-model.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-model/)      |
-| Controller | [![coverage](../badges/jacoco-controller.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-controller/) | [![branch coverage](../badges/branches-controller.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-controller/) |
-| Network    |    [![coverage](../badges/jacoco-network.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-network/)    |    [![branch coverage](../badges/branches-network.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate-network/)    |
-| Overall    |        [![coverage](../badges/jacoco-overall.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate/)        |        [![branch coverage](../badges/branches-overall.svg)](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/jacoco-aggregate/)        |
+|            |                                                   Instructions                                                    |                                                          Branches                                                          |
+|------------|:-----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------:|
+| Model      |      [![coverage](../badges/jacoco-model.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate-model/)      |      [![branch coverage](../badges/branches-model.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate-model/)      |
+| Controller | [![coverage](../badges/jacoco-controller.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate-controller/) | [![branch coverage](../badges/branches-controller.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate-controller/) |
+| Network    |    [![coverage](../badges/jacoco-network.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate-network/)    |    [![branch coverage](../badges/branches-network.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate-network/)    |
+| Overall    |        [![coverage](../badges/jacoco-overall.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate/)        |        [![branch coverage](../badges/branches-overall.svg)](https://furrrlo.github.io/my-shelfie/jacoco-aggregate/)        |
 
 ## Javadocs
 
-You can find javadocs [here](https://furrrlo.github.io/ing-sw-2023-ferlin-orsenigo-guarda-sartorato/javadocs/)
+You can find javadocs [here](https://furrrlo.github.io/my-shelfie/javadocs/)
 
 # Development
 
